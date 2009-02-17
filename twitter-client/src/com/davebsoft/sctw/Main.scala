@@ -10,7 +10,7 @@ import scala.xml._
 
 /**
  * Continually displays Twitter statuses in a Swing JTable.
- * Written for the purposes of learning Scala and the Twitter API, probably not
+ * Written to learn and teach Scala and the Twitter API, probably not
  * to create a real Twitter client.
  * 
  * Your feedback is welcome!
@@ -19,11 +19,8 @@ import scala.xml._
  */
 object Main extends SimpleGUIApplication {
   
-  val friendsStatuses = Collections.synchronizedList(new ArrayList[Node]())
-  var friendsModel: AbstractTableModel = null
-
-  val publicStatuses = Collections.synchronizedList(new ArrayList[Node]())
-  var publicModel: AbstractTableModel = null
+  var friendsModel = new StatusTableModel
+  var publicModel = new StatusTableModel
 
   /** How often, in ms, to fetch and load new data */
   private final var RELOAD_INTERVAL = 120 * 1000;
@@ -45,30 +42,28 @@ object Main extends SimpleGUIApplication {
       contents = new TabbedPane() {
         preferredSize = new Dimension(600, 600)
         pages.append(new TabbedPane.Page("Friends", new ScrollPane {
-          val table = createTable(friendsStatuses)
-          friendsModel = table.model.asInstanceOf[AbstractTableModel]
+          val table = createTable(friendsModel)
           contents = table
         }))
         pages.append(new TabbedPane.Page("Public", new ScrollPane {
-          val table = createTable(publicStatuses)
-          publicModel = table.model.asInstanceOf[AbstractTableModel]
+          val table = createTable(publicModel)
           contents = table
         }))
       }
       
       peer.setLocationRelativeTo(null)
 
-      friendsStatusDataProvider.loadTwitterData(friendsStatuses)
-      publicStatusDataProvider.loadTwitterData(publicStatuses)
+      friendsStatusDataProvider.loadTwitterData(friendsModel.getStatuses)
+      publicStatusDataProvider.loadTwitterData(publicModel.getStatuses)
 
-      continuallyLoadData(friendsStatusDataProvider, friendsStatuses, friendsModel)
-      continuallyLoadData(publicStatusDataProvider, publicStatuses, publicModel)
+      continuallyLoadData(friendsStatusDataProvider, friendsModel)
+      continuallyLoadData(publicStatusDataProvider, publicModel)
     }
   }
     
-  private def createTable(statuses: java.util.List[Node]): Table = {
+  private def createTable(statusTableModel: StatusTableModel): Table = {
     new Table() {
-      model = new StatusTableModel(statuses)
+      model = statusTableModel
       val colModel = peer.getColumnModel
       colModel.getColumn(0).setPreferredWidth(100)
       colModel.getColumn(1).setPreferredWidth(500)
@@ -76,10 +71,10 @@ object Main extends SimpleGUIApplication {
   }
 
   private def continuallyLoadData(statusDataProvider: StatusDataProvider,
-      statuses: java.util.List[Node], model: AbstractTableModel) {
+      model: StatusTableModel) {
     new Timer(RELOAD_INTERVAL, new ActionListener() {
       def actionPerformed(event: ActionEvent) {
-        statusDataProvider.loadTwitterData(statuses)
+        statusDataProvider.loadTwitterData(model.getStatuses)
         model.fireTableDataChanged
       }
     }).start
