@@ -15,7 +15,7 @@ class StatusTableModel(statuses: java.util.List[Node]) extends AbstractTableMode
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val status = statuses.get(rowIndex)
-    val node = if (columnIndex == 0) (status \ "user" \ "name") else (status \ "text")
+    val node = if (columnIndex == 0) status \ "user" \ "name" else status \ "text"
     node.text
   }
 }

@@ -7,8 +7,6 @@ import javax.swing.{SwingUtilities, Timer}
 import java.util.{ArrayList,Collections}
 import scala.swing._
 import scala.xml._
-import org.apache.commons.httpclient.HttpClient
-import org.apache.commons.httpclient.methods.GetMethod
 
 /**
  * Continually displays current Twitter public timeline statuses in a Swing JTable.
@@ -22,15 +20,14 @@ object Main extends SimpleGUIApplication {
   /** Statuses, in a list for direct access from table model */
   val statuses = Collections.synchronizedList(new ArrayList[Node]())
   
-  val httpClient = new HttpClient()
-  val timelineMethod = new GetMethod("http://twitter.com/statuses/public_timeline.xml")
-  var publicModel: AbstractTableModel = null
-  val friendsMethod = new GetMethod("http://twitter.com/statuses/friends_timeline.xml")
+  val statusDataProvider = new StatusDataProvider
   
+  var publicModel: AbstractTableModel = null
+
   /** How often, in ms, to fetch and load new data */
   private final var RELOAD_INTERVAL = 10000;
 
-  loadTwitterData(statuses)
+  statusDataProvider.loadTwitterData(statuses)
 
   /**
    * Creates the Swing frame, which consists of a JTable inside a JScrollPane.
@@ -63,22 +60,10 @@ object Main extends SimpleGUIApplication {
   private def continuallyLoadData(container: Container) {
     new Timer(RELOAD_INTERVAL, new ActionListener() {
       def actionPerformed(event: ActionEvent) {
-        loadTwitterData(statuses)
+        statusDataProvider.loadTwitterData(statuses)
         publicModel.fireTableDataChanged
       }
     }).start
-  }
-
-  /**
-   * Fetches statuses from Twitter and stores them in statuses field.
-   */
-  private def loadTwitterData(statuses: java.util.List[Node]) {
-    val result = httpClient.executeMethod(timelineMethod)
-    val timeline = XML.load(timelineMethod.getResponseBodyAsStream())
-    statuses.clear
-    for (st <- timeline \\ "status") {
-      statuses.add(st)
-    }
   }
 
   override def main(args: Array[String]): Unit = super.main(args)  // Without this, IDEA doesn’t see main 
