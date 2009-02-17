@@ -39,6 +39,8 @@ object Main extends SimpleGUIApplication {
       preferredSize = new Dimension(600,600)
       contents = new Table() {
         model = StatusTableModel
+        peer.getColumnModel.getColumn(0).setPreferredWidth(100)
+        peer.getColumnModel.getColumn(1).setPreferredWidth(500)
       }
     }
     contents = scrollPane
