@@ -19,8 +19,8 @@ import scala.xml._
  */
 object Main extends SimpleGUIApplication {
   
-  var friendsModel = new StatusTableModel
-  var publicModel = new StatusTableModel
+  val friendsModel = new StatusTableModel
+  val publicModel = new StatusTableModel
 
   /** How often, in ms, to fetch and load new data */
   private final var RELOAD_INTERVAL = 120 * 1000;
@@ -42,12 +42,10 @@ object Main extends SimpleGUIApplication {
       contents = new TabbedPane() {
         preferredSize = new Dimension(600, 600)
         pages.append(new TabbedPane.Page("Friends", new ScrollPane {
-          val table = createTable(friendsModel)
-          contents = table
+          contents = createTable(friendsModel)
         }))
         pages.append(new TabbedPane.Page("Public", new ScrollPane {
-          val table = createTable(publicModel)
-          contents = table
+          contents = createTable(publicModel)
         }))
       }
       
@@ -70,8 +68,7 @@ object Main extends SimpleGUIApplication {
     }
   }
 
-  private def continuallyLoadData(statusDataProvider: StatusDataProvider,
-      model: StatusTableModel) {
+  private def continuallyLoadData(statusDataProvider: StatusDataProvider, model: StatusTableModel) {
     new Timer(RELOAD_INTERVAL, new ActionListener() {
       def actionPerformed(event: ActionEvent) {
         statusDataProvider.loadTwitterData(model.getStatuses)
