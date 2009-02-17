@@ -34,7 +34,7 @@ object Main extends SimpleGUIApplication {
    * Creates the Swing frame, which consists of a JTable inside a JScrollPane.
    */
   def top = new MainFrame {
-    title = "Scala Twitter Client"
+    title = "Public Timeline"
     val scrollPane = new ScrollPane {
       preferredSize = new Dimension(600,600)
       contents = new Table() {
