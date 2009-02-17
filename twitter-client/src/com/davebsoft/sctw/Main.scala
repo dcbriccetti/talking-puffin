@@ -23,30 +23,38 @@ object Main extends SimpleGUIApplication {
   val statuses = Collections.synchronizedList(new ArrayList[Node]())
   
   val httpClient = new HttpClient()
-  val method = new GetMethod("http://twitter.com/statuses/public_timeline.xml")
+  val timelineMethod = new GetMethod("http://twitter.com/statuses/public_timeline.xml")
+  var publicModel: AbstractTableModel = null
+  val friendsMethod = new GetMethod("http://twitter.com/statuses/friends_timeline.xml")
   
   /** How often, in ms, to fetch and load new data */
   private final var RELOAD_INTERVAL = 10000;
 
-  loadTwitterData
+  loadTwitterData(statuses)
 
   /**
    * Creates the Swing frame, which consists of a JTable inside a JScrollPane.
    */
-  def top = new MainFrame {
-    title = "Public Timeline"
-    val scrollPane = new ScrollPane {
-      preferredSize = new Dimension(600,600)
-      contents = new Table() {
-        model = StatusTableModel
-        peer.getColumnModel.getColumn(0).setPreferredWidth(100)
-        peer.getColumnModel.getColumn(1).setPreferredWidth(500)
+  def top = {
+    new MainFrame {
+      title = "Too-Simple Twitter Client"
+      val tp: TabbedPane = new TabbedPane() {
+        pages.append(new TabbedPane.Page("Public", new ScrollPane {
+          preferredSize = new Dimension(600, 600)
+          contents = new Table() {
+            model = new StatusTableModel(statuses)
+            publicModel = model.asInstanceOf[AbstractTableModel]
+            val colModel = peer.getColumnModel
+            colModel.getColumn(0).setPreferredWidth(100)
+            colModel.getColumn(1).setPreferredWidth(500)
+          }
+        }))
       }
-    }
-    contents = scrollPane
-    peer.setLocationRelativeTo(null)
+      contents = tp
+      peer.setLocationRelativeTo(null)
 
-    continuallyLoadData(this)
+      continuallyLoadData(this)
+    }
   }
 
   /**
@@ -55,8 +63,8 @@ object Main extends SimpleGUIApplication {
   private def continuallyLoadData(container: Container) {
     new Timer(RELOAD_INTERVAL, new ActionListener() {
       def actionPerformed(event: ActionEvent) {
-        loadTwitterData
-        StatusTableModel.fireTableDataChanged
+        loadTwitterData(statuses)
+        publicModel.fireTableDataChanged
       }
     }).start
   }
@@ -64,31 +72,14 @@ object Main extends SimpleGUIApplication {
   /**
    * Fetches statuses from Twitter and stores them in statuses field.
    */
-  private def loadTwitterData() {
-    val result = httpClient.executeMethod(method)
-    val timeline = XML.load(method.getResponseBodyAsStream())
+  private def loadTwitterData(statuses: java.util.List[Node]) {
+    val result = httpClient.executeMethod(timelineMethod)
+    val timeline = XML.load(timelineMethod.getResponseBodyAsStream())
     statuses.clear
     for (st <- timeline \\ "status") {
       statuses.add(st)
     }
   }
 
-  /**
-   * Model providing data to the JTable
-   */
-  private object StatusTableModel extends AbstractTableModel {
-    val colNames = List("Name", "Status")
-
-    def getColumnCount = 2
-    def getRowCount = statuses.size
-    override def getColumnName(column: Int) = colNames(column)
-
-    override def getValueAt(rowIndex: Int, columnIndex: Int) = {
-      val status = statuses.get(rowIndex)
-      val node = if (columnIndex == 0) (status \ "user" \ "name") else (status \ "text")
-      node.text
-    }
-  }
-  
   override def main(args: Array[String]): Unit = super.main(args)  // Without this, IDEA doesn’t see main 
 }
