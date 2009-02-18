@@ -39,7 +39,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   }
   
   private def loadData {
-    statusDataProvider.loadTwitterData(statuses)
+    statusDataProvider.loadTwitterStatusData(statuses)
     fireTableDataChanged
   }
 

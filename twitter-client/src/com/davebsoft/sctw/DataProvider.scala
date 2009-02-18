@@ -6,21 +6,35 @@ import scala.xml._
 import javax.swing.table.AbstractTableModel
 import org.apache.commons.httpclient.methods.GetMethod
 
-abstract class StatusDataProvider() {
+abstract class DataProvider {
   val httpClient = new HttpClient()
   def getUrl: String
   val method = new GetMethod(getUrl)
-  
+
+  def loadTwitterData: Node = {
+    val result = httpClient.executeMethod(method)
+    if (result != 200) {
+      println("Result: " + result)
+      null
+    } else {
+      val elem = XML.load(method.getResponseBodyAsStream())
+      method.releaseConnection
+      elem
+    }
+  }
+}
+
+abstract class StatusDataProvider extends DataProvider {
   /**
    * Fetches statuses from Twitter and stores them in <code>statuses</code>.
    */
-  def loadTwitterData(statuses: java.util.List[Node]) {
-    val result = httpClient.executeMethod(method)
-    val timeline = XML.load(method.getResponseBodyAsStream())
-    method.releaseConnection
-    statuses.clear
-    for (st <- timeline \\ "status") {
-      statuses.add(st)
+  def loadTwitterStatusData(statuses: java.util.List[Node]) {
+    val elem = loadTwitterData
+    if (elem != null) {
+      statuses.clear
+      for (st <- elem \\ "status") {
+        statuses.add(st)
+      }
     }
   }
 }
