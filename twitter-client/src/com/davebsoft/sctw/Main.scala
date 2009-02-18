@@ -1,5 +1,6 @@
 package com.davebsoft.sctw
 
+import _root_.scala.swing.event.{ButtonClicked, SelectionChanged}
 import java.awt.Dimension
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.table.{DefaultTableModel, AbstractTableModel}
@@ -19,15 +20,9 @@ import scala.xml._
  */
 object Main extends SimpleGUIApplication {
   
-  val friendsModel = new StatusTableModel
-  val publicModel = new StatusTableModel
-
-  /** How often, in ms, to fetch and load new data */
-  private final var RELOAD_INTERVAL = 120 * 1000;
-  
   private var username: String = null
   private var password: String = null
-
+  
   /**
    * Creates the Swing frame, which consists of a TabbedPane with two panes, 
    * with each pane containing a JTable inside a JScrollPane.
@@ -35,6 +30,10 @@ object Main extends SimpleGUIApplication {
   def top = {
     val friendsStatusDataProvider = new FriendsStatusDataProvider(username, password)
     val publicStatusDataProvider = new PublicStatusDataProvider()
+    
+    val friendsModel = new StatusTableModel(friendsStatusDataProvider)
+    val publicModel = new StatusTableModel(publicStatusDataProvider)
+
   
     new MainFrame {
       title = "Too-Simple Twitter Client"
@@ -45,12 +44,6 @@ object Main extends SimpleGUIApplication {
       }
       
       peer.setLocationRelativeTo(null)
-
-      friendsStatusDataProvider.loadTwitterData(friendsModel.getStatuses)
-      publicStatusDataProvider.loadTwitterData(publicModel.getStatuses)
-
-      continuallyLoadData(friendsStatusDataProvider, friendsModel)
-      continuallyLoadData(publicStatusDataProvider, publicModel)
     }
   }
     
@@ -64,16 +57,20 @@ object Main extends SimpleGUIApplication {
           colModel.getColumn(1).setPreferredWidth(500)
         }
       }
-    }
-  }
-
-  private def continuallyLoadData(statusDataProvider: StatusDataProvider, model: StatusTableModel) {
-    new Timer(RELOAD_INTERVAL, new ActionListener() {
-      def actionPerformed(event: ActionEvent) {
-        statusDataProvider.loadTwitterData(model.getStatuses)
-        model.fireTableDataChanged
+      contents += new FlowPanel {
+        contents += new Label("Refresh (secs)")
+        val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
+        var defaultRefresh = 120
+        comboBox.peer.setSelectedItem(defaultRefresh)
+        statusTableModel.setUpdateFrequency(defaultRefresh)
+        comboBox.peer.addActionListener(new ActionListener(){
+          def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
+            statusTableModel.setUpdateFrequency(comboBox.selection.item)
+          }
+        });
+        contents += comboBox
       }
-    }).start
+    }
   }
 
   override def main(args: Array[String]): Unit = {
