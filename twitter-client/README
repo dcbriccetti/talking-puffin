@@ -1,0 +1,4 @@
+The primary purpose of this project is for its author to learn, and play around
+with, Scala, the scala.swing package, and the Twitter API. The code may be educational
+for others. The product, a trivial Twitter client, is not very useful. Maybe it will
+be one day.
