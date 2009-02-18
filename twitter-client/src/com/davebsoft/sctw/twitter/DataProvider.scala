@@ -74,7 +74,7 @@ abstract class FriendsFollowersDataProvider(username: String, password: String) 
       userNames ::= userName.text
     }
   
-    userNames.sort((a,b) => (a compareTo b) < 0)
+    userNames.sort((a,b) => (a.toLowerCase compareTo b.toLowerCase) < 0)
   }
 }
 
