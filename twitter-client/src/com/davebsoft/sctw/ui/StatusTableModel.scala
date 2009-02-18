@@ -5,6 +5,7 @@ import javax.swing.Timer
 import java.util.{ArrayList, Collections}
 import scala.xml.Node
 import javax.swing.table.{DefaultTableModel, AbstractTableModel}
+import twitter.StatusDataProvider
 
 /**
  * Model providing status data to the JTable
@@ -50,8 +51,11 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
     if (timer != null && timer.isRunning) {
       timer.stop
     }
-    createLoadTimer
-    loadData
+
+    if (updateFrequency > 0) {
+      createLoadTimer
+      loadData
+    }
   }
 }
   

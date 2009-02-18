@@ -8,10 +8,12 @@ import javax.swing.{SwingUtilities, Timer}
 import java.util.{ArrayList,Collections}
 import scala.swing._
 import scala.xml._
-import ui.{StatusTableModel, StatusPane}
+import twitter.{FriendsDataProvider, PublicStatusDataProvider, FollowersDataProvider, FriendsStatusDataProvider}
+import ui.{StatusTableModel, StatusPane, FriendsFollowersPane}
 
 /**
- * Continually displays Twitter statuses in a Swing JTable.
+ * “Too-Simple Twitter Client”
+ * 
  * Written to learn and teach Scala and the Twitter API, probably not
  * to create a real Twitter client.
  * 
@@ -25,24 +27,27 @@ object Main extends SimpleGUIApplication {
   private var password: String = null
   
   /**
-   * Creates the Swing frame, which consists of a TabbedPane with two panes, 
-   * with each pane containing a JTable inside a JScrollPane.
+   * Creates the Swing frame.
    */
   def top = {
-    val friendsStatusDataProvider = new FriendsStatusDataProvider(username, password)
-    val publicStatusDataProvider = new PublicStatusDataProvider()
-    
-    val friendsModel = new StatusTableModel(friendsStatusDataProvider)
-    val publicModel = new StatusTableModel(publicStatusDataProvider)
-
   
     new MainFrame {
       title = "Too-Simple Twitter Client"
       
       contents = new TabbedPane() {
         preferredSize = new Dimension(750, 600)
-        pages.append(new TabbedPane.Page("Friends", new StatusPane(friendsModel)))
-        pages.append(new TabbedPane.Page("Public", new StatusPane(publicModel)))
+        
+        pages.append(new TabbedPane.Page("Friends’ Tweets", new StatusPane(
+            new StatusTableModel(new FriendsStatusDataProvider(username, password)))))
+        
+        pages.append(new TabbedPane.Page("Public Tweets", new StatusPane(
+            new StatusTableModel(new PublicStatusDataProvider))))
+        
+        pages.append(new TabbedPane.Page("Following", new FriendsFollowersPane(
+            new FriendsDataProvider(username, password))))
+        
+        pages.append(new TabbedPane.Page("Followers", new FriendsFollowersPane(
+            new FollowersDataProvider(username, password))))
       }
       
       peer.setLocationRelativeTo(null)

@@ -4,7 +4,7 @@ import java.awt.event.{ActionListener, ActionEvent}
 import scala.swing._
 
 /**
- * A status pane displays friend and public statuses
+ * Displays friend and public statuses
  */
 class StatusPane(statusTableModel: StatusTableModel) extends BoxPanel(Orientation.Vertical) {
   
