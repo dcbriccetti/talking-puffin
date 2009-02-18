@@ -8,6 +8,7 @@ import javax.swing.{SwingUtilities, Timer}
 import java.util.{ArrayList,Collections}
 import scala.swing._
 import scala.xml._
+import ui.{StatusTableModel, StatusPane}
 
 /**
  * Continually displays Twitter statuses in a Swing JTable.
@@ -39,40 +40,15 @@ object Main extends SimpleGUIApplication {
       title = "Too-Simple Twitter Client"
       
       contents = new TabbedPane() {
-        pages.append(new TabbedPane.Page("Friends", createStatusPane(friendsModel)))
-        pages.append(new TabbedPane.Page("Public", createStatusPane(publicModel)))
+        preferredSize = new Dimension(750, 600)
+        pages.append(new TabbedPane.Page("Friends", new StatusPane(friendsModel)))
+        pages.append(new TabbedPane.Page("Public", new StatusPane(publicModel)))
       }
       
       peer.setLocationRelativeTo(null)
     }
   }
     
-  private def createStatusPane(statusTableModel: StatusTableModel): Component = {
-    new BoxPanel(Orientation.Vertical) {
-      contents += new ScrollPane {
-        contents = new Table() {
-          model = statusTableModel
-          val colModel = peer.getColumnModel
-          colModel.getColumn(0).setPreferredWidth(100)
-          colModel.getColumn(1).setPreferredWidth(500)
-        }
-      }
-      contents += new FlowPanel {
-        contents += new Label("Refresh (secs)")
-        val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
-        var defaultRefresh = 120
-        comboBox.peer.setSelectedItem(defaultRefresh)
-        statusTableModel.setUpdateFrequency(defaultRefresh)
-        comboBox.peer.addActionListener(new ActionListener(){
-          def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
-            statusTableModel.setUpdateFrequency(comboBox.selection.item)
-          }
-        });
-        contents += comboBox
-      }
-    }
-  }
-
   override def main(args: Array[String]): Unit = {
     if (args.length >= 2) {
       username = args(0)

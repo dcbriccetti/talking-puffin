@@ -1,5 +1,4 @@
-package com.davebsoft.sctw
-
+package com.davebsoft.sctw.ui
 
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.Timer
