@@ -40,13 +40,8 @@ object Main extends SimpleGUIApplication {
       title = "Too-Simple Twitter Client"
       
       contents = new TabbedPane() {
-        preferredSize = new Dimension(600, 600)
-        pages.append(new TabbedPane.Page("Friends", new ScrollPane {
-          contents = createTable(friendsModel)
-        }))
-        pages.append(new TabbedPane.Page("Public", new ScrollPane {
-          contents = createTable(publicModel)
-        }))
+        pages.append(new TabbedPane.Page("Friends", createStatusPane(friendsModel)))
+        pages.append(new TabbedPane.Page("Public", createStatusPane(publicModel)))
       }
       
       peer.setLocationRelativeTo(null)
@@ -59,12 +54,16 @@ object Main extends SimpleGUIApplication {
     }
   }
     
-  private def createTable(statusTableModel: StatusTableModel): Table = {
-    new Table() {
-      model = statusTableModel
-      val colModel = peer.getColumnModel
-      colModel.getColumn(0).setPreferredWidth(100)
-      colModel.getColumn(1).setPreferredWidth(500)
+  private def createStatusPane(statusTableModel: StatusTableModel): Component = {
+    new BoxPanel(Orientation.Vertical) {
+      contents += new ScrollPane {
+        contents = new Table() {
+          model = statusTableModel
+          val colModel = peer.getColumnModel
+          colModel.getColumn(0).setPreferredWidth(100)
+          colModel.getColumn(1).setPreferredWidth(500)
+        }
+      }
     }
   }
 
