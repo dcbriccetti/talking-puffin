@@ -12,16 +12,19 @@ import org.apache.commons.httpclient.methods.GetMethod
 abstract class DataProvider {
   val httpClient = new HttpClient()
   def getUrl: String
-  val method = new GetMethod(getUrl)
 
   /**
    * Load data for the appropriate Twitter service (determined by the subclass),
    * and return it as XML.
    */
   def loadTwitterData: Node = {
+    val url = getUrl
+    println(url)
+    val method = new GetMethod(url)
     val result = httpClient.executeMethod(method)
     if (result != 200) {
       println("Result: " + result)
+      println(method.getResponseBodyAsString())
       null
     } else {
       val elem = XML.load(method.getResponseBodyAsStream())
@@ -37,15 +40,20 @@ abstract class DataProvider {
 }
 
 abstract class StatusDataProvider extends DataProvider {
+  protected var highestId: String = null
+  
   /**
    * Fetches statuses from Twitter and stores them in <code>statuses</code>.
    */
-  def loadTwitterStatusData(statuses: java.util.List[Node]) {
+  def loadTwitterStatusData(statusList: java.util.List[Node]) {
     val elem = loadTwitterData
     if (elem != null) {
-      statuses.clear
-      for (st <- elem \\ "status") {
-        statuses.add(st)
+      val statuses = elem \\ "status"
+      if (statuses.length > 0) {
+        highestId = (statuses(0) \ "id").text 
+        for (st <- statuses.reverse) {
+          statusList.add(st)
+        }
       }
     }
   }
@@ -58,7 +66,8 @@ class PublicStatusDataProvider extends StatusDataProvider {
 class FriendsStatusDataProvider(username: String, password: String) extends StatusDataProvider {
   setCredentials(username, password)
   
-  def getUrl() = "http://twitter.com/statuses/friends_timeline.xml"
+  def getUrl() = "http://twitter.com/statuses/friends_timeline.xml" +
+      (if (highestId == null) "?count=200" else "?since_id=" + highestId)
 }
 
 abstract class FriendsFollowersDataProvider(username: String, password: String) extends DataProvider {

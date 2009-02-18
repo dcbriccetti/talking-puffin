@@ -29,6 +29,13 @@ class StatusPane(statusTableModel: StatusTableModel) extends BoxPanel(Orientatio
       }
     });
     contents += comboBox
+    val clearButton = new Button("Clear")
+    clearButton.peer.addActionListener(new ActionListener() {
+      def actionPerformed(e: ActionEvent) = {
+        statusTableModel.clear
+      }
+    })
+    contents += clearButton
   }
 
 }

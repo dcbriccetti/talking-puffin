@@ -57,5 +57,10 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
       loadData
     }
   }
+  
+  def clear {
+    statuses.clear
+    fireTableDataChanged
+  }
 }
   
