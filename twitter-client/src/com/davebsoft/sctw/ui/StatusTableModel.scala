@@ -1,6 +1,7 @@
 package com.davebsoft.sctw.ui
 
 import _root_.scala.xml.{NodeSeq, Node}
+import filter.TagUser
 import java.awt.event.{ActionEvent, ActionListener}
 import java.util.{ArrayList, Collections}
 import javax.swing.{SwingWorker, Timer}
@@ -17,6 +18,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   private var statuses = List[Node]()
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
   private val mutedIds = scala.collection.mutable.Set[String]()
+  private var selectedTags = List[String]()
   private val colNames = List("Name", "Status")
   private var timer: Timer = null
   
@@ -31,16 +33,33 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   }
   
   def muteSelectedUsers(rows: Array[int]) {
-    for (i <- rows) {
-      val status = filteredStatuses.get(i)
-      mutedIds += (status \ "user" \ "id").text
-    }
+    mutedIds ++= getUserIds(rows)
     filterAndNotify
   }
   
   def unMuteAll {
     mutedIds.clear
     filterAndNotify
+  }
+  
+  def tagSelectedUsers(rows: Array[int], tag: String) {
+    for (id <- getUserIds(rows)) {
+      filter.tagUsers.add(new TagUser(tag, id))
+    }
+  }
+
+  def setSelectedTags(selectedTags: List[String]) {
+    this.selectedTags = selectedTags;
+    filterAndNotify
+  }
+  
+  private def getUserIds(rows: Array[int]): List[String] = {
+    var ids = List[String]()
+    for (i <- rows) {
+      val status = filteredStatuses.get(i)
+      ids ::= (status \ "user" \ "id").text
+    }
+    ids
   }
   
   private def createLoadTimer {
@@ -67,9 +86,23 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   private def filterStatuses {
     filteredStatuses.clear
     for (st <- statuses) {
-      if (! mutedIds.contains((st \ "user" \ "id").text)) {
-        filteredStatuses.add(st)
+      var id = (st \ "user" \ "id").text
+      if (! mutedIds.contains(id)) {
+        if (tagFiltersInclude(id)) {
+          filteredStatuses.add(st)
+        }
       }
+    }
+  }
+  
+  private def tagFiltersInclude(id: String): Boolean = {
+    if (selectedTags.length == 0) true else {
+      for (tag <- selectedTags) {
+        if (filter.tagUsers.contains(new TagUser(tag, id))) {
+          return true
+        }
+      }
+      false
     }
   }
 

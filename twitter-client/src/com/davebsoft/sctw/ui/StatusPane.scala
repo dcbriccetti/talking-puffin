@@ -2,9 +2,9 @@ package com.davebsoft.sctw.ui
 
 import _root_.com.davebsoft.sctw.util.PopupListener
 import java.awt.event.{ActionListener, ActionEvent}
-import javax.swing.{JMenuItem, JPopupMenu}
-
+import javax.swing.{JMenu, JMenuItem, JPopupMenu}
 import scala.swing._
+import filter.tagsRepository
 
 /**
  * Displays friend and public statuses
@@ -63,16 +63,32 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
 
   def getPopupMenu: JPopupMenu = {
     val menu = new JPopupMenu()
+
     val mi = new JMenuItem("Mute")
     mi.addActionListener(new ActionListener() {
       def actionPerformed(e: ActionEvent) = {
-        println("Mute")
         val rows = table.peer.getSelectedRows
         statusTableModel.muteSelectedUsers(rows)
         unmuteButton.enabled = true
       }
     })
     menu.add(mi)
+
+    val tagAl = new ActionListener() {
+      def actionPerformed(e: ActionEvent) = {
+        val rows = table.peer.getSelectedRows
+        statusTableModel.tagSelectedUsers(rows, e.getActionCommand)
+      }
+    }
+    
+    val tagMi = new JMenu("Tag Friend With")
+    for (tag <- tagsRepository.get) {
+      val tagSmi = new JMenuItem(tag)
+      tagSmi.addActionListener(tagAl)
+      tagMi.add(tagSmi)
+    }
+    menu.add(tagMi)
+
     menu
   }
 

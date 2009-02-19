@@ -9,8 +9,7 @@ import java.util.{ArrayList,Collections}
 import scala.swing._
 import scala.xml._
 import twitter.{FriendsDataProvider, PublicStatusDataProvider, FollowersDataProvider, FriendsStatusDataProvider}
-import ui.{StatusTableModel, StatusPane, FriendsFollowersPane}
-
+import ui.{StatusTableModel, FiltersPane, StatusPane, FriendsFollowersPane}
 /**
  * “Simple Twitter Client”
  * 
@@ -37,8 +36,8 @@ object Main extends SimpleGUIApplication {
       contents = new TabbedPane() {
         preferredSize = new Dimension(800, 600)
         
-        pages.append(new TabbedPane.Page("Friends’ Tweets", new StatusPane(
-            new StatusTableModel(new FriendsStatusDataProvider(username, password)))))
+        val friendsTableModel = new StatusTableModel(new FriendsStatusDataProvider(username, password))
+        pages.append(new TabbedPane.Page("Friends’ Tweets", new StatusPane(friendsTableModel)))
         
         pages.append(new TabbedPane.Page("Public Tweets", new StatusPane(
             new StatusTableModel(new PublicStatusDataProvider))))
@@ -48,6 +47,8 @@ object Main extends SimpleGUIApplication {
         
         pages.append(new TabbedPane.Page("Followers", new FriendsFollowersPane(
             new FollowersDataProvider(username, password))))
+        
+        pages.append(new TabbedPane.Page("Filters", new FiltersPane(friendsTableModel)))
       }
       
       peer.setLocationRelativeTo(null)
