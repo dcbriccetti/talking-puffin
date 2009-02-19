@@ -58,10 +58,6 @@ abstract class StatusDataProvider extends DataProvider {
   }
 }
 
-class PublicStatusDataProvider extends StatusDataProvider {
-  def getUrl = "http://twitter.com/statuses/public_timeline.xml"
-}
-
 class FriendsStatusDataProvider(username: String, password: String) extends StatusDataProvider {
   setCredentials(username, password)
   

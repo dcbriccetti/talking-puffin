@@ -8,8 +8,9 @@ import javax.swing.{SwingUtilities, Timer}
 import java.util.{ArrayList,Collections}
 import scala.swing._
 import scala.xml._
-import twitter.{FriendsDataProvider, PublicStatusDataProvider, FollowersDataProvider, FriendsStatusDataProvider}
+import twitter.{FriendsDataProvider, FollowersDataProvider, FriendsStatusDataProvider}
 import ui.{StatusTableModel, FiltersPane, StatusPane, FriendsFollowersPane}
+
 /**
  * “Simple Twitter Client”
  * 
@@ -37,10 +38,7 @@ object Main extends SimpleGUIApplication {
         preferredSize = new Dimension(800, 600)
         
         val friendsTableModel = new StatusTableModel(new FriendsStatusDataProvider(username, password))
-        pages.append(new TabbedPane.Page("Friends’ Tweets", new StatusPane(friendsTableModel)))
-        
-        pages.append(new TabbedPane.Page("Public Tweets", new StatusPane(
-            new StatusTableModel(new PublicStatusDataProvider))))
+        pages.append(new TabbedPane.Page("Tweets", new StatusPane(friendsTableModel)))
         
         pages.append(new TabbedPane.Page("Following", new FriendsFollowersPane(
             new FriendsDataProvider(username, password))))
