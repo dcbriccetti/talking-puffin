@@ -10,7 +10,7 @@ import org.apache.commons.httpclient.methods.GetMethod
  * A provider of Twitter data
  */
 abstract class DataProvider {
-  val httpClient = new HttpClient()
+  private val httpClient = new HttpClient()
   def getUrl: String
 
   /**
