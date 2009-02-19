@@ -20,6 +20,6 @@ object tagUsers {
   }
   
   def contains(tagUser: TagUser): Boolean = {
-    return tagUsers.contains(tagUser)
+    tagUsers.contains(tagUser)
   }
 }
