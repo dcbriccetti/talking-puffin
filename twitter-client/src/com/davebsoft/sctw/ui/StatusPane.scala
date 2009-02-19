@@ -1,20 +1,28 @@
 package com.davebsoft.sctw.ui
 
+import _root_.com.davebsoft.sctw.util.PopupListener
 import java.awt.event.{ActionListener, ActionEvent}
+import javax.swing.{JMenuItem, JPopupMenu}
+
 import scala.swing._
 
 /**
  * Displays friend and public statuses
  */
 class StatusPane(statusTableModel: StatusTableModel) extends BoxPanel(Orientation.Vertical) {
+  var table: Table = null
+  var unmuteButton: Button = null
   
   contents += new ScrollPane {
-    contents = new Table() {
+    table = new Table() {
       model = statusTableModel
       val colModel = peer.getColumnModel
       colModel.getColumn(0).setPreferredWidth(100)
       colModel.getColumn(1).setPreferredWidth(600)
     }
+    // TODO convert this to scala.swing way
+    table.peer.addMouseListener(new PopupListener(table.peer, getPopupMenu));
+    contents = table
   }
   
   contents += new FlowPanel {
@@ -29,6 +37,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends BoxPanel(Orientatio
       }
     });
     contents += comboBox
+    
     val clearButton = new Button("Clear")
     clearButton.peer.addActionListener(new ActionListener() {
       def actionPerformed(e: ActionEvent) = {
@@ -36,6 +45,31 @@ class StatusPane(statusTableModel: StatusTableModel) extends BoxPanel(Orientatio
       }
     })
     contents += clearButton
+    
+    unmuteButton = new Button("Unmute All")
+    unmuteButton.peer.addActionListener(new ActionListener() {
+      def actionPerformed(e: ActionEvent) = {
+        statusTableModel.unMuteAll
+        unmuteButton.enabled = false
+      }
+    })
+    unmuteButton.enabled = false
+    contents += unmuteButton
+  }
+
+  def getPopupMenu: JPopupMenu = {
+    val menu = new JPopupMenu()
+    val mi = new JMenuItem("Mute")
+    mi.addActionListener(new ActionListener() {
+      def actionPerformed(e: ActionEvent) = {
+        println("Mute")
+        val rows = table.peer.getSelectedRows
+        statusTableModel.muteSelectedUsers(rows)
+        unmuteButton.enabled = true
+      }
+    })
+    menu.add(mi)
+    menu
   }
 
 }

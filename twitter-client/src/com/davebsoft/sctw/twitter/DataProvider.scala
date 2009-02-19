@@ -43,19 +43,18 @@ abstract class StatusDataProvider extends DataProvider {
   protected var highestId: String = null
   
   /**
-   * Fetches statuses from Twitter and stores them in <code>statuses</code>.
+   * Fetches statuses from Twitter.
    */
-  def loadTwitterStatusData(statusList: java.util.List[Node]) {
+  def loadTwitterStatusData(): NodeSeq = {
     val elem = loadTwitterData
     if (elem != null) {
       val statuses = elem \\ "status"
       if (statuses.length > 0) {
         highestId = (statuses(0) \ "id").text 
-        for (st <- statuses.reverse) {
-          statusList.add(st)
-        }
       }
+      return statuses
     }
+    List[Node]()
   }
 }
 

@@ -1,9 +1,9 @@
 package com.davebsoft.sctw.ui
 
+import _root_.scala.xml.{NodeSeq, Node}
 import java.awt.event.{ActionEvent, ActionListener}
-import javax.swing.Timer
 import java.util.{ArrayList, Collections}
-import scala.xml.Node
+import javax.swing.{SwingWorker, Timer}
 import javax.swing.table.{DefaultTableModel, AbstractTableModel}
 import twitter.StatusDataProvider
 
@@ -14,19 +14,33 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
   
-  private val statuses = Collections.synchronizedList(new ArrayList[Node]())
+  private var statuses = List[Node]()
+  private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
+  private val mutedIds = scala.collection.mutable.Set[String]()
   private val colNames = List("Name", "Status")
   private var timer: Timer = null
   
-  def getStatuses = statuses
   def getColumnCount = 2
-  def getRowCount = statuses.size
+  def getRowCount = filteredStatuses.size
   override def getColumnName(column: Int) = colNames(column)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
-    val status = statuses.get(rowIndex)
+    val status = filteredStatuses.get(rowIndex)
     val node = if (columnIndex == 0) status \ "user" \ "name" else status \ "text"
     node.text
+  }
+  
+  def muteSelectedUsers(rows: Array[int]) {
+    for (i <- rows) {
+      val status = filteredStatuses.get(i)
+      mutedIds += (status \ "user" \ "id").text
+    }
+    filterAndNotify
+  }
+  
+  def unMuteAll {
+    mutedIds.clear
+    filterAndNotify
   }
   
   private def createLoadTimer {
@@ -39,8 +53,24 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   }
   
   private def loadData {
-    statusDataProvider.loadTwitterStatusData(statuses)
-    fireTableDataChanged
+    new SwingWorker[NodeSeq, Object] {
+      def doInBackground = statusDataProvider.loadTwitterStatusData()
+      override def done = {
+        for (st <- get) {
+          statuses ::= st
+        }
+        filterAndNotify
+      }
+    }.run
+  }
+  
+  private def filterStatuses {
+    filteredStatuses.clear
+    for (st <- statuses) {
+      if (! mutedIds.contains((st \ "user" \ "id").text)) {
+        filteredStatuses.add(st)
+      }
+    }
   }
 
   /**
@@ -59,7 +89,12 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   }
   
   def clear {
-    statuses.clear
+    statuses = List[Node]()
+    filterAndNotify
+  }
+
+  private def filterAndNotify {
+    filterStatuses
     fireTableDataChanged
   }
 }

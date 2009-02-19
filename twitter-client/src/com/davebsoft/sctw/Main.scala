@@ -12,7 +12,7 @@ import twitter.{FriendsDataProvider, PublicStatusDataProvider, FollowersDataProv
 import ui.{StatusTableModel, StatusPane, FriendsFollowersPane}
 
 /**
- * “Too-Simple Twitter Client”
+ * “Simple Twitter Client”
  * 
  * Written to learn and teach Scala and the Twitter API, probably not
  * to create a real Twitter client.
@@ -34,7 +34,7 @@ object Main extends SimpleGUIApplication {
   def top = {
   
     new MainFrame {
-      title = "Too-Simple Twitter Client"
+      title = "Simple Twitter Client"
       
       contents = new TabbedPane() {
         preferredSize = new Dimension(750, 600)
