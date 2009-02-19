@@ -35,7 +35,7 @@ object Main extends SimpleGUIApplication {
       title = "Simple Twitter Client"
       
       contents = new TabbedPane() {
-        preferredSize = new Dimension(750, 600)
+        preferredSize = new Dimension(800, 600)
         
         pages.append(new TabbedPane.Page("Friends’ Tweets", new StatusPane(
             new StatusTableModel(new FriendsStatusDataProvider(username, password)))))

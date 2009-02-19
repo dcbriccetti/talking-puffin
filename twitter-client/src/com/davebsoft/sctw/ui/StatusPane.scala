@@ -9,11 +9,11 @@ import scala.swing._
 /**
  * Displays friend and public statuses
  */
-class StatusPane(statusTableModel: StatusTableModel) extends BoxPanel(Orientation.Vertical) {
+class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
   var table: Table = null
   var unmuteButton: Button = null
   
-  contents += new ScrollPane {
+  add(new ScrollPane {
     table = new Table() {
       model = statusTableModel
       val colModel = peer.getColumnModel
@@ -23,9 +23,11 @@ class StatusPane(statusTableModel: StatusTableModel) extends BoxPanel(Orientatio
     // TODO convert this to scala.swing way
     table.peer.addMouseListener(new PopupListener(table.peer, getPopupMenu));
     contents = table
-  }
+  }, new Constraints{
+    gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
+  })
   
-  contents += new FlowPanel {
+  add(new FlowPanel {
     contents += new Label("Refresh (secs)")
     val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
     var defaultRefresh = 120
@@ -55,7 +57,9 @@ class StatusPane(statusTableModel: StatusTableModel) extends BoxPanel(Orientatio
     })
     unmuteButton.enabled = false
     contents += unmuteButton
-  }
+  }, new Constraints{
+    gridx = 0; gridy = 1; fill = GridBagPanel.Fill.Horizontal;
+  })
 
   def getPopupMenu: JPopupMenu = {
     val menu = new JPopupMenu()
