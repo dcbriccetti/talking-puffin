@@ -19,8 +19,6 @@ import ui.{StatusTableModel, StatusPane, FriendsFollowersPane}
  * 
  * Your feedback is welcome!
  * 
- * To do: Get Web services calls off the UI thread
- * 
  * @Author Dave Briccetti, daveb@davebsoft.com, @dcbriccetti
  */
 object Main extends SimpleGUIApplication {
