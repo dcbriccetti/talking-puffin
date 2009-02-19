@@ -3,7 +3,7 @@ package com.davebsoft.sctw.ui
 import _root_.scala.xml.{NodeSeq, Node}
 import filter.TagUser
 import java.awt.event.{ActionEvent, ActionListener}
-import java.util.{ArrayList, Collections}
+import java.util.{Collections, Date, ArrayList}
 import javax.swing.{SwingWorker, Timer}
 import javax.swing.table.{DefaultTableModel, AbstractTableModel}
 import twitter.StatusDataProvider
@@ -19,17 +19,20 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
   private val mutedIds = scala.collection.mutable.Set[String]()
   private var selectedTags = List[String]()
-  private val colNames = List("Name", "Status")
+  private val colNames = List("Name", "Age", "Status")
   private var timer: Timer = null
   
-  def getColumnCount = 2
+  def getColumnCount = 3
   def getRowCount = filteredStatuses.size
   override def getColumnName(column: Int) = colNames(column)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val status = filteredStatuses.get(rowIndex)
-    val node = if (columnIndex == 0) status \ "user" \ "name" else status \ "text"
-    node.text
+    columnIndex match {
+      case 0 => (status \ "user" \ "name").text
+      case 1 => dateToAgeSeconds((status \ "created_at").text) 
+      case 2 => (status \ "text").text 
+    }
   }
   
   def muteSelectedUsers(rows: Array[int]) {
@@ -51,6 +54,11 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   def setSelectedTags(selectedTags: List[String]) {
     this.selectedTags = selectedTags;
     filterAndNotify
+  }
+  
+  private def dateToAgeSeconds(date: String) : java.lang.Long = {
+    val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy")
+    (new Date().getTime - df.parse(date).getTime) / 1000
   }
   
   private def getUserIds(rows: Array[int]): List[String] = {
