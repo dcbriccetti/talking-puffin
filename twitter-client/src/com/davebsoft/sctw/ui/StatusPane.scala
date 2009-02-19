@@ -18,7 +18,9 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
       model = statusTableModel
       val colModel = peer.getColumnModel
       colModel.getColumn(0).setPreferredWidth(100)
+      colModel.getColumn(0).setMaxWidth(200)
       colModel.getColumn(1).setPreferredWidth(50)
+      colModel.getColumn(1).setMaxWidth(100)
       colModel.getColumn(2).setPreferredWidth(600)
     }
     // TODO convert this to scala.swing way
