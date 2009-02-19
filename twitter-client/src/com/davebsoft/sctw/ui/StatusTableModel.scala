@@ -61,7 +61,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
         }
         filterAndNotify
       }
-    }.run
+    }.execute
   }
   
   private def filterStatuses {
