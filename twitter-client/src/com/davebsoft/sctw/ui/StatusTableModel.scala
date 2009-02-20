@@ -81,7 +81,20 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   
   private def loadData {
     new SwingWorker[NodeSeq, Object] {
-      def doInBackground = statusDataProvider.loadTwitterStatusData()
+      def doInBackground = statusDataProvider.loadTwitterStatusData
+      override def done = {
+        for (st <- get.reverse) {
+          statuses = statuses ::: List(st)
+        }
+        filterAndNotify
+      }
+    }.execute
+  }
+  
+  def loadLastSet {
+    clear
+    new SwingWorker[NodeSeq, Object] {
+      def doInBackground = statusDataProvider.loadLastSet
       override def done = {
         for (st <- get.reverse) {
           statuses = statuses ::: List(st)

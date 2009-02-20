@@ -4,7 +4,7 @@ import _root_.com.davebsoft.sctw.util.PopupListener
 import java.awt.event.{ActionListener, ActionEvent}
 import javax.swing.{JMenu, JMenuItem, JPopupMenu}
 import scala.swing._
-import filter.tagsRepository
+import filter.TagsRepos
 
 /**
  * Displays friend and public statuses
@@ -42,6 +42,16 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
       }
     });
     contents += comboBox
+    
+    val lastSetButton = new Button("Last 200") {
+      tooltip = "Loads the last 200 of your “following” tweets"
+    }
+    lastSetButton.peer.addActionListener(new ActionListener() {
+      def actionPerformed(e: ActionEvent) = {
+        statusTableModel.loadLastSet
+      }
+    })
+    contents += lastSetButton
     
     val clearButton = new Button("Clear")
     clearButton.peer.addActionListener(new ActionListener() {
@@ -85,7 +95,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     }
     
     val tagMi = new JMenu("Tag Friend With")
-    for (tag <- tagsRepository.get) {
+    for (tag <- TagsRepos.get) {
       val tagSmi = new JMenuItem(tag)
       tagSmi.addActionListener(tagAl)
       tagMi.add(tagSmi)

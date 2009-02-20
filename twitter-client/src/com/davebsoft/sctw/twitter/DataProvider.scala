@@ -18,7 +18,10 @@ abstract class DataProvider {
    * and return it as XML.
    */
   def loadTwitterData: Node = {
-    val url = getUrl
+    loadTwitterData(getUrl)
+  }
+  
+  def loadTwitterData(url: String): Node = {
     println(url)
     val method = new GetMethod(url)
     val result = httpClient.executeMethod(method)
@@ -31,6 +34,7 @@ abstract class DataProvider {
       method.releaseConnection
       elem
     }
+    
   }
 
   protected def setCredentials(username: String, password: String) {
@@ -49,8 +53,18 @@ abstract class StatusDataProvider extends DataProvider {
   /**
    * Fetches statuses from Twitter.
    */
-  def loadTwitterStatusData(): NodeSeq = {
-    val elem = loadTwitterData
+  def loadTwitterStatusData: NodeSeq = {
+    formatData(loadTwitterData)
+  }
+  
+  /**
+   * Fetches statuses from Twitter.
+   */
+  def loadLastSet: NodeSeq = {
+    formatData(loadTwitterData("http://twitter.com/statuses/friends_timeline.xml?count=200"))
+  }
+  
+  def formatData(elem: Node): NodeSeq = {
     if (elem != null) {
       val statuses = elem \\ "status"
       if (statuses.length > 0) {
