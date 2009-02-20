@@ -9,12 +9,17 @@ import java.io._
 
 object StateRepository {
   private val state = scala.collection.mutable.Map[String, String]()
+  private var loaded = false
   
   def set(key: String, value: String) {
     state += (key -> value)
   }
   
-  def get(key: String) = state(key)
+  def get(key: String, default: String): String = {
+    if (! loaded) 
+      load
+    if (state.contains(key)) state(key) else default
+  }
   
   private def getFile = {
     val homeDir = new File(System.getProperty("user.home"));
@@ -33,16 +38,21 @@ object StateRepository {
   
   def load {
     clear
-    val in = new BufferedReader(new FileReader(getFile))
-    // I don’t like this 1970s “priming read” approach, but my 
-    // while ((line = in.readLine()) != null) from Java didn’t work
-    var line = in.readLine  
-    while (line != null) {
-      val kv = line.split("=")
-      state += (kv(0) -> kv(1))
-      line = in.readLine
+    try {
+      val in = new BufferedReader(new FileReader(getFile))
+      // I don’t like this 1970s “priming read” approach, but my 
+      // while ((line = in.readLine()) != null) from Java didn’t work
+      var line = in.readLine  
+      while (line != null) {
+        val kv = line.split("=")
+        state += (kv(0) -> kv(1))
+        line = in.readLine
+      }
+      in.close
+    } catch {
+      case ex: FileNotFoundException => // Ignore
     }
-    in.close
+    loaded = true
   }
   
   def main(args: Array[String]) { // TODO move this to unit test
@@ -51,6 +61,6 @@ object StateRepository {
     StateRepository.save
     StateRepository.clear
     StateRepository.load
-    println(StateRepository.get("k1"))
+    println(StateRepository.get("k1", null))
   }
 }

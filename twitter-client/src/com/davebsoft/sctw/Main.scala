@@ -1,6 +1,6 @@
 package com.davebsoft.sctw
 
-import _root_.scala.swing.event.{ButtonClicked, SelectionChanged}
+import _root_.scala.swing.event.{ButtonClicked, SelectionChanged, WindowClosing}
 import java.awt.Dimension
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.table.{DefaultTableModel, AbstractTableModel}
@@ -8,8 +8,9 @@ import javax.swing.{SwingUtilities, Timer}
 import java.util.{ArrayList,Collections}
 import scala.swing._
 import scala.xml._
-import twitter.{FriendsDataProvider, FollowersDataProvider, FriendsStatusDataProvider}
+import twitter.{FriendsDataProvider, FollowersDataProvider, TweetsProvider}
 import ui.{StatusTableModel, FiltersPane, StatusPane, FriendsFollowersPane}
+import state.StateRepository
 
 /**
  * “Simple Twitter Client”
@@ -31,13 +32,15 @@ object Main extends SimpleGUIApplication {
    */
   def top = {
   
-    new MainFrame {
+    new Frame {
       title = "Simple Twitter Client"
       
+      var tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
+
       contents = new TabbedPane() {
         preferredSize = new Dimension(800, 600)
         
-        val friendsTableModel = new StatusTableModel(new FriendsStatusDataProvider(username, password))
+        val friendsTableModel = new StatusTableModel(tweetsProvider)
         pages.append(new TabbedPane.Page("Tweets", new StatusPane(friendsTableModel)))
         
         pages.append(new TabbedPane.Page("Following", new FriendsFollowersPane(
@@ -47,6 +50,14 @@ object Main extends SimpleGUIApplication {
             new FollowersDataProvider(username, password))))
         
         pages.append(new TabbedPane.Page("Filters", new FiltersPane(friendsTableModel)))
+      }
+
+      reactions += {
+        case WindowClosing(_) => { 
+          StateRepository.set("highestId", tweetsProvider.getHighestId) 
+          StateRepository.save 
+          System.exit(1) 
+        }
       }
       
       peer.setLocationRelativeTo(null)

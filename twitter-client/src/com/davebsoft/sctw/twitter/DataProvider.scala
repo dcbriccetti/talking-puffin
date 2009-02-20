@@ -42,6 +42,10 @@ abstract class DataProvider {
 abstract class StatusDataProvider extends DataProvider {
   protected var highestId: String = null
   
+  protected def setHighestId(highestId: String) {
+    this.highestId = highestId
+  }
+  
   /**
    * Fetches statuses from Twitter.
    */
@@ -58,11 +62,15 @@ abstract class StatusDataProvider extends DataProvider {
   }
 }
 
-class FriendsStatusDataProvider(username: String, password: String) extends StatusDataProvider {
+class TweetsProvider(username: String, password: String, startingId: String) extends StatusDataProvider {
   setCredentials(username, password)
+  if (startingId != null) 
+    setHighestId(startingId)
   
-  def getUrl() = "http://twitter.com/statuses/friends_timeline.xml" +
+  def getUrl = "http://twitter.com/statuses/friends_timeline.xml" +
       (if (highestId == null) "?count=200" else "?since_id=" + highestId)
+  
+  def getHighestId = highestId
 }
 
 abstract class FriendsFollowersDataProvider(username: String, password: String) extends DataProvider {
