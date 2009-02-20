@@ -5,5 +5,6 @@ package com.davebsoft.sctw.filter
  * @author Dave Briccetti
  */
 object tagsRepository {
-  def get = List("Important", "Chatty", "Family", "Friend", "Work")
+  def get = List("Important", "Medium Priority", "Low Priority", "Family", "Friend", "Work",
+    "Group1", "Group2", "Group3")
 }
