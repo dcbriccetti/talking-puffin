@@ -10,7 +10,7 @@ import scala.swing._
 import scala.xml._
 import twitter.{FriendsDataProvider, FollowersDataProvider, TweetsProvider}
 import ui.{StatusTableModel, FiltersPane, StatusPane, FriendsFollowersPane, LoginDialog}
-import filter.tagUsers
+import filter.TagUsersX
 import state.StateRepository
 
 /**
@@ -36,7 +36,7 @@ object Main extends SimpleGUIApplication {
     new Frame {
       title = "Simple Twitter Client"
 
-      tagUsers.load
+      TagUsersX.load
       
       val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
 
@@ -59,7 +59,7 @@ object Main extends SimpleGUIApplication {
         case WindowClosing(_) => { 
           StateRepository.set("highestId", tweetsProvider.getHighestId) 
           StateRepository.save
-          tagUsers.save
+          TagUsersX.save
           System.exit(1) 
         }
       }

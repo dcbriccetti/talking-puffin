@@ -15,7 +15,7 @@ case class TagUser(tag: String, userId: String)
 /**
  * A set of tag -> user pairings
  */
-object tagUsers {
+object TagUsersX {
   private val tagUsers = Set[TagUser]()
   
   def add(tagUser: TagUser) {

@@ -47,7 +47,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   
   def tagSelectedUsers(rows: Array[int], tag: String) {
     for (id <- getUserIds(rows)) {
-      filter.tagUsers.add(new TagUser(tag, id))
+      filter.TagUsersX.add(new TagUser(tag, id))
     }
   }
 
@@ -119,7 +119,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   private def tagFiltersInclude(id: String): Boolean = {
     if (selectedTags.length == 0) true else {
       for (tag <- selectedTags) {
-        if (filter.tagUsers.contains(new TagUser(tag, id))) {
+        if (filter.TagUsersX.contains(new TagUser(tag, id))) {
           return true
         }
       }
