@@ -1,6 +1,7 @@
 package com.davebsoft.sctw.state
 
 import java.io._
+import scala.io._
 
 /**
  * Stores application state
@@ -39,16 +40,8 @@ object StateRepository {
   def load {
     clear
     try {
-      val in = new BufferedReader(new FileReader(getFile))
-      // I don’t like this 1970s “priming read” approach, but my 
-      // while ((line = in.readLine()) != null) from Java didn’t work
-      var line = in.readLine  
-      while (line != null) {
-        val kv = line.split("=")
-        state += (kv(0) -> kv(1))
-        line = in.readLine
-      }
-      in.close
+      val src = Source.fromFile(getFile)  
+      src.getLines.map(_.split("=")).foreach((kv) => state += kv(0) -> kv(1).trim)  
     } catch {
       case ex: FileNotFoundException => // Ignore
     }
