@@ -4,7 +4,7 @@ import _root_.com.davebsoft.sctw.util.PopupListener
 import java.awt.event.{ActionListener, ActionEvent}
 import javax.swing.{JMenu, JMenuItem, JPopupMenu}
 import scala.swing._
-import filter.TagsRepos
+import filter.TagsRepository
 
 /**
  * Displays friend and public statuses
@@ -95,7 +95,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     }
     
     val tagMi = new JMenu("Tag Friend With")
-    for (tag <- TagsRepos.get) {
+    for (tag <- TagsRepository.get) {
       val tagSmi = new JMenuItem(tag)
       tagSmi.addActionListener(tagAl)
       tagMi.add(tagSmi)

@@ -1,7 +1,7 @@
 package com.davebsoft.sctw.ui
 
 import _root_.scala.swing.{ListView, Label, GridBagPanel, ScrollPane}
-import filter.TagsRepos
+import filter.TagsRepository
 import java.awt.Dimension
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 /**
@@ -13,7 +13,7 @@ class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
   add(new Label("Tags"), new Constraints {gridx=0; gridy=0})
   add(new ScrollPane {
     preferredSize = new Dimension(100, 200)
-    val listView = new ListView(TagsRepos.get)
+    val listView = new ListView(TagsRepository.get)
     val selModel = listView.peer.getSelectionModel
     selModel.addListSelectionListener(new ListSelectionListener(){
       def valueChanged(e: ListSelectionEvent) = {
