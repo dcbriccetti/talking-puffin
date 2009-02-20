@@ -9,7 +9,7 @@ import java.util.{ArrayList,Collections}
 import scala.swing._
 import scala.xml._
 import twitter.{FriendsDataProvider, FollowersDataProvider, TweetsProvider}
-import ui.{StatusTableModel, FiltersPane, StatusPane, FriendsFollowersPane}
+import ui.{StatusTableModel, FiltersPane, StatusPane, FriendsFollowersPane, LoginDialog}
 import state.StateRepository
 
 /**
@@ -68,9 +68,15 @@ object Main extends SimpleGUIApplication {
     if (args.length >= 2) {
       username = args(0)
       password = args(1)
+    } else if (LoginDialog.display) {
+      username = LoginDialog.username
+      password = LoginDialog.password
+    }
+    if (username.length > 0 && password.length > 0) {
       super.main(args)
     } else {
       println("Missing username and password")
+      System.exit(1)
     }
   }
 }
