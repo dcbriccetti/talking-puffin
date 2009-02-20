@@ -82,12 +82,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   private def loadData {
     new SwingWorker[NodeSeq, Object] {
       def doInBackground = statusDataProvider.loadTwitterStatusData
-      override def done = {
-        for (st <- get.reverse) {
-          statuses = statuses ::: List(st)
-        }
-        filterAndNotify
-      }
+      override def done = processStatuses(get)
     }.execute
   }
   
@@ -95,13 +90,15 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
     clear
     new SwingWorker[NodeSeq, Object] {
       def doInBackground = statusDataProvider.loadLastSet
-      override def done = {
-        for (st <- get.reverse) {
-          statuses = statuses ::: List(st)
-        }
-        filterAndNotify
-      }
+      override def done = processStatuses(get)
     }.execute
+  }
+  
+  private def processStatuses(newStatuses: NodeSeq) {
+    for (st <- newStatuses.reverse) {
+      statuses = statuses ::: List(st)
+    }
+    filterAndNotify
   }
   
   private def filterStatuses {
