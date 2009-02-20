@@ -78,15 +78,19 @@ abstract class FriendsFollowersDataProvider(username: String, password: String) 
   
   def getUserNames: List[String] = {
     val elem = loadTwitterData
-    val users = elem \ "user"
-    var userNames = List[String]()
+    if (elem == null) {
+      List[String]()
+    } else {
+      val users = elem \ "user"
+      var userNames = List[String]()
+      
+      for (user <- users) {
+        val userName = user \ "name"
+        userNames ::= userName.text
+      }
     
-    for (user <- users) {
-      val userName = user \ "name"
-      userNames ::= userName.text
+      userNames.sort((a,b) => (a.toLowerCase compareTo b.toLowerCase) < 0)
     }
-  
-    userNames.sort((a,b) => (a.toLowerCase compareTo b.toLowerCase) < 0)
   }
 }
 
