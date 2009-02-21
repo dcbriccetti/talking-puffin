@@ -20,7 +20,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     val colModel = table.getColumnModel
     colModel.getColumn(0).setPreferredWidth(100)
     colModel.getColumn(0).setMaxWidth(200)
-    colModel.getColumn(1).setPreferredWidth(50)
+    colModel.getColumn(1).setPreferredWidth(60)
     colModel.getColumn(1).setMaxWidth(100)
     colModel.getColumn(2).setPreferredWidth(600)
     val col = colModel.getColumn(0);

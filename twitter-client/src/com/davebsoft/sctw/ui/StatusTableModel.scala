@@ -64,9 +64,23 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
     filterAndNotify
   }
   
-  private def dateToAgeSeconds(date: String) : java.lang.Long = {
+  private def dateToAgeSeconds(date: String) : java.lang.String = {
     val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy")
-    (new Date().getTime - df.parse(date).getTime) / 1000
+    val time = (new Date().getTime - df.parse(date).getTime) / 1000
+    val days = time / 86400
+    val hours = (time / 3600) - (days * 24)
+    val mins = (time / 60) - (days * 1440) - (hours * 60)
+    val seconds = time % 60
+    val sb = new StringBuilder
+    if (days > 0) sb.append(twoDigitNum(days)).append(":")
+    if (hours > 0) sb.append(twoDigitNum(hours)).append(":")
+    if (mins > 0) sb.append(twoDigitNum(mins)).append(":")
+    sb.append(twoDigitNum(seconds))
+    sb.toString
+  }
+  
+  private def twoDigitNum(num: java.lang.Long): String = {
+    String.format("%02d", num)
   }
   
   private def getUserIds(rows: Array[int]): List[String] = {
