@@ -81,8 +81,8 @@ class TweetsProvider(username: String, password: String, startingId: String) ext
   if (startingId != null) 
     setHighestId(startingId)
   
-  def getUrl = "http://twitter.com/statuses/friends_timeline.xml" +
-      (if (highestId == null) "?count=200" else "?since_id=" + highestId)
+  def getUrl = "http://twitter.com/statuses/friends_timeline.xml?count=200" +
+      (if (highestId == null) "" else "&since_id=" + highestId)
   
   def getHighestId = highestId
 }
