@@ -7,8 +7,6 @@ in the same. But now the product, a simple Twitter client, has become useful.
 
 ## To do
 
-- Persist configuration data
-- When starting, resume where user left off
 - More filtering
   Followers/Non-followers (@vdichev)
 - Change code to the Scala way of doing things
