@@ -1,8 +1,10 @@
 package com.davebsoft.sctw.ui
 
 import _root_.com.davebsoft.sctw.util.PopupListener
+import _root_.scala.xml.{NodeSeq, Node}
 import java.awt.event.{ActionListener, ActionEvent}
-import javax.swing.{JMenu, JMenuItem, JPopupMenu}
+import javax.swing._
+import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import scala.swing._
 import filter.TagsRepository
 
@@ -10,22 +12,23 @@ import filter.TagsRepository
  * Displays friend and public statuses
  */
 class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
-  var table: Table = null
+  var table: JTable = null
   var unmuteButton: Button = null
   
   add(new ScrollPane {
-    table = new Table() {
-      model = statusTableModel
-      val colModel = peer.getColumnModel
-      colModel.getColumn(0).setPreferredWidth(100)
-      colModel.getColumn(0).setMaxWidth(200)
-      colModel.getColumn(1).setPreferredWidth(50)
-      colModel.getColumn(1).setMaxWidth(100)
-      colModel.getColumn(2).setPreferredWidth(600)
-    }
+    table = new JTable(statusTableModel)
+    val colModel = table.getColumnModel
+    colModel.getColumn(0).setPreferredWidth(100)
+    colModel.getColumn(0).setMaxWidth(200)
+    colModel.getColumn(1).setPreferredWidth(50)
+    colModel.getColumn(1).setMaxWidth(100)
+    colModel.getColumn(2).setPreferredWidth(600)
+    val col = colModel.getColumn(0);
+    col.setCellRenderer(new CellRenderer);
+    
     // TODO convert this to scala.swing way
-    table.peer.addMouseListener(new PopupListener(table.peer, getPopupMenu));
-    contents = table
+    table.addMouseListener(new PopupListener(table, getPopupMenu));
+    peer.setViewportView(table)
   }, new Constraints{
     gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
@@ -80,7 +83,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     val mi = new JMenuItem("Mute")
     mi.addActionListener(new ActionListener() {
       def actionPerformed(e: ActionEvent) = {
-        val rows = table.peer.getSelectedRows
+        val rows = table.getSelectedRows
         statusTableModel.muteSelectedUsers(rows)
         unmuteButton.enabled = true
       }
@@ -89,7 +92,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
 
     val tagAl = new ActionListener() {
       def actionPerformed(e: ActionEvent) = {
-        val rows = table.peer.getSelectedRows
+        val rows = table.getSelectedRows
         statusTableModel.tagSelectedUsers(rows, e.getActionCommand)
       }
     }
@@ -106,3 +109,13 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
   }
 
 }
+
+class CellRenderer extends DefaultTableCellRenderer {
+  override def setValue(value: Any) {
+    val nodes = value.asInstanceOf[NodeSeq]
+    setText((nodes \ "name").text)
+    setToolTipText((nodes \ "screen_name").text + " • " + 
+            (nodes \ "location").text + " • " + (nodes \ "description").text)
+  }
+}
+
