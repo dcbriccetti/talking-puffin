@@ -2,10 +2,11 @@ package com.davebsoft.sctw.ui
 
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.xml.{NodeSeq, Node}
+
 import java.awt.event.{ActionListener, ActionEvent}
 import java.util.Comparator
 import javax.swing._
-import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
+import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
 import filter.TagsRepository
 
@@ -17,19 +18,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
   var unmuteButton: Button = null
   
   add(new ScrollPane {
-    table = new JTable(statusTableModel)
-    table.setAutoCreateRowSorter(true)
-    val colModel = table.getColumnModel
-    colModel.getColumn(0).setPreferredWidth(60)
-    colModel.getColumn(0).setMaxWidth(100)
-    colModel.getColumn(0).setCellRenderer(new AgeCellRenderer);
-    colModel.getColumn(1).setPreferredWidth(100)
-    colModel.getColumn(1).setMaxWidth(200)
-    colModel.getColumn(1).setCellRenderer(new NameCellRenderer);
-    colModel.getColumn(2).setPreferredWidth(600)
-    
-    // TODO convert this to scala.swing way
-    table.addMouseListener(new PopupListener(table, getPopupMenu));
+    table = buildTable    
     peer.setViewportView(table)
   }, new Constraints{
     gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
@@ -116,5 +105,28 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
       smi ::= table.convertRowIndexToModel(tableRows(i))
     }
     smi
+  }
+  
+  private def buildTable: JTable = {
+    val table = new JTable(statusTableModel)
+    val sorter = new TableRowSorter[StatusTableModel](statusTableModel);
+    sorter.setComparator(1, new Comparator[NodeSeq] {
+      def compare(o1: NodeSeq, o2: NodeSeq) = 
+        (o1 \ "name").text compareTo (o2 \ "name").text
+    });
+    table.setRowSorter(sorter);
+
+    val colModel = table.getColumnModel
+    colModel.getColumn(0).setPreferredWidth(60)
+    colModel.getColumn(0).setMaxWidth(100)
+    colModel.getColumn(0).setCellRenderer(new AgeCellRenderer);
+    colModel.getColumn(1).setPreferredWidth(100)
+    colModel.getColumn(1).setMaxWidth(200)
+    colModel.getColumn(1).setCellRenderer(new NameCellRenderer);
+    colModel.getColumn(2).setPreferredWidth(600)
+
+    table.addMouseListener(new PopupListener(table, getPopupMenu));
+    
+    table
   }
 }
