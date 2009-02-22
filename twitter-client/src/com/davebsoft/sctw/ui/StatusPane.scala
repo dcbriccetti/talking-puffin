@@ -142,7 +142,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
           var uri = "http://twitter.com/" +
                   (status \ "user" \ "screen_name").text + "/statuses/" +
                   (status \ "id").text
-          println(uri)
           if (Desktop.isDesktopSupported) {
             Desktop.getDesktop.browse(new URI(uri))
           }
