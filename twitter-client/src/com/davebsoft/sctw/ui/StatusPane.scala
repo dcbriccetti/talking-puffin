@@ -3,7 +3,9 @@ package com.davebsoft.sctw.ui
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.xml.{NodeSeq, Node}
 
-import java.awt.event.{ActionListener, ActionEvent}
+import java.awt.Desktop
+import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
+import java.net.URI
 import java.util.Comparator
 import javax.swing._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
@@ -117,15 +119,36 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     table.setRowSorter(sorter);
 
     val colModel = table.getColumnModel
-    colModel.getColumn(0).setPreferredWidth(60)
-    colModel.getColumn(0).setMaxWidth(100)
-    colModel.getColumn(0).setCellRenderer(new AgeCellRenderer);
-    colModel.getColumn(1).setPreferredWidth(100)
-    colModel.getColumn(1).setMaxWidth(200)
-    colModel.getColumn(1).setCellRenderer(new NameCellRenderer);
-    colModel.getColumn(2).setPreferredWidth(600)
+    
+    val ageCol = colModel.getColumn(0)
+    ageCol.setPreferredWidth(60)
+    ageCol.setMaxWidth(100)
+    ageCol.setCellRenderer(new AgeCellRenderer);
+    
+    val nameCol = colModel.getColumn(1)
+    nameCol.setPreferredWidth(100)
+    nameCol.setMaxWidth(200)
+    nameCol.setCellRenderer(new NameCellRenderer);
+    
+    val statusCol = colModel.getColumn(2)
+    statusCol.setPreferredWidth(600)
 
     table.addMouseListener(new PopupListener(table, getPopupMenu));
+    table.addMouseListener(new MouseAdapter {
+      override def mouseClicked(e: MouseEvent) = {
+        if (e.getClickCount == 2) {
+          val status = statusTableModel.getStatusAt(table.convertRowIndexToModel(
+            table.getSelectedRow))
+          var uri = "http://twitter.com/" +
+                  (status \ "user" \ "screen_name").text + "/statuses/" +
+                  (status \ "id").text
+          println(uri)
+          if (Desktop.isDesktopSupported) {
+            Desktop.getDesktop.browse(new URI(uri))
+          }
+        }
+      }
+    });
     
     table
   }

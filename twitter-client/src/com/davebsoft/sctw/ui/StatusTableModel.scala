@@ -34,6 +34,10 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
       case 2 => (status \ "text").text 
     }
   }
+  
+  def getStatusAt(rowIndex: Int): NodeSeq = {
+    filteredStatuses.get(rowIndex)
+  }
 
   override def getColumnClass(columnIndex: Int) = {
     columnIndex match {
