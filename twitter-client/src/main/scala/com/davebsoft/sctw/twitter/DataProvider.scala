@@ -90,7 +90,25 @@ class TweetsProvider(username: String, password: String, startingId: String) ext
 abstract class FriendsFollowersDataProvider(username: String, password: String) extends DataProvider {
   setCredentials(username, password)
   
+  def getUsers: List[Node] = {
+    val elem = loadTwitterData
+    if (elem == null) {
+      List[Node]()
+    } else {
+      val users = elem \ "user"
+      var usersList = List[Node]()
+      
+      for (user <- users) {
+        usersList ::= user
+      }
+    
+      usersList.sort((a,b) => ((a \ "name").text.toLowerCase compareTo 
+              (b \ "name").text.toLowerCase) < 0)
+    }
+  }
+  
   def getUserNames: List[String] = {
+    // TODO call getUsers instead of duplicating this code
     val elem = loadTwitterData
     if (elem == null) {
       List[String]()
