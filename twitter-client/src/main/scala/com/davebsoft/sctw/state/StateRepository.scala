@@ -47,13 +47,4 @@ object StateRepository {
     }
     loaded = true
   }
-  
-  def main(args: Array[String]) { // TODO move this to unit test
-    StateRepository.set("k1", "v1")
-    StateRepository.set("k2", "v2")
-    StateRepository.save
-    StateRepository.clear
-    StateRepository.load
-    println(StateRepository.get("k1", null))
-  }
 }
