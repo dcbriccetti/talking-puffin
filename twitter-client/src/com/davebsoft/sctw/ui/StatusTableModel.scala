@@ -19,7 +19,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
   private val mutedIds = scala.collection.mutable.Set[String]()
   private var selectedTags = List[String]()
-  private val colNames = List("Name", "Age", "Status")
+  private val colNames = List("Age", "Name", "Status")
   private var timer: Timer = null
   
   def getColumnCount = 3
@@ -29,21 +29,21 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val status = filteredStatuses.get(rowIndex)
     columnIndex match {
-      case 0 => status \ "user"
-      case 1 => dateToAgeSeconds((status \ "created_at").text) 
+      case 0 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
+      case 1 => status \ "user"
       case 2 => (status \ "text").text 
     }
   }
 
   override def getColumnClass(columnIndex: Int) = {
     columnIndex match {
-      case 0 => classOf[NodeSeq]
-      case 1 => classOf[String] 
+      case 0 => classOf[java.lang.Long]
+      case 1 => classOf[NodeSeq]
       case 2 => classOf[String] 
     }
   }
 
-  def muteSelectedUsers(rows: Array[int]) {
+  def muteSelectedUsers(rows: List[Int]) {
     mutedIds ++= getUserIds(rows)
     filterAndNotify
   }
@@ -53,7 +53,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
     filterAndNotify
   }
   
-  def tagSelectedUsers(rows: Array[int], tag: String) {
+  def tagSelectedUsers(rows: List[Int], tag: String) {
     for (id <- getUserIds(rows)) {
       filter.TagUsers.add(new TagUser(tag, id))
     }
@@ -64,26 +64,12 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
     filterAndNotify
   }
   
-  private def dateToAgeSeconds(date: String) : java.lang.String = {
+  private def dateToAgeSeconds(date: String): Long = {
     val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy")
-    val time = (new Date().getTime - df.parse(date).getTime) / 1000
-    val days = time / 86400
-    val hours = (time / 3600) - (days * 24)
-    val mins = (time / 60) - (days * 1440) - (hours * 60)
-    val seconds = time % 60
-    val sb = new StringBuilder
-    if (days > 0) sb.append(twoDigitNum(days)).append(":")
-    if (hours > 0) sb.append(twoDigitNum(hours)).append(":")
-    if (mins > 0) sb.append(twoDigitNum(mins)).append(":")
-    sb.append(twoDigitNum(seconds))
-    sb.toString
+    (new Date().getTime - df.parse(date).getTime) / 1000
   }
   
-  private def twoDigitNum(num: java.lang.Long): String = {
-    String.format("%02d", num)
-  }
-  
-  private def getUserIds(rows: Array[int]): List[String] = {
+  private def getUserIds(rows: List[Int]): List[String] = {
     var ids = List[String]()
     for (i <- rows) {
       val status = filteredStatuses.get(i)

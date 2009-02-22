@@ -3,6 +3,7 @@ package com.davebsoft.sctw.ui
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.xml.{NodeSeq, Node}
 import java.awt.event.{ActionListener, ActionEvent}
+import java.util.Comparator
 import javax.swing._
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import scala.swing._
@@ -17,14 +18,15 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
   
   add(new ScrollPane {
     table = new JTable(statusTableModel)
+    table.setAutoCreateRowSorter(true)
     val colModel = table.getColumnModel
-    colModel.getColumn(0).setPreferredWidth(100)
-    colModel.getColumn(0).setMaxWidth(200)
-    colModel.getColumn(1).setPreferredWidth(60)
-    colModel.getColumn(1).setMaxWidth(100)
+    colModel.getColumn(0).setPreferredWidth(60)
+    colModel.getColumn(0).setMaxWidth(100)
+    colModel.getColumn(0).setCellRenderer(new AgeCellRenderer);
+    colModel.getColumn(1).setPreferredWidth(100)
+    colModel.getColumn(1).setMaxWidth(200)
+    colModel.getColumn(1).setCellRenderer(new NameCellRenderer);
     colModel.getColumn(2).setPreferredWidth(600)
-    val col = colModel.getColumn(0);
-    col.setCellRenderer(new CellRenderer);
     
     // TODO convert this to scala.swing way
     table.addMouseListener(new PopupListener(table, getPopupMenu));
@@ -83,8 +85,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     val mi = new JMenuItem("Mute")
     mi.addActionListener(new ActionListener() {
       def actionPerformed(e: ActionEvent) = {
-        val rows = table.getSelectedRows
-        statusTableModel.muteSelectedUsers(rows)
+        statusTableModel.muteSelectedUsers(getSelectedModelIndexes)
         unmuteButton.enabled = true
       }
     })
@@ -92,10 +93,10 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
 
     val tagAl = new ActionListener() {
       def actionPerformed(e: ActionEvent) = {
-        val rows = table.getSelectedRows
-        statusTableModel.tagSelectedUsers(rows, e.getActionCommand)
+        statusTableModel.tagSelectedUsers(getSelectedModelIndexes, e.getActionCommand)
       }
     }
+    
     
     val tagMi = new JMenu("Tag Friend With")
     for (tag <- TagsRepository.get) {
@@ -108,14 +109,12 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     menu
   }
 
-}
-
-class CellRenderer extends DefaultTableCellRenderer {
-  override def setValue(value: Any) {
-    val nodes = value.asInstanceOf[NodeSeq]
-    setText((nodes \ "name").text)
-    setToolTipText((nodes \ "screen_name").text + " • " + 
-            (nodes \ "location").text + " • " + (nodes \ "description").text)
+  private def getSelectedModelIndexes: List[Int] = {
+    val tableRows = table.getSelectedRows
+    var smi = List[Int]()
+    for (i <- 0 to (tableRows.length - 1)) {
+      smi ::= table.convertRowIndexToModel(tableRows(i))
+    }
+    smi
   }
 }
-
