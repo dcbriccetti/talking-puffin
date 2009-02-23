@@ -106,24 +106,6 @@ abstract class FriendsFollowersDataProvider(username: String, password: String) 
               (b \ "name").text.toLowerCase) < 0)
     }
   }
-  
-  def getUserNames: List[String] = {
-    // TODO call getUsers instead of duplicating this code
-    val elem = loadTwitterData
-    if (elem == null) {
-      List[String]()
-    } else {
-      val users = elem \ "user"
-      var userNames = List[String]()
-      
-      for (user <- users) {
-        val userName = user \ "name"
-        userNames ::= userName.text
-      }
-    
-      userNames.sort((a,b) => (a.toLowerCase compareTo b.toLowerCase) < 0)
-    }
-  }
 }
 
 class FriendsDataProvider(username: String, password: String) 

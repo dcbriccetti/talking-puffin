@@ -16,9 +16,6 @@ import state.StateRepository
 /**
  * “Simple Twitter Client”
  * 
- * Written to learn and teach Scala and the Twitter API, probably not
- * to create a real Twitter client.
- * 
  * Your feedback is welcome!
  * 
  * @Author Dave Briccetti, daveb@davebsoft.com, @dcbriccetti
@@ -46,11 +43,10 @@ object Main extends SimpleGUIApplication {
         val friendsTableModel = new StatusTableModel(tweetsProvider)
         pages.append(new TabbedPane.Page("Tweets", new StatusPane(friendsTableModel)))
         
-        pages.append(new TabbedPane.Page("Following", new FriendsFollowersPane(
-            new FriendsDataProvider(username, password))))
-        
-        pages.append(new TabbedPane.Page("Followers", new FriendsFollowersPane(
-            new FollowersDataProvider(username, password))))
+        val following = new FriendsDataProvider(username, password).getUsers
+        val followers = new FollowersDataProvider(username, password).getUsers
+        pages.append(new TabbedPane.Page("Following", new FriendsFollowersPane(following, getIds(followers))))
+        pages.append(new TabbedPane.Page("Followers", new FriendsFollowersPane(followers, getIds(following))))
         
         pages.append(new TabbedPane.Page("Filters", new FiltersPane(friendsTableModel)))
       }
@@ -66,6 +62,10 @@ object Main extends SimpleGUIApplication {
       
       peer.setLocationRelativeTo(null)
     }
+  }
+  
+  private def getIds(users: List[Node]): List[String] = {
+    users map (u => (u \ "id").text) 
   }
     
   override def main(args: Array[String]): Unit = {
