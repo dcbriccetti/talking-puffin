@@ -132,9 +132,20 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     
     val statusCol = colModel.getColumn(2)
     statusCol.setPreferredWidth(600)
+    statusCol.setCellRenderer(new StatusCellRenderer);
 
     table.addMouseListener(new PopupListener(table, getPopupMenu));
+    table.addMouseMotionListener(new MouseAdapter {
+      override def mouseMoved(e: MouseEvent) = sendEventToRenderer(e)
+    })
     table.addMouseListener(new MouseAdapter {
+      override def mouseClicked(e: MouseEvent) = sendEventToRenderer(e)
+      override def mousePressed(e: MouseEvent) = sendEventToRenderer(e)
+      override def mouseReleased(e: MouseEvent) = sendEventToRenderer(e)
+    })
+    table.addMouseListener(new MouseAdapter {
+      override def mouseEntered(e: MouseEvent) = println(e)
+
       override def mouseClicked(e: MouseEvent) = {
         if (e.getClickCount == 2) {
           val status = statusTableModel.getStatusAt(table.convertRowIndexToModel(
@@ -147,8 +158,23 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
           }
         }
       }
-    });
-    
+    })
+
     table
+  }
+  
+  private def sendEventToRenderer(e: MouseEvent) {
+    val c = table.columnAtPoint(e.getPoint)
+    val r = table.rowAtPoint(e.getPoint)
+    if (c != -1 && r != -1) {
+      val renderer = table.getCellRenderer(r, c)
+      renderer match {
+        case fcr: StatusCellFancyRenderer => {
+          println("Renderer at " + e.getPoint + ": " + renderer)
+          fcr.text.dispatchEvent(SwingUtilities.convertMouseEvent(table, e, fcr.text))
+        }
+        case _ =>
+      }
+    }
   }
 }
