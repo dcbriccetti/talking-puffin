@@ -6,8 +6,7 @@ import java.awt.event.{ActionEvent, ActionListener}
 import java.util.{Collections, Date, ArrayList}
 import javax.swing.{SwingWorker, Timer}
 import javax.swing.table.{DefaultTableModel, AbstractTableModel}
-import twitter.StatusDataProvider
-
+import twitter.{DataFetchException, StatusDataProvider}
 /**
  * Model providing status data to the JTable
  */
@@ -92,9 +91,23 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   }
   
   private def loadData {
-    new SwingWorker[NodeSeq, Object] {
-      def doInBackground = statusDataProvider.loadTwitterStatusData
-      override def done = processStatuses(get)
+    new SwingWorker[Option[NodeSeq], Object] {
+      override def doInBackground: Option[NodeSeq] = {
+        try {
+          return Some(statusDataProvider.loadTwitterStatusData)
+        } catch {
+          case ex: DataFetchException => {
+            println(ex.response)
+            return None
+          }
+        }
+      }
+      override def done = {
+        get match {
+          case Some(statuses) => processStatuses(statuses)
+          case None => // Ignore
+        }
+      }
     }.execute
   }
   

@@ -6,6 +6,8 @@ import scala.xml._
 import javax.swing.table.AbstractTableModel
 import org.apache.commons.httpclient.methods.GetMethod
 
+case class DataFetchException(val code: Int, val response: String) extends Exception
+  
 /**
  * A provider of Twitter data
  */
@@ -25,16 +27,14 @@ abstract class DataProvider {
     println(url)
     val method = new GetMethod(url)
     val result = httpClient.executeMethod(method)
+    val responseBody = method.getResponseBodyAsString()
+    method.releaseConnection
+
     if (result != 200) {
-      println("Result: " + result)
-      println(method.getResponseBodyAsString())
-      null
+      throw new DataFetchException(result, responseBody)
     } else {
-      val elem = XML.load(method.getResponseBodyAsStream())
-      method.releaseConnection
-      elem
+      XML.loadString(responseBody)
     }
-    
   }
 
   protected def setCredentials(username: String, password: String) {
