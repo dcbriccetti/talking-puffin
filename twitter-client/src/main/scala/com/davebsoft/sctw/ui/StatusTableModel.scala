@@ -72,14 +72,8 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
     (new Date().getTime - df.parse(date).getTime) / 1000
   }
   
-  private def getUserIds(rows: List[Int]): List[String] = {
-    var ids = List[String]()
-    for (i <- rows) {
-      val status = filteredStatuses.get(i)
-      ids ::= (status \ "user" \ "id").text
-    }
-    ids
-  }
+  private def getUserIds(rows: List[Int]): List[String] = 
+    rows.map(i => (filteredStatuses.get(i)\ "user" \ "id").text)
   
   private def createLoadTimer {
     timer = new Timer(updateFrequency, new ActionListener() {
