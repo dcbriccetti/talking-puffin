@@ -17,4 +17,4 @@ in the same. But now the product, a simple Twitter client, has become useful.
 
 Thanks to the people helping me, including:
 
-@michaelg, @bjartek, @vdichev, @jorgeortiz85, @stevej
+@michaelg, @bjartek, @vdichev, @jorgeortiz85, @stevej, @crichardson
