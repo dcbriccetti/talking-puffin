@@ -144,8 +144,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
       override def mouseReleased(e: MouseEvent) = sendEventToRenderer(e)
     })
     table.addMouseListener(new MouseAdapter {
-      override def mouseEntered(e: MouseEvent) = println(e)
-
       override def mouseClicked(e: MouseEvent) = {
         if (e.getClickCount == 2) {
           val status = statusTableModel.getStatusAt(table.convertRowIndexToModel(

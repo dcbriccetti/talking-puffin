@@ -41,8 +41,6 @@ class StatusCellFancyRenderer extends TableCellRenderer {
   });
   text.addMouseListener(new MouseAdapter{
     override def mouseClicked(e: MouseEvent) = {
-      println("FR: " + e)
-      println("HLL: " + text.getHyperlinkListeners)
     }
     
   });
