@@ -3,9 +3,9 @@ package com.davebsoft.sctw.ui
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.xml.{NodeSeq, Node}
 
-import java.awt.Desktop
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
-import java.net.URI
+import java.awt.{Desktop, Dimension}
+import java.net.{URI, URL}
 import java.util.Comparator
 import javax.swing._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
@@ -18,6 +18,8 @@ import filter.TagsRepository
 class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
   var table: JTable = null
   var unmuteButton: Button = null
+  var showingUrl: String = null
+  var picLabel: Label = null
   
   add(new ScrollPane {
     table = buildTable    
@@ -27,6 +29,9 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
   })
   
   add(new FlowPanel {
+    picLabel = new Label
+    contents += picLabel
+
     contents += new Label("Refresh (secs)")
     val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
     var defaultRefresh = 120
@@ -136,7 +141,10 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
 
     table.addMouseListener(new PopupListener(table, getPopupMenu));
     table.addMouseMotionListener(new MouseAdapter {
-      override def mouseMoved(e: MouseEvent) = sendEventToRenderer(e)
+      override def mouseMoved(e: MouseEvent) = {
+        sendEventToRenderer(e)
+        doCustomTooltip(e)
+      }
     })
     table.addMouseListener(new MouseAdapter {
       override def mouseClicked(e: MouseEvent) = sendEventToRenderer(e)
@@ -172,6 +180,22 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
           fcr.text.dispatchEvent(SwingUtilities.convertMouseEvent(table, e, fcr.text))
         }
         case _ =>
+      }
+    }
+  }
+
+  private def doCustomTooltip(e: MouseEvent) {
+    val c = table.columnAtPoint(e.getPoint)
+    val r = table.rowAtPoint(e.getPoint)
+    if (c == 1 && r != -1) {
+      val user = statusTableModel.getValueAt(r, 1).asInstanceOf[NodeSeq]
+      val picUrl = (user \ "profile_image_url").text
+      if (! picUrl.equals(showingUrl)) {
+        showingUrl = picUrl
+        val u = new URL(picUrl)
+        val icon = new ImageIcon(u)
+        picLabel.peer.setIcon(icon)
+        println("got " + picUrl)
       }
     }
   }
