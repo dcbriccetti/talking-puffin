@@ -188,7 +188,8 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     val c = table.columnAtPoint(e.getPoint)
     val r = table.rowAtPoint(e.getPoint)
     if (c == 1 && r != -1) {
-      val user = statusTableModel.getValueAt(r, 1).asInstanceOf[NodeSeq]
+      val user = statusTableModel.getValueAt(
+        table.convertRowIndexToModel(r), 1).asInstanceOf[NodeSeq]
       val picUrl = (user \ "profile_image_url").text
       if (! picUrl.equals(showingUrl)) {
         showingUrl = picUrl
