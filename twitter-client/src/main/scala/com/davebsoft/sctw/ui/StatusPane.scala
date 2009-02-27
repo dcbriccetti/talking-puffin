@@ -173,7 +173,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
       println("got " + picUrl)
     }
     userDescription.text = (user \ "screen_name").text + " • " +
-            (user \ "location").text + "\n" + (user \ "description").text
+            (user \ "location").text + " • " + (user \ "description").text
     largeTweet.text = (status \ "text").text
   }
   
