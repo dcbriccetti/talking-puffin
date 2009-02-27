@@ -12,8 +12,6 @@ class NameCellRenderer extends DefaultTableCellRenderer {
   override def setValue(value: Any) {
     val nodes = value.asInstanceOf[NodeSeq]
     setText((nodes \ "name").text)
-    setToolTipText((nodes \ "screen_name").text + " • " + 
-            (nodes \ "location").text + " • " + (nodes \ "description").text)
   }
 }
 

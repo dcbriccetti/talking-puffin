@@ -4,10 +4,11 @@ import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.xml.{NodeSeq, Node}
 
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
-import java.awt.{Desktop, Dimension}
+import java.awt.{Desktop, Dimension, Insets, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
 import javax.swing._
+import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
 import filter.TagsRepository
@@ -20,6 +21,8 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
   var unmuteButton: Button = null
   var showingUrl: String = null
   var picLabel: Label = null
+  var userDescription: TextArea = null
+  var largeTweet: TextArea = null
   
   add(new ScrollPane {
     table = buildTable    
@@ -28,51 +31,18 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
   
-  add(new FlowPanel {
-    picLabel = new Label
-    contents += picLabel
-
-    contents += new Label("Refresh (secs)")
-    val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
-    var defaultRefresh = 120
-    comboBox.peer.setSelectedItem(defaultRefresh)
-    statusTableModel.setUpdateFrequency(defaultRefresh)
-    comboBox.peer.addActionListener(new ActionListener(){
-      def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
-        statusTableModel.setUpdateFrequency(comboBox.selection.item)
-      }
-    });
-    contents += comboBox
-    
-    val lastSetButton = new Button("Last 200") {
-      tooltip = "Loads the last 200 of your “following” tweets"
-    }
-    lastSetButton.peer.addActionListener(new ActionListener() {
-      def actionPerformed(e: ActionEvent) = {
-        statusTableModel.loadLastSet
-      }
-    })
-    contents += lastSetButton
-    
-    val clearButton = new Button("Clear")
-    clearButton.peer.addActionListener(new ActionListener() {
-      def actionPerformed(e: ActionEvent) = {
-        statusTableModel.clear
-      }
-    })
-    contents += clearButton
-    
-    unmuteButton = new Button("Unmute All")
-    unmuteButton.peer.addActionListener(new ActionListener() {
-      def actionPerformed(e: ActionEvent) = {
-        statusTableModel.unMuteAll
-        unmuteButton.enabled = false
-      }
-    })
-    unmuteButton.enabled = false
-    contents += unmuteButton
-  }, new Constraints{
+  largeTweet = new TextArea {
+    font = new Font("Serif", Font.PLAIN, 24)
+    lineWrap = true
+    wordWrap = true
+  }
+  add(largeTweet, new Constraints{
+    insets = new Insets(5,1,5,1)
     gridx = 0; gridy = 1; fill = GridBagPanel.Fill.Horizontal;
+  })
+
+  add(new ControlPanel, new Constraints{
+    gridx = 0; gridy = 2; fill = GridBagPanel.Fill.Horizontal;
   })
 
   def getPopupMenu: JPopupMenu = {
@@ -92,7 +62,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
         statusTableModel.tagSelectedUsers(getSelectedModelIndexes, e.getActionCommand)
       }
     }
-    
     
     val tagMi = new JMenu("Tag Friend With")
     for (tag <- TagsRepository.get) {
@@ -143,7 +112,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     table.addMouseMotionListener(new MouseAdapter {
       override def mouseMoved(e: MouseEvent) = {
         sendEventToRenderer(e)
-        doCustomTooltip(e)
       }
     })
     table.addMouseListener(new MouseAdapter {
@@ -162,6 +130,14 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
           if (Desktop.isDesktopSupported) {
             Desktop.getDesktop.browse(new URI(uri))
           }
+        }
+      }
+    })
+    
+    table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
+      def valueChanged(e: ListSelectionEvent) = {
+        if (table.getSelectedRowCount == 1) {
+          showDetailsForTableRow(table.getSelectedRow)
         }
       }
     })
@@ -184,20 +160,72 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     }
   }
 
-  private def doCustomTooltip(e: MouseEvent) {
-    val c = table.columnAtPoint(e.getPoint)
-    val r = table.rowAtPoint(e.getPoint)
-    if (c == 1 && r != -1) {
-      val user = statusTableModel.getValueAt(
-        table.convertRowIndexToModel(r), 1).asInstanceOf[NodeSeq]
-      val picUrl = (user \ "profile_image_url").text
-      if (! picUrl.equals(showingUrl)) {
-        showingUrl = picUrl
-        val u = new URL(picUrl)
-        val icon = new ImageIcon(u)
-        picLabel.peer.setIcon(icon)
-        println("got " + picUrl)
-      }
+  private def showDetailsForTableRow(r: Int) {
+    val modelRowIndex = table.convertRowIndexToModel(r)
+    val status = statusTableModel.getStatusAt(modelRowIndex)
+    val user = status \ "user"
+    val picUrl = (user \ "profile_image_url").text
+    if (! picUrl.equals(showingUrl)) {
+      showingUrl = picUrl
+      val u = new URL(picUrl)
+      val icon = new ImageIcon(u)
+      picLabel.peer.setIcon(icon)
+      println("got " + picUrl)
     }
+    userDescription.text = (user \ "screen_name").text + " • " +
+            (user \ "location").text + "\n" + (user \ "description").text
+    largeTweet.text = (status \ "text").text
+  }
+  
+  private class ControlPanel extends FlowPanel(FlowPanel.Alignment.Left) {
+    picLabel = new Label
+    contents += picLabel
+
+    userDescription = new TextArea {
+      columns = 25
+      lineWrap = true
+      wordWrap = true
+    }
+    contents += userDescription
+
+    contents += new Label("Refresh (secs)")
+    val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
+    var defaultRefresh = 120
+    comboBox.peer.setSelectedItem(defaultRefresh)
+    statusTableModel.setUpdateFrequency(defaultRefresh)
+    comboBox.peer.addActionListener(new ActionListener(){
+      def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
+        statusTableModel.setUpdateFrequency(comboBox.selection.item)
+      }
+    });
+    contents += comboBox
+    
+    val lastSetButton = new Button("Last 200") {
+      tooltip = "Loads the last 200 of your “following” tweets"
+    }
+    lastSetButton.peer.addActionListener(new ActionListener() {
+      def actionPerformed(e: ActionEvent) = {
+        statusTableModel.loadLastSet
+      }
+    })
+    contents += lastSetButton
+    
+    val clearButton = new Button("Clear")
+    clearButton.peer.addActionListener(new ActionListener() {
+      def actionPerformed(e: ActionEvent) = {
+        statusTableModel.clear
+      }
+    })
+    contents += clearButton
+    
+    unmuteButton = new Button("Unmute All")
+    unmuteButton.peer.addActionListener(new ActionListener() {
+      def actionPerformed(e: ActionEvent) = {
+        statusTableModel.unMuteAll
+        unmuteButton.enabled = false
+      }
+    })
+    unmuteButton.enabled = false
+    contents += unmuteButton
   }
 }
