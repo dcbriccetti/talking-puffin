@@ -179,6 +179,24 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
   
   private class ControlPanel extends FlowPanel(FlowPanel.Alignment.Left) {
     picLabel = new Label
+    picLabel.peer.addMouseListener(new MouseAdapter {
+      override def mouseClicked(e: MouseEvent) = {
+        val picture = new Label {
+          icon = new ImageIcon(new URL(showingUrl.replace("_normal", "")))
+        }
+        val bigPicFrame = new Frame {
+          contents = picture
+          pack
+          peer.setLocationRelativeTo(picLabel.peer)
+          visible = true
+        }
+        picture.peer.addMouseListener(new MouseAdapter {
+          override def mouseClicked(e: MouseEvent) = {
+            bigPicFrame.dispose
+          }
+        })
+      }
+    })
     contents += picLabel
 
     userDescription = new TextArea {
