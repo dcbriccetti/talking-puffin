@@ -211,17 +211,11 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
       }
       userDescription.text = (user \ "screen_name").text + " • " +
               (user \ "location").text + " • " + (user \ "description").text
-      val statusText = (status \ "text").text
-      largeTweet.setText(htmlIfy(statusText)) 
+      largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
+        (status \ "in_reply_to_status_id").text)) 
     } catch {
       case ex: IndexOutOfBoundsException => println(ex)
     }
-  }
-  
-  def htmlIfy(s: String): String = {
-    var r = s.replaceAll("(https?\\://[^'\"\\s]+)", "<a href='$1'>$1</a>")
-    r = r.replaceAll("@(\\S+)", "<a href='http://twitter.com/$1'>@$1</a>")
-    "<html><font size='+2'>" + r + "</font></html>"    
   }
   
   private class ControlPanel extends FlowPanel(FlowPanel.Alignment.Left) {
