@@ -9,7 +9,7 @@ import java.awt.{Desktop, Dimension, Insets, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
 import javax.swing._
-import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
+import javax.swing.event.{TableModelEvent, ListSelectionEvent, TableModelListener, ListSelectionListener}
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
 import filter.TagsRepository
@@ -17,13 +17,18 @@ import filter.TagsRepository
 /**
  * Displays friend and public statuses
  */
-class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
+class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel 
+        with TableModelListener with PreChangeListener {
   var table: JTable = null
   var unmuteButton: Button = null
   var showingUrl: String = null
   var picLabel: Label = null
   var userDescription: TextArea = null
   var largeTweet: TextArea = null
+  var lastSelectedRows = new Array[Int](0);
+
+  statusTableModel.addTableModelListener(this)
+  statusTableModel.setPreChangeListener(this)
   
   add(new ScrollPane {
     table = buildTable    
@@ -46,6 +51,21 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
   add(new ControlPanel, new Constraints{
     gridx = 0; gridy = 2; fill = GridBagPanel.Fill.Horizontal;
   })
+
+  def tableChanging = lastSelectedRows = table.getSelectedRows
+
+  def tableChanged(e: TableModelEvent) = {
+    e match {
+      case _ =>
+        val selectionModel = table.getSelectionModel
+        selectionModel.clearSelection
+        
+        for (i <- 0 until lastSelectedRows.length) {
+          val row = lastSelectedRows(i)
+          selectionModel.addSelectionInterval(row, row)
+        }
+    }
+  }
 
   def getPopupMenu: JPopupMenu = {
     val menu = new JPopupMenu()
@@ -93,7 +113,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
         (o1 \ "name").text compareTo (o2 \ "name").text
     });
     table.setRowSorter(sorter);
-
+    
     val colModel = table.getColumnModel
     
     val ageCol = colModel.getColumn(0)
@@ -138,8 +158,10 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     
     table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
       def valueChanged(e: ListSelectionEvent) = {
-        if (table.getSelectedRowCount == 1) {
-          showDetailsForTableRow(table.getSelectedRow)
+        if (! e.getValueIsAdjusting) {
+          if (table.getSelectedRowCount == 1) {
+            showDetailsForTableRow(table.getSelectedRow)
+          }
         }
       }
     })

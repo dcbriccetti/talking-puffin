@@ -4,8 +4,9 @@ import _root_.scala.xml.{NodeSeq, Node}
 import filter.TagUser
 import java.awt.event.{ActionEvent, ActionListener}
 import java.util.{Collections, Date, ArrayList}
+import javax.swing.event.TableModelEvent
+import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
 import javax.swing.{SwingWorker, Timer}
-import javax.swing.table.{DefaultTableModel, AbstractTableModel}
 import twitter.{DataFetchException, StatusDataProvider}
 /**
  * Model providing status data to the JTable
@@ -20,6 +21,9 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   private var selectedTags = List[String]()
   private val colNames = List("Age", "Name", "Status")
   private var timer: Timer = null
+  private var preChangeListener: PreChangeListener = null;
+  
+  def setPreChangeListener(preChangeListener: PreChangeListener) = this.preChangeListener = preChangeListener
   
   def getColumnCount = 3
   def getRowCount = filteredStatuses.size
@@ -164,8 +168,15 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   }
 
   private def filterAndNotify {
+    if (preChangeListener != null) {
+      preChangeListener.tableChanging
+    }
     filterStatuses
     fireTableDataChanged
   }
+}
+
+trait PreChangeListener {
+  def tableChanging
 }
   
