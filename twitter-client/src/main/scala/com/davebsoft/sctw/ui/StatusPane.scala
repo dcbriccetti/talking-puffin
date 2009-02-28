@@ -171,7 +171,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
       showingUrl = picUrl
       val u = new URL(picUrl)
       val icon = new ImageIcon(u)
-      picLabel.peer.setIcon(icon)
+      picLabel.icon = icon
       println("got " + picUrl)
     }
     userDescription.text = (user \ "screen_name").text + " • " +
@@ -240,6 +240,9 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
       case ButtonClicked(b) => {
         if (b == clearButton) {
           statusTableModel.clear
+          picLabel.icon = null
+          userDescription.text = null
+          largeTweet.text = null
         } else if (b == unmuteButton) { 
           statusTableModel.unMuteAll
           unmuteButton.enabled = false
