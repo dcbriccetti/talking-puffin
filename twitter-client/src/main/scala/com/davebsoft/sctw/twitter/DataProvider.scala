@@ -31,6 +31,7 @@ abstract class DataProvider {
     method.releaseConnection
 
     if (result != 200) {
+      println(responseBody)
       throw new DataFetchException(result, responseBody)
     } else {
       XML.loadString(responseBody)
