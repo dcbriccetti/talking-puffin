@@ -1,6 +1,7 @@
 package com.davebsoft.sctw.ui
 
 import _root_.com.davebsoft.sctw.util.PopupListener
+import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.xml.{NodeSeq, Node}
 
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
@@ -32,6 +33,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
   })
   
   largeTweet = new TextArea {
+    background = StatusPane.this.background
     font = new Font("Serif", Font.PLAIN, 24)
     lineWrap = true
     wordWrap = true
@@ -200,6 +202,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     contents += picLabel
 
     userDescription = new TextArea {
+      background = ControlPanel.this.background
       columns = 25
       lineWrap = true
       wordWrap = true
@@ -221,29 +224,29 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel {
     val lastSetButton = new Button("Last 200") {
       tooltip = "Loads the last 200 of your “following” tweets"
     }
-    lastSetButton.peer.addActionListener(new ActionListener() {
-      def actionPerformed(e: ActionEvent) = {
-        statusTableModel.loadLastSet
-      }
-    })
+    listenTo(lastSetButton)
     contents += lastSetButton
     
     val clearButton = new Button("Clear")
-    clearButton.peer.addActionListener(new ActionListener() {
-      def actionPerformed(e: ActionEvent) = {
-        statusTableModel.clear
-      }
-    })
+    listenTo(clearButton)
     contents += clearButton
     
     unmuteButton = new Button("Unmute All")
-    unmuteButton.peer.addActionListener(new ActionListener() {
-      def actionPerformed(e: ActionEvent) = {
-        statusTableModel.unMuteAll
-        unmuteButton.enabled = false
-      }
-    })
+    listenTo(unmuteButton)
     unmuteButton.enabled = false
     contents += unmuteButton
+
+    reactions += {
+      case ButtonClicked(b) => {
+        if (b == clearButton) {
+          statusTableModel.clear
+        } else if (b == unmuteButton) { 
+          statusTableModel.unMuteAll
+          unmuteButton.enabled = false
+        } else if (b == lastSetButton) { 
+          statusTableModel.loadLastSet
+        }
+      }
+    }
   }
 }
