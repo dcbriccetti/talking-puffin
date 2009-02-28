@@ -38,6 +38,9 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   })
   
   largeTweet = new TextArea {
+    val dim = new Dimension(500, 50)
+    minimumSize = dim
+    preferredSize = dim
     background = StatusPane.this.background
     font = new Font("Serif", Font.PLAIN, 24)
     lineWrap = true
@@ -45,7 +48,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   }
   add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)
-    gridx = 0; gridy = 1; fill = GridBagPanel.Fill.Horizontal;
+    gridx = 0; gridy = 1; fill = GridBagPanel.Fill.Both;
   })
 
   add(new ControlPanel, new Constraints{
@@ -185,20 +188,24 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   }
 
   private def showDetailsForTableRow(r: Int) {
-    val modelRowIndex = table.convertRowIndexToModel(r)
-    val status = statusTableModel.getStatusAt(modelRowIndex)
-    val user = status \ "user"
-    val picUrl = (user \ "profile_image_url").text
-    if (! picUrl.equals(showingUrl)) {
-      showingUrl = picUrl
-      val u = new URL(picUrl)
-      val icon = new ImageIcon(u)
-      picLabel.icon = icon
-      println("got " + picUrl)
+    try {
+      val modelRowIndex = table.convertRowIndexToModel(r)
+      val status = statusTableModel.getStatusAt(modelRowIndex)
+      val user = status \ "user"
+      val picUrl = (user \ "profile_image_url").text
+      if (! picUrl.equals(showingUrl)) {
+        showingUrl = picUrl
+        val u = new URL(picUrl)
+        val icon = new ImageIcon(u)
+        picLabel.icon = icon
+        println("got " + picUrl)
+      }
+      userDescription.text = (user \ "screen_name").text + " • " +
+              (user \ "location").text + " • " + (user \ "description").text
+      largeTweet.text = (status \ "text").text
+    } catch {
+      case ex: IndexOutOfBoundsException => println(ex)
     }
-    userDescription.text = (user \ "screen_name").text + " • " +
-            (user \ "location").text + " • " + (user \ "description").text
-    largeTweet.text = (status \ "text").text
   }
   
   private class ControlPanel extends FlowPanel(FlowPanel.Alignment.Left) {
