@@ -9,7 +9,7 @@ import java.awt.{Desktop, Dimension, Insets, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
 import javax.swing._
-import javax.swing.event.{TableModelEvent, ListSelectionEvent, TableModelListener, ListSelectionListener}
+import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
 import filter.TagsRepository
@@ -24,7 +24,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   var showingUrl: String = null
   var picLabel: Label = null
   var userDescription: TextArea = null
-  var largeTweet: TextArea = null
+  var largeTweet: JTextPane = null
   var lastSelectedRows = new Array[Int](0);
 
   statusTableModel.addTableModelListener(this)
@@ -37,19 +37,28 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
   
-  largeTweet = new TextArea {
-    val dim = new Dimension(500, 50)
-    minimumSize = dim
-    preferredSize = dim
-    background = StatusPane.this.background
-    font = new Font("Serif", Font.PLAIN, 24)
-    lineWrap = true
-    wordWrap = true
-  }
-  add(largeTweet, new Constraints{
+  largeTweet = new JTextPane()
+  val dim = new Dimension(500, 50)
+  largeTweet.setMinimumSize(dim)
+  largeTweet.setPreferredSize(dim)
+  largeTweet.setBackground(StatusPane.this.background)
+  largeTweet.setContentType("text/html");
+  largeTweet.setEditable(false);
+  largeTweet.addHyperlinkListener(new HyperlinkListener() {
+    def hyperlinkUpdate(e: HyperlinkEvent) {
+      if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+        if (Desktop.isDesktopSupported) {
+          Desktop.getDesktop.browse(e.getURL().toURI)
+        }
+      }
+    }
+  });
+  
+  
+  peer.add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)
     gridx = 0; gridy = 1; fill = GridBagPanel.Fill.Both;
-  })
+  }.peer)
 
   add(new ControlPanel, new Constraints{
     gridx = 0; gridy = 2; fill = GridBagPanel.Fill.Horizontal;
@@ -202,10 +211,17 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
       }
       userDescription.text = (user \ "screen_name").text + " • " +
               (user \ "location").text + " • " + (user \ "description").text
-      largeTweet.text = (status \ "text").text
+      val statusText = (status \ "text").text
+      largeTweet.setText(htmlIfy(statusText)) 
     } catch {
       case ex: IndexOutOfBoundsException => println(ex)
     }
+  }
+  
+  def htmlIfy(s: String): String = {
+    var r = s.replaceAll("(https?\\://[^'\"\\s]+)", "<a href='$1'>$1</a>")
+    r = r.replaceAll("@(\\S+)", "<a href='http://twitter.com/$1'>@$1</a>")
+    "<html><font size='+2'>" + r + "</font></html>"    
   }
   
   private class ControlPanel extends FlowPanel(FlowPanel.Alignment.Left) {
@@ -235,6 +251,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
       columns = 25
       lineWrap = true
       wordWrap = true
+      editable = false
     }
     contents += userDescription
 
@@ -271,7 +288,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
           statusTableModel.clear
           picLabel.icon = null
           userDescription.text = null
-          largeTweet.text = null
+          largeTweet.setText(null)
         } else if (b == unmuteButton) { 
           statusTableModel.unMuteAll
           unmuteButton.enabled = false
