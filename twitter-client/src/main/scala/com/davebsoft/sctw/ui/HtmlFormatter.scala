@@ -14,7 +14,7 @@ object HtmlFormatter {
       "/statuses/" + replyTo + "'>↑</a> " else "" 
     var r = text.replaceAll("(https?\\://[^'\"\\s]+)", "<a href='$1'>$1</a>")
     r = r.replaceAll("@(\\S+)", "<a href='http://twitter.com/$1'>@$1</a>")
-    "<html><font size='+2'>" + parent + r + "</font></html>"    
+    "<html>" + parent + "<font size='+2'>" + r + "</font></html>"    
   }
 
   /**

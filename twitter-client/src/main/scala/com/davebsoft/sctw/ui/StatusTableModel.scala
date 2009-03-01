@@ -19,7 +19,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
   private val mutedIds = scala.collection.mutable.Set[String]()
   private var selectedTags = List[String]()
-  private val colNames = List("Age", "Name", "Status")
+  private val colNames = List("Age", "Username", "Status")
   private var timer: Timer = null
   private var preChangeListener: PreChangeListener = null;
   

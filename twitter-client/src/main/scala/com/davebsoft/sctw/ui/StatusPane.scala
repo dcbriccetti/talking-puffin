@@ -209,7 +209,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
         picLabel.icon = icon
         println("got " + picUrl)
       }
-      userDescription.text = (user \ "screen_name").text + " • " +
+      userDescription.text = (user \ "name").text + " • " +
               (user \ "location").text + " • " + (user \ "description").text
       largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
         (status \ "in_reply_to_status_id").text)) 
