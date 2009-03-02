@@ -13,7 +13,8 @@ import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
   var selectedTags = List[String]()
   
-  add(new Label("Tags"), new Constraints {gridx=0; gridy=0})
+  add(new Label("Tags"), new Constraints {gridx=0; gridy=0; gridwidth=3})
+  
   add(new ScrollPane {
     preferredSize = new Dimension(100, 200)
     val listView = new ListView(TagsRepository.get)
@@ -29,13 +30,32 @@ class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
       }
     })
     contents = listView
-  }, new Constraints {gridx=0; gridy=1})
+  }, new Constraints {gridx=0; gridy=1; gridwidth=3})
 
   val excludeNotToYouReplies = new CheckBox("Exclude replies not to you")
-  add(excludeNotToYouReplies, new Constraints {gridx=0; gridy=2})
+  add(excludeNotToYouReplies, new Constraints {gridx=0; gridy=2; gridwidth=3})
   listenTo(excludeNotToYouReplies)
+  
+  add(new Label("Include Matching"), new Constraints {gridx=0; gridy=3})
+  val includeMatching = new TextField {
+    columns = 40
+  }
+  add(includeMatching, new Constraints {gridx=1; gridy=3})
+  
+  val includeIsRegex = new CheckBox("Regular Expression")
+  add(includeIsRegex, new Constraints {gridx=2; gridy=3})
+
+  add(new Label("Exclude Matching"), new Constraints {gridx=0; gridy=4})
+  val excludeMatching = new TextField {
+    columns = 40
+  }
+  add(excludeMatching, new Constraints {gridx=1; gridy=4})
+
+  val excludeIsRegex = new CheckBox("Regular Expression")
+  add(excludeIsRegex, new Constraints {gridx=2; gridy=4})
 
   val applyButton = new Button("Apply")
+  add(applyButton, new Constraints {gridx=0; gridy=20; gridwidth=3})
   listenTo(applyButton)
 
   reactions += {
@@ -43,11 +63,12 @@ class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
       if (b == applyButton) {
         tableModel.selectedTags_$eq(selectedTags) // TODO Why doesn’t = work?
         tableModel.excludeNotToYouReplies_$eq(excludeNotToYouReplies.selected)
+        tableModel.setIncludeMatching(includeMatching.text, includeIsRegex.selected)
+        tableModel.setExcludeMatching(excludeMatching.text, excludeIsRegex.selected)
         tableModel.applyFilters
       }
     }
   }
-  add(applyButton, new Constraints {gridx=0; gridy=5})
-  add(new Label(""), new Constraints {gridx=1; gridy=0; fill=GridBagPanel.Fill.Horizontal; weightx=1; })
-  add(new Label(""), new Constraints {gridx=0; gridy=6; fill=GridBagPanel.Fill.Vertical; weighty=1;})
+  add(new Label(""), new Constraints {gridx=4; gridy=0; fill=GridBagPanel.Fill.Horizontal; weightx=1; })
+  add(new Label(""), new Constraints {gridx=0; gridy=21; fill=GridBagPanel.Fill.Vertical; weighty=1;})
 }

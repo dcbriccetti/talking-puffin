@@ -22,6 +22,11 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
   private val mutedIds = scala.collection.mutable.Set[String]()
   private[this] var selectedTags = List[String]()
   private[this] var excludeNotToYouReplies: Boolean = _
+  private[this] var includeMatching: String = ""
+  private[this] var excludeMatching: String = ""
+  private[this] var includeIsRegex: Boolean = _
+  private[this] var excludeIsRegex: Boolean = _
+  
   private val colNames = List("Age", "Username", "Status")
   private var timer: Timer = _
   private var preChangeListener: PreChangeListener = _;
@@ -71,12 +76,20 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
 
   def selectedTags_=(tags: List[String]) {
     selectedTags = tags;
-    filterAndNotify
   }
   
   def excludeNotToYouReplies_=(ex: Boolean) {
     excludeNotToYouReplies = ex
-    filterAndNotify
+  }
+  
+  def setIncludeMatching(text: String, regex: Boolean) {
+    includeMatching = text
+    includeIsRegex = regex
+  }
+  
+  def setExcludeMatching(text: String, regex: Boolean) {
+    excludeMatching = text
+    excludeIsRegex = regex
   }
   
   private def dateToAgeSeconds(date: String): Long = {
@@ -138,8 +151,11 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
       var id = (st \ "user" \ "id").text
       if (! mutedIds.contains(id)) {
         if (tagFiltersInclude(id)) {
-          if (! excludedBecauseReplyAndNotToYou(st)) {
-            filteredStatuses.add(st)
+          val text = (st \ "text").text 
+          if (! excludedBecauseReplyAndNotToYou(text)) {
+            if (! excludedByStringMatches(text)) {
+              filteredStatuses.add(st)
+            }
           }
         }
       }
@@ -157,11 +173,26 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
     }
   }
   
-  private def excludedBecauseReplyAndNotToYou(status: NodeSeq): Boolean = {
-    val rtu = Utils.getReplyToUser((status \ "text").text)
+  private def excludedBecauseReplyAndNotToYou(text: String): Boolean = {
+    val rtu = Utils.getReplyToUser(text)
     if (! excludeNotToYouReplies) return false
     if (rtu.length == 0) return false
     ! rtu.equals(username)
+  }
+
+  private def excludedByStringMatches(text: String): Boolean = {
+    if (includeMatching.length == 0 && excludeMatching.length == 0) return false
+    if (includeMatching.length > 0 && ! matches(text, includeMatching, includeIsRegex)) return true
+    if (excludeMatching.length > 0 && matches(text, excludeMatching, excludeIsRegex)) return true
+    false
+  }
+  
+  private def matches(text: String, search: String, regex: Boolean): Boolean = {
+    if (regex) {
+      java.util.regex.Pattern.compile(search).matcher(text).find
+    } else {
+      text.contains(search)
+    }
   }
 
   /**
