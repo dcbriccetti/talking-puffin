@@ -38,7 +38,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   })
   
   largeTweet = new JTextPane()
-  val dim = new Dimension(500, 50)
+  val dim = new Dimension(500, 70)
   largeTweet.setMinimumSize(dim)
   largeTweet.setPreferredSize(dim)
   largeTweet.setBackground(StatusPane.this.background)
