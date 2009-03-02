@@ -1,4 +1,5 @@
 package com.davebsoft.sctw.ui
+import com.davebsoft.sctw.twitter.Utils
 
 /**
  * Helps with creating HTML for display in the UI
@@ -8,7 +9,7 @@ package com.davebsoft.sctw.ui
 object HtmlFormatter {
 
   def createTweetHtml(text: String, replyTo: String): String = {
-    val replyToUser = getReplyToUser(text)   
+    val replyToUser = Utils.getReplyToUser(text)   
     val parent = if (replyTo.length > 0 && replyToUser.length > 0) 
       "<a href='http://twitter.com/" + replyToUser + 
       "/statuses/" + replyTo + "'>↑</a> " else "" 
@@ -17,12 +18,4 @@ object HtmlFormatter {
     "<html>" + parent + "<font face='Georgia' size='+2'>" + r + "</font></html>"    
   }
 
-  /**
-   * Returns the Twitter handle of the user whose @handle appears at the beginning of 
-   * the tweet, or an empty string.
-   */
-  private def getReplyToUser(text: String): String = {
-    val m = java.util.regex.Pattern.compile("^@(\\S+)").matcher(text)
-    if (m.find) m.group(1) else ""
-  }
 }

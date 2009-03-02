@@ -40,7 +40,7 @@ object Main extends SimpleGUIApplication {
       contents = new TabbedPane() {
         preferredSize = new Dimension(900, 600)
         
-        val friendsTableModel = new StatusTableModel(tweetsProvider)
+        val friendsTableModel = new StatusTableModel(tweetsProvider, username)
         pages.append(new TabbedPane.Page("Tweets", new StatusPane(friendsTableModel)))
         
         val following = new FriendsDataProvider(username, password).getUsers

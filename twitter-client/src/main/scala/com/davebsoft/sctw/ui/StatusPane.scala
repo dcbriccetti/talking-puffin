@@ -19,12 +19,12 @@ import filter.TagsRepository
  */
 class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel 
         with TableModelListener with PreChangeListener {
-  var table: JTable = null
-  var unmuteButton: Button = null
-  var showingUrl: String = null
-  var picLabel: Label = null
-  var userDescription: TextArea = null
-  var largeTweet: JTextPane = null
+  var table: JTable = _
+  var unmuteButton: Button = _
+  var showingUrl: String = _
+  var picLabel: Label = _
+  var userDescription: TextArea = _
+  var largeTweet: JTextPane = _
   var lastSelectedRows = new Array[Int](0);
 
   statusTableModel.addTableModelListener(this)

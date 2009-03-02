@@ -1,5 +1,6 @@
 package com.davebsoft.sctw.ui
 
+import com.davebsoft.sctw.twitter.Utils
 import _root_.scala.xml.{NodeSeq, Node}
 import filter.TagUser
 import java.awt.event.{ActionEvent, ActionListener}
@@ -8,20 +9,22 @@ import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
 import javax.swing.{SwingWorker, Timer}
 import twitter.{DataFetchException, StatusDataProvider}
+
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractTableModel {
+class StatusTableModel(statusDataProvider: StatusDataProvider, username: String) extends AbstractTableModel {
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
   
   private var statuses = List[Node]()
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
   private val mutedIds = scala.collection.mutable.Set[String]()
-  private var selectedTags = List[String]()
+  private[this] var selectedTags = List[String]()
+  private[this] var excludeNotToYouReplies: Boolean = _
   private val colNames = List("Age", "Username", "Status")
-  private var timer: Timer = null
-  private var preChangeListener: PreChangeListener = null;
+  private var timer: Timer = _
+  private var preChangeListener: PreChangeListener = _;
   
   def setPreChangeListener(preChangeListener: PreChangeListener) = this.preChangeListener = preChangeListener
   
@@ -66,8 +69,13 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
     }
   }
 
-  def setSelectedTags(selectedTags: List[String]) {
-    this.selectedTags = selectedTags;
+  def selectedTags_=(tags: List[String]) {
+    selectedTags = tags;
+    filterAndNotify
+  }
+  
+  def excludeNotToYouReplies_=(ex: Boolean) {
+    excludeNotToYouReplies = ex
     filterAndNotify
   }
   
@@ -130,7 +138,9 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
       var id = (st \ "user" \ "id").text
       if (! mutedIds.contains(id)) {
         if (tagFiltersInclude(id)) {
-          filteredStatuses.add(st)
+          if (! excludedBecauseReplyAndNotToYou(st)) {
+            filteredStatuses.add(st)
+          }
         }
       }
     }
@@ -145,6 +155,13 @@ class StatusTableModel(statusDataProvider: StatusDataProvider) extends AbstractT
       }
       false
     }
+  }
+  
+  private def excludedBecauseReplyAndNotToYou(status: NodeSeq): Boolean = {
+    val rtu = Utils.getReplyToUser((status \ "text").text)
+    if (! excludeNotToYouReplies) return false
+    if (rtu.length == 0) return false
+    ! rtu.equals(username)
   }
 
   /**
