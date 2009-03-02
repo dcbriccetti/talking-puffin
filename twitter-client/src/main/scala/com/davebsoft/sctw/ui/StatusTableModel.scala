@@ -184,6 +184,8 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
     filterAndNotify
   }
 
+  def applyFilters = filterAndNotify
+  
   private def filterAndNotify {
     if (preChangeListener != null) {
       preChangeListener.tableChanging
