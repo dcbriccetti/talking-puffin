@@ -1,7 +1,7 @@
 package com.davebsoft.sctw.ui
 
 import _root_.scala.swing._
-import _root_.scala.swing.event.ButtonClicked
+import _root_.scala.swing.event.{ButtonClicked, EditDone}
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.JDialog
 import state.StateRepository
@@ -35,7 +35,15 @@ object LoginDialog extends JDialog(null: java.awt.Frame, "Simple Twitter Client 
   
   private val usernameTextField = new TextField(storedUser) {columns=20}
   private val passwordTextField = new PasswordField(storedPwd) {columns=20}
+  
+  enterDoesLoginClick(usernameTextField)
+  enterDoesLoginClick(passwordTextField)
 
+  private def enterDoesLoginClick(t: TextField) {
+    t.reactions += { 
+      case EditDone(f) => loginButton.peer.doClick()
+    }
+  }
   
   setContentPane(new GridBagPanel {
     border = Swing.EmptyBorder(5, 5, 5, 5)
