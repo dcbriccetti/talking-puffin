@@ -16,10 +16,25 @@ object StateRepository {
     state.setProperty(key, value)
   }
   
+  def set(keyValues: Tuple2[String, String]*) {
+    for ((key, value) <- keyValues) state.setProperty(key, value)
+  }
+  
+  def remove(keys: String*) {
+    keys.foreach(state remove _)
+  }
+
+  
   def get(key: String, default: String): String = {
     if (! loaded) 
       load
     state.getProperty(key, default)
+  }
+  
+    def get(key: String): String = {
+    if (! loaded) 
+      load
+    state.getProperty(key)
   }
   
   private def getFile = {
