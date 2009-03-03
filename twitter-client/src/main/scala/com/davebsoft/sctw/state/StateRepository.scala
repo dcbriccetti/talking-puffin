@@ -20,8 +20,8 @@ object StateRepository {
     for ((key, value) <- keyValues) state.setProperty(key, value)
   }
   
-  def remove(key: String*) {
-    key.foreach(state remove _)
+  def remove(keys: String*) {
+    keys.foreach(state remove _)
   }
 
   

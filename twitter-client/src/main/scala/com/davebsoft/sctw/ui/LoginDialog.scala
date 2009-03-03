@@ -48,6 +48,14 @@ object LoginDialog extends JDialog(null: java.awt.Frame, "Simple Twitter Client 
       contents += cancelButton
       contents += saveUserInfoCheckBox
     }, new Constraints {gridx=0; gridy=2; gridwidth=2})
+    reactions += {
+      case ButtonClicked(b) =>
+        ok = (b == loginButton)
+        setVisible(false)
+    }
+    listenTo(loginButton)
+    listenTo(cancelButton)
+
   }.peer)
 
   loginButton.peer.addActionListener(new ActionListener() {
