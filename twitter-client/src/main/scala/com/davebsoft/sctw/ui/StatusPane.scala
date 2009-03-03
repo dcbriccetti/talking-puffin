@@ -5,7 +5,8 @@ import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.xml.{NodeSeq, Node}
 
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
-import java.awt.{Desktop, Dimension, Insets, Font}
+import java.awt.image.BufferedImage
+import java.awt.{Color, Desktop, Dimension, Insets, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
 import javax.swing._
@@ -22,6 +23,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   var table: JTable = _
   var unmuteButton: Button = _
   var showingUrl: String = _
+  val transparentPic = new ImageIcon(new BufferedImage(48, 48, BufferedImage.TYPE_INT_ARGB))
   var picLabel: Label = _
   var userDescription: TextArea = _
   var largeTweet: JTextPane = _
@@ -209,11 +211,15 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
       if (! picUrl.equals(showingUrl)) {
         showingUrl = picUrl
         val u = new URL(picUrl)
+        picLabel.icon = transparentPic
         new SwingWorker[Icon, Object] {
+          val urlToShow = showingUrl
           def doInBackground = new ImageIcon(u)
           override def done = {
-            picLabel.icon = get
-            println("got " + picUrl)
+            if (urlToShow == showingUrl) { // If user is moving quickly there may be several threads
+              picLabel.icon = get
+              println("got " + picUrl)
+            }
           }
         }.execute
       }
