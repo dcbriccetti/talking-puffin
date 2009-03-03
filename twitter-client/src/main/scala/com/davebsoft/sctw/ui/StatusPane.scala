@@ -201,18 +201,22 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
       val modelRowIndex = table.convertRowIndexToModel(r)
       val status = statusTableModel.getStatusAt(modelRowIndex)
       val user = status \ "user"
-      val picUrl = (user \ "profile_image_url").text
-      if (! picUrl.equals(showingUrl)) {
-        showingUrl = picUrl
-        val u = new URL(picUrl)
-        val icon = new ImageIcon(u)
-        picLabel.icon = icon
-        println("got " + picUrl)
-      }
       userDescription.text = (user \ "name").text + " • " +
               (user \ "location").text + " • " + (user \ "description").text
       largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
         (status \ "in_reply_to_status_id").text)) 
+      val picUrl = (user \ "profile_image_url").text
+      if (! picUrl.equals(showingUrl)) {
+        showingUrl = picUrl
+        val u = new URL(picUrl)
+        new SwingWorker[Icon, Object] {
+          def doInBackground = new ImageIcon(u)
+          override def done = {
+            picLabel.icon = get
+            println("got " + picUrl)
+          }
+        }.execute
+      }
     } catch {
       case ex: IndexOutOfBoundsException => println(ex)
     }
