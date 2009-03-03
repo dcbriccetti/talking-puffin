@@ -113,7 +113,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
     new SwingWorker[Option[NodeSeq], Object] {
       override def doInBackground: Option[NodeSeq] = {
         try {
-          return Some(statusDataProvider.loadTwitterStatusData)
+          Some(statusDataProvider.loadTwitterStatusData)
         } catch {
           case ex: DataFetchException => {
             println(ex.response)
