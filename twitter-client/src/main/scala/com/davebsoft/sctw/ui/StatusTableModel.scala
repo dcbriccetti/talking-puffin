@@ -20,8 +20,8 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
   private var statuses = List[Node]()
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
   private val mutedIds = scala.collection.mutable.Set[String]()
-  private[this] var selectedTags = List[String]()
-  private[this] var excludeNotToYouReplies: Boolean = _
+  var selectedTags = List[String]()
+  var excludeNotToYouReplies: Boolean = _
   private[this] var includeMatching: String = ""
   private[this] var excludeMatching: String = ""
   private[this] var includeIsRegex: Boolean = _
@@ -74,14 +74,6 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
     }
   }
 
-  def selectedTags_=(tags: List[String]) {
-    selectedTags = tags;
-  }
-  
-  def excludeNotToYouReplies_=(ex: Boolean) {
-    excludeNotToYouReplies = ex
-  }
-  
   def setIncludeMatching(text: String, regex: Boolean) {
     includeMatching = text
     includeIsRegex = regex
