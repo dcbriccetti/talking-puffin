@@ -27,7 +27,8 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   var picLabel: Label = _
   var userDescription: TextArea = _
   var largeTweet: JTextPane = _
-  var lastSelectedRows = new Array[Int](0);
+  val emptyIntArray = new Array[Int](0) 
+  var lastSelectedRows = emptyIntArray 
 
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
@@ -284,6 +285,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     reactions += {
       case ButtonClicked(b) => {
         if (b == clearButton) {
+          clearSelection
           statusTableModel.clear
           picLabel.icon = null
           userDescription.text = null
@@ -291,10 +293,16 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
         } else if (b == unmuteButton) { 
           statusTableModel.unMuteAll
           unmuteButton.enabled = false
-        } else if (b == lastSetButton) { 
+        } else if (b == lastSetButton) {
+          clearSelection
           statusTableModel.loadLastSet
         }
       }
+    }
+    
+    def clearSelection = {
+      table.getSelectionModel.clearSelection
+      lastSelectedRows = emptyIntArray
     }
   }
 }
