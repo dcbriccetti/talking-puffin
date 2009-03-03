@@ -61,8 +61,8 @@ class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
   reactions += {
     case ButtonClicked(b) => {
       if (b == applyButton) {
-        tableModel.selectedTags_$eq(selectedTags) // TODO Why doesn’t = work?
-        tableModel.excludeNotToYouReplies_$eq(excludeNotToYouReplies.selected)
+        tableModel.selectedTags = selectedTags
+        tableModel.excludeNotToYouReplies = excludeNotToYouReplies.selected
         tableModel.setIncludeMatching(includeMatching.text, includeIsRegex.selected)
         tableModel.setExcludeMatching(excludeMatching.text, excludeIsRegex.selected)
         tableModel.applyFilters
