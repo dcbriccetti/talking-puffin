@@ -41,7 +41,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
     val status = filteredStatuses.get(rowIndex)
     columnIndex match {
       case 0 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
-      case 1 => status \ "user"
+      case 1 => (status \ "user" \ "screen_name").text
       case 2 => (status \ "text").text 
     }
   }
@@ -53,7 +53,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
   override def getColumnClass(columnIndex: Int) = {
     columnIndex match {
       case 0 => classOf[java.lang.Long]
-      case 1 => classOf[NodeSeq]
+      case 1 => classOf[String]
       case 2 => classOf[String] 
     }
   }

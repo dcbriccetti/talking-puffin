@@ -122,10 +122,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   private def buildTable: JTable = {
     val table = new JTable(statusTableModel)
     val sorter = new TableRowSorter[StatusTableModel](statusTableModel);
-    sorter.setComparator(1, new Comparator[NodeSeq] {
-      def compare(o1: NodeSeq, o2: NodeSeq) = 
-        (o1 \ "name").text compareTo (o2 \ "name").text
-    });
     table.setRowSorter(sorter);
     
     val colModel = table.getColumnModel
@@ -138,7 +134,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     val nameCol = colModel.getColumn(1)
     nameCol.setPreferredWidth(100)
     nameCol.setMaxWidth(200)
-    nameCol.setCellRenderer(new NameCellRenderer);
     
     val statusCol = colModel.getColumn(2)
     statusCol.setPreferredWidth(600)
