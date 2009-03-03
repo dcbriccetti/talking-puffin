@@ -52,18 +52,12 @@ object LoginDialog extends JDialog(null: java.awt.Frame, "Simple Twitter Client 
       case ButtonClicked(b) =>
         ok = (b == loginButton)
         setVisible(false)
+        if (ok) storeUserInfoIfSet()
     }
     listenTo(loginButton)
     listenTo(cancelButton)
 
   }.peer)
-
-  loginButton.peer.addActionListener(new ActionListener() {
-    def actionPerformed(e: ActionEvent) = {ok = true; setVisible(false); storeUserInfoIfSet()}
-  })
-  cancelButton.peer.addActionListener(new ActionListener() {
-    def actionPerformed(e: ActionEvent) = {ok = false; setVisible(false)}
-  })
   
   getRootPane.setDefaultButton(loginButton.peer)
   
