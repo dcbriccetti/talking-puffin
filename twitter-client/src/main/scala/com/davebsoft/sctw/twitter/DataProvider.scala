@@ -11,8 +11,8 @@ case class DataFetchException(val code: Int, val response: String) extends Excep
 /**
  * A provider of Twitter data
  */
-abstract class DataProvider {
-  private val httpClient = new HttpClient()
+abstract class DataProvider extends HttpHandler {
+  
   def getUrl: String
 
   /**
@@ -25,10 +25,7 @@ abstract class DataProvider {
   
   def loadTwitterData(url: String): Node = {
     println(url)
-    val method = new GetMethod(url)
-    val result = httpClient.executeMethod(method)
-    val responseBody = method.getResponseBodyAsString()
-    method.releaseConnection
+    val (method, result, responseBody) = doGet(url)
 
     if (result != 200) {
       println(responseBody)
@@ -37,11 +34,7 @@ abstract class DataProvider {
       XML.loadString(responseBody)
     }
   }
-
-  protected def setCredentials(username: String, password: String) {
-    httpClient.getState().setCredentials(new AuthScope("twitter.com", 80, AuthScope.ANY_REALM), 
-      new UsernamePasswordCredentials(username, password));
-  }
+  
 }
 
 abstract class StatusDataProvider extends DataProvider {
