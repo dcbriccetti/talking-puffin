@@ -3,16 +3,18 @@ package com.davebsoft.sctw.ui
 import _root_.scala.swing._
 import _root_.scala.swing.event.{ButtonClicked, EditDone}
 import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.Color
 import javax.swing.JDialog
 import state.StateRepository
 import twitter.AuthenticationProvider
+import LongRunningSpinner._
 
 /**
  * Collect user name and password for Twitter authentication.
  * @author Dave Briccetti
  */
 
-class LoginDialog(authenticator: AuthenticationProvider) extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
+class LoginDialog(authenticator: AuthenticationProvider, startup: (String, String) => Unit) extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
   
   def username = usernameTextField.text
   def password = new String(passwordTextField.password)
@@ -64,15 +66,10 @@ class LoginDialog(authenticator: AuthenticationProvider) extends JDialog(null: j
       case ButtonClicked(b) =>
         ok = (b == loginButton)
         if (ok) {
-          if(authenticator.userAuthenticates(username, password)) {
-            storeUserInfoIfSet()
-	        setVisible(false)
-          }
-          else {
-            infoLabel.text = "Login failed"
-          }
+          handleLogin
         }
         else {
+          // Cancel pressed
           setVisible(false)
         }
         
@@ -81,6 +78,36 @@ class LoginDialog(authenticator: AuthenticationProvider) extends JDialog(null: j
     listenTo(cancelButton)
 
   }.peer)
+  
+
+  private def handleLogin {
+    LongRunningSpinner.run(this, null, 
+        { 
+          () =>
+          if(authenticator.userAuthenticates(username, password)) {
+            storeUserInfoIfSet()
+            true
+          }
+          else {
+            infoLabel.foreground = Color.RED
+            infoLabel.text = "Login failed"
+            false
+          }
+        }, 
+        { 
+          () =>
+          infoLabel.foreground = Color.BLACK
+          infoLabel.text = "Login successful, initializing"
+          startup(username, password)
+          true
+        }, 
+        {
+          () =>
+          setVisible(false)
+          true
+        }
+    )
+  }
   
   getRootPane.setDefaultButton(loginButton.peer)
   

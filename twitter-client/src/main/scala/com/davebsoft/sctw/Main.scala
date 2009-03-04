@@ -34,7 +34,6 @@ object Main extends SimpleGUIApplication {
       title = "Simple Twitter Client"
 
       TagUsers.load
-      
       val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
 
       contents = new TabbedPane() {
@@ -69,18 +68,26 @@ object Main extends SimpleGUIApplication {
   }
     
   override def main(args: Array[String]): Unit = {
-    val login = new LoginDialog(new twitter.AuthenticationProvider)
-    if (login.display) {
-      username = login.username
-      password = login.password
+    
+    def startup(userName: String, pwd: String) {
+        username = userName
+        password = pwd
+      if (username.length > 0 && password.length > 0) {
+        setupUI
+      } else {
+        println("Missing username and password")
+        System.exit(1)
+      }	
     }
-    if (username.length > 0 && password.length > 0) {
-      println("calling main")
-      
-      super.main(args)
-    } else {
-      println("Missing username and password")
-      System.exit(1)
-    }
+    
+    val login = new LoginDialog(new twitter.AuthenticationProvider, startup)
+    login.display
   }
+  
+  def setupUI {
+    init(); 
+    top.pack(); 
+    top.visible = true 
+  }
+  
 }
