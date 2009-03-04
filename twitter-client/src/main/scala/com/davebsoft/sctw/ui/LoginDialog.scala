@@ -12,6 +12,7 @@ import LongRunningSpinner._
 /**
  * Collect user name and password for Twitter authentication.
  * @author Dave Briccetti
+ * @author Alf Kristian Støyle  
  */
 
 class LoginDialog(authenticator: AuthenticationProvider, startup: (String, String) => Unit) extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
@@ -62,6 +63,7 @@ class LoginDialog(authenticator: AuthenticationProvider, startup: (String, Strin
       contents += cancelButton
       contents += saveUserInfoCheckBox
     }, new Constraints {gridx=0; gridy=3; gridwidth=2})
+    
     reactions += {
       case ButtonClicked(b) =>
         ok = (b == loginButton)
@@ -72,7 +74,6 @@ class LoginDialog(authenticator: AuthenticationProvider, startup: (String, Strin
           // Cancel pressed
           setVisible(false)
         }
-        
     }
     listenTo(loginButton)
     listenTo(cancelButton)
