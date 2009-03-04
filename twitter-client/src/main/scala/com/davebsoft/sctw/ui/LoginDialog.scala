@@ -10,9 +10,11 @@ import twitter.AuthenticationProvider
 /**
  * Collect user name and password for Twitter authentication.
  * @author Dave Briccetti
+ * @author Alf Kristian Støyle  
  */
 
-class LoginDialog(authenticator: AuthenticationProvider) extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
+class LoginDialog(authenticator: AuthenticationProvider) 
+    extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
   
   def username = usernameTextField.text
   def password = new String(passwordTextField.password)
@@ -60,13 +62,14 @@ class LoginDialog(authenticator: AuthenticationProvider) extends JDialog(null: j
       contents += cancelButton
       contents += saveUserInfoCheckBox
     }, new Constraints {gridx=0; gridy=3; gridwidth=2})
+    
     reactions += {
       case ButtonClicked(b) =>
         ok = (b == loginButton)
         if (ok) {
           if(authenticator.userAuthenticates(username, password)) {
             storeUserInfoIfSet()
-	        setVisible(false)
+            setVisible(false)
           }
           else {
             infoLabel.text = "Login failed"
@@ -75,7 +78,6 @@ class LoginDialog(authenticator: AuthenticationProvider) extends JDialog(null: j
         else {
           setVisible(false)
         }
-        
     }
     listenTo(loginButton)
     listenTo(cancelButton)
