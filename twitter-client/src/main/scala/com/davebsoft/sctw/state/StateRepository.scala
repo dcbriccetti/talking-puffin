@@ -23,7 +23,6 @@ object StateRepository {
   def remove(keys: String*) {
     keys.foreach(state remove _)
   }
-
   
   def get(key: String, default: String): String = {
     if (! loaded) 
@@ -31,7 +30,7 @@ object StateRepository {
     state.getProperty(key, default)
   }
   
-    def get(key: String): String = {
+  def get(key: String): String = {
     if (! loaded) 
       load
     state.getProperty(key)

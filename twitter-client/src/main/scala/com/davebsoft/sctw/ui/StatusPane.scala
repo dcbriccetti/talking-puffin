@@ -16,7 +16,7 @@ import scala.swing._
 import filter.TagsRepository
 
 /**
- * Displays friend and public statuses
+ * Displays friend statuses
  */
 class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel 
         with TableModelListener with PreChangeListener {
