@@ -21,7 +21,6 @@ import filter.TagsRepository
 class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel 
         with TableModelListener with PreChangeListener {
   var table: JTable = _
-  var unmuteButton: Button = _
   var showingUrl: String = _
   val transparentPic = new ImageIcon(new BufferedImage(48, 48, BufferedImage.TYPE_INT_ARGB))
   var picLabel: Label = _
@@ -89,7 +88,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     mi.addActionListener(new ActionListener() {
       def actionPerformed(e: ActionEvent) = {
         statusTableModel.muteSelectedUsers(getSelectedModelIndexes)
-        unmuteButton.enabled = true
       }
     })
     menu.add(mi)
@@ -277,11 +275,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     listenTo(clearButton)
     contents += clearButton
     
-    unmuteButton = new Button("Unmute All")
-    listenTo(unmuteButton)
-    unmuteButton.enabled = false
-    contents += unmuteButton
-
     reactions += {
       case ButtonClicked(b) => {
         if (b == clearButton) {
@@ -290,9 +283,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
           picLabel.icon = null
           userDescription.text = null
           largeTweet.setText(null)
-        } else if (b == unmuteButton) { 
-          statusTableModel.unMuteAll
-          unmuteButton.enabled = false
         } else if (b == lastSetButton) {
           clearSelection
           statusTableModel.loadLastSet
