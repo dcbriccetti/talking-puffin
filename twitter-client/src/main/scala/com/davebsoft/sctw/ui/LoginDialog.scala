@@ -100,13 +100,9 @@ class LoginDialog(authenticator: AuthenticationProvider, startup: (String, Strin
           infoLabel.foreground = Color.BLACK
           infoLabel.text = "Login successful, initializing"
           startup(username, password)
-          true
-        }, 
-        {
-          () =>
           setVisible(false)
           true
-        }
+        } 
     )
   }
   
