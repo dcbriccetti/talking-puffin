@@ -19,7 +19,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
   
   private var statuses = List[Node]()
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
-  private val mutedIds = scala.collection.mutable.Set[String]()
+  val mutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
   var selectedTags = List[String]()
   var excludeNotToYouReplies: Boolean = _
   private[this] var includeMatching: String = ""
@@ -59,18 +59,27 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
   }
 
   def muteSelectedUsers(rows: List[Int]) {
-    mutedIds ++= getUserIds(rows)
+    muteUsers(getUsers(rows))
+  }
+
+  private def muteUsers(users: List[User]) {
+    mutedUsers ++= users.map(user => (user.id, user))
+    filterAndNotify
+  }
+
+  def unmuteUsers(userIds: List[String]) {
+    mutedUsers --= userIds
     filterAndNotify
   }
   
   def unMuteAll {
-    mutedIds.clear
+    mutedUsers.clear
     filterAndNotify
   }
-  
+
   def tagSelectedUsers(rows: List[Int], tag: String) {
-    for (id <- getUserIds(rows)) {
-      filter.TagUsers.add(new TagUser(tag, id))
+    for (user <- getUsers(rows)) {
+      filter.TagUsers.add(new TagUser(tag, user.id))
     }
   }
 
@@ -89,8 +98,13 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
     (new Date().getTime - df.parse(date).getTime) / 1000
   }
   
-  private def getUserIds(rows: List[Int]): List[String] = 
-    rows.map(i => (filteredStatuses.get(i)\ "user" \ "id").text)
+  private def getUsers(rows: List[Int]): List[User] = 
+    rows.map(i => {
+      val node = filteredStatuses.get(i)
+      val id = (node \ "user" \ "id").text
+      val name = (node \ "user" \ "name").text
+      new User(id, name)
+    })
   
   private def createLoadTimer {
     timer = new Timer(updateFrequency, new ActionListener() {
@@ -141,7 +155,7 @@ class StatusTableModel(statusDataProvider: StatusDataProvider, username: String)
     filteredStatuses.clear
     for (st <- statuses) {
       var id = (st \ "user" \ "id").text
-      if (! mutedIds.contains(id)) {
+      if (! mutedUsers.contains(id)) {
         if (tagFiltersInclude(id)) {
           val text = (st \ "text").text 
           if (! excludedBecauseReplyAndNotToYou(text)) {
