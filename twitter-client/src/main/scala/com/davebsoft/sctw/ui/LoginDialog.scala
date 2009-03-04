@@ -5,13 +5,14 @@ import _root_.scala.swing.event.{ButtonClicked, EditDone}
 import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.JDialog
 import state.StateRepository
+import twitter.AuthenticationProvider
 
 /**
  * Collect user name and password for Twitter authentication.
  * @author Dave Briccetti
  */
 
-object LoginDialog extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
+class LoginDialog(authenticator: AuthenticationProvider) extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
   
   def username = usernameTextField.text
   def password = new String(passwordTextField.password)
@@ -25,6 +26,7 @@ object LoginDialog extends JDialog(null: java.awt.Frame, "Simple Twitter Client 
   private val loginButton = new Button("Log In")
   private val cancelButton = new Button("Cancel")
   private val saveUserInfoCheckBox = new CheckBox("Remember me")
+  private val infoLabel = new Label(" ")
   
   def storeUserInfoIfSet() {
     if(saveUserInfoCheckBox.peer.isSelected) StateRepository.set((usernameKey, username), (pwdKey, password))
@@ -51,16 +53,29 @@ object LoginDialog extends JDialog(null: java.awt.Frame, "Simple Twitter Client 
     add(usernameTextField, new Constraints {gridx=1; gridy=0})
     add(new Label("Password"), new Constraints {gridx=0; gridy=1})
     add(passwordTextField, new Constraints {gridx=1; gridy=1})
+    add(infoLabel, new Constraints {gridx=0; gridy=2; gridwidth=2; anchor=GridBagPanel.Anchor.West})
+    
     add(new FlowPanel {
       contents += loginButton
       contents += cancelButton
       contents += saveUserInfoCheckBox
-    }, new Constraints {gridx=0; gridy=2; gridwidth=2})
+    }, new Constraints {gridx=0; gridy=3; gridwidth=2})
     reactions += {
       case ButtonClicked(b) =>
         ok = (b == loginButton)
-        setVisible(false)
-        if (ok) storeUserInfoIfSet()
+        if (ok) {
+          if(authenticator.userAuthenticates(username, password)) {
+            storeUserInfoIfSet()
+	        setVisible(false)
+          }
+          else {
+            infoLabel.text = "Login failed"
+          }
+        }
+        else {
+          setVisible(false)
+        }
+        
     }
     listenTo(loginButton)
     listenTo(cancelButton)

@@ -69,14 +69,14 @@ object Main extends SimpleGUIApplication {
   }
     
   override def main(args: Array[String]): Unit = {
-    if (args.length >= 2) {
-      username = args(0)
-      password = args(1)
-    } else if (LoginDialog.display) {
-      username = LoginDialog.username
-      password = LoginDialog.password
+    val login = new LoginDialog(new twitter.AuthenticationProvider)
+    if (login.display) {
+      username = login.username
+      password = login.password
     }
     if (username.length > 0 && password.length > 0) {
+      println("calling main")
+      
       super.main(args)
     } else {
       println("Missing username and password")
