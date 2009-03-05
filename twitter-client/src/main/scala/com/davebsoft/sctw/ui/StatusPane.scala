@@ -1,5 +1,6 @@
 package com.davebsoft.sctw.ui
 
+import _root_.scala.swing.GridBagPanel._
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.xml.{NodeSeq, Node}
@@ -224,7 +225,12 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     }
   }
   
-  private class ControlPanel extends FlowPanel(FlowPanel.Alignment.Left) {
+  private class ControlPanel extends GridBagPanel {
+    
+    private class CustomConstraints extends Constraints {
+      gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
+    }
+  
     picLabel = new Label
     picLabel.peer.addMouseListener(new MouseAdapter {
       override def mouseClicked(e: MouseEvent) = {
@@ -244,18 +250,21 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
         })
       }
     })
-    contents += picLabel
+    add(picLabel, new CustomConstraints {
+      gridx = 0; gridy = 0; gridheight = 2;  
+    })
 
     userDescription = new TextArea {
       background = ControlPanel.this.background
-      columns = 25
       lineWrap = true
       wordWrap = true
       editable = false
     }
-    contents += userDescription
+    add(userDescription, new CustomConstraints {
+      gridx = 1; gridy = 0; gridheight=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
+    })
 
-    contents += new Label("Refresh (secs)")
+    add(new Label("Refresh (secs)"), new CustomConstraints { gridx = 2; gridy = 1; anchor=Anchor.CENTER })
     val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
     var defaultRefresh = 120
     comboBox.peer.setSelectedItem(defaultRefresh)
@@ -264,18 +273,18 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
       def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
         statusTableModel.setUpdateFrequency(comboBox.selection.item)
       }
-    });
-    contents += comboBox
+    })
+    add(comboBox, new CustomConstraints { gridx=3; gridy=1; anchor=Anchor.CENTER })
     
     val lastSetButton = new Button("Last 200") {
       tooltip = "Loads the last 200 of your “following” tweets"
     }
     listenTo(lastSetButton)
-    contents += lastSetButton
+    add(lastSetButton, new CustomConstraints { gridx=4; gridy=1; anchor=Anchor.CENTER })
     
     val clearButton = new Button("Clear")
     listenTo(clearButton)
-    contents += clearButton
+    add(clearButton, new CustomConstraints { gridx=5; gridy=1; anchor=Anchor.CENTER })
     
     reactions += {
       case ButtonClicked(b) => {
