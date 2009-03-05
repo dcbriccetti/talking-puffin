@@ -22,7 +22,8 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
         with TableModelListener with PreChangeListener {
   var table: JTable = _
   var showingUrl: String = _
-  val transparentPic = new ImageIcon(new BufferedImage(48, 48, BufferedImage.TYPE_INT_ARGB))
+  private val THUMBNAIL_SIZE = 48
+  val transparentPic = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, BufferedImage.TYPE_INT_ARGB))
   var picLabel: Label = _
   var userDescription: TextArea = _
   var largeTweet: JTextPane = _
@@ -211,7 +212,8 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
           def doInBackground = new ImageIcon(u)
           override def done = {
             if (urlToShow == showingUrl) { // If user is moving quickly there may be several threads
-              picLabel.icon = get
+              val icon = get
+              if (icon.getIconHeight <= THUMBNAIL_SIZE) picLabel.icon = icon // Ignore broken, too-big thumbnails 
               println("got " + picUrl)
             }
           }
