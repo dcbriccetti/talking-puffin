@@ -53,6 +53,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
       if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
         if (Desktop.isDesktopSupported) {
           Desktop.getDesktop.browse(e.getURL().toURI)
+          table.requestFocusInWindow // Let user resume using keyboard to move through tweets
         }
       }
     }
