@@ -72,16 +72,15 @@ object Main extends SimpleGUIApplication {
     def startup(userName: String, pwd: String) {
         username = userName
         password = pwd
-      if (username.length > 0 && password.length > 0) {
         setupUI
-      } else {
-        println("Missing username and password")
-        System.exit(1)
-      }	
     }
     
-    val login = new LoginDialog(new twitter.AuthenticationProvider, startup)
+    val login = new LoginDialog(new twitter.AuthenticationProvider, shutdown, startup)
     login.display
+  }
+  
+  def shutdown {
+    System.exit(1)
   }
   
   def setupUI {
