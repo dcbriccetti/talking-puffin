@@ -10,39 +10,25 @@ import SwingInvoke._
  */
 object LongRunningSpinner {
 
-  /**
-   * Handles a single functions and its return value. Calls the callback (if not null) when the function has finished.
-   */
-  def run[T](frame: HasCursor, callback: (T) => Unit, f: => T) {
-    executeThread{
-      invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)))
-      val ret = f
-      invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)))
-      if(callback != null) callback(ret)
-    }
-  }
+  private type hasCursorType = { def setCursor(c: Cursor) }
   
   /**
    * Handles several functions after each other on the same thread, and the function returns true if the next function should be
    * executed, false otherwise. The callback funtion is called when the functions have finished
    */
-  def run(frame: HasCursor, callback: () => Unit, functions: () => Boolean*) {
+  def run[T <: hasCursorType](frame: T, callback: () => Unit, functions: () => Boolean*) {
     executeThread {
       invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)))
-      functions.find( !_() )
+      
+      functions.find(f => !f())
+      
       invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)))
     }
-    if(callback != null) callback()
+    if(callback != null) invokeLater(callback())
   }
 
   private def executeThread(f: => Unit) {
     new Thread{ override def run{f} }.start
   }
-  
-  trait HasCursor {
-    def setCursor(c: Cursor)
-  }
-  
-  implicit def toHasCursor[T <: { def setCursor(c: Cursor) }](t: T) = new HasCursor { def setCursor(c: Cursor) = t.setCursor(c) } 
-  
+    
 }
