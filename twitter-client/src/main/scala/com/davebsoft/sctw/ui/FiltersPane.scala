@@ -4,17 +4,20 @@ import _root_.scala.swing._
 import _root_.scala.swing.GridBagPanel._
 import _root_.scala.swing.event.ButtonClicked
 import filter.TagsRepository
-import java.awt.Dimension
+import java.awt.{Dimension, Insets}
 import javax.swing.BorderFactory
 import javax.swing.event.{ListSelectionListener, ListSelectionEvent, TableModelListener, TableModelEvent}
+
 /**
  * Filters
  * @author Dave Briccetti
  */
 
 class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
-  add(new FiltersSettingsPane(tableModel), new Constraints {gridx=0; gridy=0; fill=Fill.Both})
-  add(new UnmutePane(tableModel), new Constraints {gridx=0; gridy=1; fill=Fill.Both})
+  add(new FiltersSettingsPane(tableModel), new Constraints {gridx=0; gridy=0})
+  add(new UnmutePane(tableModel), new Constraints {gridx=0; gridy=1})
+  add(new Label(""), new Constraints {gridx=1; gridy=0; fill=Fill.Horizontal; weightx=1})
+  add(new Label(""), new Constraints {gridx=0; gridy=1; fill=Fill.Vertical; weighty=1})
 }
 
 class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
@@ -26,7 +29,8 @@ class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
     add(new Label("Tags"), new Constraints {gridx=0; gridy=0})
   
     add(new ScrollPane {
-      preferredSize = new Dimension(100, 200)
+      preferredSize = new Dimension(100, 170)
+      minimumSize = new Dimension(100, 100)
       val listView = new ListView(TagsRepository.get)
       val selModel = listView.peer.getSelectionModel
       selModel.addListSelectionListener(new ListSelectionListener(){
@@ -49,19 +53,17 @@ class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
   add(excludeNotToYouReplies, new Constraints {gridx=0; gridy=2; gridwidth=3})
   listenTo(excludeNotToYouReplies)
   
+  class MatchField extends TextField {columns=20; minimumSize=new Dimension(100, preferredSize.height)}
+
   add(new Label("Include Matching"), new Constraints {gridx=0; gridy=3})
-  val includeMatching = new TextField {
-    columns = 40
-  }
+  val includeMatching = new MatchField
   add(includeMatching, new Constraints {gridx=1; gridy=3})
   
   val includeIsRegex = new CheckBox("Regular Expression")
   add(includeIsRegex, new Constraints {gridx=2; gridy=3})
 
   add(new Label("Exclude Matching"), new Constraints {gridx=0; gridy=4})
-  val excludeMatching = new TextField {
-    columns = 40
-  }
+  val excludeMatching = new MatchField
   add(excludeMatching, new Constraints {gridx=1; gridy=4})
 
   val excludeIsRegex = new CheckBox("Regular Expression")
@@ -90,7 +92,9 @@ class UnmutePane(tableModel: StatusTableModel) extends GridBagPanel with TableMo
   border = BorderFactory.createTitledBorder("Muted users")
 
   val mutedUsersList = new ListView(tableModel.mutedUsers.values.toList)
-  add(new ScrollPane {contents = mutedUsersList}, new Constraints {gridx=0; gridy=0; anchor=Anchor.West})
+  add(new ScrollPane {
+    contents = mutedUsersList; preferredSize=new Dimension(150,130); minimumSize=new Dimension(150,130)
+  }, new Constraints {gridx=0; gridy=0; anchor=Anchor.West})
 
   tableModel.addTableModelListener(this)
   
