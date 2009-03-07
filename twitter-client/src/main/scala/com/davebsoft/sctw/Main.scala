@@ -69,21 +69,21 @@ object Main extends GUIApplication {
     
   def main(args: Array[String]): Unit = {
     
-    def startup(userName: String, pwd: String) {
-        username = userName
-        password = pwd
-        setupUI
+    def startUp(userName: String, pwd: String) {
+      username = userName
+      password = pwd
+      setUpUi
     }
     
-    val login = new LoginDialog(new twitter.AuthenticationProvider, shutdown, startup)
+    val login = new LoginDialog(new twitter.AuthenticationProvider, shutDown, startUp)
     login.display
   }
   
-  def shutdown {
+  def shutDown {
     System.exit(1)
   }
   
-  def setupUI {
+  def setUpUi {
     init(); 
     top.pack(); 
     top.visible = true 
