@@ -111,6 +111,19 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
 
     menu
   }
+  
+  def clearTweets = {
+    clearSelection
+    statusTableModel.clear
+    picLabel.icon = null
+    userDescription.text = null
+    largeTweet.setText(null)
+  }
+
+  def clearSelection = {
+    table.getSelectionModel.clearSelection
+    lastSelectedRows = emptyIntArray
+  }
 
   private def getSelectedModelIndexes: List[Int] = {
     val tableRows = table.getSelectedRows
@@ -276,35 +289,5 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
       }
     })
     add(comboBox, new CustomConstraints { gridx=3; gridy=1; anchor=Anchor.CENTER })
-    
-    val lastSetButton = new Button("Last 200") {
-      tooltip = "Loads the last 200 of your “following” tweets"
-    }
-    listenTo(lastSetButton)
-    add(lastSetButton, new CustomConstraints { gridx=4; gridy=1; anchor=Anchor.CENTER })
-    
-    val clearButton = new Button("Clear")
-    listenTo(clearButton)
-    add(clearButton, new CustomConstraints { gridx=5; gridy=1; anchor=Anchor.CENTER })
-    
-    reactions += {
-      case ButtonClicked(b) => {
-        if (b == clearButton) {
-          clearSelection
-          statusTableModel.clear
-          picLabel.icon = null
-          userDescription.text = null
-          largeTweet.setText(null)
-        } else if (b == lastSetButton) {
-          clearSelection
-          statusTableModel.loadLastSet
-        }
-      }
-    }
-    
-    def clearSelection = {
-      table.getSelectionModel.clearSelection
-      lastSelectedRows = emptyIntArray
-    }
   }
 }

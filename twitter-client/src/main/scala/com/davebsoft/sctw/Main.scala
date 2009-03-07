@@ -1,8 +1,8 @@
 package com.davebsoft.sctw
 
 import _root_.scala.swing.event.{ButtonClicked, SelectionChanged, WindowClosing}
-import java.awt.Dimension
 import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.{Dimension}
 import javax.swing.table.{DefaultTableModel, AbstractTableModel}
 import javax.swing.{SwingUtilities, Timer}
 import java.util.{ArrayList,Collections}
@@ -30,17 +30,31 @@ object Main extends GUIApplication {
    */
   def top = {
   
-    new Frame {
+     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
+     val friendsTableModel = new StatusTableModel(tweetsProvider, username)
+     val statusPane = new StatusPane(friendsTableModel)
+ 
+     new Frame {
       title = "Simple Twitter Client"
+      menuBar = new MenuBar {
+        val tweetMenu = new Menu("Tweets")
+        tweetMenu.contents += new MenuItem(new Action("Clear") {def apply=statusPane.clearTweets})
+        tweetMenu.contents += new MenuItem(new Action("Last 200") {
+          toolTip = "Loads the last 200 of your “following” tweets"
+          def apply={
+            statusPane.clearSelection
+            friendsTableModel.loadLastSet
+          }
+        })
+        contents += tweetMenu
+      }
 
       TagUsers.load
-      val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
 
       contents = new TabbedPane() {
         preferredSize = new Dimension(900, 600)
         
-        val friendsTableModel = new StatusTableModel(tweetsProvider, username)
-        pages.append(new TabbedPane.Page("Tweets", new StatusPane(friendsTableModel)))
+        pages.append(new TabbedPane.Page("Tweets", statusPane))
         
         val following = new FriendsDataProvider(username, password).getUsers
         val followers = new FollowersDataProvider(username, password).getUsers
