@@ -13,8 +13,8 @@ object HtmlFormatter {
     val parent = if (replyTo.length > 0 && replyToUser.length > 0) 
       "<a href='http://twitter.com/" + replyToUser + 
       "/statuses/" + replyTo + "'>↑</a> " else "" 
-    var r = text.replaceAll("(https?\\://[^'\"\\s]+)", "<a href='$1'>$1</a>")
-    r = r.replaceAll("@(\\S+)", "<a href='http://twitter.com/$1'>@$1</a>")
+    var r = text.replaceAll("""(https?://[^'"\s]+)""", "<a href='$1'>$1</a>")
+    r = r.replaceAll("""@([^\s:]+)""", "<a href='http://twitter.com/$1'>@$1</a>")
     "<html>" + parent + "<font face='Georgia' size='+2'>" + r + "</font></html>"    
   }
 
