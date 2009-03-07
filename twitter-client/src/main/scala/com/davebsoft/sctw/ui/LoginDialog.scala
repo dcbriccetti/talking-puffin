@@ -8,6 +8,7 @@ import javax.swing.JDialog
 import state.StateRepository
 import twitter.AuthenticationProvider
 import LongRunningSpinner._
+import event.Event
 
 /**
  * Collect user name and password for Twitter authentication.
@@ -30,6 +31,13 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
   private val cancelButton = new Button("Cancel")
   private val saveUserInfoCheckBox = new CheckBox("Remember me")
   private val infoLabel = new Label(" ")
+
+  private val usernameTextField = new TextField(storedUser) {columns=20}
+  private val passwordTextField = new PasswordField(storedPwd) {columns=20}
+  
+  private val enterReaction: PartialFunction[Event, Unit] = { case EditDone(f) => loginButton.peer.doClick() }
+  
+  setupEnterClick(true)
   
   def storeUserInfoIfSet() {
     if(saveUserInfoCheckBox.peer.isSelected) StateRepository.set((usernameKey, username), (pwdKey, password))
@@ -38,16 +46,15 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
 
   if (storedUser != null) saveUserInfoCheckBox.peer.setSelected(true)
   
-  private val usernameTextField = new TextField(storedUser) {columns=20}
-  private val passwordTextField = new PasswordField(storedPwd) {columns=20}
+  private def setupEnterClick(enable: Boolean) {
+    enterDoesLoginClick(usernameTextField, enable)
+    enterDoesLoginClick(passwordTextField, enable)
+  }
   
-  enterDoesLoginClick(usernameTextField)
-  enterDoesLoginClick(passwordTextField)
-
-  private def enterDoesLoginClick(t: TextField) {
-    t.reactions += { 
-      case EditDone(f) => loginButton.peer.doClick()
-    }
+  
+  private def enterDoesLoginClick(t: TextField, enable: Boolean) {
+    if (enable) t.reactions += enterReaction
+    else t.reactions -= enterReaction
   }
   
   setContentPane(new GridBagPanel {
@@ -115,6 +122,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
     cancelButton.enabled = enable
     loginButton.enabled = enable
     saveUserInfoCheckBox.enabled = enable
+    setupEnterClick(enable)
   }
   
   def display = {
