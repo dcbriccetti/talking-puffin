@@ -16,16 +16,26 @@ object LongRunningSpinner {
    * Handles several functions after each other on the same thread, and the function returns true if the next function should be
    * executed, false otherwise. The callback funtion is called when the functions have finished
    */
-  def run[T <: hasCursorType](frame: T, callback: () => Unit, functions: () => Boolean*) {
+  def run[T <: hasCursorType](frame: T, callback: (Status) => Unit, functions: () => Boolean*) {
     execSwingWorker({
-      invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)))
+      try {
+        invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)))
       
-      functions.find(f => !f())
-      
-      invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)))
-    }, (it: Unit) =>
-      if(callback != null) callback()
+        functions.find(f => !f())
+        
+        invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)))
+        Successful
+      }
+      catch {
+        case e: Exception => new Failure(e)
+      }
+    }, (status: Status) =>
+      if(callback != null) callback(status)
     )
   }
+  
+  abstract sealed case class Status()
+  case object Successful extends Status
+  case class Failure(val e:Exception) extends Status
   
 }
