@@ -20,7 +20,7 @@ import state.StateRepository
  * 
  * @Author Dave Briccetti, daveb@davebsoft.com, @dcbriccetti
  */
-object Main extends SimpleGUIApplication {
+object Main extends GUIApplication {
   
   private var username: String = ""
   private var password: String = ""
@@ -67,7 +67,7 @@ object Main extends SimpleGUIApplication {
     users map (u => (u \ "id").text) 
   }
     
-  override def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit = {
     
     def startup(userName: String, pwd: String) {
         username = userName
