@@ -15,7 +15,6 @@ import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
 import filter.TagsRepository
-import SwingInvoke._
 
 /**
  * Displays friend statuses
@@ -210,15 +209,17 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
         showingUrl = picUrl
         val u = new URL(picUrl)
         picLabel.icon = transparentPic
-        
-        execSwingWorker[Icon, Object](new ImageIcon(u), icon => {
+        new SwingWorker[Icon, Object] {
           val urlToShow = showingUrl
-          if (urlToShow == showingUrl) { // If user is moving quickly there may be several threads
-            if (icon.getIconHeight <= THUMBNAIL_SIZE) picLabel.icon = icon // Ignore broken, too-big thumbnails 
-            println("got " + picUrl)
+          def doInBackground = new ImageIcon(u)
+          override def done = {
+            if (urlToShow == showingUrl) { // If user is moving quickly there may be several threads
+              val icon = get
+              if (icon.getIconHeight <= THUMBNAIL_SIZE) picLabel.icon = icon // Ignore broken, too-big thumbnails 
+              println("got " + picUrl)
+            }
           }
-        })
-        
+        }.execute
       }
     } catch {
       case ex: IndexOutOfBoundsException => println(ex)
