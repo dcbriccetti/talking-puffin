@@ -83,6 +83,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
   
 
   private def handleLogin {
+    toggleButton(false)
     LongRunningSpinner.run(this, null, 
         { 
           () =>
@@ -93,6 +94,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
           else {
             infoLabel.foreground = Color.RED
             infoLabel.text = "Login failed"
+            toggleButton(true)
             false
           }
         }, 
@@ -108,6 +110,12 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
   }
   
   getRootPane.setDefaultButton(loginButton.peer)
+  
+  private def toggleButton(enable: Boolean) {
+    cancelButton.enabled = enable
+    loginButton.enabled = enable
+    saveUserInfoCheckBox.enabled = enable
+  }
   
   def display = {
     pack
