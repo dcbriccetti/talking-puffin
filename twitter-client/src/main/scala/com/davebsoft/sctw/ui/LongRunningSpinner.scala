@@ -17,18 +17,15 @@ object LongRunningSpinner {
    * executed, false otherwise. The callback funtion is called when the functions have finished
    */
   def run[T <: hasCursorType](frame: T, callback: () => Unit, functions: () => Boolean*) {
-    executeThread {
+    execSwingWorker({
       invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)))
       
       functions.find(f => !f())
       
       invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)))
-    }
-    if(callback != null) invokeLater(callback())
+    }, (it: Unit) =>
+      if(callback != null) callback()
+    )
   }
-
-  private def executeThread(f: => Unit) {
-    new Thread{ override def run{f} }.start
-  }
-    
+  
 }
