@@ -16,7 +16,9 @@ import event.Event
  * @author Alf Kristian Støyle  
  */
 
-class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit, startup: (String, String) => Unit) extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
+class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit, 
+  startup: (String, String) => Unit) 
+  extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
   
   def username = usernameTextField.text
   def password = new String(passwordTextField.password)
