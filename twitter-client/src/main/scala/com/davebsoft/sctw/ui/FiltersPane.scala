@@ -14,15 +14,15 @@ import javax.swing.event.{ListSelectionListener, ListSelectionEvent, TableModelL
  */
 
 class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
-  add(new FiltersSettingsPane(tableModel), new Constraints {gridx=0; gridy=0})
-  add(new UnmutePane(tableModel), new Constraints {gridx=0; gridy=1})
+  val filterSettingsPane = new FiltersSettingsPane(tableModel)
+  add(filterSettingsPane, new Constraints {gridx=0; gridy=0})
   add(new Label(""), new Constraints {gridx=1; gridy=0; fill=Fill.Horizontal; weightx=1})
   add(new Label(""), new Constraints {gridx=0; gridy=1; fill=Fill.Vertical; weighty=1})
+  
+  def applyChanges = filterSettingsPane.applyChanges
 }
 
 class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
-  border = BorderFactory.createTitledBorder("Settings")
-  
   var selectedTags = List[String]()
   
   val tagsPanel = new GridBagPanel {
@@ -47,45 +47,45 @@ class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
     }, new Constraints {gridx=0; gridy=1})
   }
   
-  add(tagsPanel, new Constraints {gridx=0; gridy=0; gridwidth=3})
+  add(new FlowPanel {
+    contents += tagsPanel
+    contents += new UnmutePane(tableModel)
+  }, new Constraints {gridx=0; gridy=0; gridwidth=3})
   
   val excludeNotToYouReplies = new CheckBox("Exclude replies not to you")
   add(excludeNotToYouReplies, new Constraints {gridx=0; gridy=2; gridwidth=3})
-  listenTo(excludeNotToYouReplies)
   
   class MatchField extends TextField {columns=20; minimumSize=new Dimension(100, preferredSize.height)}
 
-  add(new Label("Include Matching"), new Constraints {gridx=0; gridy=3})
-  val includeMatching = new MatchField
+  add(new Label("Include"), new Constraints {gridx=0; gridy=3})
+  val includeMatching = 
+    new MatchField {tooltip="Include only tweets that match this string or regular expression"}
   add(includeMatching, new Constraints {gridx=1; gridy=3})
   
-  val includeIsRegex = new CheckBox("Regular Expression")
+  class RegexCheckBox extends CheckBox("Regex") {
+    tooltip = "Whether this search argument is a regular expression"
+  }
+  
+  val includeIsRegex = new RegexCheckBox
   add(includeIsRegex, new Constraints {gridx=2; gridy=3})
 
-  add(new Label("Exclude Matching"), new Constraints {gridx=0; gridy=4})
-  val excludeMatching = new MatchField
+  add(new Label("Exclude"), new Constraints {gridx=0; gridy=4})
+  val excludeMatching = new MatchField {tooltip="Exclude tweets that match this string or regular expression"}
   add(excludeMatching, new Constraints {gridx=1; gridy=4})
 
-  val excludeIsRegex = new CheckBox("Regular Expression")
+  val excludeIsRegex = new RegexCheckBox
   add(excludeIsRegex, new Constraints {gridx=2; gridy=4})
 
-  val applyButton = new Button("Apply")
-  add(applyButton, new Constraints {gridx=0; gridy=20; gridwidth=3})
-  listenTo(applyButton)
-
-  reactions += {
-    case ButtonClicked(b) => {
-      if (b == applyButton) {
-        tableModel.selectedTags = selectedTags
-        tableModel.excludeNotToYouReplies = excludeNotToYouReplies.selected
-        tableModel.setIncludeMatching(includeMatching.text, includeIsRegex.selected)
-        tableModel.setExcludeMatching(excludeMatching.text, excludeIsRegex.selected)
-        tableModel.applyFilters
-      }
-    }
-  }
   add(new Label(""), new Constraints {gridx=4; gridy=0; fill=GridBagPanel.Fill.Horizontal; weightx=1; })
   add(new Label(""), new Constraints {gridx=0; gridy=21; fill=GridBagPanel.Fill.Vertical; weighty=1;})
+  
+  def applyChanges {
+    tableModel.selectedTags = selectedTags
+    tableModel.excludeNotToYouReplies = excludeNotToYouReplies.selected
+    tableModel.setIncludeMatching(includeMatching.text, includeIsRegex.selected)
+    tableModel.setExcludeMatching(excludeMatching.text, excludeIsRegex.selected)
+    tableModel.applyFilters
+  }
 }
 
 class UnmutePane(tableModel: StatusTableModel) extends GridBagPanel with TableModelListener {

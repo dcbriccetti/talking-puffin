@@ -34,7 +34,7 @@ object Main extends GUIApplication {
      val friendsTableModel = new StatusTableModel(tweetsProvider, username)
      val statusPane = new StatusPane(friendsTableModel)
  
-     new Frame {
+    new Frame {
       title = "Simple Twitter Client"
       menuBar = new MenuBar {
         val tweetMenu = new Menu("Tweets")
@@ -51,18 +51,24 @@ object Main extends GUIApplication {
 
       TagUsers.load
 
-      contents = new TabbedPane() {
+      val filtersPane = new FiltersPane(friendsTableModel)
+      val filtersPage = new TabbedPane.Page("Filters", filtersPane)
+
+      val tabbedPane = new TabbedPane() {
         preferredSize = new Dimension(900, 600)
-        
+
         pages.append(new TabbedPane.Page("Tweets", statusPane))
-        
+
         val following = new FriendsDataProvider(username, password).getUsers
         val followers = new FollowersDataProvider(username, password).getUsers
         pages.append(new TabbedPane.Page("Following", new FriendsFollowersPane(following, getIds(followers))))
         pages.append(new TabbedPane.Page("Followers", new FriendsFollowersPane(followers, getIds(following))))
-        
-        pages.append(new TabbedPane.Page("Filters", new FiltersPane(friendsTableModel)))
+
+        pages.append(filtersPage)
       }
+      listenTo(tabbedPane.selection)
+      contents = tabbedPane
+      var lastSelectedPane = tabbedPane.selection.page
 
       reactions += {
         case WindowClosing(_) => { 
@@ -70,6 +76,14 @@ object Main extends GUIApplication {
           StateRepository.save
           TagUsers.save
           System.exit(1) 
+        }
+        case SelectionChanged(sc) => {
+          val selectedPage = tabbedPane.selection.page
+          if (lastSelectedPane == filtersPage && selectedPage != filtersPage) {
+            println("Applying filter changes")
+            filtersPane.applyChanges
+          }
+          lastSelectedPane = selectedPage
         }
       }
       
