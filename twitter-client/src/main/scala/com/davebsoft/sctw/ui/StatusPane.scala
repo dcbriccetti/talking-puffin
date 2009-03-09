@@ -38,7 +38,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     table = buildTable    
     peer.setViewportView(table)
   }, new Constraints{
-    gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
+    grid = (0,0); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
   
   largeTweet = new JTextPane()
@@ -62,11 +62,11 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   
   peer.add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)
-    gridx = 0; gridy = 1; fill = GridBagPanel.Fill.Both;
+    grid = (0,1); fill = GridBagPanel.Fill.Both;
   }.peer)
 
   add(new ControlPanel, new Constraints{
-    gridx = 0; gridy = 2; fill = GridBagPanel.Fill.Horizontal;
+    grid = (0,2); fill = GridBagPanel.Fill.Horizontal;
   })
 
   def tableChanging = lastSelectedRows = table.getSelectedRows
@@ -265,7 +265,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
       }
     })
     add(picLabel, new CustomConstraints {
-      gridx = 0; gridy = 0; gridheight = 2;  
+      grid = (0,0); gridheight = 2;  
     })
 
     userDescription = new TextArea {
@@ -275,10 +275,10 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
       editable = false
     }
     add(userDescription, new CustomConstraints {
-      gridx = 1; gridy = 0; gridheight=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
+      grid = (1,0); gridheight=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
     })
 
-    add(new Label("Refresh (secs)"), new CustomConstraints { gridx = 2; gridy = 1; anchor=Anchor.CENTER })
+    add(new Label("Refresh (secs)"), new CustomConstraints { grid = (2,1); anchor=Anchor.CENTER })
     val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
     var defaultRefresh = 120
     comboBox.peer.setSelectedItem(defaultRefresh)
@@ -288,6 +288,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
         statusTableModel.setUpdateFrequency(comboBox.selection.item)
       }
     })
-    add(comboBox, new CustomConstraints { gridx=3; gridy=1; anchor=Anchor.CENTER })
+    add(comboBox, new CustomConstraints { grid=(3,1); anchor=Anchor.CENTER })
   }
 }

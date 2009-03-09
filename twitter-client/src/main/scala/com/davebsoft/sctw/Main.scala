@@ -1,7 +1,7 @@
 package com.davebsoft.sctw
 
 import _root_.scala.swing.event.{ButtonClicked, SelectionChanged, WindowClosing}
-import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.event.{ActionEvent, ActionListener,KeyEvent}
 import java.awt.{Dimension}
 import javax.swing.table.{DefaultTableModel, AbstractTableModel}
 import javax.swing.{SwingUtilities, Timer}
@@ -12,6 +12,7 @@ import twitter.{FriendsDataProvider, FollowersDataProvider, TweetsProvider}
 import ui.{StatusTableModel, FiltersPane, StatusPane, FriendsFollowersPane, LoginDialog}
 import filter.TagUsers
 import state.StateRepository
+import TabbedPane._
 
 /**
  * “Simple Twitter Client”
@@ -30,15 +31,16 @@ object Main extends GUIApplication {
    */
   def top = {
   
-     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
-     val friendsTableModel = new StatusTableModel(tweetsProvider, username)
-     val statusPane = new StatusPane(friendsTableModel)
+    val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
+    val friendsTableModel = new StatusTableModel(tweetsProvider, username)
+    val statusPane = new StatusPane(friendsTableModel)
  
+    val clearAction = Action("Clear") {statusPane.clearTweets}
     new Frame {
       title = "Simple Twitter Client"
       menuBar = new MenuBar {
         val tweetMenu = new Menu("Tweets")
-        tweetMenu.contents += new MenuItem(new Action("Clear") {def apply=statusPane.clearTweets})
+        tweetMenu.contents += new MenuItem(clearAction)
         tweetMenu.contents += new MenuItem(new Action("Last 200") {
           toolTip = "Loads the last 200 of your “following” tweets"
           def apply={
@@ -52,17 +54,17 @@ object Main extends GUIApplication {
       TagUsers.load
 
       val filtersPane = new FiltersPane(friendsTableModel)
-      val filtersPage = new TabbedPane.Page("Filters", filtersPane)
+      val filtersPage = new Page("Filters", filtersPane)
 
       val tabbedPane = new TabbedPane() {
         preferredSize = new Dimension(900, 600)
 
-        pages.append(new TabbedPane.Page("Tweets", statusPane))
+        pages.append(new Page("Tweets", statusPane))
 
         val following = new FriendsDataProvider(username, password).getUsers
         val followers = new FollowersDataProvider(username, password).getUsers
-        pages.append(new TabbedPane.Page("Following", new FriendsFollowersPane(following, getIds(followers))))
-        pages.append(new TabbedPane.Page("Followers", new FriendsFollowersPane(followers, getIds(following))))
+        pages.append(new Page("Following", new FriendsFollowersPane(following, getIds(followers))))
+        pages.append(new Page("Followers", new FriendsFollowersPane(followers, getIds(following))))
 
         pages.append(filtersPage)
       }

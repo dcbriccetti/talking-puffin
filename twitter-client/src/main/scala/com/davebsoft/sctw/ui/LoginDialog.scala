@@ -61,17 +61,17 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
   
   setContentPane(new GridBagPanel {
     border = Swing.EmptyBorder(5, 5, 5, 5)
-    add(new Label("User name"), new Constraints {gridx=0; gridy=0})
-    add(usernameTextField, new Constraints {gridx=1; gridy=0})
-    add(new Label("Password"), new Constraints {gridx=0; gridy=1})
-    add(passwordTextField, new Constraints {gridx=1; gridy=1})
-    add(infoLabel, new Constraints {gridx=0; gridy=2; gridwidth=2; anchor=GridBagPanel.Anchor.West})
+    add(new Label("User name"), new Constraints {grid=(0,0)})
+    add(usernameTextField,      new Constraints {grid=(1,0)})
+    add(new Label("Password"),  new Constraints {grid=(0,1)})
+    add(passwordTextField,      new Constraints {grid=(1,1)})
+    add(infoLabel,              new Constraints {grid=(0,2); gridwidth=2; anchor=GridBagPanel.Anchor.West})
     
     add(new FlowPanel {
       contents += loginButton
       contents += cancelButton
       contents += saveUserInfoCheckBox
-    }, new Constraints {gridx=0; gridy=3; gridwidth=2})
+    }, new Constraints {grid=(0,3); gridwidth=2})
     
     reactions += {
       case ButtonClicked(b) =>

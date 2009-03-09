@@ -15,9 +15,9 @@ import javax.swing.event.{ListSelectionListener, ListSelectionEvent, TableModelL
 
 class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
   val filterSettingsPane = new FiltersSettingsPane(tableModel)
-  add(filterSettingsPane, new Constraints {gridx=0; gridy=0})
-  add(new Label(""), new Constraints {gridx=1; gridy=0; fill=Fill.Horizontal; weightx=1})
-  add(new Label(""), new Constraints {gridx=0; gridy=1; fill=Fill.Vertical; weighty=1})
+  add(filterSettingsPane, new Constraints {grid=(0,0)})
+  add(new Label(""), new Constraints {grid=(1,0); fill=Fill.Horizontal; weightx=1})
+  add(new Label(""), new Constraints {grid=(0,1); fill=Fill.Vertical; weighty=1})
   
   def applyChanges = filterSettingsPane.applyChanges
 }
@@ -26,7 +26,7 @@ class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
   var selectedTags = List[String]()
   
   val tagsPanel = new GridBagPanel {
-    add(new Label("Tags"), new Constraints {gridx=0; gridy=0})
+    add(new Label("Tags"), new Constraints {grid=(0,0)})
   
     add(new ScrollPane {
       preferredSize = new Dimension(100, 170)
@@ -44,40 +44,40 @@ class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
         }
       })
       contents = listView
-    }, new Constraints {gridx=0; gridy=1})
+    }, new Constraints {grid=(0,1)})
   }
   
   add(new FlowPanel {
     contents += tagsPanel
     contents += new UnmutePane(tableModel)
-  }, new Constraints {gridx=0; gridy=0; gridwidth=3})
+  }, new Constraints {grid=(0,0); gridwidth=3})
   
   val excludeNotToYouReplies = new CheckBox("Exclude replies not to you")
-  add(excludeNotToYouReplies, new Constraints {gridx=0; gridy=2; gridwidth=3})
+  add(excludeNotToYouReplies, new Constraints {grid=(0,2); gridwidth=3})
   
   class MatchField extends TextField {columns=20; minimumSize=new Dimension(100, preferredSize.height)}
 
-  add(new Label("Include"), new Constraints {gridx=0; gridy=3})
+  add(new Label("Include"), new Constraints {grid=(0,3)})
   val includeMatching = 
     new MatchField {tooltip="Include only tweets that match this string or regular expression"}
-  add(includeMatching, new Constraints {gridx=1; gridy=3})
+  add(includeMatching, new Constraints {grid=(1,3)})
   
   class RegexCheckBox extends CheckBox("Regex") {
     tooltip = "Whether this search argument is a regular expression"
   }
   
   val includeIsRegex = new RegexCheckBox
-  add(includeIsRegex, new Constraints {gridx=2; gridy=3})
+  add(includeIsRegex, new Constraints {grid=(2,3)})
 
-  add(new Label("Exclude"), new Constraints {gridx=0; gridy=4})
+  add(new Label("Exclude"), new Constraints {grid=(0,4)})
   val excludeMatching = new MatchField {tooltip="Exclude tweets that match this string or regular expression"}
-  add(excludeMatching, new Constraints {gridx=1; gridy=4})
+  add(excludeMatching, new Constraints {grid=(1,4)})
 
   val excludeIsRegex = new RegexCheckBox
-  add(excludeIsRegex, new Constraints {gridx=2; gridy=4})
+  add(excludeIsRegex, new Constraints {grid=(2,4)})
 
-  add(new Label(""), new Constraints {gridx=4; gridy=0; fill=GridBagPanel.Fill.Horizontal; weightx=1; })
-  add(new Label(""), new Constraints {gridx=0; gridy=21; fill=GridBagPanel.Fill.Vertical; weighty=1;})
+  add(new Label(""), new Constraints {grid=(4,0); fill=GridBagPanel.Fill.Horizontal; weightx=1; })
+  add(new Label(""), new Constraints {grid=(0,21); fill=GridBagPanel.Fill.Vertical; weighty=1;})
   
   def applyChanges {
     tableModel.selectedTags = selectedTags
@@ -94,7 +94,7 @@ class UnmutePane(tableModel: StatusTableModel) extends GridBagPanel with TableMo
   val mutedUsersList = new ListView(tableModel.mutedUsers.values.toList)
   add(new ScrollPane {
     contents = mutedUsersList; preferredSize=new Dimension(150,130); minimumSize=new Dimension(150,130)
-  }, new Constraints {gridx=0; gridy=0; anchor=Anchor.West})
+  }, new Constraints {grid=(0,0); anchor=Anchor.West})
 
   tableModel.addTableModelListener(this)
   
@@ -103,7 +103,7 @@ class UnmutePane(tableModel: StatusTableModel) extends GridBagPanel with TableMo
   }
 
   val unmuteButton = new Button("Unmute")
-  add(unmuteButton, new Constraints {gridx=0; gridy=1})
+  add(unmuteButton, new Constraints {grid=(0,1)})
   
   listenTo(unmuteButton)
   reactions += {
