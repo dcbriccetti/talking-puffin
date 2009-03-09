@@ -24,7 +24,8 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   var table: JTable = _
   var showingUrl: String = _
   private val THUMBNAIL_SIZE = 48
-  val transparentPic = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, BufferedImage.TYPE_INT_ARGB))
+  val transparentPic = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, 
+    BufferedImage.TYPE_INT_ARGB))
   var picLabel: Label = _
   var userDescription: TextArea = _
   var largeTweet: JTextPane = _
@@ -35,7 +36,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   statusTableModel.setPreChangeListener(this)
   
   add(new ScrollPane {
-    table = buildTable    
+    table = new StatusTable(statusTableModel, showStatusDetails)
     peer.setViewportView(table)
   }, new Constraints{
     grid = (0,0); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
@@ -84,35 +85,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     }
   }
 
-  def getPopupMenu: JPopupMenu = {
-    val menu = new JPopupMenu()
-
-    val mi = new JMenuItem("Mute")
-    mi.addActionListener(new ActionListener() {
-      def actionPerformed(e: ActionEvent) = {
-        statusTableModel.muteSelectedUsers(getSelectedModelIndexes)
-      }
-    })
-    menu.add(mi)
-
-    val tagAl = new ActionListener() {
-      def actionPerformed(e: ActionEvent) = {
-        statusTableModel.tagSelectedUsers(getSelectedModelIndexes, e.getActionCommand)
-      }
-    }
-    
-    val tagMi = new JMenu("Tag Friend With")
-    for (tag <- TagsRepository.get) {
-      val tagSmi = new JMenuItem(tag)
-      tagSmi.addActionListener(tagAl)
-      tagMi.add(tagSmi)
-    }
-    menu.add(tagMi)
-
-    menu
-  }
-  
-  def clearTweets = {
+  def clearTweets {
     clearSelection
     statusTableModel.clear
     picLabel.icon = null
@@ -120,125 +93,36 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     largeTweet.setText(null)
   }
 
-  def clearSelection = {
+  def clearSelection {
     table.getSelectionModel.clearSelection
     lastSelectedRows = emptyIntArray
   }
 
-  private def getSelectedModelIndexes: List[Int] = {
-    val tableRows = table.getSelectedRows
-    var smi = List[Int]()
-    for (i <- 0 to (tableRows.length - 1)) {
-      smi ::= table.convertRowIndexToModel(tableRows(i))
-    }
-    smi
-  }
-  
-  private def buildTable: JTable = {
-    val table = new JTable(statusTableModel)
-    val sorter = new TableRowSorter[StatusTableModel](statusTableModel);
-    table.setRowSorter(sorter);
-    
-    val colModel = table.getColumnModel
-    
-    val ageCol = colModel.getColumn(0)
-    ageCol.setPreferredWidth(60)
-    ageCol.setMaxWidth(100)
-    ageCol.setCellRenderer(new AgeCellRenderer);
-    
-    val nameCol = colModel.getColumn(1)
-    nameCol.setPreferredWidth(100)
-    nameCol.setMaxWidth(200)
-    
-    val statusCol = colModel.getColumn(2)
-    statusCol.setPreferredWidth(600)
-    statusCol.setCellRenderer(new StatusCellRenderer);
-
-    table.addMouseListener(new PopupListener(table, getPopupMenu));
-    table.addMouseMotionListener(new MouseAdapter {
-      override def mouseMoved(e: MouseEvent) = {
-        sendEventToRenderer(e)
-      }
-    })
-    table.addMouseListener(new MouseAdapter {
-      override def mouseClicked(e: MouseEvent) = sendEventToRenderer(e)
-      override def mousePressed(e: MouseEvent) = sendEventToRenderer(e)
-      override def mouseReleased(e: MouseEvent) = sendEventToRenderer(e)
-    })
-    table.addMouseListener(new MouseAdapter {
-      override def mouseClicked(e: MouseEvent) = {
-        if (e.getClickCount == 2) {
-          val status = statusTableModel.getStatusAt(table.convertRowIndexToModel(
-            table.getSelectedRow))
-          var uri = "http://twitter.com/" +
-                  (status \ "user" \ "screen_name").text + "/statuses/" +
-                  (status \ "id").text
-          if (Desktop.isDesktopSupported) {
-            Desktop.getDesktop.browse(new URI(uri))
+  private def showStatusDetails(status: NodeSeq) {
+    val user = status \ "user"
+    userDescription.text = (user \ "name").text + " • " +
+            (user \ "location").text + " • " + (user \ "description").text
+    largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
+      (status \ "in_reply_to_status_id").text)) 
+    val picUrl = (user \ "profile_image_url").text
+    if (! picUrl.equals(showingUrl)) {
+      showingUrl = picUrl
+      val u = new URL(picUrl)
+      picLabel.icon = transparentPic
+      new SwingWorker[Icon, Object] {
+        val urlToShow = showingUrl
+        def doInBackground = new ImageIcon(u)
+        override def done = {
+          if (urlToShow == showingUrl) { // If user is moving quickly there may be several threads
+            val icon = get
+            if (icon.getIconHeight <= THUMBNAIL_SIZE) picLabel.icon = icon // Ignore broken, too-big thumbnails 
+            println("got " + picUrl)
           }
         }
-      }
-    })
-    
-    table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
-      def valueChanged(e: ListSelectionEvent) = {
-        if (! e.getValueIsAdjusting) {
-          if (table.getSelectedRowCount == 1) {
-            showDetailsForTableRow(table.getSelectedRow)
-          }
-        }
-      }
-    })
-
-    table
-  }
-  
-  private def sendEventToRenderer(e: MouseEvent) {
-    val c = table.columnAtPoint(e.getPoint)
-    val r = table.rowAtPoint(e.getPoint)
-    if (c != -1 && r != -1) {
-      val renderer = table.getCellRenderer(r, c)
-      renderer match {
-        case fcr: StatusCellFancyRenderer => {
-          println("Renderer at " + e.getPoint + ": " + renderer)
-          fcr.text.dispatchEvent(SwingUtilities.convertMouseEvent(table, e, fcr.text))
-        }
-        case _ =>
-      }
+      }.execute
     }
   }
 
-  private def showDetailsForTableRow(r: Int) {
-    try {
-      val modelRowIndex = table.convertRowIndexToModel(r)
-      val status = statusTableModel.getStatusAt(modelRowIndex)
-      val user = status \ "user"
-      userDescription.text = (user \ "name").text + " • " +
-              (user \ "location").text + " • " + (user \ "description").text
-      largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
-        (status \ "in_reply_to_status_id").text)) 
-      val picUrl = (user \ "profile_image_url").text
-      if (! picUrl.equals(showingUrl)) {
-        showingUrl = picUrl
-        val u = new URL(picUrl)
-        picLabel.icon = transparentPic
-        new SwingWorker[Icon, Object] {
-          val urlToShow = showingUrl
-          def doInBackground = new ImageIcon(u)
-          override def done = {
-            if (urlToShow == showingUrl) { // If user is moving quickly there may be several threads
-              val icon = get
-              if (icon.getIconHeight <= THUMBNAIL_SIZE) picLabel.icon = icon // Ignore broken, too-big thumbnails 
-              println("got " + picUrl)
-            }
-          }
-        }.execute
-      }
-    } catch {
-      case ex: IndexOutOfBoundsException => println(ex)
-    }
-  }
-  
   private class ControlPanel extends GridBagPanel {
     
     private class CustomConstraints extends Constraints {
