@@ -1,41 +1,37 @@
 package com.davebsoft.sctw
 
 import _root_.scala.swing.event.{ButtonClicked, SelectionChanged, WindowClosing}
-import java.awt.event.{ActionEvent, ActionListener,KeyEvent}
+import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Dimension}
-import javax.swing.table.{DefaultTableModel, AbstractTableModel}
-import javax.swing.{SwingUtilities, Timer}
-import java.util.{ArrayList,Collections}
 import scala.swing._
 import scala.xml._
+import TabbedPane._
 import twitter.{FriendsDataProvider, FollowersDataProvider, TweetsProvider}
 import ui.{StatusTableModel, FiltersPane, StatusPane, FriendsFollowersPane, LoginDialog}
 import filter.TagUsers
 import state.StateRepository
-import TabbedPane._
 
 /**
  * “Simple Twitter Client”
- * 
+ *
  * Your feedback is welcome!
- * 
+ *
  * @Author Dave Briccetti, daveb@davebsoft.com, @dcbriccetti
  */
 object Main extends GUIApplication {
-  
   private var username: String = ""
   private var password: String = ""
-  
+
   /**
    * Creates the Swing frame.
    */
   def top = {
-  
+
     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
     val friendsTableModel = new StatusTableModel(tweetsProvider, username)
     val statusPane = new StatusPane(friendsTableModel)
- 
-    val clearAction = Action("Clear") {statusPane.clearTweets}
+
+    val clearAction = Action("Clear"){statusPane.clearTweets}
     new Frame {
       title = "Simple Twitter Client"
       menuBar = new MenuBar {
@@ -43,7 +39,7 @@ object Main extends GUIApplication {
         tweetMenu.contents += new MenuItem(clearAction)
         tweetMenu.contents += new MenuItem(new Action("Last 200") {
           toolTip = "Loads the last 200 of your “following” tweets"
-          def apply={
+          def apply = {
             statusPane.clearSelection
             friendsTableModel.loadLastSet
           }
@@ -73,50 +69,47 @@ object Main extends GUIApplication {
       var lastSelectedPane = tabbedPane.selection.page
 
       reactions += {
-        case WindowClosing(_) => { 
-          StateRepository.set("highestId", tweetsProvider.getHighestId) 
+        case WindowClosing(_) => {
+          StateRepository.set("highestId", tweetsProvider.getHighestId)
           StateRepository.save
           TagUsers.save
-          System.exit(1) 
+          System.exit(1)
         }
         case SelectionChanged(sc) => {
           val selectedPage = tabbedPane.selection.page
           if (lastSelectedPane == filtersPage && selectedPage != filtersPage) {
-            println("Applying filter changes")
             filtersPane.applyChanges
           }
           lastSelectedPane = selectedPage
         }
       }
-      
+
       peer.setLocationRelativeTo(null)
     }
   }
-  
+
   private def getIds(users: List[Node]): List[String] = {
-    users map (u => (u \ "id").text) 
+    users map (u => (u \ "id").text)
   }
-    
+
   def main(args: Array[String]): Unit = {
-    
+
     def startUp(userName: String, pwd: String) {
       username = userName
       password = pwd
       setUpUi
     }
-    
+
+    def shutDown = System.exit(1)
+
     val login = new LoginDialog(new twitter.AuthenticationProvider, shutDown, startUp)
     login.display
   }
-  
-  def shutDown {
-    System.exit(1)
-  }
-  
+
   def setUpUi {
-    init(); 
-    top.pack(); 
-    top.visible = true 
+    init
+    top.pack
+    top.visible = true
   }
-  
+
 }

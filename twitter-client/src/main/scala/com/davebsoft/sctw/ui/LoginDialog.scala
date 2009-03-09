@@ -94,27 +94,27 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
   private def handleLogin {
     toggleButton(false)
     LongRunningSpinner.run(this, null, 
-        { 
-          () =>
-          if(authenticator.userAuthenticates(username, password)) {
-            storeUserInfoIfSet()
-            true
-          }
-          else {
-            infoLabel.foreground = Color.RED
-            infoLabel.text = "Login failed"
-            toggleButton(true)
-            false
-          }
-        }, 
-        { 
-          () =>
-          infoLabel.foreground = Color.BLACK
-          infoLabel.text = "Login successful. Initializing…"
-          startup(username, password)
-          setVisible(false)
+      { 
+        () =>
+        if(authenticator.userAuthenticates(username, password)) {
+          storeUserInfoIfSet()
           true
         }
+        else {
+          infoLabel.foreground = Color.RED
+          infoLabel.text = "Login failed"
+          toggleButton(true)
+          false
+        }
+      }, 
+      { 
+        () =>
+        infoLabel.foreground = Color.BLACK
+        infoLabel.text = "Login successful. Initializing…"
+        startup(username, password)
+        setVisible(false)
+        true
+      }
     )
   }
   
