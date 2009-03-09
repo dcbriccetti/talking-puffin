@@ -17,8 +17,8 @@ import event.Event
  */
 
 class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit, 
-  startup: (String, String) => Unit) 
-  extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
+    startup: (String, String) => Unit) 
+    extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
   
   def username = usernameTextField.text
   def password = new String(passwordTextField.password)
@@ -110,7 +110,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
         { 
           () =>
           infoLabel.foreground = Color.BLACK
-          infoLabel.text = "Login successful, initializing"
+          infoLabel.text = "Login successful. Initializing…"
           startup(username, password)
           setVisible(false)
           true
