@@ -27,6 +27,8 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   val transparentPic = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, 
     BufferedImage.TYPE_INT_ARGB))
   var picLabel: Label = _
+  var bigPicFrame: Frame = _
+  var bigPicLabel: Label = _
   var userDescription: TextArea = _
   var largeTweet: JTextPane = _
   val emptyIntArray = new Array[Int](0) 
@@ -117,9 +119,17 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
             val icon = get
             if (icon.getIconHeight <= THUMBNAIL_SIZE) picLabel.icon = icon // Ignore broken, too-big thumbnails 
             println("got " + picUrl)
+            setBigPicLabelIcon
           }
         }
       }.execute
+    }
+  }
+
+  private def setBigPicLabelIcon {
+    if (bigPicFrame != null && bigPicLabel != null) { 
+      bigPicLabel.icon = new ImageIcon(new URL(showingUrl.replace("_normal", "")))
+      bigPicFrame.pack
     }
   }
 
@@ -132,18 +142,21 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     picLabel = new Label
     picLabel.peer.addMouseListener(new MouseAdapter {
       override def mouseClicked(e: MouseEvent) = {
-        val picture = new Label {
-          icon = new ImageIcon(new URL(showingUrl.replace("_normal", "")))
+        bigPicLabel = new Label
+        if (bigPicFrame != null) {
+          bigPicFrame.dispose
         }
-        val bigPicFrame = new Frame {
-          contents = picture
-          pack
+        bigPicFrame = new Frame {
+          contents = bigPicLabel
           peer.setLocationRelativeTo(picLabel.peer)
           visible = true
         }
-        picture.peer.addMouseListener(new MouseAdapter {
+        setBigPicLabelIcon
+        bigPicLabel.peer.addMouseListener(new MouseAdapter {
           override def mouseClicked(e: MouseEvent) = {
             bigPicFrame.dispose
+            bigPicFrame = null
+            bigPicLabel = null
           }
         })
       }
