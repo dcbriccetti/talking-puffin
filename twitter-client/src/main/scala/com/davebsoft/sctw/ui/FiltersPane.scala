@@ -88,28 +88,4 @@ class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
   }
 }
 
-class UnmutePane(tableModel: StatusTableModel) extends GridBagPanel with TableModelListener {
-  border = BorderFactory.createTitledBorder("Muted users")
-
-  val mutedUsersList = new ListView(tableModel.mutedUsers.values.toList)
-  add(new ScrollPane {
-    contents = mutedUsersList; preferredSize=new Dimension(150,130); minimumSize=new Dimension(150,130)
-  }, new Constraints {grid=(0,0); anchor=Anchor.West})
-
-  tableModel.addTableModelListener(this)
-  
-  def tableChanged(e: TableModelEvent) {
-    mutedUsersList.listData = tableModel.mutedUsers.values.toList
-  }
-
-  val unmuteButton = new Button("Unmute")
-  add(unmuteButton, new Constraints {grid=(0,1)})
-  
-  listenTo(unmuteButton)
-  reactions += {
-    case ButtonClicked(b) => {
-      val selected = mutedUsersList.selection.items.toList
-      tableModel.unmuteUsers(selected.map(_.id))
-    }
-  }
-} 
+ 
