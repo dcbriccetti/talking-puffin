@@ -37,48 +37,6 @@ abstract class DataProvider extends HttpHandler {
   
 }
 
-class TweetsProvider(username: String, password: String, startingId: String) extends DataProvider {
-  setCredentials(username, password)
-  if (startingId != null) 
-    setHighestId(startingId)
-  
-  def getUrl = "http://twitter.com/statuses/friends_timeline.xml?count=200" +
-      (if (highestId == null) "" else "&since_id=" + highestId)
-  
-  def getHighestId = highestId
-
-  protected var highestId: String = null
-  
-  protected def setHighestId(highestId: String) {
-    this.highestId = highestId
-  }
-  
-  /**
-   * Fetches statuses from Twitter.
-   */
-  def loadTwitterStatusData: NodeSeq = {
-    formatData(loadTwitterData)
-  }
-  
-  /**
-   * Fetches statuses from Twitter.
-   */
-  def loadLastSet: NodeSeq = {
-    formatData(loadTwitterData("http://twitter.com/statuses/friends_timeline.xml?count=200"))
-  }
-  
-  def formatData(elem: Node): NodeSeq = {
-    if (elem != null) {
-      val statuses = elem \\ "status"
-      if (statuses.length > 0) {
-        highestId = (statuses(0) \ "id").text 
-      }
-      return statuses
-    }
-    List[Node]()
-  }
-}
-
 abstract class FriendsFollowersDataProvider(username: String, password: String) extends DataProvider {
   setCredentials(username, password)
   
