@@ -8,12 +8,12 @@ import java.util.{Collections, Date, ArrayList}
 import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
 import javax.swing.{SwingWorker, Timer}
-import twitter.{DataFetchException, StatusDataProvider}
+import twitter.{DataFetchException, TweetsProvider}
 
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(statusDataProvider: StatusDataProvider, username: String) extends AbstractTableModel {
+class StatusTableModel(statusDataProvider: TweetsProvider, username: String) extends AbstractTableModel {
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
   
