@@ -37,7 +37,6 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   
   val statusCol = colModel.getColumn(2)
   statusCol.setPreferredWidth(600)
-  statusCol.setCellRenderer(new StatusCellRenderer)
 
   addMouseListener(new PopupListener(this, getPopupMenu))
   addMouseListener(new MouseAdapter {

@@ -12,10 +12,11 @@ import twitter.{FriendsFollowersDataProvider}
  * Displays a list of friends or followers
  */
 class FriendsFollowersPane(users: List[Node], xref: List[String]) extends ScrollPane {
-  val table = new JTable(new UsersModel(users, xref))
-  table.setAutoCreateRowSorter(true)
-  table.getColumnModel.getColumn(0).setCellRenderer(new AnnotatedUserRenderer)
-  table.getColumnModel.getColumn(3).setPreferredWidth(500)
+  val table = new JTable(new UsersModel(users, xref)) {
+    setAutoCreateRowSorter(true)
+    getColumnModel.getColumn(0).setCellRenderer(new AnnotatedUserRenderer)
+    getColumnModel.getColumn(3).setPreferredWidth(500)
+  }
   peer.setViewportView(table)
 }
 
