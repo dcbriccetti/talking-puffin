@@ -16,8 +16,8 @@ class AgeCellRenderer extends DefaultTableCellRenderer {
     val seconds = time % 60
     val sb = new StringBuilder
     if (days > 0) sb.append(twoDigitNum(days)).append(":")
-    if (hours > 0) sb.append(twoDigitNum(hours)).append(":")
-    if (mins > 0) sb.append(twoDigitNum(mins)).append(":")
+    if (hours > 0 || sb.length > 0) sb.append(twoDigitNum(hours)).append(":")
+    if (mins > 0 || sb.length > 0) sb.append(twoDigitNum(mins)).append(":")
     sb.append(twoDigitNum(seconds))
     setText(sb.toString)
   }
