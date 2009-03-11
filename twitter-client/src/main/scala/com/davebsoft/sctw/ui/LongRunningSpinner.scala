@@ -5,7 +5,7 @@ import SwingInvoke._
 
 /**
  * Whenever a long running operation is performed the UI thread should be released and a spinner should be shown. This object has
- * functions for simplyfying this tasks. Every functions spins of a thread, and calls a callback function when job is finished.
+ * functions for simplifying these tasks. Every function spins off a thread, and calls a callback function when job is finished.
  * @author Alf Kristian Støyle
  */
 object LongRunningSpinner {

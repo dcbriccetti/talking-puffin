@@ -62,7 +62,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     }
   });
   
-  
   peer.add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)
     grid = (0,1); fill = GridBagPanel.Fill.Both;

@@ -17,9 +17,15 @@ class StatusTableModel(statusDataProvider: TweetsProvider, username: String) ext
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
   
+  /** All loaded statuses */
   private var statuses = List[Node]()
+  
+  /** Statuses, after filtering */
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
+  
+  /** Those users currently muted */
   val mutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
+  
   var selectedTags = List[String]()
   var excludeNotToYouReplies: Boolean = _
   private[this] var includeMatching: String = ""
@@ -215,7 +221,10 @@ class StatusTableModel(statusDataProvider: TweetsProvider, username: String) ext
       loadData
     }
   }
-  
+
+  /**
+   * Clear (remove) all statuses
+   */
   def clear {
     statuses = List[Node]()
     filterAndNotify
@@ -232,6 +241,10 @@ class StatusTableModel(statusDataProvider: TweetsProvider, username: String) ext
   }
 }
 
+/**
+ * Provide hook before the model fires an update notification,
+ * so that the currently selected rows can be saved.
+ */
 trait PreChangeListener {
   def tableChanging
 }
