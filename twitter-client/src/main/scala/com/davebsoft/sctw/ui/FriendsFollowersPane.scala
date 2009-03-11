@@ -12,18 +12,16 @@ import twitter.{FriendsFollowersDataProvider}
  * Displays a list of friends or followers
  */
 class FriendsFollowersPane(users: List[Node], xref: List[String]) extends ScrollPane {
-  val table = new Table {
-    model = new UsersModel(users, xref)
-    peer.setAutoCreateRowSorter(true)
-    val cm = peer.getColumnModel
-    cm.getColumn(0).setCellRenderer(new AnnotatedUserRenderer)
-    cm.getColumn(3).setPreferredWidth(500)
+  val table = new JTable(new UsersModel(users, xref)) {
+    setAutoCreateRowSorter(true)
+    getColumnModel.getColumn(0).setCellRenderer(new AnnotatedUserRenderer)
+    getColumnModel.getColumn(3).setPreferredWidth(500)
   }
-  viewportView = table
+  peer.setViewportView(table)
 }
 
 private class UsersModel(users: List[Node], xref: List[String]) extends AbstractTableModel {
-  private val colNames     = List[String]("Screen Name", "Name", "Location", "Description")
+  private val colNames = List[String]("Screen Name", "Name", "Location", "Description")
   private val elementNames = List[String]("screen_name", "name", "location", "description")
   
   def getColumnCount = 4
