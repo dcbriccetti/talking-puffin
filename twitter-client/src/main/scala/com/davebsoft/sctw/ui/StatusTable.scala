@@ -1,9 +1,11 @@
 package com.davebsoft.sctw.ui
+
 import _root_.scala.swing.GridBagPanel._
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.xml.{NodeSeq, Node}
 
+import _root_.scala.{Option}
 import java.awt.{Desktop}
 import java.awt.event.{KeyEvent, ActionEvent, ActionListener, MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
@@ -20,7 +22,8 @@ import filter.TagsRepository
  * @author Dave Briccetti
  */
 
-class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) => Unit) 
+class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) => Unit,
+      clearAction: Action) 
     extends JTable(statusTableModel) {
   setRowSorter(new TableRowSorter[StatusTableModel](statusTableModel))
   
@@ -38,9 +41,20 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   val statusCol = colModel.getColumn(2)
   statusCol.setPreferredWidth(600)
 
+  val viewAction = Action("View in browser") {viewSelected}
+  viewAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_V, 0)) 
+  getActionMap.put(viewAction.title, viewAction.peer)
+  viewAction.accelerator match {
+    case Some(s) => getInputMap.put(s, viewAction.title)
+    case None =>
+  }
+  
   val muteAction = Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}
   getActionMap.put(muteAction.title, muteAction.peer)
   getInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0), muteAction.title)
+  
+  getActionMap.put(clearAction.title, clearAction.peer)
+  getInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), clearAction.title)
   
   val nextAction = Action("Next") {
     dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
@@ -60,12 +74,7 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = {
       if (e.getClickCount == 2) {
-        val status = statusTableModel.getStatusAt(convertRowIndexToModel(getSelectedRow))
-        var uri = "http://twitter.com/" +
-          (status \ "user" \ "screen_name").text + "/statuses/" + (status \ "id").text
-        if (Desktop.isDesktopSupported) {
-          Desktop.getDesktop.browse(new URI(uri))
-        }
+        viewSelected
       }
     }
   })
@@ -80,11 +89,20 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
     }
   })
 
+  def viewSelected {
+    val status = statusTableModel.getStatusAt(convertRowIndexToModel(getSelectedRow))
+    var uri = "http://twitter.com/" +
+      (status \ "user" \ "screen_name").text + "/statuses/" + (status \ "id").text
+    if (Desktop.isDesktopSupported) {
+      Desktop.getDesktop.browse(new URI(uri))
+    }
+  }
+
   def getPopupMenu: JPopupMenu = {
     val menu = new JPopupMenu()
 
-    val mi = new MenuItem(muteAction)
-    menu.add(mi.peer)
+    menu.add(new MenuItem(viewAction).peer)
+    menu.add(new MenuItem(muteAction).peer)
 
     val tagAl = new ActionListener() {
       def actionPerformed(e: ActionEvent) = {

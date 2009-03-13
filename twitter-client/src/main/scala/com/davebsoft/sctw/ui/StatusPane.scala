@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage
 import java.awt.{Color, Desktop, Dimension, Insets, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
-import javax.swing._
+import javax.swing.{JTable, JTextPane, ImageIcon, Icon, SwingWorker}
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
@@ -32,13 +32,14 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   var userDescription: TextArea = _
   var largeTweet: JTextPane = _
   val emptyIntArray = new Array[Int](0) 
-  var lastSelectedRows = emptyIntArray 
+  var lastSelectedRows = emptyIntArray
+  val clearAction = Action("Clear") {clearTweets}
 
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
   
   add(new ScrollPane {
-    table = new StatusTable(statusTableModel, showStatusDetails)
+    table = new StatusTable(statusTableModel, showStatusDetails, clearAction)
     peer.setViewportView(table)
   }, new Constraints{
     grid = (0,0); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 

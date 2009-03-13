@@ -31,7 +31,7 @@ object Main extends GUIApplication {
     val friendsTableModel = new StatusTableModel(tweetsProvider, username)
     val statusPane = new StatusPane(friendsTableModel)
 
-    val clearAction = Action("Clear") {statusPane.clearTweets}
+    val clearAction = statusPane.clearAction
     new Frame {
       title = "Simple Twitter Client"
       menuBar = new MenuBar {
