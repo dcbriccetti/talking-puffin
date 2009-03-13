@@ -22,7 +22,8 @@ protected trait HttpHandler {
 
   def setCredentials(username: String, password: String) {
     httpClient.getState().setCredentials(new AuthScope("twitter.com", 80, AuthScope.ANY_REALM), 
-      new UsernamePasswordCredentials(username, password));
+      new UsernamePasswordCredentials(username, password))
+    httpClient.getParams.setAuthenticationPreemptive(true)
   }
   
 }
