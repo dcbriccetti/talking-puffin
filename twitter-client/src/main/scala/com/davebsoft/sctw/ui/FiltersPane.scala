@@ -48,37 +48,35 @@ class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
   }
   
   add(new FlowPanel {
+    hGap = 10
     contents += tagsPanel
     contents += new UnmutePane(tableModel)
-  }, new Constraints {grid=(0,0); gridwidth=3})
+  }, new Constraints {grid=(0,0); gridwidth=3; anchor=Anchor.West})
   
   val excludeNotToYouReplies = new CheckBox("Exclude replies not to you")
-  add(excludeNotToYouReplies, new Constraints {grid=(0,2); gridwidth=3})
+  add(excludeNotToYouReplies, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
   
   class MatchField extends TextField {columns=20; minimumSize=new Dimension(100, preferredSize.height)}
 
-  add(new Label("Include"), new Constraints {grid=(0,3)})
+  add(new Label("Include"), new Constraints {grid=(0,3); ipadx=5})
   val includeMatching = 
     new MatchField {tooltip="Include only tweets that match this string or regular expression"}
-  add(includeMatching, new Constraints {grid=(1,3)})
+  add(includeMatching, new Constraints {grid=(1,3); ipadx=5})
   
   class RegexCheckBox extends CheckBox("Regex") {
     tooltip = "Whether this search argument is a regular expression"
   }
   
   val includeIsRegex = new RegexCheckBox
-  add(includeIsRegex, new Constraints {grid=(2,3)})
+  add(includeIsRegex, new Constraints {grid=(2,3); anchor=Anchor.West})
 
-  add(new Label("Exclude"), new Constraints {grid=(0,4)})
+  add(new Label("Exclude"), new Constraints {grid=(0,4); ipadx=5})
   val excludeMatching = new MatchField {tooltip="Exclude tweets that match this string or regular expression"}
-  add(excludeMatching, new Constraints {grid=(1,4)})
+  add(excludeMatching, new Constraints {grid=(1,4); ipadx=5})
 
   val excludeIsRegex = new RegexCheckBox
-  add(excludeIsRegex, new Constraints {grid=(2,4)})
+  add(excludeIsRegex, new Constraints {grid=(2,4); anchor=Anchor.West})
 
-  add(new Label(""), new Constraints {grid=(4,0); fill=GridBagPanel.Fill.Horizontal; weightx=1; })
-  add(new Label(""), new Constraints {grid=(0,21); fill=GridBagPanel.Fill.Vertical; weighty=1;})
-  
   def applyChanges {
     tableModel.selectedTags = selectedTags
     tableModel.excludeNotToYouReplies = excludeNotToYouReplies.selected
