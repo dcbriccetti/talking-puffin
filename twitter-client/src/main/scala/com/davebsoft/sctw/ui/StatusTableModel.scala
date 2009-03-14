@@ -1,6 +1,5 @@
 package com.davebsoft.sctw.ui
 
-import com.davebsoft.sctw.twitter.Utils
 import _root_.scala.xml.{NodeSeq, Node}
 import filter.TagUser
 import java.awt.event.{ActionEvent, ActionListener}
@@ -186,7 +185,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, username: String) ext
   }
   
   private def excludedBecauseReplyAndNotToYou(text: String): Boolean = {
-    val rtu = Utils.getReplyToUser(text)
+    val rtu = LinkExtractor.getReplyToUser(text)
     if (! excludeNotToYouReplies) return false
     if (rtu.length == 0) return false
     ! rtu.equals(username)

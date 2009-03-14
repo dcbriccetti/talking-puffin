@@ -11,6 +11,7 @@ import java.awt.event.{KeyEvent, ActionEvent, ActionListener, MouseEvent, MouseA
 import java.awt.image.BufferedImage
 import java.net.{URI, URL}
 import java.util.Comparator
+import java.util.regex.Pattern
 import javax.swing.{JTable, JMenu, JMenuItem, JPopupMenu, KeyStroke}
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
@@ -49,26 +50,44 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
     case None =>
   }
   
-  val muteAction = Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}
-  getActionMap.put(muteAction.title, muteAction.peer)
-  getInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0), muteAction.title)
+  val openAction = Action("Open Links") {
+    val status = getSelectedStatus
+    val urls = LinkExtractor.getAllLinks(status)
+    
+    if (urls.length > 0) {
+      val menu = new JPopupMenu
+      var index = 0
+      
+      for (url <- urls) {
+        val a1 = Action(url) {browse(url)}
+        a1.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_1 + index, 0)) 
+        index += 1
+        menu.add(new MenuItem(a1).peer)
+      }
+      val menuLoc = this.getCellRect(getSelectedRow, 0, true).getLocation
+      menu.show(this, menuLoc.getX().asInstanceOf[Int], menuLoc.getY().asInstanceOf[Int])
+    }
+  }
+  openAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0))
+  connectAction(openAction, KeyStroke.getKeyStroke(KeyEvent.VK_L, 0))
   
-  getActionMap.put(clearAction.title, clearAction.peer)
-  getInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), clearAction.title)
+  val muteAction = Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}
+  muteAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0))
+  connectAction(muteAction, KeyStroke.getKeyStroke(KeyEvent.VK_M, 0))
+  
+  connectAction(clearAction, KeyStroke.getKeyStroke(KeyEvent.VK_C, 0))
   
   val nextAction = Action("Next") {
     dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
       0, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED))
   }
-  getActionMap.put(nextAction.title, nextAction.peer)
-  getInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_N, 0), nextAction.title)
+  connectAction(nextAction, KeyStroke.getKeyStroke(KeyEvent.VK_N, 0))
   
   val prevAction = Action("Previous") {
     dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
       0, KeyEvent.VK_UP, KeyEvent.CHAR_UNDEFINED))
   }
-  getActionMap.put(prevAction.title, prevAction.peer)
-  getInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0), prevAction.title)
+  connectAction(prevAction, KeyStroke.getKeyStroke(KeyEvent.VK_P, 0))
   
   addMouseListener(new PopupListener(this, getPopupMenu))
   addMouseListener(new MouseAdapter {
@@ -88,20 +107,34 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
       }
     }
   })
+  
+  private def connectAction(a: Action, k: KeyStroke) {
+    getActionMap.put(a.title, a.peer)
+    getInputMap.put(k, a.title)
+  }
 
   def viewSelected {
-    val status = statusTableModel.getStatusAt(convertRowIndexToModel(getSelectedRow))
+    val status = getSelectedStatus
     var uri = "http://twitter.com/" +
       (status \ "user" \ "screen_name").text + "/statuses/" + (status \ "id").text
+    browse(uri)
+  }
+  
+  def browse(uri: String) {
     if (Desktop.isDesktopSupported) {
       Desktop.getDesktop.browse(new URI(uri))
     }
   }
 
+  def getSelectedStatus: NodeSeq = {
+    statusTableModel.getStatusAt(convertRowIndexToModel(getSelectedRow))
+  }
+
   def getPopupMenu: JPopupMenu = {
-    val menu = new JPopupMenu()
+    val menu = new JPopupMenu
 
     menu.add(new MenuItem(viewAction).peer)
+    menu.add(new MenuItem(openAction).peer)
     menu.add(new MenuItem(muteAction).peer)
 
     val tagAl = new ActionListener() {
