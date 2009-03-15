@@ -56,7 +56,9 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
     val status = getSelectedStatus
     val urls = LinkExtractor.getAllLinks(status)
     
-    if (urls.length > 0) {
+    if (urls.length == 1) {
+      browse(urls(0))
+    } else if (urls.length > 0) {
       val menu = new JPopupMenu
       var index = 0
       
