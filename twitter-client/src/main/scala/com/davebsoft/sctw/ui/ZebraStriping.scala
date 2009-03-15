@@ -15,7 +15,7 @@ trait ZebraStriping extends DefaultTableCellRenderer {
   override def getTableCellRendererComponent(table: JTable, value: Any, 
       isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Component = {
     val comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
-    setBackground(if (row % 2 == 0) Color.WHITE else VERY_LIGHT_GRAY)
+    if (! isSelected) setBackground(if (row % 2 == 0) Color.WHITE else VERY_LIGHT_GRAY)
     comp
   }
 }
