@@ -58,7 +58,7 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
     
     if (urls.length == 1) {
       browse(urls(0))
-    } else if (urls.length > 0) {
+    } else if (urls.length > 1) {
       val menu = new JPopupMenu
       var index = 0
       
