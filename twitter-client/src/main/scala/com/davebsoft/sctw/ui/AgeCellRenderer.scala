@@ -1,5 +1,7 @@
 package com.davebsoft.sctw.ui
 
+import java.awt.{Component, Color}
+import javax.swing.JTable
 import javax.swing.table.DefaultTableCellRenderer
 
 /**
@@ -7,7 +9,7 @@ import javax.swing.table.DefaultTableCellRenderer
  * @author Dave Briccetti
  */
 
-class AgeCellRenderer extends DefaultTableCellRenderer {
+class AgeCellRenderer extends DefaultTableCellRenderer with ZebraStriping {
   override def setValue(value: Any) {
     val time = value.asInstanceOf[Long]
     val days = time / 86400

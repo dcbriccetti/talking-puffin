@@ -28,6 +28,8 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
     extends JTable(statusTableModel) {
   setRowSorter(new TableRowSorter[StatusTableModel](statusTableModel))
   
+  setDefaultRenderer(classOf[String], new DefaultTableCellRenderer with ZebraStriping)
+  
   val colModel = getColumnModel
   
   val ageCol = colModel.getColumn(0)
@@ -42,7 +44,7 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   val statusCol = colModel.getColumn(2)
   statusCol.setPreferredWidth(600)
 
-  val viewAction = Action("View in browser") {viewSelected}
+  val viewAction = Action("View in Browser") {viewSelected}
   viewAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_V, 0)) 
   getActionMap.put(viewAction.title, viewAction.peer)
   viewAction.accelerator match {
