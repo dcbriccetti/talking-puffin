@@ -18,8 +18,9 @@ import event.Event
 
 class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit, 
     startup: (String, String) => Unit) 
-    extends JDialog(null: java.awt.Frame, "Simple Twitter Client - Log In", true) {
+    extends Frame {
   
+  title = "Simple Twitter Client - Log In"
   def username = usernameTextField.text
   def password = new String(passwordTextField.password)
   private var ok = false
@@ -59,7 +60,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
     else t.reactions -= enterReaction
   }
   
-  setContentPane(new GridBagPanel {
+  contents = new GridBagPanel {
     border = Swing.EmptyBorder(5, 5, 5, 5)
     add(new Label("User name"), new Constraints {grid=(0,0)})
     add(usernameTextField,      new Constraints {grid=(1,0)})
@@ -75,24 +76,22 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
     
     reactions += {
       case ButtonClicked(b) =>
-        ok = (b == loginButton)
+        ok = b == loginButton
         if (ok) {
           handleLogin
-        }
-        else {
+        } else {
           // Cancel pressed
-          setVisible(false)
+          visible = false
           cancelPressed
         }
     }
     listenTo(loginButton)
     listenTo(cancelButton)
-
-  }.peer)
+  }
   
 
   private def handleLogin {
-    toggleButton(false)
+    enableButtons(false)
     LongRunningSpinner.run(this, null, 
       { 
         () =>
@@ -103,7 +102,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
         else {
           infoLabel.foreground = Color.RED
           infoLabel.text = "Login failed"
-          toggleButton(true)
+          enableButtons(true)
           false
         }
       }, 
@@ -112,15 +111,15 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
         infoLabel.foreground = Color.BLACK
         infoLabel.text = "Login successful. Initializing…"
         startup(username, password)
-        setVisible(false)
+        visible = false
         true
       }
     )
   }
   
-  getRootPane.setDefaultButton(loginButton.peer)
+  defaultButton = loginButton
   
-  private def toggleButton(enable: Boolean) {
+  private def enableButtons(enable: Boolean) {
     cancelButton.enabled = enable
     loginButton.enabled = enable
     saveUserInfoCheckBox.enabled = enable
@@ -129,8 +128,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
   
   def display = {
     pack
-    setLocationRelativeTo(null)
-    setVisible(true)
-    ok
+    peer.setLocationRelativeTo(null)
+    visible = true
   }
 }

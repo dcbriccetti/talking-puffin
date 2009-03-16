@@ -102,8 +102,7 @@ object Main extends GUIApplication {
 
     def shutDown = System.exit(1)
 
-    val login = new LoginDialog(new twitter.AuthenticationProvider, shutDown, startUp)
-    login.display
+    new LoginDialog(new twitter.AuthenticationProvider, shutDown, startUp).display
   }
 
   def setUpUi {

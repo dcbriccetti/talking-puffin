@@ -1,5 +1,6 @@
 package com.davebsoft.sctw.ui
 
+import _root_.scala.swing.UIElement
 import java.awt.{Frame, Cursor}
 import SwingInvoke._
 
@@ -10,20 +11,18 @@ import SwingInvoke._
  */
 object LongRunningSpinner {
 
-  private type hasCursorType = { def setCursor(c: Cursor) }
-  
   /**
    * Handles several functions after each other on the same thread, and the function returns true if the next function should be
    * executed, false otherwise. The callback funtion is called when the functions have finished
    */
-  def run[T <: hasCursorType](frame: T, callback: (Status) => Unit, functions: () => Boolean*) {
+  def run(frame: UIElement, callback: (Status) => Unit, functions: () => Boolean*) {
     execSwingWorker({
       try {
-        invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)))
+        invokeLater(frame.cursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
       
         functions.find(f => !f())
         
-        invokeLater(frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR)))
+        invokeLater(frame.cursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
         Successful
       }
       catch {
