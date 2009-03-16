@@ -118,7 +118,6 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
           if (urlToShow == showingUrl) { // If user is moving quickly there may be several threads
             val icon = get
             if (icon.getIconHeight <= THUMBNAIL_SIZE) picLabel.icon = icon // Ignore broken, too-big thumbnails 
-            println("got " + picUrl)
             setBigPicLabelIcon
           }
         }

@@ -53,8 +53,9 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   }
   
   val openLinksAction = new OpenLinksAction(getSelectedStatus, this, browse)
-  openLinksAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0))
-  connectAction(openLinksAction, KeyStroke.getKeyStroke(KeyEvent.VK_L, 0))
+  val l = KeyStroke.getKeyStroke(KeyEvent.VK_L, 0)
+  openLinksAction.accelerator = Some(l)
+  connectAction(openLinksAction, l)
   
   val muteAction = Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}
   muteAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0))
