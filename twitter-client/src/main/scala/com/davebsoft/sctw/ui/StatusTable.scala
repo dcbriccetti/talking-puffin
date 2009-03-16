@@ -52,28 +52,9 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
     case None =>
   }
   
-  val openAction = Action("Open Links") {
-    val status = getSelectedStatus
-    val urls = LinkExtractor.getAllLinks(status)
-    
-    if (urls.length == 1) {
-      browse(urls(0))
-    } else if (urls.length > 1) {
-      val menu = new JPopupMenu
-      var index = 0
-      
-      for (url <- urls) {
-        val a1 = Action(url) {browse(url)}
-        a1.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_1 + index, 0)) 
-        index += 1
-        menu.add(new MenuItem(a1).peer)
-      }
-      val menuLoc = this.getCellRect(getSelectedRow, 0, true).getLocation
-      menu.show(this, menuLoc.getX().asInstanceOf[Int], menuLoc.getY().asInstanceOf[Int])
-    }
-  }
-  openAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0))
-  connectAction(openAction, KeyStroke.getKeyStroke(KeyEvent.VK_L, 0))
+  val openLinksAction = new OpenLinksAction(getSelectedStatus, this, browse)
+  openLinksAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0))
+  connectAction(openLinksAction, KeyStroke.getKeyStroke(KeyEvent.VK_L, 0))
   
   val muteAction = Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}
   muteAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0))
@@ -138,7 +119,7 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
     val menu = new JPopupMenu
 
     menu.add(new MenuItem(viewAction).peer)
-    menu.add(new MenuItem(openAction).peer)
+    menu.add(new MenuItem(openLinksAction).peer)
     menu.add(new MenuItem(muteAction).peer)
 
     val tagAl = new ActionListener() {
