@@ -39,7 +39,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
   statusTableModel.setPreChangeListener(this)
   
   add(new ScrollPane {
-    table = new StatusTable(statusTableModel, showStatusDetails, clearAction)
+    table = new StatusTable(statusTableModel, showStatusDetails, clearAction, showBigPicture)
     peer.setViewportView(table)
   }, new Constraints{
     grid = (0,0); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
@@ -132,6 +132,26 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     }
   }
 
+  def showBigPicture {
+    bigPicLabel = new Label
+    if (bigPicFrame != null) {
+      bigPicFrame.dispose
+    }
+    bigPicFrame = new Frame {
+      contents = bigPicLabel
+      peer.setLocationRelativeTo(picLabel.peer)
+      visible = true
+    }
+    setBigPicLabelIcon
+    bigPicLabel.peer.addMouseListener(new MouseAdapter {
+      override def mouseClicked(e: MouseEvent) = {
+        bigPicFrame.dispose
+        bigPicFrame = null
+        bigPicLabel = null
+      }
+    })
+  }
+  
   private class ControlPanel extends GridBagPanel {
     
     private class CustomConstraints extends Constraints {
@@ -141,23 +161,7 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     picLabel = new Label
     picLabel.peer.addMouseListener(new MouseAdapter {
       override def mouseClicked(e: MouseEvent) = {
-        bigPicLabel = new Label
-        if (bigPicFrame != null) {
-          bigPicFrame.dispose
-        }
-        bigPicFrame = new Frame {
-          contents = bigPicLabel
-          peer.setLocationRelativeTo(picLabel.peer)
-          visible = true
-        }
-        setBigPicLabelIcon
-        bigPicLabel.peer.addMouseListener(new MouseAdapter {
-          override def mouseClicked(e: MouseEvent) = {
-            bigPicFrame.dispose
-            bigPicFrame = null
-            bigPicLabel = null
-          }
-        })
+        showBigPicture
       }
     })
     add(picLabel, new CustomConstraints {

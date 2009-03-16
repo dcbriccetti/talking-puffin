@@ -12,9 +12,10 @@ import java.awt.image.BufferedImage
 import java.net.{URI, URL}
 import java.util.Comparator
 import java.util.regex.Pattern
-import javax.swing.{JTable, JMenu, JMenuItem, JPopupMenu, KeyStroke}
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
+import javax.swing.{JTable, KeyStroke, JMenuItem, JMenu, JPopupMenu}
+
 import scala.swing._
 import filter.TagsRepository
 
@@ -24,7 +25,7 @@ import filter.TagsRepository
  */
 
 class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) => Unit,
-      clearAction: Action) 
+      clearAction: Action, showBigPicture: => Unit) 
     extends JTable(statusTableModel) {
   setRowSorter(new TableRowSorter[StatusTableModel](statusTableModel))
   
@@ -67,13 +68,22 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
     dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
       0, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED))
   }
-  connectAction(nextAction, KeyStroke.getKeyStroke(KeyEvent.VK_N, 0))
+  val n = KeyStroke.getKeyStroke(KeyEvent.VK_N, 0)
+  nextAction.accelerator = Some(n)
+  connectAction(nextAction, n)
   
   val prevAction = Action("Previous") {
     dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
       0, KeyEvent.VK_UP, KeyEvent.CHAR_UNDEFINED))
   }
-  connectAction(prevAction, KeyStroke.getKeyStroke(KeyEvent.VK_P, 0))
+  val p = KeyStroke.getKeyStroke(KeyEvent.VK_P, 0)
+  prevAction.accelerator = Some(p)
+  connectAction(prevAction, p)
+  
+  val showImageAction = Action("Show Larger Image") { showBigPicture }
+  val i = KeyStroke.getKeyStroke(KeyEvent.VK_I, 0)
+  showImageAction.accelerator = Some(i)
+  connectAction(showImageAction, i)
   
   addMouseListener(new PopupListener(this, getPopupMenu))
   addMouseListener(new MouseAdapter {
@@ -119,9 +129,8 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   def getPopupMenu: JPopupMenu = {
     val menu = new JPopupMenu
 
-    menu.add(new MenuItem(viewAction).peer)
-    menu.add(new MenuItem(openLinksAction).peer)
-    menu.add(new MenuItem(muteAction).peer)
+    for (action <- List(viewAction, openLinksAction, muteAction, nextAction, prevAction, showImageAction)) 
+      menu.add(new MenuItem(action).peer)
 
     val tagAl = new ActionListener() {
       def actionPerformed(e: ActionEvent) = {
