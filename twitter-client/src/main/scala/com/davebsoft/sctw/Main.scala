@@ -29,7 +29,8 @@ object Main extends GUIApplication {
 
     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
     val friendsTableModel = new StatusTableModel(tweetsProvider, username)
-    val statusPane = new StatusPane(friendsTableModel)
+    val filtersPane = new FiltersPane(friendsTableModel)
+    val statusPane = new StatusPane(friendsTableModel, filtersPane)
 
     val clearAction = statusPane.clearAction
     new Frame {
@@ -49,7 +50,6 @@ object Main extends GUIApplication {
 
       TagUsers.load
 
-      val filtersPane = new FiltersPane(friendsTableModel)
       val filtersPage = new Page("Filters", filtersPane)
 
       val tabbedPane = new TabbedPane() {

@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage
 import java.awt.{Color, Desktop, Dimension, Insets, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
-import javax.swing.{JTable, JTextPane, ImageIcon, Icon, SwingWorker}
+import javax.swing.{JTable, JTextPane, ImageIcon, Icon, SwingWorker, JMenu, JPopupMenu, JMenuItem}
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
@@ -19,7 +19,7 @@ import filter.TagsRepository
 /**
  * Displays friend statuses
  */
-class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel 
+class StatusPane(statusTableModel: StatusTableModel, filtersPane: FiltersPane) extends GridBagPanel 
         with TableModelListener with PreChangeListener {
   var table: JTable = _
   var showingUrl: String = _
@@ -45,23 +45,8 @@ class StatusPane(statusTableModel: StatusTableModel) extends GridBagPanel
     grid = (0,0); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
   
-  largeTweet = new JTextPane()
-  val dim = new Dimension(500, 70)
-  largeTweet.setMinimumSize(dim)
-  largeTweet.setPreferredSize(dim)
+  largeTweet = new LargeTweet(filtersPane, table)
   largeTweet.setBackground(StatusPane.this.background)
-  largeTweet.setContentType("text/html");
-  largeTweet.setEditable(false);
-  largeTweet.addHyperlinkListener(new HyperlinkListener() {
-    def hyperlinkUpdate(e: HyperlinkEvent) {
-      if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-        if (Desktop.isDesktopSupported) {
-          Desktop.getDesktop.browse(e.getURL().toURI)
-        }
-        table.requestFocusInWindow // Let user resume using keyboard to move through tweets
-      }
-    }
-  });
   
   peer.add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)
