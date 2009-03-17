@@ -35,18 +35,6 @@ object Main extends GUIApplication {
     val clearAction = statusPane.clearAction
     new Frame {
       title = "Simple Twitter Client"
-      menuBar = new MenuBar {
-        val tweetMenu = new Menu("Tweets")
-        tweetMenu.contents += new MenuItem(clearAction)
-        tweetMenu.contents += new MenuItem(new Action("Last 200") {
-          toolTip = "Loads the last 200 of your “following” tweets"
-          def apply = {
-            statusPane.clearSelection
-            friendsTableModel.loadLastSet
-          }
-        })
-        contents += tweetMenu
-      }
 
       TagUsers.load
 

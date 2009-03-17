@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage
 import java.awt.{Color, Desktop, Dimension, Insets, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
-import javax.swing.{JTable, JTextPane, ImageIcon, Icon, SwingWorker, JMenu, JPopupMenu, JMenuItem}
+import javax.swing.{JTable, JTextPane, JButton, JLabel, ImageIcon, Icon, SwingWorker, JMenu, JPopupMenu, JMenuItem, JToolBar}
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
@@ -33,16 +33,43 @@ class StatusPane(statusTableModel: StatusTableModel, filtersPane: FiltersPane) e
   var largeTweet: JTextPane = _
   val emptyIntArray = new Array[Int](0) 
   var lastSelectedRows = emptyIntArray
-  val clearAction = Action("Clear") {clearTweets}
+  val clearAction = new Action("Clear") {
+    toolTip = "Removes all tweets from the display"
+    def apply = clearTweets
+  }
+  val last200Action = new Action("Last 200") {
+    toolTip = "Loads the last 200 of your “following” tweets"
+    def apply = {
+      clearSelection
+      statusTableModel.loadLastSet
+    }
+  }
 
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
+  
+  peer.add(new JToolBar {
+    setFloatable(false)
+    add(clearAction.peer)
+    add(last200Action.peer)
+    val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
+    comboBox.peer.setToolTipText("Number of seconds between fetches from Twitter")
+    var defaultRefresh = 120
+    comboBox.peer.setSelectedItem(defaultRefresh)
+    statusTableModel.setUpdateFrequency(defaultRefresh)
+    comboBox.peer.addActionListener(new ActionListener(){
+      def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
+        statusTableModel.setUpdateFrequency(comboBox.selection.item)
+      }
+    })
+    add(comboBox.peer)
+  }, new Constraints{grid=(0,0); gridwidth=3}.peer)
   
   add(new ScrollPane {
     table = new StatusTable(statusTableModel, showStatusDetails, clearAction, showBigPicture)
     peer.setViewportView(table)
   }, new Constraints{
-    grid = (0,0); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
+    grid = (0,1); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
   
   largeTweet = new LargeTweet(filtersPane, table)
@@ -50,14 +77,14 @@ class StatusPane(statusTableModel: StatusTableModel, filtersPane: FiltersPane) e
   
   peer.add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)
-    grid = (0,1); fill = GridBagPanel.Fill.Both;
+    grid = (0,2); fill = GridBagPanel.Fill.Both;
   }.peer)
 
   add(new ControlPanel, new Constraints{
-    grid = (0,2); fill = GridBagPanel.Fill.Horizontal;
+    grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
   })
 
-  def tableChanging = lastSelectedRows = table.getSelectedRows
+  def tableChanging = if (table != null) lastSelectedRows = table.getSelectedRows
 
   def tableChanged(e: TableModelEvent) = {
     e match {
@@ -163,16 +190,5 @@ class StatusPane(statusTableModel: StatusTableModel, filtersPane: FiltersPane) e
       grid = (1,0); gridheight=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
     })
 
-    add(new Label("Refresh (secs)"), new CustomConstraints { grid = (2,1); anchor=Anchor.CENTER })
-    val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
-    var defaultRefresh = 120
-    comboBox.peer.setSelectedItem(defaultRefresh)
-    statusTableModel.setUpdateFrequency(defaultRefresh)
-    comboBox.peer.addActionListener(new ActionListener(){
-      def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
-        statusTableModel.setUpdateFrequency(comboBox.selection.item)
-      }
-    })
-    add(comboBox, new CustomConstraints { grid=(3,1); anchor=Anchor.CENTER })
   }
 }
