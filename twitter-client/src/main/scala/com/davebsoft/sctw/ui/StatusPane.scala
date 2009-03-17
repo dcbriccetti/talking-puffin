@@ -37,8 +37,8 @@ class StatusPane(statusTableModel: StatusTableModel, filtersPane: FiltersPane) e
     toolTip = "Removes all tweets from the display"
     def apply = clearTweets
   }
-  val last200Action = new Action("Last 200") {
-    toolTip = "Loads the last 200 of your “following” tweets"
+  val last200Action = new Action("Fetch") {
+    toolTip = "Fetches the last 200 of your “following” tweets"
     def apply = {
       clearSelection
       statusTableModel.loadLastSet
