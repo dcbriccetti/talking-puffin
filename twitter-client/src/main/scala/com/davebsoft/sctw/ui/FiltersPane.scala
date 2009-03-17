@@ -14,15 +14,6 @@ import javax.swing.event.{ListSelectionListener, ListSelectionEvent, TableModelL
  */
 
 class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
-  val filterSettingsPane = new FiltersSettingsPane(tableModel)
-  add(filterSettingsPane, new Constraints {grid=(0,0)})
-  add(new Label(""), new Constraints {grid=(1,0); fill=Fill.Horizontal; weightx=1})
-  add(new Label(""), new Constraints {grid=(0,1); fill=Fill.Vertical; weighty=1})
-  
-  def applyChanges = filterSettingsPane.applyChanges
-}
-
-class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
   var selectedTags = List[String]()
   
   val tagsPanel = new GridBagPanel {
@@ -76,6 +67,9 @@ class FiltersSettingsPane(tableModel: StatusTableModel) extends GridBagPanel {
 
   val excludeIsRegex = new RegexCheckBox
   add(excludeIsRegex, new Constraints {grid=(2,4); anchor=Anchor.West})
+
+  add(new Label(""), new Constraints {grid=(10,0); fill=Fill.Horizontal; weightx=1})
+  add(new Label(""), new Constraints {grid=(0,10); fill=Fill.Vertical; weighty=1})
 
   def applyChanges {
     tableModel.selectedTags = selectedTags
