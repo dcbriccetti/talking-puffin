@@ -3,7 +3,7 @@ package com.davebsoft.sctw.ui
 import _root_.scala.swing._
 import _root_.scala.swing.GridBagPanel._
 import _root_.scala.swing.event.ButtonClicked
-import filter.TagsRepository
+import filter.{TagsRepository, FilterSet, TextFilter, FilterSetChanged}
 import java.awt.{Dimension, Insets}
 import javax.swing.BorderFactory
 import javax.swing.event.{ListSelectionListener, ListSelectionEvent, TableModelListener, TableModelEvent}
@@ -13,9 +13,7 @@ import javax.swing.event.{ListSelectionListener, ListSelectionEvent, TableModelL
  * @author Dave Briccetti
  */
 
-class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
-  var selectedTags = List[String]()
-  
+class FiltersPane(tableModel: StatusTableModel, filterSet: FilterSet) extends GridBagPanel {
   val tagsPanel = new GridBagPanel {
     add(new Label("Tags"), new Constraints {grid=(0,0)})
   
@@ -27,10 +25,11 @@ class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
       selModel.addListSelectionListener(new ListSelectionListener(){
         def valueChanged(e: ListSelectionEvent) = {
           if (! e.getValueIsAdjusting()) {
-            selectedTags = List[String]()
+            var selectedTags = List[String]()
             for (tag <- listView.peer.getSelectedValues) {
               selectedTags ::= tag.asInstanceOf[String]
             }
+            filterSet.selectedTags = selectedTags
           }
         }
       })
@@ -72,11 +71,10 @@ class FiltersPane(tableModel: StatusTableModel) extends GridBagPanel {
   add(new Label(""), new Constraints {grid=(0,10); fill=Fill.Vertical; weighty=1})
 
   def applyChanges {
-    tableModel.selectedTags = selectedTags
-    tableModel.excludeNotToYouReplies = excludeNotToYouReplies.selected
-    tableModel.setIncludeMatching(includeMatching.text, includeIsRegex.selected)
-    tableModel.setExcludeMatching(excludeMatching.text, excludeIsRegex.selected)
-    tableModel.applyFilters
+    filterSet.excludeNotToYouReplies = excludeNotToYouReplies.selected
+    filterSet.includeTextFilters = if (includeMatching.text.length > 0) List(new TextFilter(includeMatching.text, includeIsRegex.selected)) else List[TextFilter]()
+    filterSet.excludeTextFilters = if (excludeMatching.text.length > 0) List(new TextFilter(excludeMatching.text, excludeIsRegex.selected)) else List[TextFilter]()
+    filterSet.publish(new FilterSetChanged(filterSet))
   }
 }
 

@@ -1,6 +1,7 @@
 package com.davebsoft.sctw
 
 import _root_.scala.swing.event.{ButtonClicked, SelectionChanged, WindowClosing}
+import filter.{FilterSet, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Dimension}
 import scala.swing._
@@ -8,7 +9,6 @@ import scala.xml._
 import TabbedPane._
 import twitter.{FriendsDataProvider, FollowersDataProvider, TweetsProvider}
 import ui.{StatusTableModel, FiltersPane, StatusPane, FriendsFollowersPane, LoginDialog}
-import filter.TagUsers
 import state.StateRepository
 
 /**
@@ -27,9 +27,10 @@ object Main extends GUIApplication {
    */
   def top = {
 
+    val filterSet = new FilterSet
     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
-    val friendsTableModel = new StatusTableModel(tweetsProvider, username)
-    val filtersPane = new FiltersPane(friendsTableModel)
+    val friendsTableModel = new StatusTableModel(tweetsProvider, filterSet, username)
+    val filtersPane = new FiltersPane(friendsTableModel, filterSet)
     val statusPane = new StatusPane(friendsTableModel, filtersPane)
 
     val clearAction = statusPane.clearAction

@@ -1,7 +1,8 @@
 package com.davebsoft.sctw.ui
 
+import _root_.scala.swing.Reactor
 import _root_.scala.xml.{NodeSeq, Node}
-import filter.TagUser
+import filter.{FilterSet, TextFilter, FilterSetChanged, TagUser}
 import java.awt.event.{ActionEvent, ActionListener}
 import java.util.{Collections, Date, ArrayList}
 import javax.swing.event.TableModelEvent
@@ -12,7 +13,8 @@ import twitter.{DataFetchException, TweetsProvider}
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(statusDataProvider: TweetsProvider, username: String) extends AbstractTableModel {
+class StatusTableModel(statusDataProvider: TweetsProvider, filterSet: FilterSet, 
+    username: String) extends AbstractTableModel with Reactor {
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
   
@@ -25,16 +27,14 @@ class StatusTableModel(statusDataProvider: TweetsProvider, username: String) ext
   /** Those users currently muted */
   val mutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
   
-  var selectedTags = List[String]()
-  var excludeNotToYouReplies: Boolean = _
-  private[this] var includeMatching: String = ""
-  private[this] var excludeMatching: String = ""
-  private[this] var includeIsRegex: Boolean = _
-  private[this] var excludeIsRegex: Boolean = _
-  
   private val colNames = List("Age", "Username", "Status")
   private var timer: Timer = _
   private var preChangeListener: PreChangeListener = _;
+  
+  listenTo(filterSet)
+  reactions += {
+    case FilterSetChanged(s) => filterAndNotify
+  }
   
   def setPreChangeListener(preChangeListener: PreChangeListener) = this.preChangeListener = preChangeListener
   
@@ -88,16 +88,6 @@ class StatusTableModel(statusDataProvider: TweetsProvider, username: String) ext
     }
   }
 
-  def setIncludeMatching(text: String, regex: Boolean) {
-    includeMatching = text
-    includeIsRegex = regex
-  }
-  
-  def setExcludeMatching(text: String, regex: Boolean) {
-    excludeMatching = text
-    excludeIsRegex = regex
-  }
-  
   private def dateToAgeSeconds(date: String): Long = {
     val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy")
     (new Date().getTime - df.parse(date).getTime) / 1000
@@ -174,8 +164,8 @@ class StatusTableModel(statusDataProvider: TweetsProvider, username: String) ext
   }
   
   private def tagFiltersInclude(id: String): Boolean = {
-    if (selectedTags.length == 0) true else {
-      for (tag <- selectedTags) {
+    if (filterSet.selectedTags.length == 0) true else {
+      for (tag <- filterSet.selectedTags) {
         if (filter.TagUsers.contains(new TagUser(tag, id))) {
           return true
         }
@@ -186,23 +176,25 @@ class StatusTableModel(statusDataProvider: TweetsProvider, username: String) ext
   
   private def excludedBecauseReplyAndNotToYou(text: String): Boolean = {
     val rtu = LinkExtractor.getReplyToUser(text)
-    if (! excludeNotToYouReplies) return false
+    if (! filterSet.excludeNotToYouReplies) return false
     if (rtu.length == 0) return false
     ! rtu.equals(username)
   }
 
   private def excludedByStringMatches(text: String): Boolean = {
-    if (includeMatching.length == 0 && excludeMatching.length == 0) return false
-    if (includeMatching.length > 0 && ! matches(text, includeMatching, includeIsRegex)) return true
-    if (excludeMatching.length > 0 && matches(text, excludeMatching, excludeIsRegex)) return true
+    val includeMatching: TextFilter = if (filterSet.includeTextFilters.length == 0) null else filterSet.includeTextFilters(0) 
+    val excludeMatching: TextFilter = if (filterSet.excludeTextFilters.length == 0) null else filterSet.excludeTextFilters(0)
+    if (includeMatching == null && excludeMatching == null) return false
+    if (includeMatching != null && ! matches(text, includeMatching)) return true
+    if (excludeMatching != null && matches(text, excludeMatching)) return true
     false
   }
   
-  private def matches(text: String, search: String, regex: Boolean): Boolean = {
-    if (regex) {
-      java.util.regex.Pattern.compile(search).matcher(text).find
+  private def matches(text: String, search: TextFilter): Boolean = {
+    if (search.isRegEx) {
+      java.util.regex.Pattern.compile(search.text).matcher(text).find
     } else {
-      text.contains(search)
+      text.contains(search.text)
     }
   }
 
@@ -229,8 +221,6 @@ class StatusTableModel(statusDataProvider: TweetsProvider, username: String) ext
     filterAndNotify
   }
 
-  def applyFilters = filterAndNotify
-  
   private def filterAndNotify {
     if (preChangeListener != null) {
       preChangeListener.tableChanging
