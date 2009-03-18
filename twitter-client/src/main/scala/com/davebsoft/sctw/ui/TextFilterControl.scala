@@ -43,6 +43,8 @@ class TextFilterControl(label: String, textFilters: java.util.List[TextFilter]) 
     contents += delAllButton
     
     listenTo(newButton)
+    listenTo(delAllButton)
+    
     reactions += {
       case ButtonClicked(`newButton`) => { 
         textFilters.add(new TextFilter(text.text, regex.peer.isSelected))

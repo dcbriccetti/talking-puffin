@@ -50,9 +50,9 @@ class FiltersPane(tableModel: StatusTableModel, filterSet: FilterSet) extends Gr
     grid=(0,y); gridwidth=3; anchor=Anchor.West; fill=Fill.Both; weightx=1
   }
   
-  val includeTable = new TextFilterControl("Include Only Tweets Containing", filterSet.includeTextFilters)
+  val includeTable = new TextFilterControl("Include Only Tweets Containing One of", filterSet.includeTextFilters)
   add(includeTable, new TextFilterTableConstraints(3))
-  val excludeTable = new TextFilterControl("Exclude Tweets Containing", filterSet.excludeTextFilters)
+  val excludeTable = new TextFilterControl("Exclude Tweets Containing Any of", filterSet.excludeTextFilters)
   add(excludeTable, new TextFilterTableConstraints(5))
   
   add(new Label(""), new Constraints {grid=(10,0); fill=Fill.Horizontal; weightx=1})

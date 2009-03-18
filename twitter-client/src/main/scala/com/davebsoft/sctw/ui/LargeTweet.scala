@@ -38,7 +38,7 @@ class LargeTweet(filtersPane: FiltersPane, table: JTable) extends JTextPane {
         if (text != null) {
           val popup = new JPopupMenu
           val filterInMenu = new MenuItem(
-            Action("Include only tweets containing “" + text + "”")
+            Action("Include tweets containing “" + text + "”")
             {filtersPane.addIncludeMatching(text)})
           val filterOutMenu = new MenuItem(Action("Exclude tweets containing “" + text + "”")
             {filtersPane.addExcludeMatching(text)})

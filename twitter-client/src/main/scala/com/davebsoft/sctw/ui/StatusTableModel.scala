@@ -151,7 +151,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, filterSet: FilterSet,
         if (tagFiltersInclude(id)) {
           val text = (st \ "text").text 
           if (! excludedBecauseReplyAndNotToYou(text)) {
-            if (! excludedByStringMatches(text)) {
+            if (! filterSet.excludedByStringMatches(text)) {
               filteredStatuses.add(st)
             }
           }
@@ -176,23 +176,6 @@ class StatusTableModel(statusDataProvider: TweetsProvider, filterSet: FilterSet,
     if (! filterSet.excludeNotToYouReplies) return false
     if (rtu.length == 0) return false
     ! rtu.equals(username)
-  }
-
-  private def excludedByStringMatches(text: String): Boolean = {
-    val includeMatching: TextFilter = if (filterSet.includeTextFilters.size() == 0) null else filterSet.includeTextFilters.get(0) 
-    val excludeMatching: TextFilter = if (filterSet.excludeTextFilters.size() == 0) null else filterSet.excludeTextFilters.get(0)
-    if (includeMatching == null && excludeMatching == null) return false
-    if (includeMatching != null && ! matches(text, includeMatching)) return true
-    if (excludeMatching != null && matches(text, excludeMatching)) return true
-    false
-  }
-  
-  private def matches(text: String, search: TextFilter): Boolean = {
-    if (search.isRegEx) {
-      java.util.regex.Pattern.compile(search.text).matcher(text).find
-    } else {
-      text.contains(search.text)
-    }
   }
 
   /**
