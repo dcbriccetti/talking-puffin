@@ -17,6 +17,8 @@ class FilterSet extends Publisher {
   var excludeNotToYouReplies: Boolean = _
   var includeTextFilters = List[TextFilter]()
   var excludeTextFilters = List[TextFilter]()
+  
+  def publish: Unit = publish(new FilterSetChanged(this))
 }
 
 case class FilterSetChanged(filterSet: FilterSet) extends Event

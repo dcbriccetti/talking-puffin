@@ -74,7 +74,7 @@ class FiltersPane(tableModel: StatusTableModel, filterSet: FilterSet) extends Gr
     filterSet.excludeNotToYouReplies = excludeNotToYouReplies.selected
     filterSet.includeTextFilters = if (includeMatching.text.length > 0) List(new TextFilter(includeMatching.text, includeIsRegex.selected)) else List[TextFilter]()
     filterSet.excludeTextFilters = if (excludeMatching.text.length > 0) List(new TextFilter(excludeMatching.text, excludeIsRegex.selected)) else List[TextFilter]()
-    filterSet.publish(new FilterSetChanged(filterSet))
+    filterSet.publish
   }
 }
 
