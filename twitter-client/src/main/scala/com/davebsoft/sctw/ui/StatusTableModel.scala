@@ -179,8 +179,8 @@ class StatusTableModel(statusDataProvider: TweetsProvider, filterSet: FilterSet,
   }
 
   private def excludedByStringMatches(text: String): Boolean = {
-    val includeMatching: TextFilter = if (filterSet.includeTextFilters.length == 0) null else filterSet.includeTextFilters(0) 
-    val excludeMatching: TextFilter = if (filterSet.excludeTextFilters.length == 0) null else filterSet.excludeTextFilters(0)
+    val includeMatching: TextFilter = if (filterSet.includeTextFilters.size() == 0) null else filterSet.includeTextFilters.get(0) 
+    val excludeMatching: TextFilter = if (filterSet.excludeTextFilters.size() == 0) null else filterSet.excludeTextFilters.get(0)
     if (includeMatching == null && excludeMatching == null) return false
     if (includeMatching != null && ! matches(text, includeMatching)) return true
     if (excludeMatching != null && matches(text, excludeMatching)) return true

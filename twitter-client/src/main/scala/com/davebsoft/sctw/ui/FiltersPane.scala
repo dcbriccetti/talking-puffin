@@ -5,8 +5,8 @@ import _root_.scala.swing.GridBagPanel._
 import _root_.scala.swing.event.ButtonClicked
 import filter.{TagsRepository, FilterSet, TextFilter, FilterSetChanged}
 import java.awt.{Dimension, Insets}
-import javax.swing.BorderFactory
 import javax.swing.event.{ListSelectionListener, ListSelectionEvent, TableModelListener, TableModelEvent}
+import javax.swing.{JTable, BorderFactory}
 
 /**
  * Filters
@@ -46,34 +46,32 @@ class FiltersPane(tableModel: StatusTableModel, filterSet: FilterSet) extends Gr
   val excludeNotToYouReplies = new CheckBox("Exclude replies not to you")
   add(excludeNotToYouReplies, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
   
-  class MatchField extends TextField {columns=20; minimumSize=new Dimension(100, preferredSize.height)}
-
-  add(new Label("Include"), new Constraints {grid=(0,3); ipadx=5})
-  val includeMatching = 
-    new MatchField {tooltip="Include only tweets that match this string or regular expression"}
-  add(includeMatching, new Constraints {grid=(1,3); ipadx=5})
-  
-  class RegexCheckBox extends CheckBox("Regex") {
-    tooltip = "Whether this search argument is a regular expression"
+  class TextFilterTableConstraints(y: Int) extends Constraints {
+    grid=(0,y); gridwidth=3; anchor=Anchor.West; fill=Fill.Both; weightx=1
   }
   
-  val includeIsRegex = new RegexCheckBox
-  add(includeIsRegex, new Constraints {grid=(2,3); anchor=Anchor.West})
-
-  add(new Label("Exclude"), new Constraints {grid=(0,4); ipadx=5})
-  val excludeMatching = new MatchField {tooltip="Exclude tweets that match this string or regular expression"}
-  add(excludeMatching, new Constraints {grid=(1,4); ipadx=5})
-
-  val excludeIsRegex = new RegexCheckBox
-  add(excludeIsRegex, new Constraints {grid=(2,4); anchor=Anchor.West})
-
+  val includeTable = new TextFilterControl("Include Only Tweets Containing", filterSet.includeTextFilters)
+  add(includeTable, new TextFilterTableConstraints(3))
+  val excludeTable = new TextFilterControl("Exclude Tweets Containing", filterSet.excludeTextFilters)
+  add(excludeTable, new TextFilterTableConstraints(5))
+  
   add(new Label(""), new Constraints {grid=(10,0); fill=Fill.Horizontal; weightx=1})
   add(new Label(""), new Constraints {grid=(0,10); fill=Fill.Vertical; weighty=1})
 
+  def addIncludeMatching(text: String) {
+    filterSet.includeTextFilters.add(new TextFilter(text, false))
+    includeTable.dataChanged
+    applyChanges
+  }
+
+  def addExcludeMatching(text: String) {
+    filterSet.excludeTextFilters.add(new TextFilter(text, false))  
+    excludeTable.dataChanged
+    applyChanges
+  }
+
   def applyChanges {
     filterSet.excludeNotToYouReplies = excludeNotToYouReplies.selected
-    filterSet.includeTextFilters = if (includeMatching.text.length > 0) List(new TextFilter(includeMatching.text, includeIsRegex.selected)) else List[TextFilter]()
-    filterSet.excludeTextFilters = if (excludeMatching.text.length > 0) List(new TextFilter(excludeMatching.text, excludeIsRegex.selected)) else List[TextFilter]()
     filterSet.publish
   }
 }
