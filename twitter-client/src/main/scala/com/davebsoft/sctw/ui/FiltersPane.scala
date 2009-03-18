@@ -40,7 +40,7 @@ class FiltersPane(tableModel: StatusTableModel, filterSet: FilterSet) extends Gr
   add(new FlowPanel {
     hGap = 10
     contents += tagsPanel
-    contents += new UnmutePane(tableModel)
+    contents += new UnmutePane(tableModel, filterSet)
   }, new Constraints {grid=(0,0); gridwidth=3; anchor=Anchor.West})
   
   val excludeNotToYouReplies = new CheckBox("Exclude replies not to you")

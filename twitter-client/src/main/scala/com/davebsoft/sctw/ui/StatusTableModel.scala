@@ -24,9 +24,6 @@ class StatusTableModel(statusDataProvider: TweetsProvider, filterSet: FilterSet,
   /** Statuses, after filtering */
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
   
-  /** Those users currently muted */
-  val mutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
-  
   private val colNames = List("Age", "Username", "Status")
   private var timer: Timer = _
   private var preChangeListener: PreChangeListener = _;
@@ -68,17 +65,17 @@ class StatusTableModel(statusDataProvider: TweetsProvider, filterSet: FilterSet,
   }
 
   private def muteUsers(users: List[User]) {
-    mutedUsers ++= users.map(user => (user.id, user))
+    filterSet.mutedUsers ++= users.map(user => (user.id, user))
     filterAndNotify
   }
 
   def unmuteUsers(userIds: List[String]) {
-    mutedUsers --= userIds
+    filterSet.mutedUsers --= userIds
     filterAndNotify
   }
   
   def unMuteAll {
-    mutedUsers.clear
+    filterSet.mutedUsers.clear
     filterAndNotify
   }
 
@@ -150,7 +147,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, filterSet: FilterSet,
     filteredStatuses.clear
     for (st <- statuses) {
       var id = (st \ "user" \ "id").text
-      if (! mutedUsers.contains(id)) {
+      if (! filterSet.mutedUsers.contains(id)) {
         if (tagFiltersInclude(id)) {
           val text = (st \ "text").text 
           if (! excludedBecauseReplyAndNotToYou(text)) {

@@ -1,6 +1,7 @@
 package com.davebsoft.sctw.ui
 
 import _root_.scala.swing.{ListView, Button, GridBagPanel, ScrollPane}
+import filter.FilterSet
 import javax.swing.event.{TableModelEvent, TableModelListener}
 import javax.swing.BorderFactory
 import java.awt.Dimension
@@ -13,10 +14,10 @@ import _root_.scala.swing.GridBagPanel._
  * @author Dave Briccetti
  */
 
-class UnmutePane(tableModel: StatusTableModel) extends GridBagPanel with TableModelListener {
+class UnmutePane(tableModel: StatusTableModel, filterSet: FilterSet) extends GridBagPanel with TableModelListener {
   border = BorderFactory.createTitledBorder("Muted users")
 
-  val mutedUsersList = new ListView(tableModel.mutedUsers.values.toList)
+  val mutedUsersList = new ListView(filterSet.mutedUsers.values.toList)
   add(new ScrollPane {
     contents = mutedUsersList; preferredSize=new Dimension(150,130); minimumSize=new Dimension(150,130)
   }, new Constraints {grid=(0,0); anchor=Anchor.West})
@@ -24,7 +25,7 @@ class UnmutePane(tableModel: StatusTableModel) extends GridBagPanel with TableMo
   tableModel.addTableModelListener(this)
   
   def tableChanged(e: TableModelEvent) {
-    mutedUsersList.listData = tableModel.mutedUsers.values.toList
+    mutedUsersList.listData = filterSet.mutedUsers.values.toList
   }
 
   val unmuteButton = new Button("Unmute")
