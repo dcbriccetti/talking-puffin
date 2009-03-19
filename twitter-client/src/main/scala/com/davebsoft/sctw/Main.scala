@@ -21,6 +21,7 @@ import ui._
 object Main extends GUIApplication {
   private var username: String = ""
   private var password: String = ""
+  
 
   /**
    * Creates the Swing frame.
@@ -100,8 +101,18 @@ object Main extends GUIApplication {
 
     def shutDown = System.exit(1)
 
+    setupHttpClientLogging()
     new LoginDialog(new twitter.AuthenticationProvider, shutDown, startUp).display
   }
+  
+  def setupHttpClientLogging() {
+    // Logging setup explained in http://hc.apache.org/httpclient-3.x/logging.html
+    System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
+    System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
+    System.setProperty("org.apache.commons.logging.simplelog.log.httpclient.wire.header", "error");
+    System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient", "error");
+  }
+  
 
   def setUpUi {
     init
