@@ -27,7 +27,11 @@ import filter.TagsRepository
 class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) => Unit,
       clearAction: Action, showBigPicture: => Unit) 
     extends JTable(statusTableModel) {
-  setRowSorter(new TableRowSorter[StatusTableModel](statusTableModel))
+  val sorter = new TableRowSorter[StatusTableModel](statusTableModel)
+  sorter.setComparator(1, new Comparator[AnnotatedUser] {
+    def compare(o1: AnnotatedUser, o2: AnnotatedUser) = o1.name.compareToIgnoreCase(o2.name)
+  })
+  setRowSorter(sorter)
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer with ZebraStriping)
   
@@ -86,6 +90,19 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   showImageAction.accelerator = Some(i)
   connectAction(showImageAction, i)
   
+  val replyAction = Action("Reply") { reply }
+  val r = KeyStroke.getKeyStroke(KeyEvent.VK_R, 0)
+  replyAction.accelerator = Some(r)
+  connectAction(replyAction, r)
+  
+  val deleteAction = Action("Delete selected tweets") {
+    statusTableModel.removeSelectedElements(getSelectedModelIndexes)
+    getSelectionModel.clearSelection
+  }
+  val bs = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0)
+  deleteAction.accelerator = Some(bs)
+  connectAction(deleteAction, bs)
+  
   addMouseListener(new PopupListener(this, getPopupMenu))
   addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = {
@@ -122,6 +139,13 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
       Desktop.getDesktop.browse(new URI(uri))
     }
   }
+  
+  def reply {
+    val sm = new SendMsgDialog(null)
+    val status = getSelectedStatus
+    sm.replyToTweet.text = (status \ "in_reply_to_status_id").text
+    sm.visible = true
+  }
 
   def getSelectedStatus: NodeSeq = {
     statusTableModel.getStatusAt(convertRowIndexToModel(getSelectedRow))
@@ -130,7 +154,7 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   def getPopupMenu: JPopupMenu = {
     val menu = new JPopupMenu
 
-    for (action <- List(viewAction, openLinksAction, muteAction, nextAction, prevAction, showImageAction)) 
+    for (action <- List(viewAction, openLinksAction, deleteAction, muteAction, nextAction, prevAction, showImageAction)) 
       menu.add(new MenuItem(action).peer)
 
     val tagAl = new ActionListener() {

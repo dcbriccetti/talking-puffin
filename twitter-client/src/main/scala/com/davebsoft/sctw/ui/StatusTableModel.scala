@@ -107,6 +107,9 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
       new User(id, name)
     })
   
+  private def getStatuses(rows: List[Int]): List[Node] = 
+    rows.map(filteredStatuses.get(_))
+
   private def createLoadTimer {
     timer = new Timer(updateFrequency, new ActionListener() {
       def actionPerformed(event: ActionEvent) {
@@ -210,17 +213,9 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
     filterAndNotify
   }
   
-  def removeSelectedElements(indexes: Collection[Int]) {
-    def recursiveRemove(l: List[Node], index: Int): List[Node] = {
-      // tried to find a better way to iterate with index and remove, struggled a bit. This works, and should be farely efficient.
-      val next = index + 1
-      l match {
-        case Nil => Nil
-        case node :: rest => if (indexes.exists(_ == index)) recursiveRemove(rest, next) 
-                             else node :: recursiveRemove(rest, next)
-      }
-    }
-    statuses = recursiveRemove(statuses, 0)
+  def removeSelectedElements(indexes: List[Int]) {
+    val deleteStatuses = getStatuses(indexes)
+    statuses = statuses.filter(s => ! deleteStatuses.contains(s))
     filterAndNotify
   }
 

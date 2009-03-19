@@ -99,17 +99,6 @@ class StatusPane(statusTableModel: StatusTableModel, filtersPane: FiltersPane) e
     }
   }
   
-  table.addKeyListener(new KeyAdapter {
-    override def keyTyped(e: KeyEvent) {
-      // Dave, up to you which key should be able to delete.
-      if (e.getKeyChar == KeyEvent.VK_DELETE || e.getKeyChar == KeyEvent.VK_BACK_SPACE) {
-        val selectedRows = table.getSelectedRows
-        statusTableModel.removeSelectedElements(selectedRows)
-        table.getSelectionModel.clearSelection
-      }
-    }
-  })
-
   def clearTweets {
     clearSelection
     statusTableModel.clear

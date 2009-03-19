@@ -23,8 +23,7 @@ protected trait HttpHandler {
   }
   
   private def handleCommonMethodSetup(method: HttpMethod) {
-    // This silences the HttpClient logging output, which complained about incorrect coockie setup. 
-    // Since every call is authenticated we do currently not use those coockies.
+    // Since every call is authenticated we do currently not use cookies.
     method.getParams.setCookiePolicy(CookiePolicy.IGNORE_COOKIES)
   }
 
