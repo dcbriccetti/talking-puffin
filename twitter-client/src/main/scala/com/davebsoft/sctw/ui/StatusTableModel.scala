@@ -13,7 +13,7 @@ import twitter.{DataFetchException, TweetsProvider}
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(statusDataProvider: TweetsProvider, filterSet: FilterSet, 
+class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[String], filterSet: FilterSet, 
     username: String) extends AbstractTableModel with Reactor {
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
@@ -43,7 +43,11 @@ class StatusTableModel(statusDataProvider: TweetsProvider, filterSet: FilterSet,
     val status = filteredStatuses.get(rowIndex)
     columnIndex match {
       case 0 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
-      case 1 => (status \ "user" \ "screen_name").text
+      case 1 => {
+        val screenName = (status \ "user" \ "screen_name").text
+        val id = (status \ "user" \ "id").text
+        new AnnotatedUser(screenName, followerIds.contains(id))
+      }
       case 2 => (status \ "text").text 
     }
   }

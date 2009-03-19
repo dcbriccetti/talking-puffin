@@ -41,6 +41,7 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   val nameCol = colModel.getColumn(1)
   nameCol.setPreferredWidth(100)
   nameCol.setMaxWidth(200)
+  nameCol.setCellRenderer(new AnnotatedUserRenderer with ZebraStriping)
   
   val statusCol = colModel.getColumn(2)
   statusCol.setPreferredWidth(600)

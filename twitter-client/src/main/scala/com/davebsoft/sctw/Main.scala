@@ -29,9 +29,10 @@ object Main extends GUIApplication {
 
     val filterSet = new FilterSet
     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
-    val friendsTableModel = new StatusTableModel(tweetsProvider, filterSet, username)
-    val filtersPane = new FiltersPane(friendsTableModel, filterSet)
-    val statusPane = new StatusPane(friendsTableModel, filtersPane)
+    val followers = new FollowersDataProvider(username, password).getUsers
+    val statusTableModel = new StatusTableModel(tweetsProvider, getIds(followers), filterSet, username)
+    val filtersPane = new FiltersPane(statusTableModel, filterSet)
+    val statusPane = new StatusPane(statusTableModel, filtersPane)
 
     val clearAction = statusPane.clearAction
     new Frame {
@@ -47,7 +48,6 @@ object Main extends GUIApplication {
         pages.append(new Page("Tweets", statusPane))
 
         val following = new FriendsDataProvider(username, password).getUsers
-        val followers = new FollowersDataProvider(username, password).getUsers
         pages.append(new Page("Following", new FriendsFollowersPane(following, getIds(followers))))
         pages.append(new Page("Followers", new FriendsFollowersPane(followers, getIds(following))))
 
