@@ -8,6 +8,7 @@ import _root_.scala.xml.{NodeSeq, Node}
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
 import java.awt.image.BufferedImage
 import java.awt.{Color, Desktop, Dimension, Insets, Font}
+import java.awt.event.{KeyEvent, KeyAdapter}
 import java.net.{URI, URL}
 import java.util.Comparator
 import javax.swing.{JTable, JTextPane, JButton, JLabel, ImageIcon, Icon, SwingWorker, JMenu, JPopupMenu, JMenuItem, JToolBar}
@@ -97,6 +98,17 @@ class StatusPane(statusTableModel: StatusTableModel, filtersPane: FiltersPane) e
       }
     }
   }
+  
+  table.addKeyListener(new KeyAdapter {
+    override def keyTyped(e: KeyEvent) {
+      // Dave, up to you which key should be able to delete.
+      if (e.getKeyChar == KeyEvent.VK_DELETE || e.getKeyChar == KeyEvent.VK_BACK_SPACE) {
+        val selectedRows = table.getSelectedRows
+        statusTableModel.removeSelectedElements(selectedRows)
+        table.getSelectionModel.clearSelection
+      }
+    }
+  })
 
   def clearTweets {
     clearSelection
