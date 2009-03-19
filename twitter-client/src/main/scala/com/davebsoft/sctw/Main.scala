@@ -8,8 +8,8 @@ import scala.swing._
 import scala.xml._
 import TabbedPane._
 import twitter.{FriendsDataProvider, FollowersDataProvider, TweetsProvider}
-import ui.{StatusTableModel, FiltersPane, StatusPane, FriendsFollowersPane, LoginDialog}
 import state.StateRepository
+import ui._
 
 /**
  * “Simple Twitter Client”
@@ -33,6 +33,7 @@ object Main extends GUIApplication {
     val statusTableModel = new StatusTableModel(tweetsProvider, getIds(followers), filterSet, username)
     val filtersPane = new FiltersPane(statusTableModel, filterSet)
     val statusPane = new StatusPane(statusTableModel, filtersPane)
+    val tweetsPage = new Page("Tweets", statusPane)
 
     val clearAction = statusPane.clearAction
     new Frame {
@@ -45,15 +46,16 @@ object Main extends GUIApplication {
       val tabbedPane = new TabbedPane() {
         preferredSize = new Dimension(900, 600)
 
-        pages.append(new Page("Tweets", statusPane))
+        pages.append(tweetsPage)
 
         val following = new FriendsDataProvider(username, password).getUsers
-        pages.append(new Page("Following", new FriendsFollowersPane(following, getIds(followers))))
-        pages.append(new Page("Followers", new FriendsFollowersPane(followers, getIds(following))))
+        pages.append(new Page("Following (" + following.length + ")", new FriendsFollowersPane(following, getIds(followers))))
+        pages.append(new Page("Followers (" + followers.length + ")", new FriendsFollowersPane(followers, getIds(following))))
 
         pages.append(filtersPage)
       }
       listenTo(tabbedPane.selection)
+      listenTo(statusTableModel)
       contents = tabbedPane
       var lastSelectedPane = tabbedPane.selection.page
 
@@ -71,12 +73,19 @@ object Main extends GUIApplication {
           }
           lastSelectedPane = selectedPage
         }
+        case TableContentsChanged(filtered, total) => {
+          tabbedPane.peer.setTitleAt(0, createTweetsTitle(filtered, total))
+        }
       }
 
       peer.setLocationRelativeTo(null)
     }
   }
 
+  private def createTweetsTitle(filtered: Int, total: Int): String = {
+    "Tweets (" + filtered + "/" + total + ")"
+  }
+  
   private def getIds(users: List[Node]): List[String] = {
     users map (u => (u \ "id").text)
   }

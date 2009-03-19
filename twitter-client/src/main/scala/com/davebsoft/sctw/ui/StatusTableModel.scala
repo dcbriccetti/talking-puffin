@@ -1,6 +1,7 @@
 package com.davebsoft.sctw.ui
 
-import _root_.scala.swing.Reactor
+import _root_.scala.swing.event.Event
+import _root_.scala.swing.{Reactor, Publisher}
 import _root_.scala.xml.{NodeSeq, Node}
 import filter.{FilterSet, TextFilter, FilterSetChanged, TagUser}
 import java.awt.event.{ActionEvent, ActionListener}
@@ -14,15 +15,19 @@ import twitter.{DataFetchException, TweetsProvider}
  * Model providing status data to the JTable
  */
 class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[String], filterSet: FilterSet, 
-    username: String) extends AbstractTableModel with Reactor {
+    username: String) extends AbstractTableModel with Publisher with Reactor {
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
   
   /** All loaded statuses */
   private var statuses = List[Node]()
   
+  def statusCount = statuses.size
+  
   /** Statuses, after filtering */
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
+  
+  def filteredStatusCount = filteredStatuses.size
   
   private val colNames = List("Age", "Username", "Status")
   private var timer: Timer = _
@@ -210,6 +215,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
       preChangeListener.tableChanging
     }
     filterStatuses
+    publish(new TableContentsChanged(filteredStatuses.size, statuses.size))
     fireTableDataChanged
   }
 }
@@ -221,4 +227,6 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
 trait PreChangeListener {
   def tableChanging
 }
+
+case class TableContentsChanged(val filteredIn: Int, val total: Int) extends Event
   
