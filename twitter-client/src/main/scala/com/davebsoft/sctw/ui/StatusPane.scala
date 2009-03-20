@@ -16,12 +16,13 @@ import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
 import filter.TagsRepository
+import twitter.Sender
 
 /**
  * Displays friend statuses
  */
-class StatusPane(statusTableModel: StatusTableModel, filtersPane: FiltersPane) extends GridBagPanel 
-        with TableModelListener with PreChangeListener {
+class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane: FiltersPane) 
+    extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: JTable = _
   var showingUrl: String = _
   private val THUMBNAIL_SIZE = 48
@@ -67,7 +68,7 @@ class StatusPane(statusTableModel: StatusTableModel, filtersPane: FiltersPane) e
   }, new Constraints{grid=(0,0); gridwidth=3}.peer)
   
   add(new ScrollPane {
-    table = new StatusTable(statusTableModel, showStatusDetails, clearAction, showBigPicture)
+    table = new StatusTable(statusTableModel, sender, showStatusDetails, clearAction, showBigPicture)
     peer.setViewportView(table)
   }, new Constraints{
     grid = (0,1); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 

@@ -18,13 +18,14 @@ import javax.swing.{JTable, KeyStroke, JMenuItem, JMenu, JPopupMenu}
 
 import scala.swing._
 import filter.TagsRepository
+import twitter.Sender
 
 /**
  * Table of statuses.
  * @author Dave Briccetti
  */
 
-class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) => Unit,
+class StatusTable(statusTableModel: StatusTableModel, sender: Sender, statusSelected: (NodeSeq) => Unit,
       clearAction: Action, showBigPicture: => Unit) 
     extends JTable(statusTableModel) {
   val sorter = new TableRowSorter[StatusTableModel](statusTableModel)
@@ -50,58 +51,8 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   val statusCol = colModel.getColumn(2)
   statusCol.setPreferredWidth(600)
 
-  val viewAction = Action("View in Browser") {viewSelected}
-  viewAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_V, 0)) 
-  getActionMap.put(viewAction.title, viewAction.peer)
-  viewAction.accelerator match {
-    case Some(s) => getInputMap.put(s, viewAction.title)
-    case None =>
-  }
-  
-  val openLinksAction = new OpenLinksAction(getSelectedStatus, this, browse)
-  val l = KeyStroke.getKeyStroke(KeyEvent.VK_L, 0)
-  openLinksAction.accelerator = Some(l)
-  connectAction(openLinksAction, l)
-  
-  val muteAction = Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}
-  muteAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0))
-  connectAction(muteAction, KeyStroke.getKeyStroke(KeyEvent.VK_M, 0))
-  
-  connectAction(clearAction, KeyStroke.getKeyStroke(KeyEvent.VK_C, 0))
-  
-  val nextAction = Action("Next") {
-    dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
-      0, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED))
-  }
-  val n = KeyStroke.getKeyStroke(KeyEvent.VK_N, 0)
-  nextAction.accelerator = Some(n)
-  connectAction(nextAction, n)
-  
-  val prevAction = Action("Previous") {
-    dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
-      0, KeyEvent.VK_UP, KeyEvent.CHAR_UNDEFINED))
-  }
-  val p = KeyStroke.getKeyStroke(KeyEvent.VK_P, 0)
-  prevAction.accelerator = Some(p)
-  connectAction(prevAction, p)
-  
-  val showImageAction = Action("Show Larger Image") { showBigPicture }
-  val i = KeyStroke.getKeyStroke(KeyEvent.VK_I, 0)
-  showImageAction.accelerator = Some(i)
-  connectAction(showImageAction, i)
-  
-  val replyAction = Action("Reply") { reply }
-  val r = KeyStroke.getKeyStroke(KeyEvent.VK_R, 0)
-  replyAction.accelerator = Some(r)
-  connectAction(replyAction, r)
-  
-  val deleteAction = Action("Delete selected tweets") {
-    statusTableModel.removeSelectedElements(getSelectedModelIndexes) }
-  val bs  = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0)
-  val del = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0)
-  deleteAction.accelerator = Some(bs)
-  connectAction(deleteAction, bs, del)
-  
+  val actions = buildActions
+
   addMouseListener(new PopupListener(this, getPopupMenu))
   addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = {
@@ -121,16 +72,14 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
     }
   })
   
-  private def connectAction(a: Action, keys: KeyStroke*) {
-    getActionMap.put(a.title, a.peer)
-    for (key <- keys) getInputMap.put(key, a.title)
-  }
-
   def viewSelected {
-    val status = getSelectedStatus
-    var uri = "http://twitter.com/" +
-      (status \ "user" \ "screen_name").text + "/statuses/" + (status \ "id").text
-    browse(uri)
+    getSelectedStatus match {
+      case Some(status) =>
+        var uri = "http://twitter.com/" +
+                (status \ "user" \ "screen_name").text + "/statuses/" + (status \ "id").text
+        browse(uri)
+      case None =>
+    }
   }
   
   def browse(uri: String) {
@@ -140,20 +89,19 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   }
   
   def reply {
-    val sm = new SendMsgDialog(null)
-    val status = getSelectedStatus
-    sm.replyToTweet.text = (status \ "text").text
+    val sm = new SendMsgDialog(null, sender, getSelectedStatus)
     sm.visible = true
   }
 
-  def getSelectedStatus: NodeSeq = {
-    statusTableModel.getStatusAt(convertRowIndexToModel(getSelectedRow))
+  def getSelectedStatus: Option[NodeSeq] = {
+    val row = getSelectedRow
+    if (row == -1) None else Some(statusTableModel.getStatusAt(convertRowIndexToModel(row)))
   }
 
   def getPopupMenu: JPopupMenu = {
     val menu = new JPopupMenu
 
-    for (action <- List(viewAction, openLinksAction, deleteAction, muteAction, nextAction, prevAction, showImageAction)) 
+    for (action <- actions.reverse) 
       menu.add(new MenuItem(action).peer)
 
     val tagAl = new ActionListener() {
@@ -191,5 +139,83 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
       case ex: IndexOutOfBoundsException => println(ex)
     }
   }
+
+  private def buildActions: List[Action] = {
+    var actions = List[Action]()
+    val viewAction = Action("View in Browser") {viewSelected}
+    viewAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_V, 0)) 
+    getActionMap.put(viewAction.title, viewAction.peer)
+    viewAction.accelerator match {
+      case Some(s) => getInputMap.put(s, viewAction.title)
+      case None =>
+    }
+    actions ::= viewAction
   
+    getSelectedStatus match {
+      case Some(status) => {
+        val openLinksAction = new OpenLinksAction(status, this, browse)
+        val l = KeyStroke.getKeyStroke(KeyEvent.VK_L, 0)
+        openLinksAction.accelerator = Some(l)
+        connectAction(openLinksAction, l)
+        actions ::= openLinksAction
+      }
+      case None =>
+    }
+  
+    val muteAction = Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}
+    muteAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0))
+    connectAction(muteAction, KeyStroke.getKeyStroke(KeyEvent.VK_M, 0))
+    actions ::= muteAction
+  
+    val c = KeyStroke.getKeyStroke(KeyEvent.VK_C, 0)
+    clearAction.accelerator = Some(c)
+    connectAction(clearAction, c)
+    actions ::= clearAction
+  
+    val nextAction = Action("Next") {
+      dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
+        0, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED))
+    }
+    val n = KeyStroke.getKeyStroke(KeyEvent.VK_N, 0)
+    nextAction.accelerator = Some(n)
+    connectAction(nextAction, n)
+    actions ::= nextAction
+  
+    val prevAction = Action("Previous") {
+      dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
+        0, KeyEvent.VK_UP, KeyEvent.CHAR_UNDEFINED))
+    }
+    val p = KeyStroke.getKeyStroke(KeyEvent.VK_P, 0)
+    prevAction.accelerator = Some(p)
+    connectAction(prevAction, p)
+    actions ::= prevAction
+  
+    val showImageAction = Action("Show Larger Image") { showBigPicture }
+    val i = KeyStroke.getKeyStroke(KeyEvent.VK_I, 0)
+    showImageAction.accelerator = Some(i)
+    connectAction(showImageAction, i)
+    actions ::= showImageAction
+  
+    val replyAction = Action("Reply") { reply }
+    val r = KeyStroke.getKeyStroke(KeyEvent.VK_R, 0)
+    replyAction.accelerator = Some(r)
+    connectAction(replyAction, r)
+    actions ::= replyAction
+  
+    val deleteAction = Action("Delete selected tweets") {
+      statusTableModel.removeSelectedElements(getSelectedModelIndexes) }
+    val bs  = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0)
+    val del = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0)
+    deleteAction.accelerator = Some(bs)
+    connectAction(deleteAction, bs, del)
+    actions ::= deleteAction
+    
+    actions
+  }
+
+  private def connectAction(a: Action, keys: KeyStroke*) {
+    getActionMap.put(a.title, a.peer)
+    for (key <- keys) getInputMap.put(key, a.title)
+  }
+
 }

@@ -30,9 +30,8 @@ abstract class DataProvider extends HttpHandler {
     if (result != 200) {
       println(responseBody)
       throw new DataFetchException(result, responseBody)
-    } else {
-      XML.loadString(responseBody)
     }
+    XML.loadString(responseBody)
   }
   
 }

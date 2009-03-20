@@ -7,8 +7,8 @@ import java.awt.{Dimension}
 import scala.swing._
 import scala.xml._
 import TabbedPane._
-import twitter.{FriendsDataProvider, FollowersDataProvider, TweetsProvider}
 import state.StateRepository
+import twitter.{FriendsDataProvider, Sender, TweetsProvider, FollowersDataProvider}
 import ui._
 
 /**
@@ -29,10 +29,11 @@ object Main extends GUIApplication {
 
     val filterSet = new FilterSet
     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
+    val tweetSender = new Sender(username, password)
     val followers = new FollowersDataProvider(username, password).getUsers
     val statusTableModel = new StatusTableModel(tweetsProvider, getIds(followers), filterSet, username)
     val filtersPane = new FiltersPane(statusTableModel, filterSet)
-    val statusPane = new StatusPane(statusTableModel, filtersPane)
+    val statusPane = new StatusPane(statusTableModel, tweetSender, filtersPane)
     val tweetsPage = new Page("Tweets", statusPane)
 
     val clearAction = statusPane.clearAction
