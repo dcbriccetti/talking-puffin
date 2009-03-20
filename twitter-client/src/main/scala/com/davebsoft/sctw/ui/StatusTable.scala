@@ -151,16 +151,11 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender, statusSele
     }
     actions ::= viewAction
   
-    getSelectedStatus match {
-      case Some(status) => {
-        val openLinksAction = new OpenLinksAction(status, this, browse)
-        val l = KeyStroke.getKeyStroke(KeyEvent.VK_L, 0)
-        openLinksAction.accelerator = Some(l)
-        connectAction(openLinksAction, l)
-        actions ::= openLinksAction
-      }
-      case None =>
-    }
+    val openLinksAction = new OpenLinksAction(getSelectedStatus, this, browse)
+    val l = KeyStroke.getKeyStroke(KeyEvent.VK_L, 0)
+    openLinksAction.accelerator = Some(l)
+    connectAction(openLinksAction, l)
+    actions ::= openLinksAction
   
     val muteAction = Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}
     muteAction.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0))

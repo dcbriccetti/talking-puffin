@@ -11,26 +11,29 @@ import javax.swing.{JTable, KeyStroke, JPopupMenu}
  * @author Dave Briccetti
  */
 
-class OpenLinksAction(getSelectedStatus: => NodeSeq, table: JTable, 
+class OpenLinksAction(getSelectedStatus: => Option[NodeSeq], table: JTable, 
     browse: (String) => Unit) extends Action("Open Links") {
   def apply {
-    val status = getSelectedStatus
-    val urls = LinkExtractor.getAllLinks(status)
+    getSelectedStatus match {
+      case Some(status) =>
+        val urls = LinkExtractor.getAllLinks(status)
   
-    if (urls.length == 1) {
-      browse(urls(0))
-    } else if (urls.length > 1) {
-      val menu = new JPopupMenu
-      var index = 0
+        if (urls.length == 1) {
+          browse(urls(0))
+        } else if (urls.length > 1) {
+          val menu = new JPopupMenu
+          var index = 0
     
-      for (url <- urls) {
-        val a1 = Action(url) {browse(url)}
-        a1.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_1 + index, 0)) 
-        index += 1
-        menu.add(new MenuItem(a1).peer)
-      }
-      val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
-      menu.show(table, menuLoc.getX().asInstanceOf[Int], menuLoc.getY().asInstanceOf[Int])
+          for (url <- urls) {
+            val a1 = Action(url) {browse(url)}
+            a1.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_1 + index, 0)) 
+            index += 1
+            menu.add(new MenuItem(a1).peer)
+          }
+          val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
+          menu.show(table, menuLoc.getX().asInstanceOf[Int], menuLoc.getY().asInstanceOf[Int])
+        }
+      case None =>
     }
   }
 }
