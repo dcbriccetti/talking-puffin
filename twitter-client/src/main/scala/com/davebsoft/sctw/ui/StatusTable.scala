@@ -96,12 +96,11 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   connectAction(replyAction, r)
   
   val deleteAction = Action("Delete selected tweets") {
-    statusTableModel.removeSelectedElements(getSelectedModelIndexes)
-    getSelectionModel.clearSelection
-  }
-  val bs = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0)
+    statusTableModel.removeSelectedElements(getSelectedModelIndexes) }
+  val bs  = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0)
+  val del = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0)
   deleteAction.accelerator = Some(bs)
-  connectAction(deleteAction, bs)
+  connectAction(deleteAction, bs, del)
   
   addMouseListener(new PopupListener(this, getPopupMenu))
   addMouseListener(new MouseAdapter {
@@ -122,9 +121,9 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
     }
   })
   
-  private def connectAction(a: Action, k: KeyStroke) {
+  private def connectAction(a: Action, keys: KeyStroke*) {
     getActionMap.put(a.title, a.peer)
-    getInputMap.put(k, a.title)
+    for (key <- keys) getInputMap.put(key, a.title)
   }
 
   def viewSelected {
@@ -143,7 +142,7 @@ class StatusTable(statusTableModel: StatusTableModel, statusSelected: (NodeSeq) 
   def reply {
     val sm = new SendMsgDialog(null)
     val status = getSelectedStatus
-    sm.replyToTweet.text = (status \ "in_reply_to_status_id").text
+    sm.replyToTweet.text = (status \ "text").text
     sm.visible = true
   }
 
