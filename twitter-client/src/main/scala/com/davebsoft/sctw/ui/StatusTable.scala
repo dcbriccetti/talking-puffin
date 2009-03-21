@@ -25,7 +25,7 @@ import twitter.Sender
  * @author Dave Briccetti
  */
 
-class StatusTable(statusTableModel: StatusTableModel, sender: Sender, statusSelected: (NodeSeq) => Unit,
+class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
       clearAction: Action, showBigPicture: => Unit) 
     extends JTable(statusTableModel) {
   val sorter = new TableRowSorter[StatusTableModel](statusTableModel)
@@ -58,16 +58,6 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender, statusSele
     override def mouseClicked(e: MouseEvent) = {
       if (e.getClickCount == 2) {
         viewSelected
-      }
-    }
-  })
-  
-  getSelectionModel.addListSelectionListener(new ListSelectionListener {
-    def valueChanged(e: ListSelectionEvent) = {
-      if (! e.getValueIsAdjusting) {
-        if (getSelectedRowCount == 1) {
-          showDetailsForTableRow(getSelectedRow)
-        }
       }
     }
   })
@@ -130,16 +120,6 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender, statusSele
     smi
   }
   
-  private def showDetailsForTableRow(r: Int) {
-    try {
-      val modelRowIndex = convertRowIndexToModel(r)
-      val status = statusTableModel.getStatusAt(modelRowIndex)
-      statusSelected(status)
-    } catch {
-      case ex: IndexOutOfBoundsException => println(ex)
-    }
-  }
-
   private def buildActions: List[Action] = {
     var actions = List[Action]()
 

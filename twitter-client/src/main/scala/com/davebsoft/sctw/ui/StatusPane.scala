@@ -68,10 +68,28 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   }, new Constraints{grid=(0,0); gridwidth=3}.peer)
   
   add(new ScrollPane {
-    table = new StatusTable(statusTableModel, sender, showStatusDetails, clearAction, showBigPicture)
+    table = new StatusTable(statusTableModel, sender, clearAction, showBigPicture)
     peer.setViewportView(table)
   }, new Constraints{
     grid = (0,1); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
+  })
+  
+  table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
+    def valueChanged(e: ListSelectionEvent) = {
+      if (! e.getValueIsAdjusting) {
+        if (table.getSelectedRowCount == 1) {
+          try {
+            val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
+            val status = statusTableModel.getStatusAt(modelRowIndex)
+            showStatusDetails(status)
+          } catch {
+            case ex: IndexOutOfBoundsException => println(ex)
+          }
+        } else {
+          clearStatusDetails
+        }
+      }
+    }
   })
   
   largeTweet = new LargeTweet(filtersPane, table)
@@ -103,6 +121,10 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   def clearTweets {
     clearSelection
     statusTableModel.clear
+    clearStatusDetails
+  }
+  
+  private def clearStatusDetails {
     picLabel.icon = null
     userDescription.text = null
     largeTweet.setText(null)
