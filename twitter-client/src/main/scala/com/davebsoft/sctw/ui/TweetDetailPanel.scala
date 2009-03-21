@@ -10,7 +10,7 @@ import java.awt.{Color, Desktop, Dimension, Insets, Font}
 import java.awt.event.{KeyEvent, KeyAdapter}
 import java.net.{URI, URL}
 import java.util.Comparator
-import javax.swing.{JTable, JTextPane, JButton, JLabel, ImageIcon, Icon, SwingWorker, JMenu, JPopupMenu, JMenuItem, JToolBar}
+import javax.swing._
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
@@ -38,7 +38,6 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
   }
   
   largeTweet = new LargeTweet(filtersPane, table)
-  //largeTweet.setBackground(StatusPane.this.background)
   
   peer.add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)
@@ -90,23 +89,43 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     userDescription.text = (user \ "name").text + " • " +
             (user \ "location").text + " • " + (user \ "description").text
     largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
-      (status \ "in_reply_to_status_id").text)) 
+      (status \ "in_reply_to_status_id").text))
     val picUrl = (user \ "profile_image_url").text
-    if (! picUrl.equals(showingUrl)) {
-      showingUrl = picUrl
-      val u = new URL(picUrl)
-      picLabel.icon = transparentPic
-      new SwingWorker[Icon, Object] {
-        val urlToShow = showingUrl
-        def doInBackground = new ImageIcon(u)
-        override def done = {
-          if (urlToShow == showingUrl) { // If user is moving quickly there may be several threads
-            val icon = get
-            if (icon.getIconHeight <= THUMBNAIL_SIZE) picLabel.icon = icon // Ignore broken, too-big thumbnails 
+    showSmallPicture(picUrl)
+  }
+
+  import scala.actors.Actor._
+ 
+  case class FetchImage(val url: String)
+  case class ImageReady(val url: String, val imageIcon: ImageIcon)
+  
+  val imageReceiver = actor {
+    while(true) receive {
+      case ir: ImageReady => {
+        SwingUtilities.invokeLater(new Runnable() { def run {
+          if (ir.url == showingUrl) { // If user is moving quickly there may be several pending
+            if (ir.imageIcon.getIconHeight <= THUMBNAIL_SIZE) picLabel.icon = ir.imageIcon // Ignore broken, too-big thumbnails 
             setBigPicLabelIcon
           }
-        }
-      }.execute
+          }
+        })
+      }
+    }
+  }
+  
+  val picFetcher = actor {
+    while(true) receive {
+      case fi: FetchImage => 
+        if (mailboxSize == 0) imageReceiver ! new ImageReady(fi.url, new ImageIcon(new URL(fi.url)))
+        // else ignore this request because of the newer one behind it
+    }
+  }
+
+  private def showSmallPicture(picUrl: String) {
+    if (! picUrl.equals(showingUrl)) {
+      showingUrl = picUrl
+      picLabel.icon = transparentPic
+      picFetcher ! new FetchImage(picUrl)
     }
   }
 
