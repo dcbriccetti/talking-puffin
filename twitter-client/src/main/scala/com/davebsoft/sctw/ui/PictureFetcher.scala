@@ -14,13 +14,14 @@ import javax.swing.ImageIcon
 case class FetchImage(val url: String)
 class ImageReady(val url: String, val imageIcon: ImageIcon)
   
-class PictureFetcher(edtCallback: (ImageReady) => Unit) extends Actor {
+class PictureFetcher(processFinishedImage: (ImageReady) => Unit) extends Actor {
 
   def act = while(true) receive {
     case fi: FetchImage => 
-      if (mailboxSize == 0) 
-        SwingInvoke.invokeLater({edtCallback(new ImageReady(fi.url, new ImageIcon(new URL(fi.url))))})
-      // else ignore this request because of the newer one behind it
+      if (mailboxSize == 0) { 
+        SwingInvoke.invokeLater({processFinishedImage(new ImageReady(fi.url, 
+          new ImageIcon(new URL(fi.url))))})
+      } // else ignore this request because of the newer one behind it
   }
 
   start
