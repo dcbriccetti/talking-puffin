@@ -3,7 +3,7 @@ package com.davebsoft.sctw.ui
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
 import _root_.scala.xml.{NodeSeq, Node}
-import filter.{FilterSet, TextFilter, FilterSetChanged, TagUser}
+import filter._
 import java.awt.event.{ActionEvent, ActionListener}
 import java.util.{Collections, Date, ArrayList}
 import javax.swing.event.TableModelEvent
@@ -28,6 +28,8 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
   private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
   
   def filteredStatusCount = filteredStatuses.size
+
+  val filterLogic = new FilterLogic(username, filterSet, filteredStatuses)
   
   private val colNames = List("Age", "Username", "Status")
   private var timer: Timer = _
@@ -157,41 +159,6 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
     filterAndNotify
   }
   
-  private def filterStatuses {
-    filteredStatuses.clear
-    for (st <- statuses) {
-      var id = (st \ "user" \ "id").text
-      if (! filterSet.mutedUsers.contains(id)) {
-        if (tagFiltersInclude(id)) {
-          val text = (st \ "text").text 
-          if (! excludedBecauseReplyAndNotToYou(text)) {
-            if (! filterSet.excludedByStringMatches(text)) {
-              filteredStatuses.add(st)
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  private def tagFiltersInclude(id: String): Boolean = {
-    if (filterSet.selectedTags.length == 0) true else {
-      for (tag <- filterSet.selectedTags) {
-        if (filter.TagUsers.contains(new TagUser(tag, id))) {
-          return true
-        }
-      }
-      false
-    }
-  }
-  
-  private def excludedBecauseReplyAndNotToYou(text: String): Boolean = {
-    val rtu = LinkExtractor.getReplyToUser(text)
-    if (! filterSet.excludeNotToYouReplies) return false
-    if (rtu.length == 0) return false
-    ! rtu.equals(username)
-  }
-
   /**
    * Sets the update frequency, in seconds.
    */
@@ -224,7 +191,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
     if (preChangeListener != null) {
       preChangeListener.tableChanging
     }
-    filterStatuses
+    filterLogic.filter(statuses)
     publish(new TableContentsChanged(filteredStatuses.size, statuses.size))
     fireTableDataChanged
   }
