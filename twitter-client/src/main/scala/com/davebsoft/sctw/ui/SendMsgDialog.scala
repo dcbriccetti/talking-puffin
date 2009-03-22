@@ -33,7 +33,7 @@ class SendMsgDialog(parent: java.awt.Component, sender: Sender, status: Option[N
     class Constr extends Constraints { anchor=GridBagPanel.Anchor.West }
     status match {
       case Some(s) => {
-        userName = "@" + (s \ "user" \ "screen_name").text + " "
+        userName = "@" + (s \ "user" \ "screen_name").text
         message.text = userName + " "
       }
       case None =>
