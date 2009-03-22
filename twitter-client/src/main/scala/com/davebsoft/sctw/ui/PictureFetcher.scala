@@ -15,12 +15,21 @@ case class FetchImage(val url: String)
 class ImageReady(val url: String, val imageIcon: ImageIcon)
   
 class PictureFetcher(processFinishedImage: (ImageReady) => Unit) extends Actor {
-
+  val imageCache = scala.collection.mutable.Map.empty[String, ImageIcon]
+  
   def act = while(true) receive {
     case fi: FetchImage => 
-      if (mailboxSize == 0) { 
-        SwingInvoke.invokeLater({processFinishedImage(new ImageReady(fi.url, 
-          new ImageIcon(new URL(fi.url))))})
+      if (mailboxSize == 0) {
+        val icon = imageCache.get(fi.url) match { 
+          case Some(imageIcon) => imageIcon
+          case None => {
+            val newIcon = new ImageIcon(new URL(fi.url))
+            if (imageCache.size > 1000) imageCache.clear // TODO clear LRU instead?
+            imageCache(fi.url) = newIcon
+            newIcon
+          }
+        }
+        SwingInvoke.invokeLater({processFinishedImage(new ImageReady(fi.url, icon))})
       } // else ignore this request because of the newer one behind it
   }
 
