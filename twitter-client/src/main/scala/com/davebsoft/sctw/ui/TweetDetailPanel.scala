@@ -90,15 +90,13 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     showSmallPicture(picUrl)
   }
 
-  def processFinishedPicture(ir: ImageReady) {
+  val picFetcher = new PictureFetcher((ir: ImageReady) => {
     if (ir.url == showingUrl) {
       if (ir.imageIcon.getIconHeight <= THUMBNAIL_SIZE) 
         picLabel.icon = ir.imageIcon // Ignore broken, too-big thumbnails 
       setBigPicLabelIcon
     }
-  }
-
-  val picFetcher = new PictureFetcher(processFinishedPicture)
+  })
 
   private def showSmallPicture(picUrl: String) {
     if (! picUrl.equals(showingUrl)) {
