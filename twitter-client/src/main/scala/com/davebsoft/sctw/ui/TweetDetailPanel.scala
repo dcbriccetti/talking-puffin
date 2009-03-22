@@ -1,20 +1,17 @@
 package com.davebsoft.sctw.ui
+import _root_.scala.swing.event.{ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.com.davebsoft.sctw.util.PopupListener
-import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.xml.{NodeSeq, Node}
 
-import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
+import java.awt.event.{MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
-import java.awt.{Color, Desktop, Dimension, Insets, Font}
-import java.awt.event.{KeyEvent, KeyAdapter}
+import java.awt.Insets
 import java.net.{URI, URL}
-import java.util.Comparator
 import javax.swing._
-import javax.swing.event._
-import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
+import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import scala.swing._
-import filter.TagsRepository
+import scala.actors.Actor._
 
 /**
  * Details of the currently-selected tweet.
@@ -94,21 +91,19 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     showSmallPicture(picUrl)
   }
 
-  import scala.actors.Actor._
- 
   case class FetchImage(val url: String)
   case class ImageReady(val url: String, val imageIcon: ImageIcon)
   
   val imageReceiver = actor {
     while(true) receive {
       case ir: ImageReady => {
-        SwingUtilities.invokeLater(new Runnable() { def run {
-          if (ir.url == showingUrl) { // If user is moving quickly there may be several pending
-            if (ir.imageIcon.getIconHeight <= THUMBNAIL_SIZE) picLabel.icon = ir.imageIcon // Ignore broken, too-big thumbnails 
+        if (ir.url == showingUrl) {
+          SwingInvoke.invokeLater({
+            if (ir.imageIcon.getIconHeight <= THUMBNAIL_SIZE) 
+              picLabel.icon = ir.imageIcon // Ignore broken, too-big thumbnails 
             setBigPicLabelIcon
-          }
-          }
-        })
+          })
+        }
       }
     }
   }
@@ -116,7 +111,8 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
   val picFetcher = actor {
     while(true) receive {
       case fi: FetchImage => 
-        if (mailboxSize == 0) imageReceiver ! new ImageReady(fi.url, new ImageIcon(new URL(fi.url)))
+        if (mailboxSize == 0) 
+          imageReceiver ! new ImageReady(fi.url, new ImageIcon(new URL(fi.url)))
         // else ignore this request because of the newer one behind it
     }
   }
