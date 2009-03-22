@@ -51,7 +51,8 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
   val statusCol = colModel.getColumn(2)
   statusCol.setPreferredWidth(600)
 
-  val actions = buildActions
+  var actions = List[Action]()
+  buildActions
 
   addMouseListener(new PopupListener(this, getPopupMenu))
   addMouseListener(new MouseAdapter {
@@ -111,7 +112,7 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
     menu
   }
   
-  private def getSelectedModelIndexes: List[Int] = {
+  protected def getSelectedModelIndexes: List[Int] = {
     val tableRows = getSelectedRows
     var smi = List[Int]()
     for (i <- 0 to (tableRows.length - 1)) {
@@ -119,23 +120,20 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
     }
     smi
   }
-  
-  private def buildActions: List[Action] = {
-    var actions = List[Action]()
 
-    def addAction(action: Action, key: KeyStroke) {
-      action.accelerator = Some(key) 
-      getActionMap.put(action.title, action.peer)
-      connectAction(action, key)
-      actions ::= action
-    }
-    
-    def ks(keyEvent: Int): KeyStroke = KeyStroke.getKeyStroke(keyEvent, 0)
-  
+  protected def addAction(action: Action, key: KeyStroke) {
+    action.accelerator = Some(key)
+    getActionMap.put(action.title, action.peer)
+    connectAction(action, key)
+    actions ::= action
+  }
+
+  protected def ks(keyEvent: Int): KeyStroke = KeyStroke.getKeyStroke(keyEvent, 0)
+
+  protected def buildActions = {
     addAction(Action("View in Browser") {viewSelected}, ks(KeyEvent.VK_V))
     addAction(new OpenLinksAction(getSelectedStatus, this, browse), ks(KeyEvent.VK_L))
     addAction(Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}, ks(KeyEvent.VK_M))
-    addAction(clearAction, ks(KeyEvent.VK_C))
     addAction(Action("Next") {
       dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
         0, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED))
@@ -146,12 +144,6 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
     }, ks(KeyEvent.VK_P))
     addAction(Action("Show Larger Image") { showBigPicture }, ks(KeyEvent.VK_I))
     addAction(Action("Reply") { reply }, ks(KeyEvent.VK_R))
-    val deleteTitle = "Delete selected tweets"
-    addAction(Action(deleteTitle) {
-      statusTableModel.removeSelectedElements(getSelectedModelIndexes) }, ks(KeyEvent.VK_BACK_SPACE))
-    getInputMap.put(ks(KeyEvent.VK_DELETE), deleteTitle)  
-  
-    actions
   }
 
   private def connectAction(a: Action, keys: KeyStroke*) {
@@ -159,4 +151,20 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
     for (key <- keys) getInputMap.put(key, a.title)
   }
 
+}
+
+class TweetsTable(statusTableModel: StatusTableModel, sender: Sender,
+    clearAction: Action, showBigPicture: => Unit) 
+    extends StatusTable(statusTableModel, sender, clearAction, showBigPicture) {
+  
+  override def buildActions {
+    super.buildActions
+    addAction(clearAction, ks(KeyEvent.VK_C))
+    val deleteTitle = "Delete selected tweets"
+    addAction(Action(deleteTitle) {
+      statusTableModel.removeSelectedElements(getSelectedModelIndexes) }, ks(KeyEvent.VK_BACK_SPACE))
+    getInputMap.put(ks(KeyEvent.VK_DELETE), deleteTitle)  
+  }
+
+  
 }

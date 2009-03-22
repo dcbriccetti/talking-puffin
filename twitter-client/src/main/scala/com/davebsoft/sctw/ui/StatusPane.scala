@@ -54,27 +54,13 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
   
-  peer.add(new JToolBar {
-    setFloatable(false)
-    add(sendAction.peer)
-    add(clearAction.peer)
-    add(loadNewAction.peer)
-    add(last200Action.peer)
-    val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
-    comboBox.peer.setToolTipText("Number of seconds between automatic “Load New”s")
-    var defaultRefresh = 120
-    comboBox.peer.setSelectedItem(defaultRefresh)
-    statusTableModel.setUpdateFrequency(defaultRefresh)
-    comboBox.peer.addActionListener(new ActionListener(){
-      def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
-        statusTableModel.setUpdateFrequency(comboBox.selection.item)
-      }
-    })
-    add(comboBox.peer)
-  }, new Constraints{grid=(0,0); gridwidth=3}.peer)
+  def toolbar: JToolBar = null
+
+  if (toolbar != null)
+    peer.add(toolbar, new Constraints{grid=(0,0); gridwidth=3}.peer)
   
   add(new ScrollPane {
-    table = new StatusTable(statusTableModel, sender, clearAction, showBigPicture)
+    table = newTable
     peer.setViewportView(table)
   }, new Constraints{
     grid = (0,1); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
@@ -84,7 +70,11 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   add(tweetDetailPanel, new Constraints{
     grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
   })
+  
+  statusTableModel.loadNewData
 
+  def newTable: StatusTable = new StatusTable(statusTableModel, sender, clearAction, showBigPicture)
+  
   def showBigPicture = tweetDetailPanel.showBigPicture
   
   def tableChanging = if (table != null) lastSelectedRows = table.getSelectedRows
@@ -114,3 +104,28 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
 
 }
 
+class ToolbarStatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane: FiltersPane) 
+    extends StatusPane(statusTableModel, sender, filtersPane) {
+  
+  override def toolbar: JToolBar = new JToolBar {
+    setFloatable(false)
+    add(sendAction.peer)
+    add(clearAction.peer)
+    add(loadNewAction.peer)
+    add(last200Action.peer)
+    val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
+    comboBox.peer.setToolTipText("Number of seconds between automatic “Load New”s")
+    var defaultRefresh = 120
+    comboBox.peer.setSelectedItem(defaultRefresh)
+    statusTableModel.setUpdateFrequency(defaultRefresh)
+    comboBox.peer.addActionListener(new ActionListener(){
+      def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
+        statusTableModel.setUpdateFrequency(comboBox.selection.item)
+      }
+    })
+    add(comboBox.peer)
+  }
+
+  override def newTable: StatusTable = new TweetsTable(statusTableModel, sender, clearAction, showBigPicture)
+  
+}

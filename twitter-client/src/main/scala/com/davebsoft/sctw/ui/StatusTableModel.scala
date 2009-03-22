@@ -53,10 +53,12 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
         val id = (status \ "user" \ "id").text
         new AnnotatedUser(screenName, followerIds.contains(id))
       }
-      case 2 => (status \ "text").text 
+      case 2 => getStatusText(status, username) 
     }
   }
   
+  def getStatusText(status: NodeSeq, username: String): String = (status \ "text").text 
+
   def getStatusAt(rowIndex: Int): NodeSeq = {
     filteredStatuses.get(rowIndex)
   }
@@ -201,7 +203,6 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
 
     if (updateFrequency > 0) {
       createLoadTimer
-      loadNewData
     }
   }
 
@@ -239,3 +240,10 @@ trait PreChangeListener {
 
 case class TableContentsChanged(val filteredIn: Int, val total: Int) extends Event
   
+trait Replies extends StatusTableModel {
+  override def getStatusText(status: NodeSeq, username: String): String = {
+    val text = (status \ "text").text
+    val userTag = "@" + username
+    if (text.startsWith(userTag)) text.substring(userTag.length).trim else text
+  }
+}

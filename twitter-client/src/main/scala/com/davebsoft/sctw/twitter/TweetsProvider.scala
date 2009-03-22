@@ -42,3 +42,7 @@ class TweetsProvider(username: String, password: String, startingId: String) ext
   }
 }
 
+class RepliesProvider(username: String, password: String) extends TweetsProvider(username, password, null) {
+  override def getUrl = "http://twitter.com/statuses/replies.xml"
+}
+

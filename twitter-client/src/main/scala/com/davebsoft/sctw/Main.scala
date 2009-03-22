@@ -8,7 +8,7 @@ import scala.swing._
 import scala.xml._
 import TabbedPane._
 import state.StateRepository
-import twitter.{FriendsDataProvider, Sender, TweetsProvider, FollowersDataProvider}
+import twitter._
 import ui._
 
 /**
@@ -29,12 +29,14 @@ object Main extends GUIApplication {
 
     val filterSet = new FilterSet
     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
+    val repliesProvider = new RepliesProvider(username, password)
     val tweetSender = new Sender(username, password)
     val followers = new FollowersDataProvider(username, password).getUsers
-    val statusTableModel = new StatusTableModel(tweetsProvider, getIds(followers), filterSet, username)
-    val filtersPane = new FiltersPane(statusTableModel, filterSet)
-    val statusPane = new StatusPane(statusTableModel, tweetSender, filtersPane)
-    val tweetsPage = new Page("Tweets", statusPane)
+    val tweetsModel  = new StatusTableModel(tweetsProvider,  getIds(followers), filterSet, username)
+    val repliesModel = new StatusTableModel(repliesProvider, getIds(followers), filterSet, username) with Replies
+    val filtersPane = new FiltersPane(tweetsModel, filterSet)
+    val statusPane  = new ToolbarStatusPane(tweetsModel,  tweetSender, filtersPane)
+    val repliesPane = new StatusPane(repliesModel, tweetSender, filtersPane)
 
     val clearAction = statusPane.clearAction
     new Frame {
@@ -47,16 +49,16 @@ object Main extends GUIApplication {
       val tabbedPane = new TabbedPane() {
         preferredSize = new Dimension(900, 600)
 
-        pages.append(tweetsPage)
+        pages.append(new Page("Tweets", statusPane))
+        pages.append(new Page("Replies", repliesPane))
 
         val following = new FriendsDataProvider(username, password).getUsers
         pages.append(new Page("Following (" + following.length + ")", new FriendsFollowersPane(following, getIds(followers))))
         pages.append(new Page("Followers (" + followers.length + ")", new FriendsFollowersPane(followers, getIds(following))))
-
         pages.append(filtersPage)
       }
       listenTo(tabbedPane.selection)
-      listenTo(statusTableModel)
+      listenTo(tweetsModel)
       contents = tabbedPane
       var lastSelectedPane = tabbedPane.selection.page
 
@@ -92,7 +94,7 @@ object Main extends GUIApplication {
   }
 
   def main(args: Array[String]): Unit = {
-
+    
     def startUp(userName: String, pwd: String) {
       username = userName
       password = pwd
@@ -106,8 +108,9 @@ object Main extends GUIApplication {
   
   def setUpUi {
     init
-    top.pack
-    top.visible = true
+    val frame = top
+    frame.pack
+    frame.visible = true
   }
 
 }
