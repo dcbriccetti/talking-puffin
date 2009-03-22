@@ -11,7 +11,6 @@ import java.net.{URI, URL}
 import javax.swing._
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import scala.swing._
-import scala.actors.Actor._
 
 /**
  * Details of the currently-selected tweet.
@@ -91,31 +90,15 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     showSmallPicture(picUrl)
   }
 
-  case class FetchImage(val url: String)
-  case class ImageReady(val url: String, val imageIcon: ImageIcon)
-  
-  val imageReceiver = actor {
-    while(true) receive {
-      case ir: ImageReady => {
-        if (ir.url == showingUrl) {
-          SwingInvoke.invokeLater({
-            if (ir.imageIcon.getIconHeight <= THUMBNAIL_SIZE) 
-              picLabel.icon = ir.imageIcon // Ignore broken, too-big thumbnails 
-            setBigPicLabelIcon
-          })
-        }
-      }
+  def processFinishedPicture(ir: ImageReady) {
+    if (ir.url == showingUrl) {
+      if (ir.imageIcon.getIconHeight <= THUMBNAIL_SIZE) 
+        picLabel.icon = ir.imageIcon // Ignore broken, too-big thumbnails 
+      setBigPicLabelIcon
     }
   }
-  
-  val picFetcher = actor {
-    while(true) receive {
-      case fi: FetchImage => 
-        if (mailboxSize == 0) 
-          imageReceiver ! new ImageReady(fi.url, new ImageIcon(new URL(fi.url)))
-        // else ignore this request because of the newer one behind it
-    }
-  }
+
+  val picFetcher = new PictureFetcher(processFinishedPicture)
 
   private def showSmallPicture(picUrl: String) {
     if (! picUrl.equals(showingUrl)) {
