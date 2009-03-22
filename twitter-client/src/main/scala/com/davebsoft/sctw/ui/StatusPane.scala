@@ -26,12 +26,25 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   var table: JTable = _
   val emptyIntArray = new Array[Int](0) 
   var lastSelectedRows = emptyIntArray
+  val sendAction = new Action("Send…") {
+    toolTip = "Opens a window from which you can send a tweet"
+    def apply { 
+      val sm = new SendMsgDialog(null, sender, None)
+      sm.visible = true
+    }
+  }
   val clearAction = new Action("Clear") {
     toolTip = "Removes all tweets from the display"
     def apply = clearTweets
   }
-  val last200Action = new Action("Fetch") {
-    toolTip = "Fetches the last 200 of your “following” tweets"
+  val loadNewAction = new Action("Load New") {
+    toolTip = "Loads any new tweets since the last"
+    def apply = {
+      statusTableModel.loadNewData
+    }
+  }
+  val last200Action = new Action("Last 200") {
+    toolTip = "Fetches the last 200 tweets"
     def apply = {
       clearSelection
       statusTableModel.loadLastSet
@@ -43,10 +56,12 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   
   peer.add(new JToolBar {
     setFloatable(false)
+    add(sendAction.peer)
     add(clearAction.peer)
+    add(loadNewAction.peer)
     add(last200Action.peer)
     val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
-    comboBox.peer.setToolTipText("Number of seconds between fetches from Twitter")
+    comboBox.peer.setToolTipText("Number of seconds between automatic “Load New”s")
     var defaultRefresh = 120
     comboBox.peer.setSelectedItem(defaultRefresh)
     statusTableModel.setUpdateFrequency(defaultRefresh)

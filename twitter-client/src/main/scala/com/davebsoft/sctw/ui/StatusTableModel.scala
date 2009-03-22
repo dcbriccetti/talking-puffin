@@ -113,13 +113,13 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
   private def createLoadTimer {
     timer = new Timer(updateFrequency, new ActionListener() {
       def actionPerformed(event: ActionEvent) {
-        loadData
+        loadNewData
       }
     })
     timer.start
   }
   
-  private def loadData {
+  def loadNewData {
     new SwingWorker[Option[NodeSeq], Object] {
       override def doInBackground: Option[NodeSeq] = {
         try {
@@ -201,7 +201,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
 
     if (updateFrequency > 0) {
       createLoadTimer
-      loadData
+      loadNewData
     }
   }
 
