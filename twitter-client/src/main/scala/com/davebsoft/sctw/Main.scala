@@ -69,7 +69,7 @@ object Main extends GUIApplication {
           TagUsers.save
           System.exit(1)
         }
-        case SelectionChanged(sc) => {
+        case SelectionChanged(`tabbedPane`) => {
           val selectedPage = tabbedPane.selection.page
           if (lastSelectedPane == filtersPage && selectedPage != filtersPage) {
             filtersPane.applyChanges
