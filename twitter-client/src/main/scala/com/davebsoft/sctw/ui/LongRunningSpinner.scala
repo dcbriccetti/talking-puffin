@@ -26,7 +26,10 @@ object LongRunningSpinner {
         Successful
       }
       catch {
-        case e: Exception => new Failure(e)
+        case e: Exception => {
+          e.printStackTrace
+          new Failure(e)
+        }
       }
     }, (status: Status) =>
       if(callback != null) callback(status)
