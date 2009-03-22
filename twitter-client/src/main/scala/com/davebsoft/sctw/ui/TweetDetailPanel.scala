@@ -107,6 +107,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
   }
 
   def clearStatusDetails {
+    showingUrl = null
     picLabel.icon = null
     userDescription.text = null
     largeTweet.setText(null)
