@@ -21,11 +21,12 @@ class SendMsgDialog(parent: java.awt.Component, sender: Sender, status: Option[N
     font = new Font(font.getFontName, Font.BOLD, font.getSize * 150 / 100)
   }
 
-  val total = new Label
   val message = new CustomTextArea
+  def remainingMsg = "Characters remaining: " + (140 - message.text.length)
+  val total = new Label(remainingMsg)
   listenTo(message.caret)
   reactions += {
-    case CaretUpdate(c) => total.text = "Characters remaining: " + (140 - message.text.length) 
+    case CaretUpdate(c) => total.text = remainingMsg 
   }
   message.peer.addKeyListener(new KeyAdapter() {
     override def keyTyped(e: KeyEvent) = {

@@ -53,8 +53,8 @@ object Main extends GUIApplication {
         pages.append(new Page("Replies", repliesPane))
 
         val following = new FriendsDataProvider(username, password).getUsers
-        pages.append(new Page("Following (" + following.length + ")", new FriendsFollowersPane(following, getIds(followers))))
-        pages.append(new Page("Followers (" + followers.length + ")", new FriendsFollowersPane(followers, getIds(following))))
+        pages.append(new Page("People (" + following.length + "/" + followers.length + ")", 
+          new FriendsFollowersPane(following, followers)))
         pages.append(filtersPage)
       }
       listenTo(tabbedPane.selection)

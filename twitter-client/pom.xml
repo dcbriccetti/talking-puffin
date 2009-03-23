@@ -2,8 +2,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.davebsoft.sctw</groupId>
-    <artifactId>sctw</artifactId>
-    <version>0.4</version>
+    <artifactId>simple-twitter-client</artifactId>
+    <version>0.5</version>
     <inceptionYear>2008</inceptionYear>
     <properties>
         <scala.version>2.7.3</scala.version>

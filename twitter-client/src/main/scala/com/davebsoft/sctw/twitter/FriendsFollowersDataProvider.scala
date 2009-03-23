@@ -25,8 +25,7 @@ abstract class FriendsFollowersDataProvider(username: String, password: String) 
         page += 1
       }
     } while (users.length > 0)
-    usersList.sort((a,b) => ((a \ "name").text.toLowerCase compareTo
-            (b \ "name").text.toLowerCase) < 0)
+    usersList
   }
 }
 
