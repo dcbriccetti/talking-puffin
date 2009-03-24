@@ -28,7 +28,7 @@ import twitter.Sender
 class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
       clearAction: Action, showBigPicture: => Unit) 
     extends JTable(statusTableModel) {
-  setRowHeight(50)
+  setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
   val sorter = new TableRowSorter[StatusTableModel](statusTableModel)
   sorter.setComparator(2, new Comparator[AnnotatedUser] {
     def compare(o1: AnnotatedUser, o2: AnnotatedUser) = o1.name.compareToIgnoreCase(o2.name)
@@ -40,7 +40,7 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
   val colModel = getColumnModel
   
   val picCol = colModel.getColumn(0)
-  picCol.setMaxWidth(50)
+  picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
   
   val ageCol = colModel.getColumn(1)
   ageCol.setPreferredWidth(60)
@@ -54,7 +54,7 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
   
   val statusCol = colModel.getColumn(3)
   statusCol.setPreferredWidth(600)
-  statusCol.setCellRenderer(new StatusCellRenderer)
+  statusCol.setCellRenderer(new WordWrappingCellRenderer)
 
   var actions = List[Action]()
   buildActions

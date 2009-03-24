@@ -21,7 +21,7 @@ class ImageReady(val url: String, val id: Object, val imageIcon: ImageIcon)
 class PictureFetcher(processFinishedImage: (ImageReady) => Unit, processAll: Boolean) extends Actor {
   
   def act = while(true) receive {
-    case fi: FetchImage => 
+    case fi: FetchImage =>
       if (mailboxSize == 0 || processAll) {
         val icon = PictureFetcher.imageCache.get(fi.url) match { 
           case Some(imageIcon) => {

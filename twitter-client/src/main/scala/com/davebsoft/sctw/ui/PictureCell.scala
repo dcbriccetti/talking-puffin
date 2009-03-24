@@ -8,11 +8,11 @@ import javax.swing.table.{AbstractTableModel}
  * @author Dave Briccetti
  */
 
-class PictureCell(model: AbstractTableModel) {
+class PictureCell(model: AbstractTableModel, column: Int) {
   val picFetcher = new PictureFetcher((imageReady: ImageReady) => {
     if (imageReady.imageIcon.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
       val row = imageReady.id.asInstanceOf[Int]
-      model.fireTableCellUpdated(row, 0)
+      model.fireTableCellUpdated(row, column)
     }
   }, true)
     

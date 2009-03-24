@@ -31,7 +31,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
   var bigPicFrame: Frame = _
   var bigPicLabel: Label = _
   var showingUrl: String = _
-
+          
   private class CustomConstraints extends Constraints {
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
   }

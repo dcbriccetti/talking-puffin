@@ -6,11 +6,11 @@ import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.{JTextArea, JTable}
 
 /**
- * 
+ * Word wrapping renderer.
  * @author Dave Briccetti
  */
 
-class StatusCellRenderer extends JTextArea with TableCellRenderer {
+class WordWrappingCellRenderer extends JTextArea with TableCellRenderer {
   setLineWrap(true)
   setWrapStyleWord(true)
   val renderer = new DefaultTableCellRenderer

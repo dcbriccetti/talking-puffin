@@ -47,7 +47,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
   def getRowCount = filteredStatuses.size
   override def getColumnName(column: Int) = colNames(column)
 
-  val pcell = new PictureCell(this)
+  val pcell = new PictureCell(this, 0)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val status = filteredStatuses.get(rowIndex)
