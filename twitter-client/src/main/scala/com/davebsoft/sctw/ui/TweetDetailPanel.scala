@@ -17,14 +17,17 @@ import scala.swing._
  * @author Dave Briccetti
  */
 
+object Thumbnail {
+  val THUMBNAIL_SIZE = 48
+  val transparentPic = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, 
+    BufferedImage.TYPE_INT_ARGB))
+}
+
 class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagPanel {
     
   var picLabel: Label = _
   var userDescription: TextArea = _
   var largeTweet: JTextPane = _
-  private val THUMBNAIL_SIZE = 48
-  val transparentPic = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, 
-    BufferedImage.TYPE_INT_ARGB))
   var bigPicFrame: Frame = _
   var bigPicLabel: Label = _
   var showingUrl: String = _
@@ -92,17 +95,17 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
 
   val picFetcher = new PictureFetcher((imageReady: ImageReady) => {
     if (imageReady.url == showingUrl) {
-      if (imageReady.imageIcon.getIconHeight <= THUMBNAIL_SIZE) 
+      if (imageReady.imageIcon.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) 
         picLabel.icon = imageReady.imageIcon // Ignore broken, too-big thumbnails 
       setBigPicLabelIcon
     }
-  })
+  }, false)
 
   private def showSmallPicture(picUrl: String) {
     if (! picUrl.equals(showingUrl)) {
       showingUrl = picUrl
-      picLabel.icon = transparentPic
-      picFetcher ! new FetchImage(picUrl)
+      picLabel.icon = Thumbnail.transparentPic
+      picFetcher ! new FetchImage(picUrl, null)
     }
   }
 

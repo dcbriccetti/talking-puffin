@@ -5,10 +5,11 @@ import _root_.scala.swing.{Reactor, Publisher}
 import _root_.scala.xml.{NodeSeq, Node}
 import filter._
 import java.awt.event.{ActionEvent, ActionListener}
+import java.net.URL
 import java.util.{Collections, Date, ArrayList}
+import javax.swing._
 import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
-import javax.swing.{SwingWorker, Timer}
 import twitter.{DataFetchException, TweetsProvider}
 
 /**
@@ -31,7 +32,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
 
   val filterLogic = new FilterLogic(username, filterSet, filteredStatuses)
   
-  private val colNames = List("Age", "Username", "Status")
+  private val colNames = List(" ", "Age", "Username", "Status")
   private var timer: Timer = _
   private var preChangeListener: PreChangeListener = _;
   
@@ -42,20 +43,26 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
   
   def setPreChangeListener(preChangeListener: PreChangeListener) = this.preChangeListener = preChangeListener
   
-  def getColumnCount = 3
+  def getColumnCount = 4
   def getRowCount = filteredStatuses.size
   override def getColumnName(column: Int) = colNames(column)
+
+  val pcell = new PictureCell(this)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val status = filteredStatuses.get(rowIndex)
     columnIndex match {
-      case 0 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
-      case 1 => {
+      case 0 => {
+        val picUrl = (status \ "user" \ "profile_image_url").text
+        pcell.request(picUrl, rowIndex)
+      }
+      case 1 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
+      case 2 => {
         val screenName = (status \ "user" \ "screen_name").text
         val id = (status \ "user" \ "id").text
         new AnnotatedUser(screenName, followerIds.contains(id))
       }
-      case 2 => getStatusText(status, username) 
+      case 3 => getStatusText(status, username) 
     }
   }
   
@@ -67,9 +74,10 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
 
   override def getColumnClass(columnIndex: Int) = {
     columnIndex match {
-      case 0 => classOf[java.lang.Long]
-      case 1 => classOf[String]
-      case 2 => classOf[String] 
+      case 0 => classOf[Icon]
+      case 1 => classOf[java.lang.Long]
+      case 2 => classOf[String]
+      case 3 => classOf[String] 
     }
   }
 
