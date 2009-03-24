@@ -1,8 +1,8 @@
 package com.davebsoft.sctw.ui
 
+import _root_.scala.swing.event.{ComponentResized, ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.com.davebsoft.sctw.util.PopupListener
-import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.xml.{NodeSeq, Node}
 
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
@@ -72,6 +72,7 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   })
   
   statusTableModel.loadNewData
+  setTableRowHeights
 
   def newTable: StatusTable = new StatusTable(statusTableModel, sender, clearAction, showBigPicture)
   
@@ -80,6 +81,7 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   def tableChanging = if (table != null) lastSelectedRows = table.getSelectedRows
 
   def tableChanged(e: TableModelEvent) = {
+    println("table changed")
     if (table != null) {
       val selectionModel = table.getSelectionModel
       selectionModel.clearSelection
@@ -88,6 +90,29 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
         val row = lastSelectedRows(i)
         selectionModel.addSelectionInterval(row, row)
       }
+      
+      setTableRowHeights
+    }
+  }
+  
+  listenTo(this)
+  reactions += {
+     case ComponentResized(comp) => {println(comp); if (comp.visible) setTableRowHeights}
+  }
+  
+  private def setTableRowHeights {
+    if (! visible) {
+      println("not visible")
+      return
+    }
+    println("setting table row heights")
+    for (r <- 0 until table.getRowCount) {
+      val renderer = table.getCellRenderer(r, 2)
+      val comp = table.prepareRenderer(renderer, r, 2)
+      val h = comp.getPreferredSize().height
+      print(h + " ")
+      table.setRowHeight(r, h)
+      println()
     }
   }
   

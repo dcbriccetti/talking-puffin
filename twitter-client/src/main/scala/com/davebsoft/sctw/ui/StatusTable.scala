@@ -50,6 +50,7 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
   
   val statusCol = colModel.getColumn(2)
   statusCol.setPreferredWidth(600)
+  statusCol.setCellRenderer(new StatusCellRenderer)
 
   var actions = List[Action]()
   buildActions

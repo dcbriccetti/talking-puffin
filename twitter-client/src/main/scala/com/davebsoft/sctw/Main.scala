@@ -53,7 +53,7 @@ object Main extends GUIApplication {
         pages.append(new Page("Replies", repliesPane))
 
         val following = new FriendsDataProvider(username, password).getUsers
-        pages.append(new Page("People (" + following.length + "/" + followers.length + ")", 
+        pages.append(new Page("People (" + following.length + ", " + followers.length + ")", 
           new FriendsFollowersPane(following, followers)))
         pages.append(filtersPage)
       }
