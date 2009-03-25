@@ -6,9 +6,9 @@ import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.xml.{NodeSeq, Node}
 
 import _root_.scala.{Option}
-import java.awt.{Desktop}
 import java.awt.event.{KeyEvent, ActionEvent, ActionListener, MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
+import java.awt.{Desktop, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
 import java.util.regex.Pattern
@@ -50,11 +50,15 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
   val nameCol = colModel.getColumn(2)
   nameCol.setPreferredWidth(100)
   nameCol.setMaxWidth(200)
-  nameCol.setCellRenderer(new AnnotatedUserRenderer with ZebraStriping)
+  nameCol.setCellRenderer(new WordWrappingCellRenderer)
+  //nameCol.setCellRenderer(new AnnotatedUserRenderer with ZebraStriping)
   
   val statusCol = colModel.getColumn(3)
   statusCol.setPreferredWidth(600)
-  statusCol.setCellRenderer(new WordWrappingCellRenderer)
+  statusCol.setCellRenderer(new WordWrappingCellRenderer {
+    val normalFont = getFont
+    setFont(new Font(normalFont.getFontName, Font.PLAIN, normalFont.getSize * 120 / 100))
+  })
 
   var actions = List[Action]()
   buildActions

@@ -41,10 +41,12 @@ class FilterLogic(username: String, filterSet: FilterSet,
   }
     
   private def excludedBecauseReplyAndNotToYou(text: String): Boolean = {
-    val rtu = LinkExtractor.getReplyToUser(text)
     if (! filterSet.excludeNotToYouReplies) return false
-    if (rtu.length == 0) return false
-    ! rtu.equals(username)
+
+    LinkExtractor.getReplyToUser(text) match {
+      case Some(user) => ! user.equals(username)
+      case None => false
+    }
   }
 }
   

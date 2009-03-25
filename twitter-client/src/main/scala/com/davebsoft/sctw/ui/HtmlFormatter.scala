@@ -10,11 +10,15 @@ import java.util.regex.Pattern
 object HtmlFormatter {
 
   def createTweetHtml(text: String, replyTo: String): String = {
-    val replyToUser = LinkExtractor.getReplyToUser(text)
-    
-    val arrowLinkToParent = if (replyTo.length > 0 && replyToUser.length > 0) 
-      "<a href='" + LinkExtractor.getStatusUrl(replyTo, replyToUser) + "'>↑</a> " else "" 
-    
+    val arrowLinkToParent = LinkExtractor.getReplyToUser(text) match {
+      case Some(user) => {
+        if (replyTo.length > 0) {
+          "<a href='" + LinkExtractor.getStatusUrl(replyTo, user) + "'>↑</a> " 
+        } else ""
+      }
+      case None => ""
+    }
+              
     var r = text.replaceAll(LinkExtractor.hyperlinkRegex, "<a href='$1'>$1</a>")
 
     r = r.replaceAll(LinkExtractor.usernameRegex, "<a href='" + LinkExtractor.usernameUrl + "'>@$1</a>")

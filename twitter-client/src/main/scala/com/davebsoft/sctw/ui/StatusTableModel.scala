@@ -32,7 +32,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
 
   val filterLogic = new FilterLogic(username, filterSet, filteredStatuses)
   
-  private val colNames = List(" ", "Age", "Username", "Status")
+  private val colNames = List(" ", "Age", "From/To", "Status")
   private var timer: Timer = _
   private var preChangeListener: PreChangeListener = _;
   
@@ -58,11 +58,16 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
       }
       case 1 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
       case 2 => {
-        val screenName = (status \ "user" \ "screen_name").text
-        val id = (status \ "user" \ "id").text
-        new AnnotatedUser(screenName, followerIds.contains(id))
+        var screenName = (status \ "user" \ "screen_name").text
+        LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
+          case Some(user) => screenName += " " + user
+          case None =>
+        }
+        screenName
+        //val id = (status \ "user" \ "id").text
+        //new AnnotatedUser(screenName, followerIds.contains(id))
       }
-      case 3 => getStatusText(status, username) 
+      case 3 => LinkExtractor.getWithoutUser(getStatusText(status, username)) 
     }
   }
   

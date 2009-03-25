@@ -28,9 +28,9 @@ object LinkExtractor {
     var urls: List[String] = List()
     
     val replyTo = (status \ "in_reply_to_status_id").text
-    val replyToUser = getReplyToUser((status \ "text").text)
-    if (replyTo.length > 0 && replyToUser.length > 0) {
-      urls = getStatusUrl(replyTo, replyToUser) :: urls; 
+    getReplyToUser((status \ "text").text) match {
+      case Some(user) => if (replyTo.length > 0) urls = getStatusUrl(replyTo, user) :: urls; 
+      case None =>        
     }
 
     var m = usernamePattern.matcher((status \ "text").text)
@@ -54,8 +54,16 @@ object LinkExtractor {
    * Returns the Twitter handle of the user whose @handle appears at the beginning of 
    * the tweet, or an empty string.
    */
-  def getReplyToUser(text: String): String = {
+  def getReplyToUser(text: String): Option[String] = {
     val m = java.util.regex.Pattern.compile("^@(\\S+)").matcher(text)
-    if (m.find) m.group(1) else ""
+    if (m.find) Some(m.group(1)) else None
+  }
+
+  /**
+   * Returns a string with any @user at the beginning removed.
+   */
+  def getWithoutUser(text: String): String = {
+    val m = java.util.regex.Pattern.compile("""^@\S+ (.*)""").matcher(text)
+    if (m.find) m.group(1) else text
   }
 } 
