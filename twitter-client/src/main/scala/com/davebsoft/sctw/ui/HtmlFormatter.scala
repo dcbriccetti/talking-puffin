@@ -9,7 +9,7 @@ import java.util.regex.Pattern
 
 object HtmlFormatter {
 
-  def createTweetHtml(text: String, replyTo: String): String = {
+  def createTweetHtml(text: String, replyTo: String, source: String): String = {
     val arrowLinkToParent = LinkExtractor.getReplyToUser(text) match {
       case Some(user) => {
         if (replyTo.length > 0) {
@@ -23,11 +23,11 @@ object HtmlFormatter {
 
     r = r.replaceAll(LinkExtractor.usernameRegex, "<a href='" + LinkExtractor.usernameUrl + "'>@$1</a>")
 
-    htmlAround(arrowLinkToParent + fontAround(r))
+    htmlAround(arrowLinkToParent + fontAround(r, "+2") + fontAround(" from " + source, "-1"))
   }
   
-  def fontAround(s: String): String = {
-    "<font face='Georgia' size='+2'>" + s + "</font>"
+  def fontAround(s: String, size: String): String = {
+    "<font face='Georgia' size='" + size + "'>" + s + "</font>"
   }
 
   def htmlAround(s: String): String = {
