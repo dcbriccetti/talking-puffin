@@ -66,7 +66,7 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
   addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = {
       if (e.getClickCount == 2) {
-        viewSelected
+        reply
       }
     }
   })
