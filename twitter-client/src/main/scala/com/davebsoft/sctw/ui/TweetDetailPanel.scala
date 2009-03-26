@@ -87,7 +87,8 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
   private def showStatusDetails(status: NodeSeq) {
     val user = status \ "user"
     userDescription.text = (user \ "name").text + " • " +
-            (user \ "location").text + " • " + (user \ "description").text
+        (user \ "location").text + " • " + (user \ "description").text  + " • " +
+        (user \ "followers_count").text + " followers"
     largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
       (status \ "in_reply_to_status_id").text, (status \ "source").text))
     val picUrl = (user \ "profile_image_url").text

@@ -58,12 +58,12 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
       }
       case 1 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
       case 2 => {
-        val screenName = (status \ "user" \ "screen_name").text
+        val name = (status \ "user" \ "name").text
         val id = (status \ "user" \ "id").text
         val emphasizeFrom = followerIds.contains(id)
         LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
-          case Some(user) => new FromTo(screenName, emphasizeFrom, Some(user), false)
-          case None => new FromTo(screenName, emphasizeFrom, None, false)
+          case Some(user) => new FromTo(name, emphasizeFrom, Some(user), false)
+          case None => new FromTo(name, emphasizeFrom, None, false)
         }
       }
       case 3 => LinkExtractor.getWithoutUser(getStatusText(status, username)) 
