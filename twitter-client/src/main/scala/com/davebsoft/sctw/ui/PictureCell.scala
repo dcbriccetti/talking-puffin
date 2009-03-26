@@ -9,7 +9,7 @@ import javax.swing.table.{AbstractTableModel}
  */
 
 class PictureCell(model: AbstractTableModel, column: Int) {
-  val picFetcher = new PictureFetcher((imageReady: ImageReady) => {
+  val picFetcher = new PictureFetcher(None, (imageReady: ImageReady) => {
     if (imageReady.imageIcon.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
       val row = imageReady.id.asInstanceOf[Int]
       model.fireTableCellUpdated(row, column)

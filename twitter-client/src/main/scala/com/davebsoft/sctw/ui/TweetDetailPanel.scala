@@ -81,6 +81,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
         if (table.getSelectedRowCount == 1) {
           try {
             val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
+            println("Selected row (table, model): " + table.getSelectedRow + ", " + modelRowIndex)
             val status = statusTableModel.getStatusAt(modelRowIndex)
             showStatusDetails(status)
           } catch {
@@ -104,25 +105,16 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     showSmallPicture(picUrl)
   }
 
-  val picFetcher = new PictureFetcher((imageReady: ImageReady) => {
-    picLabel.icon = scaleImage(imageReady.imageIcon) 
+  val picFetcher = new PictureFetcher(Some(Thumbnail.MEDIUM_SIZE), (imageReady: ImageReady) => {
+    picLabel.icon = imageReady.imageIcon 
     setBigPicLabelIcon
   }, false)
   
-  private def scaleImage(imageIcon: ImageIcon): ImageIcon = {
-    val image = imageIcon.getImage
-    val w = image.getWidth(null)
-    val h = image.getHeight(null)
-    val newW: Int = if (w > h) Math.min(w, Thumbnail.MEDIUM_SIZE) else -1
-    val newH: Int = if (w > h) -1 else Math.min(h, Thumbnail.MEDIUM_SIZE)
-    new ImageIcon(image.getScaledInstance(newW, newH, Image.SCALE_SMOOTH))
-  }
-
   private def showSmallPicture(picUrl: String) {
     if (! picUrl.equals(showingUrl)) {
       showingUrl = picUrl
       picLabel.icon = Thumbnail.transparentMedium
-      picFetcher ! new FetchImage(picUrl.replace("_normal", ""), null)
+      picFetcher ! new FetchImage(PictureFetcher.getFullSizeUrl(picUrl), null)
     }
   }
 
@@ -135,7 +127,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
 
   private def setBigPicLabelIcon {
     if (bigPicFrame != null && bigPicLabel != null) { 
-      bigPicLabel.icon = PictureFetcher.pictureCache(showingUrl.replace("_normal", ""))
+      bigPicLabel.icon = PictureFetcher.pictureCache(PictureFetcher.getFullSizeUrl(showingUrl))
       bigPicFrame.pack
     }
   }

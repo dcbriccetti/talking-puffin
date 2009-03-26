@@ -89,6 +89,7 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   def tableChanging = if (table != null) lastSelectedRows = table.getSelectedRows
 
   def tableChanged(e: TableModelEvent) = {
+    if (false) {
     if (table != null) {
       val selectionModel = table.getSelectionModel
       selectionModel.clearSelection
@@ -97,6 +98,7 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
         val row = lastSelectedRows(i)
         selectionModel.addSelectionInterval(row, row)
       }
+    }
     }
   }
   
