@@ -11,7 +11,7 @@ import java.awt.{Color, Desktop, Dimension, Insets, Font}
 import java.awt.event.{KeyEvent, KeyAdapter}
 import java.net.{URI, URL}
 import java.util.Comparator
-import javax.swing.{JTable, JTextPane, JButton, JLabel, ImageIcon, Icon, SwingWorker, JMenu, JPopupMenu, JMenuItem, JToolBar}
+import javax.swing.{JTable, JTextPane, JButton, JToggleButton, JLabel, ImageIcon, Icon, SwingWorker, JMenu, JPopupMenu, JMenuItem, JToolBar}
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
@@ -50,6 +50,15 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
       statusTableModel.loadLastSet
     }
   }
+  var detailsButton: JToggleButton = _ 
+  val showDetailsAction = new Action("Details") {
+    toolTip = "Hides or shows the details panel"
+    def apply = {
+      tweetDetailPanel.visible = detailsButton.isSelected    
+    }
+  }
+  detailsButton = new JToggleButton(showDetailsAction.peer)
+  detailsButton.setSelected(true)
 
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
@@ -124,6 +133,7 @@ class ToolbarStatusPane(statusTableModel: StatusTableModel, sender: Sender, filt
       }
     })
     add(comboBox.peer)
+    add(detailsButton)
   }
 
   override def newTable: StatusTable = new TweetsTable(statusTableModel, sender, clearAction, showBigPicture)
