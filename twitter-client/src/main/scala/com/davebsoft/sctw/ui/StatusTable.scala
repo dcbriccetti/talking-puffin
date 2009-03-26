@@ -30,8 +30,8 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
     extends JTable(statusTableModel) {
   setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
   val sorter = new TableRowSorter[StatusTableModel](statusTableModel)
-  sorter.setComparator(2, new Comparator[AnnotatedUser] {
-    def compare(o1: AnnotatedUser, o2: AnnotatedUser) = o1.name.compareToIgnoreCase(o2.name)
+  sorter.setComparator(2, new Comparator[FromTo] {
+    def compare(o1: FromTo, o2: FromTo) = o1.from.compareToIgnoreCase(o2.from)
   })
   setRowSorter(sorter)
   
