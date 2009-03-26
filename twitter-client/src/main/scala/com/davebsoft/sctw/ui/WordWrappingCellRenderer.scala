@@ -1,6 +1,5 @@
 package com.davebsoft.sctw.ui
 
-
 import java.awt.{Component, Color}
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.{JTextArea, JTable}

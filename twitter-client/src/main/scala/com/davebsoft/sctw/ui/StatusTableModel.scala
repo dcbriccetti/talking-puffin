@@ -58,14 +58,13 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
       }
       case 1 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
       case 2 => {
-        var screenName = (status \ "user" \ "screen_name").text
+        val screenName = (status \ "user" \ "screen_name").text
+        val id = (status \ "user" \ "id").text
+        val emphasizeFrom = followerIds.contains(id)
         LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
-          case Some(user) => screenName += " " + user
-          case None =>
+          case Some(user) => new FromTo(screenName, emphasizeFrom, Some(user), false)
+          case None => new FromTo(screenName, emphasizeFrom, None, false)
         }
-        screenName
-        //val id = (status \ "user" \ "id").text
-        //new AnnotatedUser(screenName, followerIds.contains(id))
       }
       case 3 => LinkExtractor.getWithoutUser(getStatusText(status, username)) 
     }
@@ -218,6 +217,8 @@ trait PreChangeListener {
   def tableChanging
 }
 
+class FromTo(val from: String, val fromEmphasized: Boolean, val to: Option[String], val toEmphasized: Boolean)
+  
 case class TableContentsChanged(val filteredIn: Int, val total: Int) extends Event
   
 trait Replies extends StatusTableModel {

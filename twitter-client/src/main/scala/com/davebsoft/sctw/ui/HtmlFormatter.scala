@@ -23,7 +23,15 @@ object HtmlFormatter {
 
     r = r.replaceAll(LinkExtractor.usernameRegex, "<a href='" + LinkExtractor.usernameUrl + "'>@$1</a>")
 
-    "<html>" + arrowLinkToParent + "<font face='Georgia' size='+2'>" + r + "</font></html>"
+    htmlAround(arrowLinkToParent + fontAround(r))
+  }
+  
+  def fontAround(s: String): String = {
+    "<font face='Georgia' size='+2'>" + s + "</font>"
+  }
+
+  def htmlAround(s: String): String = {
+    "<html>" + s + "</html>"
   }
 
 }

@@ -50,8 +50,7 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
   val nameCol = colModel.getColumn(2)
   nameCol.setPreferredWidth(100)
   nameCol.setMaxWidth(200)
-  nameCol.setCellRenderer(new WordWrappingCellRenderer)
-  //nameCol.setCellRenderer(new AnnotatedUserRenderer with ZebraStriping)
+  nameCol.setCellRenderer(new FromToCellRenderer)
   
   val statusCol = colModel.getColumn(3)
   statusCol.setPreferredWidth(600)
