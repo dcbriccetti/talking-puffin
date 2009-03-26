@@ -6,7 +6,7 @@ import _root_.scala.xml.{NodeSeq, Node}
 import filter._
 import java.awt.event.{ActionEvent, ActionListener}
 import java.net.URL
-import java.util.{Collections, Date, ArrayList}
+import java.util.{Locale, Collections, Date, ArrayList}
 import javax.swing._
 import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
@@ -111,7 +111,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
   }
 
   private def dateToAgeSeconds(date: String): Long = {
-    val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy")
+    val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy", Locale.ENGLISH)
     (new Date().getTime - df.parse(date).getTime) / 1000
   }
   
