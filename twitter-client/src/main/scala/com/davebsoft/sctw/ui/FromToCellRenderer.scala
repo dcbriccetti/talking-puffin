@@ -27,7 +27,7 @@ class FromToCellRenderer extends JTextPane with TableCellRenderer {
   
   private def formatValue(fromTo: FromTo, color: Color): String = {
     val toValue = fromTo.to match {
-      case Some(to) => "<br/>" + decorate(to, fromTo.toEmphasized) 
+      case Some(to) => "<br/>￫" + decorate(to, fromTo.toEmphasized) 
       case None => ""
     }
     "<table><tr><td><font face='helvetica' color='#" + // TODO find better way than <table> to get padding 
