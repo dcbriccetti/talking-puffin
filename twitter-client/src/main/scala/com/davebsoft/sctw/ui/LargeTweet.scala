@@ -1,7 +1,7 @@
 package com.davebsoft.sctw.ui
 
 import _root_.scala.swing.{MenuItem, Action}
-import java.awt.{Desktop, Dimension}
+import java.awt.{Desktop, Dimension, Color}
 import javax.swing.event.{HyperlinkListener, HyperlinkEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
 import javax.swing.{JTable, JTextPane, JPopupMenu}
@@ -11,8 +11,9 @@ import javax.swing.{JTable, JTextPane, JPopupMenu}
  * @author Dave Briccetti
  */
 
-class LargeTweet(filtersPane: FiltersPane, table: JTable) extends JTextPane {
+class LargeTweet(filtersPane: FiltersPane, table: JTable, backgroundColor: Color) extends JTextPane {
   val dim = new Dimension(500, 100)
+  setBackground(backgroundColor)
   setMinimumSize(dim)
   setPreferredSize(dim)
   setContentType("text/html");

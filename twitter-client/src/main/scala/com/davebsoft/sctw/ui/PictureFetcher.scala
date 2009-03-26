@@ -12,7 +12,7 @@ import javax.swing.ImageIcon
  */
 
 object PictureFetcher {
-  val thumbnailCache = scala.collection.mutable.Map.empty[String, ImageIcon]
+  val pictureCache = scala.collection.mutable.Map.empty[String, ImageIcon]
 }
 
 case class FetchImage(val url: String, val id: Object)
@@ -23,14 +23,14 @@ class PictureFetcher(processFinishedImage: (ImageReady) => Unit, processAll: Boo
   def act = while(true) receive {
     case fetchImage: FetchImage =>
       if (mailboxSize == 0 || processAll) {
-        val icon = PictureFetcher.thumbnailCache.get(fetchImage.url) match { 
+        val icon = PictureFetcher.pictureCache.get(fetchImage.url) match { 
           case Some(imageIcon) => {
             imageIcon
           }
           case None => {
             val newIcon = new ImageIcon(new URL(fetchImage.url))
-            if (PictureFetcher.thumbnailCache.size > 1000) PictureFetcher.thumbnailCache.clear // TODO clear LRU instead?
-            PictureFetcher.thumbnailCache(fetchImage.url) = newIcon
+            if (PictureFetcher.pictureCache.size > 1000) PictureFetcher.pictureCache.clear // TODO clear LRU instead?
+            PictureFetcher.pictureCache(fetchImage.url) = newIcon
             newIcon
           }
         }

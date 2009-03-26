@@ -17,7 +17,7 @@ class PictureCell(model: AbstractTableModel, column: Int) {
   }, true)
     
   def request(picUrl: String, rowIndex: Int): Icon = {
-    PictureFetcher.thumbnailCache.get(picUrl) match { 
+    PictureFetcher.pictureCache.get(picUrl) match { 
       case Some(imageIcon) => {
         imageIcon
       }

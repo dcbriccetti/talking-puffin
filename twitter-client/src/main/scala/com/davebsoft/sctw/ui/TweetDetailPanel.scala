@@ -41,7 +41,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
   }
   
-  largeTweet = new LargeTweet(filtersPane, table)
+  largeTweet = new LargeTweet(filtersPane, table, background)
   
   peer.add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)
@@ -54,13 +54,13 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     }
   })
   add(new BorderPanel {
-    val s = new Dimension(Thumbnail.MEDIUM_SIZE, Thumbnail.MEDIUM_SIZE)
+    val s = new Dimension(Thumbnail.MEDIUM_SIZE + 6, Thumbnail.MEDIUM_SIZE + 6)
     minimumSize = s
     maximumSize = s
     preferredSize = s
     add(picLabel, BorderPanel.Position.Center)
   }, new CustomConstraints {
-    grid = (0,0); gridheight = 3;  
+    grid = (0,0); gridheight = 3; insets = new Insets(3, 3, 3, 3)  
   })
 
   userDescription = new TextArea {
@@ -105,11 +105,8 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
   }
 
   val picFetcher = new PictureFetcher((imageReady: ImageReady) => {
-    //if (imageReady.url == showingUrl) {
-      //if (imageReady.imageIcon.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) 
-        picLabel.icon = scaleImage(imageReady.imageIcon) // Ignore broken, too-big thumbnails 
-      setBigPicLabelIcon
-    //}
+    picLabel.icon = scaleImage(imageReady.imageIcon) 
+    setBigPicLabelIcon
   }, false)
   
   private def scaleImage(imageIcon: ImageIcon): ImageIcon = {
@@ -118,7 +115,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     val h = image.getHeight(null)
     val newW: Int = if (w > h) Math.min(w, Thumbnail.MEDIUM_SIZE) else -1
     val newH: Int = if (w > h) -1 else Math.min(h, Thumbnail.MEDIUM_SIZE)
-    new ImageIcon(image.getScaledInstance(newW, newH, Image.SCALE_DEFAULT))
+    new ImageIcon(image.getScaledInstance(newW, newH, Image.SCALE_SMOOTH))
   }
 
   private def showSmallPicture(picUrl: String) {
@@ -138,7 +135,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
 
   private def setBigPicLabelIcon {
     if (bigPicFrame != null && bigPicLabel != null) { 
-      bigPicLabel.icon = new ImageIcon(new URL(showingUrl.replace("_normal", "")))
+      bigPicLabel.icon = PictureFetcher.pictureCache(showingUrl.replace("_normal", ""))
       bigPicFrame.pack
     }
   }
