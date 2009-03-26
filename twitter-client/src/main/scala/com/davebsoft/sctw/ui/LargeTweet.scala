@@ -12,7 +12,7 @@ import javax.swing.{JTable, JTextPane, JPopupMenu}
  */
 
 class LargeTweet(filtersPane: FiltersPane, table: JTable) extends JTextPane {
-  val dim = new Dimension(500, 70)
+  val dim = new Dimension(500, 100)
   setMinimumSize(dim)
   setPreferredSize(dim)
   setContentType("text/html");

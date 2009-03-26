@@ -12,7 +12,7 @@ import javax.swing.ImageIcon
  */
 
 object PictureFetcher {
-  val imageCache = scala.collection.mutable.Map.empty[String, ImageIcon]
+  val thumbnailCache = scala.collection.mutable.Map.empty[String, ImageIcon]
 }
 
 case class FetchImage(val url: String, val id: Object)
@@ -21,20 +21,20 @@ class ImageReady(val url: String, val id: Object, val imageIcon: ImageIcon)
 class PictureFetcher(processFinishedImage: (ImageReady) => Unit, processAll: Boolean) extends Actor {
   
   def act = while(true) receive {
-    case fi: FetchImage =>
+    case fetchImage: FetchImage =>
       if (mailboxSize == 0 || processAll) {
-        val icon = PictureFetcher.imageCache.get(fi.url) match { 
+        val icon = PictureFetcher.thumbnailCache.get(fetchImage.url) match { 
           case Some(imageIcon) => {
             imageIcon
           }
           case None => {
-            val newIcon = new ImageIcon(new URL(fi.url))
-            if (PictureFetcher.imageCache.size > 1000) PictureFetcher.imageCache.clear // TODO clear LRU instead?
-            PictureFetcher.imageCache(fi.url) = newIcon
+            val newIcon = new ImageIcon(new URL(fetchImage.url))
+            if (PictureFetcher.thumbnailCache.size > 1000) PictureFetcher.thumbnailCache.clear // TODO clear LRU instead?
+            PictureFetcher.thumbnailCache(fetchImage.url) = newIcon
             newIcon
           }
         }
-        SwingInvoke.invokeLater({processFinishedImage(new ImageReady(fi.url, fi.id, icon))})
+        SwingInvoke.invokeLater({processFinishedImage(new ImageReady(fetchImage.url, fetchImage.id, icon))})
       } // else ignore this request because of the newer one behind it
   }
 

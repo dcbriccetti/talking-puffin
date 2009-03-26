@@ -6,7 +6,7 @@ import _root_.scala.xml.{NodeSeq, Node}
 
 import java.awt.event.{MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
-import java.awt.{Dimension, Insets}
+import java.awt.{Dimension, Insets, Image}
 import java.net.{URI, URL}
 import javax.swing._
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
@@ -19,14 +19,17 @@ import scala.swing._
 
 object Thumbnail {
   val THUMBNAIL_SIZE = 48
-  val transparentPic = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, 
+  val transparentThumbnail = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, 
+    BufferedImage.TYPE_INT_ARGB))
+  val MEDIUM_SIZE = 150
+  val transparentMedium = new ImageIcon(new BufferedImage(MEDIUM_SIZE, MEDIUM_SIZE, 
     BufferedImage.TYPE_INT_ARGB))
 }
 
 class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagPanel {
     
   var picLabel: Label = new Label {
-    icon = Thumbnail.transparentPic
+    icon = Thumbnail.transparentMedium
   }
   var userDescription: TextArea = _
   var largeTweet: JTextPane = _
@@ -42,7 +45,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
   
   peer.add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)
-    grid = (0,0); gridwidth=2; fill = GridBagPanel.Fill.Both;
+    grid = (1,0); gridwidth=2; fill = GridBagPanel.Fill.Both;
   }.peer)
 
   picLabel.peer.addMouseListener(new MouseAdapter {
@@ -50,8 +53,14 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
       showBigPicture
     }
   })
-  add(picLabel, new CustomConstraints {
-    grid = (0,1); gridheight = 2;  
+  add(new BorderPanel {
+    val s = new Dimension(Thumbnail.MEDIUM_SIZE, Thumbnail.MEDIUM_SIZE)
+    minimumSize = s
+    maximumSize = s
+    preferredSize = s
+    add(picLabel, BorderPanel.Position.Center)
+  }, new CustomConstraints {
+    grid = (0,0); gridheight = 3;  
   })
 
   userDescription = new TextArea {
@@ -96,24 +105,33 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
   }
 
   val picFetcher = new PictureFetcher((imageReady: ImageReady) => {
-    if (imageReady.url == showingUrl) {
-      if (imageReady.imageIcon.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) 
-        picLabel.icon = imageReady.imageIcon // Ignore broken, too-big thumbnails 
+    //if (imageReady.url == showingUrl) {
+      //if (imageReady.imageIcon.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) 
+        picLabel.icon = scaleImage(imageReady.imageIcon) // Ignore broken, too-big thumbnails 
       setBigPicLabelIcon
-    }
+    //}
   }, false)
+  
+  private def scaleImage(imageIcon: ImageIcon): ImageIcon = {
+    val image = imageIcon.getImage
+    val w = image.getWidth(null)
+    val h = image.getHeight(null)
+    val newW: Int = if (w > h) Math.min(w, Thumbnail.MEDIUM_SIZE) else -1
+    val newH: Int = if (w > h) -1 else Math.min(h, Thumbnail.MEDIUM_SIZE)
+    new ImageIcon(image.getScaledInstance(newW, newH, Image.SCALE_DEFAULT))
+  }
 
   private def showSmallPicture(picUrl: String) {
     if (! picUrl.equals(showingUrl)) {
       showingUrl = picUrl
-      picLabel.icon = Thumbnail.transparentPic
-      picFetcher ! new FetchImage(picUrl, null)
+      picLabel.icon = Thumbnail.transparentMedium
+      picFetcher ! new FetchImage(picUrl.replace("_normal", ""), null)
     }
   }
 
   def clearStatusDetails {
     showingUrl = null
-    picLabel.icon = Thumbnail.transparentPic
+    picLabel.icon = Thumbnail.transparentMedium
     userDescription.text = null
     largeTweet.setText(null)
   }
