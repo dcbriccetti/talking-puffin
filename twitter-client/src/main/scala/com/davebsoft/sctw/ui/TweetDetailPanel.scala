@@ -6,7 +6,7 @@ import _root_.scala.xml.{NodeSeq, Node}
 
 import java.awt.event.{MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
-import java.awt.Insets
+import java.awt.{Dimension, Insets}
 import java.net.{URI, URL}
 import javax.swing._
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
@@ -25,7 +25,9 @@ object Thumbnail {
 
 class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagPanel {
     
-  var picLabel: Label = _
+  var picLabel: Label = new Label {
+    icon = Thumbnail.transparentPic
+  }
   var userDescription: TextArea = _
   var largeTweet: JTextPane = _
   var bigPicFrame: Frame = _
@@ -43,7 +45,6 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     grid = (0,0); gridwidth=2; fill = GridBagPanel.Fill.Both;
   }.peer)
 
-  picLabel = new Label
   picLabel.peer.addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = {
       showBigPicture
@@ -111,7 +112,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
 
   def clearStatusDetails {
     showingUrl = null
-    picLabel.icon = null
+    picLabel.icon = Thumbnail.transparentPic
     userDescription.text = null
     largeTweet.setText(null)
   }
