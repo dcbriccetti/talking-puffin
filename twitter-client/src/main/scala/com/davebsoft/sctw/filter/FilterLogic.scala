@@ -15,20 +15,27 @@ class FilterLogic(username: String, filterSet: FilterSet,
   def filter(statuses: List[Node]) {
     filteredStatuses.clear
     for (st <- statuses) {
-      var id = (st \ "user" \ "id").text
-      if (! filterSet.mutedUsers.contains(id)) {
-        if (tagFiltersInclude(id)) {
-          val text = (st \ "text").text 
-          if (! excludedBecauseReplyAndNotToYou(text)) {
-            if (! filterSet.excludedByStringMatches(text)) {
-              filteredStatuses.add(st)
-            }
+      if (filterStatus(st)) {
+        filteredStatuses.add(st)
+      }
+    }
+  }
+
+  private def filterStatus(st: Node): Boolean = { 
+    var id = (st \ "user" \ "id").text
+    if (! filterSet.mutedUsers.contains(id)) {
+      if (tagFiltersInclude(id)) {
+        val text = (st \ "text").text 
+        if (! excludedBecauseReplyAndNotToYou(text)) {
+          if (! filterSet.excludedByStringMatches(text)) {
+            return true
           }
         }
       }
     }
+    false
   }
-    
+  
   private def tagFiltersInclude(id: String): Boolean = {
     if (filterSet.selectedTags.length == 0) true else {
       for (tag <- filterSet.selectedTags) {
