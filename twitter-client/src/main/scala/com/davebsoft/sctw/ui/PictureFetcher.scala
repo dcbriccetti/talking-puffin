@@ -14,6 +14,7 @@ import javax.swing.ImageIcon
 
 object PictureFetcher {
   val pictureCache = scala.collection.mutable.Map.empty[String, ImageIcon]
+  val scaledPictureCache = scala.collection.mutable.Map.empty[String, ImageIcon]
   
   def getFullSizeUrl(thumb: String): String = thumb.replace("_normal", "")
 
@@ -50,7 +51,11 @@ class PictureFetcher(scaleTo: Option[Int],
           }
         }
         scaleTo match {
-          case Some(limit) => icon = PictureFetcher.scaleImage(limit, icon)
+          case Some(limit) => {
+            icon = PictureFetcher.scaleImage(limit, icon)
+            if (PictureFetcher.scaledPictureCache.size > 1000) PictureFetcher.scaledPictureCache.clear // TODO clear LRU instead?
+            PictureFetcher.scaledPictureCache(fetchImage.url) = icon
+          }
           case None =>
         }
         SwingInvoke.invokeLater({processFinishedImage(new ImageReady(fetchImage.url, fetchImage.id, icon))})
