@@ -81,7 +81,6 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
         if (table.getSelectedRowCount == 1) {
           try {
             val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
-            println("Selected row (table, model): " + table.getSelectedRow + ", " + modelRowIndex)
             val status = statusTableModel.getStatusAt(modelRowIndex)
             showStatusDetails(status)
           } catch {

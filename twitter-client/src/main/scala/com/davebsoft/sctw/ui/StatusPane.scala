@@ -23,9 +23,8 @@ import twitter.Sender
  */
 class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane: FiltersPane) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
-  var table: JTable = _
-  val emptyIntArray = new Array[Int](0) 
-  var lastSelectedRows = emptyIntArray
+  var table: StatusTable = _
+  var lastSelectedRows: List[NodeSeq] = Nil
   val sendAction = new Action("Send…") {
     toolTip = "Opens a window from which you can send a tweet"
     def apply { 
@@ -86,19 +85,23 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   
   def showBigPicture = tweetDetailPanel.showBigPicture
   
-  def tableChanging = if (table != null) lastSelectedRows = table.getSelectedRows
+  def tableChanging = {
+    if (table != null) {
+      lastSelectedRows = table.getSelectedModelIndexes map(statusTableModel.getStatusAt(_))
+    }
+  }
 
   def tableChanged(e: TableModelEvent) = {
-    if (false) {
     if (table != null) {
       val selectionModel = table.getSelectionModel
       selectionModel.clearSelection
       
-      for (i <- 0 until lastSelectedRows.length) {
-        val row = lastSelectedRows(i)
-        selectionModel.addSelectionInterval(row, row)
+      for (i <- 0 until table.getRowCount) {
+        if (lastSelectedRows.contains(statusTableModel.getStatusAt(table.convertRowIndexToModel(i)))) {
+          println("selecting row " + i)
+          selectionModel.addSelectionInterval(i, i)
+        }
       }
-    }
     }
   }
   
@@ -110,7 +113,7 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   
   def clearSelection {
     table.getSelectionModel.clearSelection
-    lastSelectedRows = emptyIntArray
+    lastSelectedRows = Nil
   }
 
 }

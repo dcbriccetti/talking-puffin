@@ -120,7 +120,7 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
     menu
   }
   
-  protected def getSelectedModelIndexes: List[Int] = {
+  def getSelectedModelIndexes: List[Int] = {
     val tableRows = getSelectedRows
     var smi = List[Int]()
     for (i <- 0 to (tableRows.length - 1)) {
