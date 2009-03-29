@@ -50,7 +50,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
 
   picLabel.peer.addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = {
-      showBigPicture
+      if (showingUrl != null) showBigPicture
     }
   })
   add(new BorderPanel {
