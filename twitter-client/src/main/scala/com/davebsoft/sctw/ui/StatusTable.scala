@@ -3,21 +3,20 @@ package com.davebsoft.sctw.ui
 import _root_.scala.swing.GridBagPanel._
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.swing.event.ButtonClicked
+import _root_.scala.swing.{MenuItem, Action}
+import java.awt.{Desktop, Toolkit, Component, Font}
 import _root_.scala.xml.{NodeSeq, Node}
 
 import _root_.scala.{Option}
 import java.awt.event.{KeyEvent, ActionEvent, ActionListener, MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
-import java.awt.{Desktop, Toolkit, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
 import java.util.regex.Pattern
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
-import javax.swing.{JTable, KeyStroke, JMenuItem, JMenu, JPopupMenu}
-
-import scala.swing._
 import filter.TagsRepository
+import javax.swing.{JTable, KeyStroke, JMenu, JMenuItem, JPopupMenu, JComponent}
 import twitter.Sender
 
 /**
@@ -28,6 +27,7 @@ import twitter.Sender
 class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
       clearAction: Action, showBigPicture: => Unit) 
     extends JTable(statusTableModel) {
+
   setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
   val sorter = new TableRowSorter[StatusTableModel](statusTableModel)
   sorter.setComparator(2, new Comparator[FromTo] {
@@ -36,39 +36,15 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   setRowSorter(sorter)
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer with ZebraStriping)
-  
-  val colModel = getColumnModel
-  
-  val picCol = colModel.getColumn(0)
-  picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
-  
-  val ageCol = colModel.getColumn(1)
-  ageCol.setPreferredWidth(60)
-  ageCol.setMaxWidth(100)
-  ageCol.setCellRenderer(new AgeCellRenderer)
-  
-  val nameCol = colModel.getColumn(2)
-  nameCol.setPreferredWidth(100)
-  nameCol.setMaxWidth(200)
-  nameCol.setCellRenderer(new FromToCellRenderer)
-  
-  val statusCol = colModel.getColumn(3)
-  statusCol.setPreferredWidth(600)
-  statusCol.setCellRenderer(new WordWrappingCellRenderer {
-    val normalFont = getFont
-    setFont(new Font(normalFont.getFontName, Font.PLAIN, normalFont.getSize * 120 / 100))
-  })
 
-  var actions = List[Action]()
+  configureColumns
+
+  val ap = new ActionPrep(this)
   buildActions
 
   addMouseListener(new PopupListener(this, getPopupMenu))
   addMouseListener(new MouseAdapter {
-    override def mouseClicked(e: MouseEvent) = {
-      if (e.getClickCount == 2) {
-        reply
-      }
-    }
+    override def mouseClicked(e: MouseEvent) = if (e.getClickCount == 2) reply
   })
   
   def viewSelected {
@@ -108,7 +84,7 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   def getPopupMenu: JPopupMenu = {
     val menu = new JPopupMenu
 
-    for (action <- actions.reverse) 
+    for (action <- ap.actions.reverse) 
       menu.add(new MenuItem(action).peer)
 
     val tagAl = new ActionListener() {
@@ -137,36 +113,40 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     smi
   }
 
-  protected def addAction(action: Action, key: KeyStroke) {
-    action.accelerator = Some(key)
-    getActionMap.put(action.title, action.peer)
-    connectAction(action, key)
-    actions ::= action
+  private def configureColumns {
+    val colModel = getColumnModel
+    
+    val picCol = colModel.getColumn(0)
+    picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
+    
+    val ageCol = colModel.getColumn(1)
+    ageCol.setPreferredWidth(60)
+    ageCol.setMaxWidth(100)
+    ageCol.setCellRenderer(new AgeCellRenderer)
+    
+    val nameCol = colModel.getColumn(2)
+    nameCol.setPreferredWidth(100)
+    nameCol.setMaxWidth(200)
+    nameCol.setCellRenderer(new FromToCellRenderer)
+    
+    val statusCol = colModel.getColumn(3)
+    statusCol.setPreferredWidth(600)
+    statusCol.setCellRenderer(new WordWrappingCellRenderer {
+      val normalFont = getFont
+      setFont(new Font(normalFont.getFontName, Font.PLAIN, normalFont.getSize * 120 / 100))
+    })
   }
-
-  protected def ks(keyEvent: Int): KeyStroke = KeyStroke.getKeyStroke(keyEvent, 0)
 
   protected def buildActions = {
-    addAction(Action("View in Browser") {viewSelected}, ks(KeyEvent.VK_V))
-    addAction(new OpenLinksAction(getSelectedStatus, this, browse), ks(KeyEvent.VK_L))
-    addAction(Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}, ks(KeyEvent.VK_M))
-    addAction(Action("Next") {
-      dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
-        0, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED))
-    }, ks(KeyEvent.VK_N))
-    addAction(Action("Previous") {
-      dispatchEvent(new KeyEvent(this, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
-        0, KeyEvent.VK_UP, KeyEvent.CHAR_UNDEFINED))
-    }, ks(KeyEvent.VK_P))
-    addAction(Action("Show Larger Image") { showBigPicture }, ks(KeyEvent.VK_I))
-    addAction(Action("Reply") { reply }, ks(KeyEvent.VK_R))
-    addAction(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
+    ap.addAction(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
+    ap.addAction(new OpenLinksAction(getSelectedStatus, this, browse), Actions.ks(KeyEvent.VK_L))
+    ap.addAction(Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}, Actions.ks(KeyEvent.VK_M))
+    ap.addAction(new NextTAction(this))
+    ap.addAction(new PrevTAction(this))
+    ap.addAction(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
+    ap.addAction(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
+    ap.addAction(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
-  }
-
-  private def connectAction(a: Action, keys: KeyStroke*) {
-    getActionMap.put(a.title, a.peer)
-    for (key <- keys) getInputMap.put(key, a.title)
   }
 
 }
@@ -177,11 +157,11 @@ class TweetsTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   
   override def buildActions {
     super.buildActions
-    addAction(clearAction, ks(KeyEvent.VK_C))
+    ap.addAction(clearAction, Actions.ks(KeyEvent.VK_C))
     val deleteTitle = "Delete selected tweets"
-    addAction(Action(deleteTitle) {
-      statusTableModel.removeSelectedElements(getSelectedModelIndexes) }, ks(KeyEvent.VK_BACK_SPACE))
-    getInputMap.put(ks(KeyEvent.VK_DELETE), deleteTitle)  
+    ap.addAction(Action(deleteTitle) {
+      statusTableModel.removeSelectedElements(getSelectedModelIndexes) }, Actions.ks(KeyEvent.VK_BACK_SPACE))
+    getInputMap.put(Actions.ks(KeyEvent.VK_DELETE), deleteTitle)  
   }
 
   
