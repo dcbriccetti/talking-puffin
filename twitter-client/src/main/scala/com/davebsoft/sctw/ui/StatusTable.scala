@@ -18,7 +18,7 @@ import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRen
 import filter.TagsRepository
 import javax.swing.{JTable, KeyStroke, JMenu, JMenuItem, JPopupMenu, JComponent}
 import twitter.Sender
-
+import util.{TableUtil, DesktopUtil}
 /**
  * Table of statuses.
  * @author Dave Briccetti
@@ -52,20 +52,19 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
       case Some(status) =>
         var uri = "http://twitter.com/" +
                 (status \ "user" \ "screen_name").text + "/statuses/" + (status \ "id").text
-        browse(uri)
+        DesktopUtil.browse(uri)
       case None =>
     }
   }
   
-  def browse(uri: String) {
-    if (Desktop.isDesktopSupported) {
-      Desktop.getDesktop.browse(new URI(uri))
-    }
-  }
-  
   def reply {
-    val sm = new SendMsgDialog(null, apiHandlers.sender, getSelectedStatus)
-    sm.visible = true
+    getSelectedStatus match {
+      case Some(s) => 
+        val sm = new SendMsgDialog(null, apiHandlers.sender,
+          Some((s \ "user" \ "screen_name").text), Some((s \ "id").text))
+        sm.visible = true
+      case None =>
+    }
   }
   
   private def unfollow {
@@ -73,7 +72,7 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   }
   
   def getSelectedStatuses: List[Node] = {
-    statusTableModel.getStatuses(getSelectedModelIndexes)
+    statusTableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
   }
 
   def getSelectedStatus: Option[NodeSeq] = {
@@ -89,7 +88,7 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
 
     val tagAl = new ActionListener() {
       def actionPerformed(e: ActionEvent) = {
-        statusTableModel.tagSelectedUsers(getSelectedModelIndexes, e.getActionCommand)
+        statusTableModel.tagSelectedUsers(TableUtil.getSelectedModelIndexes(StatusTable.this), e.getActionCommand)
       }
     }
     
@@ -104,15 +103,6 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     menu
   }
   
-  def getSelectedModelIndexes: List[Int] = {
-    val tableRows = getSelectedRows
-    var smi = List[Int]()
-    for (i <- 0 to (tableRows.length - 1)) {
-      smi ::= convertRowIndexToModel(tableRows(i))
-    }
-    smi
-  }
-
   private def configureColumns {
     val colModel = getColumnModel
     
@@ -139,8 +129,9 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
 
   protected def buildActions = {
     ap.addAction(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
-    ap.addAction(new OpenLinksAction(getSelectedStatus, this, browse), Actions.ks(KeyEvent.VK_L))
-    ap.addAction(Action("Mute") {statusTableModel.muteSelectedUsers(getSelectedModelIndexes)}, Actions.ks(KeyEvent.VK_M))
+    ap.addAction(new OpenLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
+    ap.addAction(Action("Mute") {statusTableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
+      Actions.ks(KeyEvent.VK_M))
     ap.addAction(new NextTAction(this))
     ap.addAction(new PrevTAction(this))
     ap.addAction(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
@@ -160,8 +151,8 @@ class TweetsTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     ap.addAction(clearAction, Actions.ks(KeyEvent.VK_C))
     val deleteTitle = "Delete selected tweets"
     ap.addAction(Action(deleteTitle) {
-      statusTableModel.removeSelectedElements(getSelectedModelIndexes) }, Actions.ks(KeyEvent.VK_BACK_SPACE))
-    getInputMap.put(Actions.ks(KeyEvent.VK_DELETE), deleteTitle)  
+      statusTableModel.removeSelectedElements(TableUtil.getSelectedModelIndexes(this)) 
+    }, Actions.ks(KeyEvent.VK_DELETE), Actions.ks(KeyEvent.VK_BACK_SPACE))  
   }
 
   

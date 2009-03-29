@@ -15,7 +15,9 @@ import twitter.Sender
  * @author Dave Briccetti
  */
 
-class SendMsgDialog(parent: java.awt.Component, sender: Sender, status: Option[NodeSeq]) extends Frame {
+class SendMsgDialog(parent: java.awt.Component, sender: Sender, recipient: Option[String],
+    replyToId: Option[String]) extends Frame {
+  
   class CustomTextArea extends TextArea { 
     preferredSize = new Dimension(400, 80); wordWrap = true; lineWrap = true
     font = new Font(font.getFontName, Font.BOLD, font.getSize * 150 / 100)
@@ -41,9 +43,9 @@ class SendMsgDialog(parent: java.awt.Component, sender: Sender, status: Option[N
     preferredSize = new Dimension(600, 200)
     border = Swing.EmptyBorder(5,5,5,5)
     class Constr extends Constraints { anchor=GridBagPanel.Anchor.West }
-    status match {
-      case Some(s) => {
-        userName = "@" + (s \ "user" \ "screen_name").text
+    recipient match {
+      case Some(r) => {
+        userName = "@" + r
         message.text = userName + " "
       }
       case None =>
@@ -55,11 +57,7 @@ class SendMsgDialog(parent: java.awt.Component, sender: Sender, status: Option[N
   peer.setLocationRelativeTo(parent)
   
   private def send {
-    val replyTo = status match { 
-      case Some(s) => if (message.text.startsWith(userName)) Some((s \ "id").text) else None 
-      case None => None 
-    }
-    sender.send(message.text, replyTo)
+    sender.send(message.text, replyToId)
     visible = false
   }
 }

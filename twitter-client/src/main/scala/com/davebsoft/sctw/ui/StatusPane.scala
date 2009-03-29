@@ -17,6 +17,7 @@ import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRen
 import scala.swing._
 import filter.TagsRepository
 import twitter.Sender
+import util.TableUtil
 
 /**
  * Displays friend statuses
@@ -28,7 +29,7 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
   val sendAction = new Action("Send…") {
     toolTip = "Opens a window from which you can send a tweet"
     def apply { 
-      val sm = new SendMsgDialog(null, apiHandlers.sender, None)
+      val sm = new SendMsgDialog(null, apiHandlers.sender, None, None)
       sm.visible = true
     }
   }
@@ -87,7 +88,7 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
   
   def tableChanging = {
     if (table != null) {
-      lastSelectedRows = table.getSelectedModelIndexes map(statusTableModel.getStatusAt(_))
+      lastSelectedRows = TableUtil.getSelectedModelIndexes(table) map(statusTableModel.getStatusAt(_))
     }
   }
 

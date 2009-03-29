@@ -56,7 +56,7 @@ object Main extends GUIApplication {
 
         val following = new FriendsDataProvider(username, password).getUsers
         pages.append(new Page("People (" + following.length + ", " + followers.length + ")", 
-          new FriendsFollowersPane(following, followers)))
+          new FriendsFollowersPane(apiHandlers, following, followers)))
         pages.append(filtersPage)
       }
       listenTo(tabbedPane.selection)
