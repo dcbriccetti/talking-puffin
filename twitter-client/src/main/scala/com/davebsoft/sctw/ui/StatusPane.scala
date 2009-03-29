@@ -21,14 +21,14 @@ import twitter.Sender
 /**
  * Displays friend statuses
  */
-class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane: FiltersPane) 
+class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, filtersPane: FiltersPane) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
   var lastSelectedRows: List[NodeSeq] = Nil
   val sendAction = new Action("Send…") {
     toolTip = "Opens a window from which you can send a tweet"
     def apply { 
-      val sm = new SendMsgDialog(null, sender, None)
+      val sm = new SendMsgDialog(null, apiHandlers.sender, None)
       sm.visible = true
     }
   }
@@ -81,7 +81,7 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
   
   statusTableModel.loadNewData
 
-  def newTable: StatusTable = new StatusTable(statusTableModel, sender, clearAction, showBigPicture)
+  def newTable: StatusTable = new StatusTable(statusTableModel, apiHandlers, clearAction, showBigPicture)
   
   def showBigPicture = tweetDetailPanel.showBigPicture
   
@@ -98,7 +98,6 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
       
       for (i <- 0 until table.getRowCount) {
         if (lastSelectedRows.contains(statusTableModel.getStatusAt(table.convertRowIndexToModel(i)))) {
-          println("selecting row " + i)
           selectionModel.addSelectionInterval(i, i)
         }
       }
@@ -118,8 +117,8 @@ class StatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane
 
 }
 
-class ToolbarStatusPane(statusTableModel: StatusTableModel, sender: Sender, filtersPane: FiltersPane) 
-    extends StatusPane(statusTableModel, sender, filtersPane) {
+class ToolbarStatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, filtersPane: FiltersPane) 
+    extends StatusPane(statusTableModel, apiHandlers, filtersPane) {
   
   override def toolbar: JToolBar = new JToolBar {
     setFloatable(false)
@@ -141,6 +140,6 @@ class ToolbarStatusPane(statusTableModel: StatusTableModel, sender: Sender, filt
     add(detailsButton)
   }
 
-  override def newTable: StatusTable = new TweetsTable(statusTableModel, sender, clearAction, showBigPicture)
+  override def newTable: StatusTable = new TweetsTable(statusTableModel, apiHandlers, clearAction, showBigPicture)
   
 }

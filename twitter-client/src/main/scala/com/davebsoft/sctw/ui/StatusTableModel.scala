@@ -123,7 +123,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
       new User(id, name)
     })
   
-  private def getStatuses(rows: List[Int]): List[Node] = 
+  def getStatuses(rows: List[Int]): List[Node] = 
     rows.map(filteredStatuses.get(_))
 
   private def createLoadTimer {

@@ -28,3 +28,26 @@ class Sender(username: String, password: String) extends HttpHandler {
     XML.loadString(responseBody)
   }
 }
+
+/**
+ * Sends tweets
+ * @author Dave Briccetti
+ */
+
+class Follower(username: String, password: String) extends HttpHandler {
+  setCredentials(username, password)
+  
+  def unfollow(screenName: String): Node = {
+    val url = "http://twitter.com/friendships/destroy/" + screenName + ".xml?id=" + screenName
+      
+    val (method, result, responseBody) = doPost(url)
+
+    if (result != 200) {
+      println(responseBody)
+      throw new DataFetchException(result, responseBody)
+    }
+    XML.loadString(responseBody)
+  }
+}
+
+

@@ -8,7 +8,7 @@ import _root_.scala.xml.{NodeSeq, Node}
 import _root_.scala.{Option}
 import java.awt.event.{KeyEvent, ActionEvent, ActionListener, MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
-import java.awt.{Desktop, Font}
+import java.awt.{Desktop, Toolkit, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
 import java.util.regex.Pattern
@@ -25,7 +25,7 @@ import twitter.Sender
  * @author Dave Briccetti
  */
 
-class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
+class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
       clearAction: Action, showBigPicture: => Unit) 
     extends JTable(statusTableModel) {
   setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
@@ -88,8 +88,16 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
   }
   
   def reply {
-    val sm = new SendMsgDialog(null, sender, getSelectedStatus)
+    val sm = new SendMsgDialog(null, apiHandlers.sender, getSelectedStatus)
     sm.visible = true
+  }
+  
+  private def unfollow {
+    getSelectedStatuses.foreach(status => apiHandlers.follower.unfollow((status \ "user" \ "screen_name").text))
+  }
+  
+  def getSelectedStatuses: List[Node] = {
+    statusTableModel.getStatuses(getSelectedModelIndexes)
   }
 
   def getSelectedStatus: Option[NodeSeq] = {
@@ -152,6 +160,8 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
     }, ks(KeyEvent.VK_P))
     addAction(Action("Show Larger Image") { showBigPicture }, ks(KeyEvent.VK_I))
     addAction(Action("Reply") { reply }, ks(KeyEvent.VK_R))
+    addAction(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
+      Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
   }
 
   private def connectAction(a: Action, keys: KeyStroke*) {
@@ -161,9 +171,9 @@ class StatusTable(statusTableModel: StatusTableModel, sender: Sender,
 
 }
 
-class TweetsTable(statusTableModel: StatusTableModel, sender: Sender,
+class TweetsTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     clearAction: Action, showBigPicture: => Unit) 
-    extends StatusTable(statusTableModel, sender, clearAction, showBigPicture) {
+    extends StatusTable(statusTableModel, apiHandlers, clearAction, showBigPicture) {
   
   override def buildActions {
     super.buildActions
