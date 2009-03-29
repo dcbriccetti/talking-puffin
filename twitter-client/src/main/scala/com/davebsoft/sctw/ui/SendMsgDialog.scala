@@ -15,7 +15,7 @@ import twitter.Sender
  * @author Dave Briccetti
  */
 
-class SendMsgDialog(parent: java.awt.Component, sender: Sender, recipient: Option[String],
+class SendMsgDialog(parent: java.awt.Component, sender: Sender, recipients: Option[String],
     replyToId: Option[String]) extends Frame {
   
   class CustomTextArea extends TextArea { 
@@ -37,16 +37,16 @@ class SendMsgDialog(parent: java.awt.Component, sender: Sender, recipient: Optio
     override def keyPressed(e: KeyEvent) = if (e.getKeyCode == KeyEvent.VK_ESCAPE) SendMsgDialog.this.visible=false 
   })
 
-  var userName = ""
+  var userNames = ""
   contents = new GridBagPanel {
     title = "Send Message"
     preferredSize = new Dimension(600, 200)
     border = Swing.EmptyBorder(5,5,5,5)
     class Constr extends Constraints { anchor=GridBagPanel.Anchor.West }
-    recipient match {
+    recipients match {
       case Some(r) => {
-        userName = "@" + r
-        message.text = userName + " "
+        userNames = r
+        message.text = userNames + " "
       }
       case None =>
     }

@@ -47,24 +47,19 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     override def mouseClicked(e: MouseEvent) = if (e.getClickCount == 2) reply
   })
   
-  def viewSelected {
-    getSelectedStatus match {
-      case Some(status) =>
-        var uri = "http://twitter.com/" +
-                (status \ "user" \ "screen_name").text + "/statuses/" + (status \ "id").text
-        DesktopUtil.browse(uri)
-      case None =>
-    }
+  private def viewSelected {
+    getSelectedStatuses.foreach(status => {
+      var uri = "http://twitter.com/" +
+          (status \ "user" \ "screen_name").text + "/statuses/" + (status \ "id").text
+      DesktopUtil.browse(uri)
+    })
   }
   
   def reply {
-    getSelectedStatus match {
-      case Some(s) => 
-        val sm = new SendMsgDialog(null, apiHandlers.sender,
-          Some((s \ "user" \ "screen_name").text), Some((s \ "id").text))
-        sm.visible = true
-      case None =>
-    }
+    val statuses = getSelectedStatuses
+    val names = statuses.map(status => ("@" + (status \ "user" \ "screen_name").text)).mkString(" ")
+    val sm = new SendMsgDialog(null, apiHandlers.sender, Some(names), Some((statuses(0) \ "id").text))
+    sm.visible = true
   }
   
   private def unfollow {
