@@ -82,8 +82,7 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
   }
   
   private def reply {
-    val users = getSelectedUsers
-    val names = users.map(user => ("@" + (user \ "screen_name").text)).mkString(" ")
+    val names = getSelectedUsers.map(user => ("@" + (user \ "screen_name").text)).mkString(" ")
     val sm = new SendMsgDialog(null, apiHandlers.sender, Some(names), None)
     sm.visible = true
   }
