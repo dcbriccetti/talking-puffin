@@ -93,7 +93,7 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
   }
 
   def tableChanged(e: TableModelEvent) = {
-    if (table != null) {
+    if (table != null && e.getFirstRow != e.getLastRow) {
       val selectionModel = table.getSelectionModel
       selectionModel.clearSelection
       
