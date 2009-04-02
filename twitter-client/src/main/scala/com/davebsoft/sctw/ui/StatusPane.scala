@@ -34,7 +34,7 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
     }
   }
   val clearAction = new Action("Clear") {
-    toolTip = "Removes all tweets from the display"
+    toolTip = "Removes all tweets (including filtered-out ones)"
     def apply = clearTweets
   }
   val loadNewAction = new Action("Load New") {
