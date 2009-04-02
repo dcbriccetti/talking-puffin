@@ -4,7 +4,7 @@ import _root_.scala.swing.GridBagPanel._
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.xml.{NodeSeq, Node}
 
-import java.awt.event.{MouseEvent, MouseAdapter}
+import java.awt.event.{MouseEvent, KeyAdapter, MouseAdapter, KeyEvent}
 import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Image}
 import java.net.{URI, URL}
@@ -150,13 +150,23 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
       visible = true
     }
     setBigPicLabelIcon
+
+    def closePicture {
+      bigPicFrame.dispose
+      bigPicFrame = null
+      bigPicLabel = null
+    }
+
     bigPicLabel.peer.addMouseListener(new MouseAdapter {
       override def mouseClicked(e: MouseEvent) = {
-        bigPicFrame.dispose
-        bigPicFrame = null
-        bigPicLabel = null
+        closePicture
       }
     })
+    
+    bigPicFrame.peer.addKeyListener(new KeyAdapter {
+      override def keyPressed(e: KeyEvent) = if (e.getKeyCode == KeyEvent.VK_ESCAPE) closePicture
+    })
+    
   }
   
 }
