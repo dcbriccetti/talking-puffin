@@ -82,6 +82,24 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
   
   statusTableModel.loadNewData
 
+  table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
+    def valueChanged(e: ListSelectionEvent) = {
+      if (! e.getValueIsAdjusting) {
+        if (table.getSelectedRowCount == 1) {
+          try {
+            val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
+            val status = statusTableModel.getStatusAt(modelRowIndex)
+            tweetDetailPanel.showStatusDetails(status)
+          } catch {
+            case ex: IndexOutOfBoundsException => println(ex)
+          }
+        } else {
+          tweetDetailPanel.clearStatusDetails
+        }
+      }
+    }
+  })
+  
   def newTable: StatusTable = new StatusTable(statusTableModel, apiHandlers, clearAction, showBigPicture)
   
   def showBigPicture = tweetDetailPanel.showBigPicture

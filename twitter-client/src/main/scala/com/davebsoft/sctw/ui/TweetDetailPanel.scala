@@ -1,16 +1,17 @@
 package com.davebsoft.sctw.ui
+
 import _root_.scala.swing.event.{ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.com.davebsoft.sctw.util.PopupListener
+import _root_.scala.swing.{Frame, Label, GridBagPanel, TextArea, BorderPanel}
 import _root_.scala.xml.{NodeSeq, Node}
 
 import java.awt.event.{MouseEvent, KeyAdapter, MouseAdapter, KeyEvent}
 import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Image}
 import java.net.{URI, URL}
-import javax.swing._
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
-import scala.swing._
+import javax.swing.{JTable, JTextPane, ImageIcon}
 
 /**
  * Details of the currently-selected tweet.
@@ -75,25 +76,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
   
   val statusTableModel = table.getModel.asInstanceOf[StatusTableModel]
 
-  table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
-    def valueChanged(e: ListSelectionEvent) = {
-      if (! e.getValueIsAdjusting) {
-        if (table.getSelectedRowCount == 1) {
-          try {
-            val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
-            val status = statusTableModel.getStatusAt(modelRowIndex)
-            showStatusDetails(status)
-          } catch {
-            case ex: IndexOutOfBoundsException => println(ex)
-          }
-        } else {
-          clearStatusDetails
-        }
-      }
-    }
-  })
-  
-  private def showStatusDetails(status: NodeSeq) {
+  def showStatusDetails(status: NodeSeq) {
     val user = status \ "user"
     userDescription.text = (user \ "name").text + " • " +
         (user \ "location").text + " • " + (user \ "description").text  + " • " +
