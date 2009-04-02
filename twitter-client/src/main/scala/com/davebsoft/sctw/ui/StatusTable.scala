@@ -62,12 +62,14 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     sm.visible = true
   }
   
-  private def unfollow {
-    getSelectedStatuses.foreach(status => apiHandlers.follower.unfollow((status \ "user" \ "screen_name").text))
-  }
+  private def unfollow = getSelectedScreenNames foreach apiHandlers.follower.unfollow
   
   def getSelectedStatuses: List[Node] = {
     statusTableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
+  }
+  
+  def getSelectedScreenNames: List[String] = {
+    getSelectedStatuses.map(status => (status \ "user" \ "screen_name").text)
   }
 
   def getSelectedStatus: Option[NodeSeq] = {
