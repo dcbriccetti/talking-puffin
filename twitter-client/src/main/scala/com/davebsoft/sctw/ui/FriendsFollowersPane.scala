@@ -2,6 +2,7 @@ package com.davebsoft.sctw.ui
 
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.xml.{NodeSeq, Node}
+import filter.TagUsers
 import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
 import javax.swing.{JTable, KeyStroke, Icon, JPopupMenu}
 import java.awt.{Toolkit, Font}
@@ -20,8 +21,9 @@ object UserColumns {
   val PICTURE = 1
   val SCREEN_NAME = 2
   val NAME = 3
-  val LOCATION = 4
-  val DESCRIPTION = 5
+  val TAGS = 4
+  val LOCATION = 5
+  val DESCRIPTION = 6
 }
 
 class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], followers: List[Node]) extends GridBagPanel {
@@ -61,8 +63,8 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
     ap.addAction(new NextTAction(comp))
     ap.addAction(new PrevTAction(comp))
     ap.addAction(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
-//    ap.addAction(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
-//      Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+    ap.addAction(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
+      Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
   }
 
   private def getPopupMenu(ap: ActionPrep): JPopupMenu = {
@@ -73,6 +75,12 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
   }
   
   private def getSelectedUsers = TableUtil.getSelectedModelIndexes(table).map(model.combined(_))
+  
+  def getSelectedScreenNames: List[String] = {
+    getSelectedUsers.map(user => (user \ "screen_name").text)
+  }
+
+  private def unfollow = getSelectedScreenNames foreach apiHandlers.follower.unfollow
   
   private def viewSelected {
     getSelectedUsers.foreach(user => {
@@ -90,15 +98,15 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
 }
 
 class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTableModel {
-  private val colNames = List[String](" ", " ", "Screen Name", "Name", "Location", "Description")
-  private val elementNames = List[String]("", " ", "screen_name", "name", "location", "description")
+  private val colNames = List(" ", " ", "Screen Name", "Name", "Tags", "Location", "Description")
+  private val elementNames = List("", "", "screen_name", "name", "", "location", "description")
   private val set = scala.collection.mutable.Set[Node]()
   set ++ friends
   set ++ followers
   val combined = set.toList.sort((a,b) => 
     ((a \ "name").text.toLowerCase compareTo (b \ "name").text.toLowerCase) < 0)
   
-  def getColumnCount = 6
+  def getColumnCount = 7
   def getRowCount = combined.length
 
   override def getColumnClass(columnIndex: Int) = {
@@ -124,6 +132,7 @@ class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTab
         if (friend && follower) "↔" else if (friend) "→" else "←"
       }
       case UserColumns.SCREEN_NAME => new AnnotatedUser(colVal, followers.contains(user))
+      case UserColumns.TAGS => TagUsers.tagsForUser((user \ "id").text).mkString(", ")
       case _ => colVal
     }
   }

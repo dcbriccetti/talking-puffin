@@ -25,6 +25,10 @@ object TagUsers {
   def contains(tagUser: TagUser): Boolean = {
     tagUsers.contains(tagUser)
   }
+  
+  def tagsForUser(userId: String): List[String] = {
+    for (tu <- tagUsers.toList; if (tu.userId.equals(userId))) yield tu.tag
+  }
 
   private def getFile = {
     val homeDir = new File(System.getProperty("user.home"));
