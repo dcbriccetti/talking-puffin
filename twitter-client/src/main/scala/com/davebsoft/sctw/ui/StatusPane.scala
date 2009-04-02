@@ -116,6 +116,9 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
     lastSelectedRows = Nil
   }
 
+  def requestFocusForTable {
+    table.requestFocusInWindow
+  }
 }
 
 class ToolbarStatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, filtersPane: FiltersPane) 

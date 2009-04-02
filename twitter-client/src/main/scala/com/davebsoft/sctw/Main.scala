@@ -84,6 +84,7 @@ object Main extends GUIApplication {
       }
 
       peer.setLocationRelativeTo(null)
+      statusPane.requestFocusForTable
     }
   }
 
