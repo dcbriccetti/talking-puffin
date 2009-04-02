@@ -87,7 +87,7 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
       }
     }
     
-    val tagMi = new JMenu("Tag Friend With")
+    val tagMi = new JMenu("Tag With")
     for (tag <- TagsRepository.get) {
       val tagSmi = new JMenuItem(tag)
       tagSmi.addActionListener(tagAl)
