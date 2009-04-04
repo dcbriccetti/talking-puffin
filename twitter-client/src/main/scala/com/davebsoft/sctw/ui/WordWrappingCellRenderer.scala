@@ -23,7 +23,6 @@ class WordWrappingCellRenderer extends JTextArea with TableCellRenderer {
     setBorder(renderer.getBorder) 
     setText(renderer.getText) 
     setSize(table.getColumnModel.getColumn(2).getWidth, 0)
-    if (! isSelected) setBackground(if (row % 2 == 0) Color.WHITE else ZebraStriping.VERY_LIGHT_GRAY)
     return this
   }
   

@@ -9,7 +9,7 @@ import javax.swing.table.DefaultTableCellRenderer
  * @author Dave Briccetti
  */
 
-class AgeCellRenderer extends DefaultTableCellRenderer with ZebraStriping {
+class AgeCellRenderer extends DefaultTableCellRenderer {
   override def setValue(value: Any) {
     val time = value.asInstanceOf[Long]
     val days = time / 86400

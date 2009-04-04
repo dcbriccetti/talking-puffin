@@ -8,6 +8,9 @@ import javax.swing.{JTable, KeyStroke, Icon, JPopupMenu}
 import java.awt.{Toolkit, Font}
 import java.util.Comparator
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, AbstractTableModel}
+import org.jdesktop.swingx.decorator.{HighlighterFactory, Highlighter}
+import org.jdesktop.swingx.JXTable
+import org.jdesktop.swingx.table.TableColumnExt
 import scala.swing._
 import scala.swing.GridBagPanel._
 import twitter.{FriendsFollowersDataProvider}
@@ -30,18 +33,19 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
   val model = new UsersModel(friends, followers)
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
-    table = new JTable(model) {
+    table = new JXTable(model) {
+      setColumnControlVisible(true)
+      setHighlighters(HighlighterFactory.createSimpleStriping)
       setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
-      val sorter = new TableRowSorter[UsersModel](model)
-      sorter.setComparator(UserColumns.SCREEN_NAME, new Comparator[AnnotatedUser] {
-        def compare(o1: AnnotatedUser, o2: AnnotatedUser) = o1.name.compareToIgnoreCase(o2.name)
-      })
-      setRowSorter(sorter)
-      setDefaultRenderer(classOf[String], new DefaultTableCellRenderer with ZebraStriping)
+      setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
       getColumnModel.getColumn(UserColumns.ARROWS).setPreferredWidth(20)
       getColumnModel.getColumn(UserColumns.ARROWS).setMaxWidth(30)
       getColumnModel.getColumn(UserColumns.PICTURE).setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
-      getColumnModel.getColumn(UserColumns.SCREEN_NAME).setCellRenderer(new AnnotatedUserRenderer with ZebraStriping)
+      val screenNameCol = getColumnModel.getColumn(UserColumns.SCREEN_NAME).asInstanceOf[TableColumnExt]
+      screenNameCol.setCellRenderer(new AnnotatedUserRenderer)
+      screenNameCol.setComparator(new Comparator[AnnotatedUser] {
+        def compare(o1: AnnotatedUser, o2: AnnotatedUser) = o1.name.compareToIgnoreCase(o2.name)
+      })
       getColumnModel.getColumn(UserColumns.DESCRIPTION).setPreferredWidth(500)
       getColumnModel.getColumn(UserColumns.DESCRIPTION).setCellRenderer(new WordWrappingCellRenderer)
       val ap = new ActionPrep(this)
@@ -98,7 +102,7 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
 }
 
 class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTableModel {
-  private val colNames = List(" ", " ", "Screen Name", "Name", "Tags", "Location", "Description")
+  private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description")
   private val set = scala.collection.mutable.Set[Node]()
   set ++ friends

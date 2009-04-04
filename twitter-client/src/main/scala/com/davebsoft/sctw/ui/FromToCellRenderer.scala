@@ -21,7 +21,6 @@ class FromToCellRenderer extends JTextPane with TableCellRenderer {
     setBorder(renderer.getBorder)
     val fromTo = value.asInstanceOf[FromTo]
     setText(HtmlFormatter.htmlAround(formatValue(fromTo, renderer.getForeground))) 
-    if (! isSelected) setBackground(if (row % 2 == 0) Color.WHITE else ZebraStriping.VERY_LIGHT_GRAY)
     return this
   }
   

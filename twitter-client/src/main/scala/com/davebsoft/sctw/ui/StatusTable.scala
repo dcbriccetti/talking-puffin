@@ -18,6 +18,7 @@ import javax.swing.event._
 import filter.TagsRepository
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableColumnModel, TableCellRenderer, DefaultTableColumnModel}
 import javax.swing.{JTable, KeyStroke, JMenu, JMenuItem, JPopupMenu, JComponent}
+import org.jdesktop.swingx.decorator.HighlighterFactory
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
@@ -33,9 +34,10 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     extends JXTable(statusTableModel) {
 
   setColumnControlVisible(true)
+  setHighlighters(HighlighterFactory.createSimpleStriping)
   setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
   
-  setDefaultRenderer(classOf[String], new DefaultTableCellRenderer with ZebraStriping)
+  setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
 
   var toCol: TableColumnExt = _
   configureColumns
