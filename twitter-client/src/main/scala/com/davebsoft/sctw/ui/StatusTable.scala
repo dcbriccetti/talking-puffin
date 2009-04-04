@@ -10,13 +10,17 @@ import _root_.scala.xml.{NodeSeq, Node}
 import _root_.scala.{Option}
 import java.awt.event.{KeyEvent, ActionEvent, ActionListener, MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
+import java.beans.PropertyChangeEvent
 import java.net.{URI, URL}
 import java.util.Comparator
 import java.util.regex.Pattern
 import javax.swing.event._
-import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import filter.TagsRepository
+import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableColumnModel, TableCellRenderer, DefaultTableColumnModel}
 import javax.swing.{JTable, KeyStroke, JMenu, JMenuItem, JPopupMenu, JComponent}
+import org.jdesktop.swingx.event.TableColumnModelExtListener
+import org.jdesktop.swingx.JXTable
+import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
 import twitter.Sender
 import util.{TableUtil, DesktopUtil}
 /**
@@ -26,17 +30,14 @@ import util.{TableUtil, DesktopUtil}
 
 class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
       clearAction: Action, showBigPicture: => Unit) 
-    extends JTable(statusTableModel) {
+    extends JXTable(statusTableModel) {
 
+  setColumnControlVisible(true)
   setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
-  val sorter = new TableRowSorter[StatusTableModel](statusTableModel)
-  sorter.setComparator(2, new Comparator[FromTo] {
-    def compare(o1: FromTo, o2: FromTo) = o1.from.compareToIgnoreCase(o2.from)
-  })
-  setRowSorter(sorter)
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer with ZebraStriping)
 
+  var toCol: TableColumnExt = _
   configureColumns
 
   val ap = new ActionPrep(this)
@@ -111,17 +112,49 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     ageCol.setMaxWidth(100)
     ageCol.setCellRenderer(new AgeCellRenderer)
     
-    val nameCol = colModel.getColumn(2)
+    val fromToComparator = new Comparator[FromTo] {
+      def compare(o1: FromTo, o2: FromTo) = {
+        def nameToString(fromTo: FromTo): String = fromTo.name match {case Some(name) => name case None => ""}
+        nameToString(o1).compareToIgnoreCase(nameToString(o2))
+      }
+    }
+
+    val nameCol = colModel.getColumn(2).asInstanceOf[TableColumnExt]
     nameCol.setPreferredWidth(100)
     nameCol.setMaxWidth(200)
     nameCol.setCellRenderer(new FromToCellRenderer)
+    nameCol.setComparator(fromToComparator)
     
-    val statusCol = colModel.getColumn(3)
+    toCol = colModel.getColumn(3).asInstanceOf[TableColumnExt]
+    toCol.setPreferredWidth(100)
+    toCol.setMaxWidth(200)
+    toCol.setCellRenderer(new FromToCellRenderer)
+    toCol.setComparator(fromToComparator)
+    
+    val statusCol = colModel.getColumn(4)
     statusCol.setPreferredWidth(600)
     statusCol.setCellRenderer(new WordWrappingCellRenderer {
       val normalFont = getFont
       setFont(new Font(normalFont.getFontName, Font.PLAIN, normalFont.getSize * 120 / 100))
     })
+
+    colModel.addColumnModelListener(new TableColumnModelExtListener {
+      def columnPropertyChange(event: PropertyChangeEvent) = {
+        if (event.getPropertyName.equals("visible") && event.getSource == toCol) {
+          showToColumn(toCol.isVisible)
+        }
+      }
+
+      def columnSelectionChanged(e: ListSelectionEvent) = {}
+      def columnRemoved(e: TableColumnModelEvent) = {}
+      def columnMoved(e: TableColumnModelEvent) = {}
+      def columnMarginChanged(e: ChangeEvent) = {}
+      def columnAdded(e: TableColumnModelEvent) = {}
+    })
+  }
+  
+  def showToColumn(show: Boolean) {
+    statusTableModel.options.showToColumn = show
   }
 
   protected def buildActions = {

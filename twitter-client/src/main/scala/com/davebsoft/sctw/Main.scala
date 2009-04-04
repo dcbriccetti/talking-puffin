@@ -30,12 +30,12 @@ object Main extends GUIApplication {
     val filterSet = new FilterSet
     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
     val repliesProvider = new RepliesProvider(username, password)
-    val tweetSender = new Sender(username, password)
-    val follower = new Follower(username, password)
-    val apiHandlers = new ApiHandlers(tweetSender, follower)
+    val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
     val followers = new FollowersDataProvider(username, password).getUsers
-    val tweetsModel  = new StatusTableModel(tweetsProvider,  getIds(followers), filterSet, username)
-    val repliesModel = new StatusTableModel(repliesProvider, getIds(followers), filterSet, username) with Replies
+    val tweetsModel  = new StatusTableModel(new StatusTableOptions(true), tweetsProvider, 
+      getIds(followers), filterSet, username)
+    val repliesModel = new StatusTableModel(new StatusTableOptions(false), repliesProvider, 
+      getIds(followers), filterSet, username) with Replies
     val filtersPane = new FiltersPane(tweetsModel, filterSet)
     val statusPane  = new ToolbarStatusPane(tweetsModel,  apiHandlers, filtersPane)
     val repliesPane = new StatusPane(repliesModel, apiHandlers, filtersPane)

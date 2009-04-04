@@ -15,8 +15,10 @@ import twitter.{DataFetchException, TweetsProvider}
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[String], filterSet: FilterSet, 
-    username: String) extends AbstractTableModel with Publisher with Reactor {
+class StatusTableModel(val options: StatusTableOptions, statusDataProvider: TweetsProvider, 
+    followerIds: List[String], filterSet: FilterSet, username: String) 
+    extends AbstractTableModel with Publisher with Reactor {
+  
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
   
@@ -32,7 +34,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
 
   val filterLogic = new FilterLogic(username, filterSet, filteredStatuses)
   
-  private val colNames = List(" ", "Age", "From/To", "Status")
+  private val colNames = List("Image", "Age", "From", "To", "Status")
   private var timer: Timer = _
   private var preChangeListener: PreChangeListener = _;
   
@@ -43,7 +45,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
   
   def setPreChangeListener(preChangeListener: PreChangeListener) = this.preChangeListener = preChangeListener
   
-  def getColumnCount = 4
+  def getColumnCount = 5
   def getRowCount = filteredStatuses.size
   override def getColumnName(column: Int) = colNames(column)
 
@@ -61,12 +63,17 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
         val name = (status \ "user" \ "name").text
         val id = (status \ "user" \ "id").text
         val emphasizeFrom = followerIds.contains(id)
-        LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
-          case Some(user) => new FromTo(name, emphasizeFrom, Some(user), false)
-          case None => new FromTo(name, emphasizeFrom, None, false)
-        }
+        new FromTo(Some(name), emphasizeFrom)
       }
-      case 3 => LinkExtractor.getWithoutUser(getStatusText(status, username)) 
+      case 3 => {
+        val name = (status \ "user" \ "name").text
+        val id = (status \ "user" \ "id").text
+        new FromTo(LinkExtractor.getReplyToUser(getStatusText(status, username)), false)
+      }
+      case 4 => {
+        val st = getStatusText(status, username)
+        if (options.showToColumn) LinkExtractor.getWithoutUser(st) else st 
+      }
     }
   }
   
@@ -82,6 +89,7 @@ class StatusTableModel(statusDataProvider: TweetsProvider, followerIds: List[Str
       case 1 => classOf[java.lang.Long]
       case 2 => classOf[String]
       case 3 => classOf[String] 
+      case 4 => classOf[String] 
     }
   }
 
@@ -217,7 +225,7 @@ trait PreChangeListener {
   def tableChanging
 }
 
-class FromTo(val from: String, val fromEmphasized: Boolean, val to: Option[String], val toEmphasized: Boolean)
+class FromTo(val name: Option[String], val nameEmphasized: Boolean)
   
 case class TableContentsChanged(val filteredIn: Int, val total: Int) extends Event
   

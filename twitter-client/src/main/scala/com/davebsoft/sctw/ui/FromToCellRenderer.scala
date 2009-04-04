@@ -4,7 +4,7 @@ import java.awt.{Component, Color}
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.{JTextArea, JTextPane, JTable}
 /**
- * Word wrapping renderer.
+ * From cell renderer.
  * @author Dave Briccetti
  */
 
@@ -26,13 +26,13 @@ class FromToCellRenderer extends JTextPane with TableCellRenderer {
   }
   
   private def formatValue(fromTo: FromTo, color: Color): String = {
-    val toValue = fromTo.to match {
-      case Some(to) => "<br/>￫" + decorate(to, fromTo.toEmphasized) 
-      case None => ""
-    }
+    fromTo.name match {
+      case Some(name) => 
     "<table><tr><td><font face='helvetica' color='#" + // TODO find better way than <table> to get padding 
         Integer.toHexString(color.getRGB & 0x00ffffff) + "'>" + 
-        decorate(fromTo.from, fromTo.fromEmphasized) + toValue + "</font></td></tr></table>"
+        decorate(name, fromTo.nameEmphasized) + "</font></td></tr></table>"
+      case None => ""    
+    }
   }
   
   private def decorate(text: String, embolden: Boolean): String = {
