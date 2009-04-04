@@ -104,6 +104,8 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   private def configureColumns {
     val colModel = getColumnModel
     
+    colModel.setColumnMargin(5)
+    
     val picCol = colModel.getColumn(0)
     picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
     
@@ -151,6 +153,10 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
       def columnMarginChanged(e: ChangeEvent) = {}
       def columnAdded(e: TableColumnModelEvent) = {}
     })
+  }
+  
+  def showColumn(index: Int, show: Boolean) {
+    getColumnModel.getColumn(index).asInstanceOf[TableColumnExt].setVisible(show)
   }
   
   def showToColumn(show: Boolean) {
