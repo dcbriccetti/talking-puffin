@@ -106,13 +106,13 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   private def configureColumns {
     val colModel = getColumnModel
     
-    val picCol = colModel.getColumn(0)
-    picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
-    
-    val ageCol = colModel.getColumn(1)
+    val ageCol = colModel.getColumn(0)
     ageCol.setPreferredWidth(60)
     ageCol.setMaxWidth(100)
     ageCol.setCellRenderer(new AgeCellRenderer)
+    
+    val picCol = colModel.getColumn(1)
+    picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
     
     val fromToComparator = new Comparator[FromTo] {
       def compare(o1: FromTo, o2: FromTo) = {

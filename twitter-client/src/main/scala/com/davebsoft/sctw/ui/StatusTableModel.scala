@@ -34,7 +34,7 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
 
   val filterLogic = new FilterLogic(username, filterSet, filteredStatuses)
   
-  private val colNames = List("Image", "Age", "From", "To", "Status")
+  private val colNames = List("Age", "Image", "From", "To", "Status")
   private var timer: Timer = _
   private var preChangeListener: PreChangeListener = _;
   
@@ -54,11 +54,11 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val status = filteredStatuses.get(rowIndex)
     columnIndex match {
-      case 0 => {
+      case 0 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
+      case 1 => {
         val picUrl = (status \ "user" \ "profile_image_url").text
         pcell.request(picUrl, rowIndex)
       }
-      case 1 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
       case 2 => {
         val name = (status \ "user" \ "name").text
         val id = (status \ "user" \ "id").text
@@ -85,8 +85,8 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
 
   override def getColumnClass(columnIndex: Int) = {
     columnIndex match {
-      case 0 => classOf[Icon]
-      case 1 => classOf[java.lang.Long]
+      case 0 => classOf[java.lang.Long]
+      case 1 => classOf[Icon]
       case 2 => classOf[String]
       case 3 => classOf[String] 
       case 4 => classOf[String] 
