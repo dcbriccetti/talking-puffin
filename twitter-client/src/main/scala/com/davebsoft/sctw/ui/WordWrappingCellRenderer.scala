@@ -22,7 +22,7 @@ class WordWrappingCellRenderer extends TableCellRenderer {
     attempts to reset the font). To work around, I’m creating a new JTextArea for every cell.
      */
     renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
-    val ta = new JTextArea { 
+    new JTextArea { 
       setLineWrap(true)
       setWrapStyleWord(true)
       setForeground(renderer.getForeground) 
@@ -30,7 +30,6 @@ class WordWrappingCellRenderer extends TableCellRenderer {
       setBorder(renderer.getBorder) 
       setText(renderer.getText)
     }
-    return ta
   }
   
 }
