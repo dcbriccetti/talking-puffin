@@ -106,8 +106,6 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   private def configureColumns {
     val colModel = getColumnModel
     
-    colModel.setColumnMargin(5)
-    
     val picCol = colModel.getColumn(0)
     picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
     

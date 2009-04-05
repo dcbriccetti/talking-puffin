@@ -89,8 +89,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
 
   val picFetcher = new PictureFetcher(Some(Thumbnail.MEDIUM_SIZE), (imageReady: ImageReady) => {
     if (imageReady.url.equals(showingUrl)) {
-      picLabel.icon = imageReady.imageIcon 
-      setBigPicLabelIcon
+      setPicLabelIconAndBigPic(imageReady.imageIcon) 
     }
   }, false)
   
@@ -98,14 +97,18 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     val fullSizeUrl = PictureFetcher.getFullSizeUrl(picUrl)
     if (! fullSizeUrl.equals(showingUrl)) {
       showingUrl = fullSizeUrl
-      picLabel.icon = PictureFetcher.scaledPictureCache.get(fullSizeUrl) match {
-        case Some(icon) => icon
-        case None => {
-          picFetcher ! new FetchImage(fullSizeUrl, null)
-          Thumbnail.transparentMedium
-        }
+      var icon = PictureFetcher.scaledPictureCache.get(fullSizeUrl)
+      if (icon == null) {  
+        picFetcher.requestImage(fullSizeUrl, null)
+        icon = Thumbnail.transparentMedium
       }
+      setPicLabelIconAndBigPic(icon)
     }
+  }
+  
+  private def setPicLabelIconAndBigPic(icon: ImageIcon) {
+    picLabel.icon = icon 
+    setBigPicLabelIcon
   }
 
   def clearStatusDetails {
@@ -117,7 +120,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
 
   private def setBigPicLabelIcon {
     if (bigPicFrame != null && bigPicLabel != null) { 
-      bigPicLabel.icon = PictureFetcher.pictureCache(PictureFetcher.getFullSizeUrl(showingUrl))
+      bigPicLabel.icon = PictureFetcher.pictureCache.get(PictureFetcher.getFullSizeUrl(showingUrl))
       bigPicFrame.pack
     }
   }

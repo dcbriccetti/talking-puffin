@@ -17,14 +17,10 @@ class PictureCell(model: AbstractTableModel, column: Int) {
   }, true)
     
   def request(picUrl: String, rowIndex: Int): Icon = {
-    PictureFetcher.pictureCache.get(picUrl) match { 
-      case Some(imageIcon) => {
-        imageIcon
-      }
-      case None => {
-        picFetcher ! new FetchImage(picUrl, rowIndex.asInstanceOf[Object])
-        Thumbnail.transparentThumbnail
-      }
+    val imageIcon = PictureFetcher.pictureCache.get(picUrl)
+    if (imageIcon != null) imageIcon else {
+      picFetcher.requestImage (picUrl, rowIndex.asInstanceOf[Object])
+      Thumbnail.transparentThumbnail
     }
   }
 }
