@@ -107,8 +107,14 @@ class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTab
   private val set = scala.collection.mutable.Set[Node]()
   set ++ friends
   set ++ followers
-  val combined = set.toList.sort((a,b) => 
+  val combinedList = set.toList.sort((a,b) => 
     ((a \ "name").text.toLowerCase compareTo (b \ "name").text.toLowerCase) < 0)
+  val combined = combinedList.toArray
+  val arrows = combinedList.map(user => {
+    val friend = friends.contains(user)
+    val follower = followers.contains(user)
+    if (friend && follower) "↔" else if (friend) "→" else "←"
+  }).toArray
   
   def getColumnCount = 7
   def getRowCount = combined.length
@@ -130,11 +136,7 @@ class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTab
         val picUrl = (user \ "profile_image_url").text
         pcell.request(picUrl, rowIndex)
       }
-      case UserColumns.ARROWS => {
-        val friend = friends.contains(user)
-        val follower = followers.contains(user)
-        if (friend && follower) "↔" else if (friend) "→" else "←"
-      }
+      case UserColumns.ARROWS => arrows(rowIndex)
       case UserColumns.SCREEN_NAME => new AnnotatedUser(colVal, followers.contains(user))
       case UserColumns.TAGS => TagUsers.tagsForUser((user \ "id").text).mkString(", ")
       case _ => colVal
