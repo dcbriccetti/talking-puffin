@@ -27,6 +27,7 @@ object UserColumns {
   val TAGS = 4
   val LOCATION = 5
   val DESCRIPTION = 6
+  val STATUS = 7
 }
 
 class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], followers: List[Node]) extends GridBagPanel {
@@ -46,8 +47,10 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
       screenNameCol.setComparator(new Comparator[AnnotatedUser] {
         def compare(o1: AnnotatedUser, o2: AnnotatedUser) = o1.name.compareToIgnoreCase(o2.name)
       })
-      getColumnModel.getColumn(UserColumns.DESCRIPTION).setPreferredWidth(500)
+      getColumnModel.getColumn(UserColumns.DESCRIPTION).setPreferredWidth(250)
       getColumnModel.getColumn(UserColumns.DESCRIPTION).setCellRenderer(new WordWrappingCellRenderer)
+      getColumnModel.getColumn(UserColumns.STATUS).setPreferredWidth(250)
+      getColumnModel.getColumn(UserColumns.STATUS).setCellRenderer(new WordWrappingCellRenderer)
       val ap = new ActionPrep(this)
       buildActions(ap, this)
       addMouseListener(new PopupListener(this, getPopupMenu(ap)))
@@ -102,8 +105,8 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
 }
 
 class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTableModel {
-  private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description")
-  private val elementNames = List("", "", "screen_name", "name", "", "location", "description")
+  private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
+  private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
   private val set = scala.collection.mutable.Set[Node]()
   set ++ friends
   set ++ followers
@@ -116,7 +119,7 @@ class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTab
     if (friend && follower) "↔" else if (friend) "→" else "←"
   }).toArray
   
-  def getColumnCount = 7
+  def getColumnCount = 8
   def getRowCount = combined.length
 
   override def getColumnClass(columnIndex: Int) = {
@@ -139,6 +142,7 @@ class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTab
       case UserColumns.ARROWS => arrows(rowIndex)
       case UserColumns.SCREEN_NAME => new AnnotatedUser(colVal, followers.contains(user))
       case UserColumns.TAGS => TagUsers.tagsForUser((user \ "id").text).mkString(", ")
+      case UserColumns.STATUS => (user \ "status" \ "text").text
       case _ => colVal
     }
   }
