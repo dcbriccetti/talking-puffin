@@ -4,6 +4,7 @@ import _root_.scala.swing.event.{ButtonClicked, SelectionChanged, WindowClosing}
 import filter.{FilterSet, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Dimension}
+import javax.swing.UIManager
 import scala.swing._
 import scala.xml._
 import TabbedPane._
@@ -97,6 +98,12 @@ object Main extends GUIApplication {
   }
 
   def main(args: Array[String]): Unit = {
+    
+    try {
+      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    } catch {
+      case e: Exception => // Ignore
+    }
     
     def startUp(userName: String, pwd: String) {
       username = userName
