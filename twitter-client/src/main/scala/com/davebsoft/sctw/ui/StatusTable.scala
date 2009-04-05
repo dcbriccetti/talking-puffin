@@ -22,7 +22,7 @@ import org.jdesktop.swingx.decorator.HighlighterFactory
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
-import twitter.{StatusUtil, Sender}
+import twitter.{Status, Sender}
 import util.{TableUtil, DesktopUtil}
 /**
  * Table of statuses.
@@ -53,14 +53,14 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   private def viewSelected {
     getSelectedStatuses.foreach(status => {
       var uri = "http://twitter.com/" +
-          StatusUtil.getScreenNameFromStatus(status) + "/statuses/" + (status \ "id").text
+          new Status(status).getScreenNameFromStatus + "/statuses/" + (status \ "id").text
       DesktopUtil.browse(uri)
     })
   }
   
   def reply {
     val statuses = getSelectedStatuses
-    val names = statuses.map(status => ("@" + StatusUtil.getScreenNameFromStatus(status))).mkString(" ")
+    val names = statuses.map(status => ("@" + new Status(status).getScreenNameFromStatus)).mkString(" ")
     val sm = new SendMsgDialog(null, apiHandlers.sender, Some(names), Some((statuses(0) \ "id").text))
     sm.visible = true
   }
@@ -71,7 +71,7 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     statusTableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
   }
 
-  def getSelectedScreenNames: List[String] = getSelectedStatuses.map(StatusUtil.getScreenNameFromStatus)
+  def getSelectedScreenNames: List[String] = getSelectedStatuses.map(s => new Status(s).getScreenNameFromStatus)
 
   def getSelectedStatus: Option[NodeSeq] = {
     val row = getSelectedRow
@@ -169,7 +169,7 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     ap.addAction(new NextTAction(this))
     ap.addAction(new PrevTAction(this))
     ap.addAction(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
-    ap.addAction(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
+    ap.addAction(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap.addAction(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
   }

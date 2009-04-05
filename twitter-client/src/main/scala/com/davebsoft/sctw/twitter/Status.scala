@@ -7,7 +7,7 @@ import _root_.scala.xml.NodeSeq
  * @author Dave Briccetti
  */
 
-object StatusUtil {
-  def getScreenNameFromStatus(status: NodeSeq) = (status \ "user" \ "screen_name").text
+class Status(status: NodeSeq) {
+  def getScreenNameFromStatus = (status \ "user" \ "screen_name").text
   
 }

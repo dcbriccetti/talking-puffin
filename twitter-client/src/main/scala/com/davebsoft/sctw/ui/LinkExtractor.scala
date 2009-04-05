@@ -50,20 +50,24 @@ object LinkExtractor {
     "http://twitter.com/" + replyToUser + "/statuses/" + replyTo
   }
 
+  val replyToUserPattern = Pattern.compile("^@(\\S+)")
+  
   /**
    * Returns the Twitter handle of the user whose @handle appears at the beginning of 
    * the tweet, or an empty string.
    */
   def getReplyToUser(text: String): Option[String] = {
-    val m = java.util.regex.Pattern.compile("^@(\\S+)").matcher(text)
+    val m = replyToUserPattern.matcher(text)
     if (m.find) Some(m.group(1)) else None
   }
 
+  val withoutUserPattern = Pattern.compile("""^@\S+ (.*)""")
+  
   /**
    * Returns a string with any @user at the beginning removed.
    */
   def getWithoutUser(text: String): String = {
-    val m = java.util.regex.Pattern.compile("""^@\S+ (.*)""").matcher(text)
+    val m = withoutUserPattern.matcher(text)
     if (m.find) m.group(1) else text
   }
 } 

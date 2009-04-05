@@ -10,7 +10,7 @@ import java.util.{Locale, Collections, Date, ArrayList}
 import javax.swing._
 import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
-import twitter.{StatusUtil, DataFetchException, TweetsProvider}
+import twitter.{Status, DataFetchException, TweetsProvider}
 /**
  * Model providing status data to the JTable
  */
@@ -207,7 +207,7 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
   }
   
   def removeStatusesFrom(screenNames: List[String]) {
-    statuses = statuses.filter(s => ! screenNames.contains(StatusUtil.getScreenNameFromStatus(s)))
+    statuses = statuses.filter(s => ! screenNames.contains(new Status(s).getScreenNameFromStatus))
     filterAndNotify
   }
 

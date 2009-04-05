@@ -12,7 +12,7 @@ import javax.swing.{JTable, KeyStroke, JPopupMenu}
  */
 
 class OpenLinksAction(getSelectedStatus: => Option[NodeSeq], table: JTable, 
-    browse: (String) => Unit) extends Action("Open Links") {
+    browse: (String) => Unit) extends Action("Open Links…") {
   def apply {
     getSelectedStatus match {
       case Some(status) =>
