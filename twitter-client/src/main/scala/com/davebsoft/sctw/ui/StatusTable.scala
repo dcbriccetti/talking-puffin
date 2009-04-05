@@ -22,7 +22,7 @@ import org.jdesktop.swingx.decorator.HighlighterFactory
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
-import twitter.Sender
+import twitter.{StatusUtil, Sender}
 import util.{TableUtil, DesktopUtil}
 /**
  * Table of statuses.
@@ -53,14 +53,14 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   private def viewSelected {
     getSelectedStatuses.foreach(status => {
       var uri = "http://twitter.com/" +
-          (status \ "user" \ "screen_name").text + "/statuses/" + (status \ "id").text
+          StatusUtil.getScreenNameFromStatus(status) + "/statuses/" + (status \ "id").text
       DesktopUtil.browse(uri)
     })
   }
   
   def reply {
     val statuses = getSelectedStatuses
-    val names = statuses.map(status => ("@" + (status \ "user" \ "screen_name").text)).mkString(" ")
+    val names = statuses.map(status => ("@" + StatusUtil.getScreenNameFromStatus(status))).mkString(" ")
     val sm = new SendMsgDialog(null, apiHandlers.sender, Some(names), Some((statuses(0) \ "id").text))
     sm.visible = true
   }
@@ -70,10 +70,8 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   def getSelectedStatuses: List[Node] = {
     statusTableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
   }
-  
-  def getSelectedScreenNames: List[String] = {
-    getSelectedStatuses.map(status => (status \ "user" \ "screen_name").text)
-  }
+
+  def getSelectedScreenNames: List[String] = getSelectedStatuses.map(StatusUtil.getScreenNameFromStatus)
 
   def getSelectedStatus: Option[NodeSeq] = {
     val row = getSelectedRow
@@ -185,10 +183,18 @@ class TweetsTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   override def buildActions {
     super.buildActions
     ap.addAction(clearAction, Actions.ks(KeyEvent.VK_C))
+    
     val deleteTitle = "Delete selected tweets"
     ap.addAction(Action(deleteTitle) {
-      statusTableModel.removeSelectedElements(TableUtil.getSelectedModelIndexes(this)) 
-    }, Actions.ks(KeyEvent.VK_DELETE), Actions.ks(KeyEvent.VK_BACK_SPACE))  
+      statusTableModel.removeStatuses(TableUtil.getSelectedModelIndexes(this)) 
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask),
+      Actions.ks(KeyEvent.VK_DELETE), Actions.ks(KeyEvent.VK_BACK_SPACE))
+
+    val deleteSelectedFromTitle = "Delete all tweets from all selected users"
+    ap.addAction(Action(deleteSelectedFromTitle) {
+      statusTableModel.removeStatusesFrom(getSelectedScreenNames) 
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask | 
+      java.awt.event.InputEvent.SHIFT_DOWN_MASK))  
   }
 
   

@@ -10,8 +10,7 @@ import java.util.{Locale, Collections, Date, ArrayList}
 import javax.swing._
 import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
-import twitter.{DataFetchException, TweetsProvider}
-
+import twitter.{StatusUtil, DataFetchException, TweetsProvider}
 /**
  * Model providing status data to the JTable
  */
@@ -201,9 +200,14 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
     filterAndNotify
   }
   
-  def removeSelectedElements(indexes: List[Int]) {
+  def removeStatuses(indexes: List[Int]) {
     val deleteStatuses = getStatuses(indexes)
     statuses = statuses.filter(s => ! deleteStatuses.contains(s))
+    filterAndNotify
+  }
+  
+  def removeStatusesFrom(screenNames: List[String]) {
+    statuses = statuses.filter(s => ! screenNames.contains(StatusUtil.getScreenNameFromStatus(s)))
     filterAndNotify
   }
 
