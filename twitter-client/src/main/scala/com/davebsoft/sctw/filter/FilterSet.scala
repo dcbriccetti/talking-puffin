@@ -2,7 +2,7 @@ package com.davebsoft.sctw.filter
 
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.Publisher
-import java.util.Collections
+import java.util.{ArrayList,Collections}
 import ui.User
 
 /**
@@ -16,8 +16,8 @@ class FilterSet extends Publisher {
   val mutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
   var selectedTags = List[String]()
   var excludeNotToYouReplies: Boolean = _
-  var includeTextFilters = Collections.synchronizedList(new java.util.ArrayList[TextFilter]())
-  var excludeTextFilters = Collections.synchronizedList(new java.util.ArrayList[TextFilter]())
+  var includeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
+  var excludeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
   
   def excludedByStringMatches(text: String): Boolean = {
     if (includeTextFilters.size() == 0 && excludeTextFilters.size() == 0) return false
