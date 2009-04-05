@@ -39,18 +39,20 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
       setHighlighters(HighlighterFactory.createSimpleStriping)
       setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
       setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
+      
+      List(UserColumns.NAME, UserColumns.TAGS, UserColumns.LOCATION, UserColumns.STATUS, 
+        UserColumns.DESCRIPTION).foreach(i => {
+        getColumnModel.getColumn(i).setCellRenderer(new WordWrappingCellRenderer)
+      })
+      
       getColumnModel.getColumn(UserColumns.ARROWS).setPreferredWidth(20)
       getColumnModel.getColumn(UserColumns.ARROWS).setMaxWidth(30)
       getColumnModel.getColumn(UserColumns.PICTURE).setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
       val screenNameCol = getColumnModel.getColumn(UserColumns.SCREEN_NAME).asInstanceOf[TableColumnExt]
-      screenNameCol.setCellRenderer(new AnnotatedUserRenderer)
-      screenNameCol.setComparator(new Comparator[AnnotatedUser] {
-        def compare(o1: AnnotatedUser, o2: AnnotatedUser) = o1.name.compareToIgnoreCase(o2.name)
-      })
+      screenNameCol.setCellRenderer(new EmphasizedStringCellRenderer)
+      screenNameCol.setComparator(EmphasizedStringComparator)
       getColumnModel.getColumn(UserColumns.DESCRIPTION).setPreferredWidth(250)
-      getColumnModel.getColumn(UserColumns.DESCRIPTION).setCellRenderer(new WordWrappingCellRenderer)
       getColumnModel.getColumn(UserColumns.STATUS).setPreferredWidth(250)
-      getColumnModel.getColumn(UserColumns.STATUS).setCellRenderer(new WordWrappingCellRenderer)
       val ap = new ActionPrep(this)
       buildActions(ap, this)
       addMouseListener(new PopupListener(this, getPopupMenu(ap)))
@@ -140,7 +142,7 @@ class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTab
         pcell.request(picUrl, rowIndex)
       }
       case UserColumns.ARROWS => arrows(rowIndex)
-      case UserColumns.SCREEN_NAME => new AnnotatedUser(colVal, followers.contains(user))
+      case UserColumns.SCREEN_NAME => new EmphasizedString(Some(colVal), followers.contains(user))
       case UserColumns.TAGS => TagUsers.tagsForUser((user \ "id").text).mkString(", ")
       case UserColumns.STATUS => (user \ "status" \ "text").text
       case _ => colVal
@@ -149,15 +151,3 @@ class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTab
   override def getColumnName(column: Int) = colNames(column)
 }
 
-private case class AnnotatedUser(val name: String, val annotated: Boolean)
-
-private class AnnotatedUserRenderer extends DefaultTableCellRenderer {
-  val normalFont = getFont
-  val boldFont = new Font(normalFont.getFontName, Font.BOLD, normalFont.getSize)
-  
-  override def setValue(value: Any) {
-    val user = value.asInstanceOf[AnnotatedUser]
-    setFont(if (user.annotated) boldFont else normalFont)
-    setText(user.name)
-  }
-}

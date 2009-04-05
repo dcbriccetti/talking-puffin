@@ -62,12 +62,12 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
         val name = (status \ "user" \ "name").text
         val id = (status \ "user" \ "id").text
         val emphasizeFrom = followerIds.contains(id)
-        new FromTo(Some(name), emphasizeFrom)
+        new EmphasizedString(Some(name), emphasizeFrom)
       }
       case 3 => {
         val name = (status \ "user" \ "name").text
         val id = (status \ "user" \ "id").text
-        new FromTo(LinkExtractor.getReplyToUser(getStatusText(status, username)), false)
+        new EmphasizedString(LinkExtractor.getReplyToUser(getStatusText(status, username)), false)
       }
       case 4 => {
         val st = getStatusText(status, username)
@@ -229,8 +229,6 @@ trait PreChangeListener {
   def tableChanging
 }
 
-class FromTo(val name: Option[String], val nameEmphasized: Boolean)
-  
 case class TableContentsChanged(val filteredIn: Int, val total: Int) extends Event
   
 trait Replies extends StatusTableModel {

@@ -112,24 +112,17 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     val picCol = colModel.getColumn(1)
     picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
     
-    val fromToComparator = new Comparator[FromTo] {
-      def compare(o1: FromTo, o2: FromTo) = {
-        def nameToString(fromTo: FromTo): String = fromTo.name match {case Some(name) => name case None => ""}
-        nameToString(o1).compareToIgnoreCase(nameToString(o2))
-      }
-    }
-
     val nameCol = colModel.getColumn(2).asInstanceOf[TableColumnExt]
     nameCol.setPreferredWidth(100)
     nameCol.setMaxWidth(200)
-    nameCol.setCellRenderer(new FromToCellRenderer)
-    nameCol.setComparator(fromToComparator)
+    nameCol.setCellRenderer(new EmphasizedStringCellRenderer)
+    nameCol.setComparator(EmphasizedStringComparator)
     
     toCol = colModel.getColumn(3).asInstanceOf[TableColumnExt]
     toCol.setPreferredWidth(100)
     toCol.setMaxWidth(200)
-    toCol.setCellRenderer(new FromToCellRenderer)
-    toCol.setComparator(fromToComparator)
+    toCol.setCellRenderer(new EmphasizedStringCellRenderer)
+    toCol.setComparator(EmphasizedStringComparator)
     
     val statusCol = colModel.getColumn(4)
     statusCol.setPreferredWidth(600)
