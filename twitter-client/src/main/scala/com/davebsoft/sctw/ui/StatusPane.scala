@@ -90,6 +90,7 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
             val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
             val status = statusTableModel.getStatusAt(modelRowIndex)
             tweetDetailPanel.showStatusDetails(status)
+            prefetchAdjacentRows        
           } catch {
             case ex: IndexOutOfBoundsException => println(ex)
           }
@@ -99,6 +100,16 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
       }
     }
   })
+
+  private def prefetchAdjacentRows {        
+    List(-1, 1).foreach(offset => {
+      val adjacentRowIndex = table.getSelectedRow + offset
+      if (adjacentRowIndex >= 0 && adjacentRowIndex < table.getRowCount) {
+        tweetDetailPanel.prefetch(statusTableModel.getStatusAt(
+          table.convertRowIndexToModel(adjacentRowIndex)))
+      }
+    })
+  }
   
   def newTable: StatusTable = new StatusTable(statusTableModel, apiHandlers, clearAction, showBigPicture)
   

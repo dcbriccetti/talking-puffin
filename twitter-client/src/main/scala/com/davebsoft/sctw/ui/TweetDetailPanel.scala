@@ -83,8 +83,16 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
         (user \ "followers_count").text + " followers"
     largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
       (status \ "in_reply_to_status_id").text, (status \ "source").text))
-    val picUrl = (user \ "profile_image_url").text
+    val picUrl = urlFromUser(user)
     showMediumPicture(picUrl)
+  }
+  
+  private def urlFromUser(user: NodeSeq): String = (user \ "profile_image_url").text 
+  
+  def prefetch(status: NodeSeq) {
+    val smallUrl = urlFromUser(status \ "user")
+    val mediumUrl = PictureFetcher.getFullSizeUrl(smallUrl)
+    List(smallUrl, mediumUrl).foreach(url => picFetcher.requestImage(url, null))
   }
 
   val picFetcher = new PictureFetcher(Some(Thumbnail.MEDIUM_SIZE), (imageReady: ImageReady) => {

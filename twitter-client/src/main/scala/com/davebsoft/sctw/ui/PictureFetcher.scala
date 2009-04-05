@@ -51,12 +51,15 @@ class PictureFetcher(scaleTo: Option[Int],
   }).start
 
   /**
-   *  Requests that an image be fetched in a background thread.  
+   * Requests that an image be fetched in a background thread. If the URL is already in the 
+   * cache, the request is ignored. 
    */
   def requestImage(url: String, id: Object) {
-    val req = new FetchImageRequest(url, id)
-    if (! requestQueue.contains(req) && ! inProgress.contains(url)) {
-      requestQueue.put(req)
+    if (! PictureFetcher.pictureCache.containsKey(url)) {
+      val req = new FetchImageRequest(url, id)
+      if (! requestQueue.contains(req) && ! inProgress.contains(url)) {
+        requestQueue.put(req)
+      }
     }
   }
   
