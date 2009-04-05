@@ -4,10 +4,10 @@ import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.xml.{NodeSeq, Node}
 import filter.TagUsers
 import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
-import javax.swing.{JTable, KeyStroke, Icon, JPopupMenu}
 import java.awt.{Toolkit, Font}
 import java.util.Comparator
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, AbstractTableModel}
+import javax.swing.{JPopupMenu, JToolBar, JTable, JToggleButton, KeyStroke, Icon, JLabel}
 import org.jdesktop.swingx.decorator.{HighlighterFactory, Highlighter}
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.TableColumnExt
@@ -31,10 +31,10 @@ object UserColumns {
 }
 
 class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], followers: List[Node]) extends GridBagPanel {
-  val model = new UsersModel(friends, followers)
+  val usersModel = new UsersModel(friends, followers)
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
-    table = new JXTable(model) {
+    table = new JXTable(usersModel) {
       setColumnControlVisible(true)
       setHighlighters(HighlighterFactory.createSimpleStriping)
       setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
@@ -59,9 +59,24 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
     }
     peer.setViewportView(table)
   }
-  add(new Label("Following: " + friends.size + ", Followers: " + followers.size +
-    ", Overlap: " + (friends.size + followers.size - model.combined.size)),
-    new Constraints { grid=(0,0); anchor=Anchor.West })
+  var followingButton: JToggleButton = _
+  var followersButton: JToggleButton = _
+  val toolbar = new JToolBar {
+    setFloatable(false)
+    class FriendFollowButton(label: String) extends JToggleButton(label) {
+      setSelected(true)
+      addActionListener(new ActionListener {
+        def actionPerformed(e: ActionEvent) = usersModel.buildModelData(
+          followersButton.isSelected, followingButton.isSelected)
+      })
+    }
+    followingButton = new FriendFollowButton("Following: " + friends.size)
+    followersButton = new FriendFollowButton("Followers: " + followers.size) 
+    add(followingButton)
+    add(followersButton)
+    add(new JLabel("Overlap: " + (friends.size + followers.size - usersModel.combined.size)))
+  }
+  peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
   
   add(tableScrollPane, new Constraints { 
     grid=(0,1); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1 
@@ -83,7 +98,7 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
     menu
   }
   
-  private def getSelectedUsers = TableUtil.getSelectedModelIndexes(table).map(model.combined(_))
+  private def getSelectedUsers = TableUtil.getSelectedModelIndexes(table).map(usersModel.combined(_))
   
   def getSelectedScreenNames: List[String] = {
     getSelectedUsers.map(user => (user \ "screen_name").text)
@@ -103,23 +118,31 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
     val sm = new SendMsgDialog(null, apiHandlers.sender, Some(names), None)
     sm.visible = true
   }
-  
+
 }
 
 class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTableModel {
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
   private val set = scala.collection.mutable.Set[Node]()
-  set ++ friends
-  set ++ followers
-  val combinedList = set.toList.sort((a,b) => 
-    ((a \ "name").text.toLowerCase compareTo (b \ "name").text.toLowerCase) < 0)
-  val combined = combinedList.toArray
-  val arrows = combinedList.map(user => {
-    val friend = friends.contains(user)
-    val follower = followers.contains(user)
-    if (friend && follower) "↔" else if (friend) "→" else "←"
-  }).toArray
+  var combined: Array[Node] = _
+  private var arrows: Array[String] = _
+  buildModelData(true, true)
+  
+  def buildModelData(includeFriends: Boolean, includeFollowers: Boolean) {
+    set.clear
+    if (includeFriends)   set ++ friends
+    if (includeFollowers) set ++ followers
+    val combinedList = set.toList.sort((a,b) => 
+      ((a \ "name").text.toLowerCase compareTo (b \ "name").text.toLowerCase) < 0)
+    combined = combinedList.toArray
+    arrows = combinedList.map(user => {
+      val friend = friends.contains(user)
+      val follower = followers.contains(user)
+      if (friend && follower) "↔" else if (friend) "→" else "←"
+    }).toArray
+    fireTableDataChanged
+  }
   
   def getColumnCount = 8
   def getRowCount = combined.length
