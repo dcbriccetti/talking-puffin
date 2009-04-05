@@ -43,6 +43,17 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
       statusTableModel.loadNewData
     }
   }
+  val clearRepliesAction = new Action("Clear") {
+    toolTip = "Removes all replies"
+    def apply = clearTweets
+  }
+  val loadNewRepliesAction = new Action("Load New") {
+    toolTip = "Loads the latest replies"
+    def apply = {
+      clearTweets
+      statusTableModel.loadNewData
+    }
+  }
   val last200Action = new Action("Last 200") {
     toolTip = "Fetches the last 200 tweets"
     def apply = {
@@ -175,4 +186,16 @@ class ToolbarStatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHand
 
   override def newTable: StatusTable = new TweetsTable(statusTableModel, apiHandlers, clearAction, showBigPicture)
   
+}
+
+class RepliesStatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, filtersPane: FiltersPane) 
+    extends StatusPane(statusTableModel, apiHandlers, filtersPane) {
+  
+  override def toolbar: JToolBar = new JToolBar {
+    setFloatable(false)
+    add(sendAction.peer)
+    add(clearRepliesAction.peer)
+    add(loadNewRepliesAction.peer)
+  }
+
 }

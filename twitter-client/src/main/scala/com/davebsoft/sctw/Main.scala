@@ -38,7 +38,7 @@ object Main extends GUIApplication {
       getIds(followers), filterSet, username) with Replies
     val filtersPane = new FiltersPane(tweetsModel, filterSet)
     val statusPane  = new ToolbarStatusPane(tweetsModel,  apiHandlers, filtersPane)
-    val repliesPane = new StatusPane(repliesModel, apiHandlers, filtersPane) {table.showColumn(3, false)}
+    val repliesPane = new RepliesStatusPane(repliesModel, apiHandlers, filtersPane) {table.showColumn(3, false)}
 
     val clearAction = statusPane.clearAction
     new Frame {
