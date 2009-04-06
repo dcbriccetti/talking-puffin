@@ -128,7 +128,7 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
   
   def tableChanging = {
     if (table != null) {
-      lastSelectedRows = TableUtil.getSelectedModelIndexes(table) map(statusTableModel.getStatusAt(_))
+      lastSelectedRows = table.getSelectedStatuses
     }
   }
 
