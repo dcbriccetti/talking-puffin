@@ -67,7 +67,7 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
       setSelected(true)
       addActionListener(new ActionListener {
         def actionPerformed(e: ActionEvent) = usersModel.buildModelData(
-          followersButton.isSelected, followingButton.isSelected)
+          followingButton.isSelected, followersButton.isSelected)
       })
     }
     followingButton = new FriendFollowButton("Following: " + friends.size)
@@ -129,9 +129,9 @@ class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTab
   private var arrows: Array[String] = _
   buildModelData(true, true)
   
-  def buildModelData(includeFriends: Boolean, includeFollowers: Boolean) {
+  def buildModelData(includeFollowing: Boolean, includeFollowers: Boolean) {
     set.clear
-    if (includeFriends)   set ++ friends
+    if (includeFollowing) set ++ friends
     if (includeFollowers) set ++ followers
     val combinedList = set.toList.sort((a,b) => 
       ((a \ "name").text.toLowerCase compareTo (b \ "name").text.toLowerCase) < 0)
