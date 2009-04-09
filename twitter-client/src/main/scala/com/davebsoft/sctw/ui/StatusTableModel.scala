@@ -15,7 +15,7 @@ import twitter.{Status, DataFetchException, TweetsProvider}
  * Model providing status data to the JTable
  */
 class StatusTableModel(val options: StatusTableOptions, statusDataProvider: TweetsProvider, 
-    followerIds: List[String], filterSet: FilterSet, username: String) 
+    usersModel: UsersModel, followerIds: List[String], filterSet: FilterSet, username: String) 
     extends AbstractTableModel with Publisher with Reactor {
   
   /** How often, in ms, to fetch and load new data */
@@ -61,13 +61,16 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
       case 2 => {
         val name = (status \ "user" \ "name").text
         val id = (status \ "user" \ "id").text
-        val emphasizeFrom = followerIds.contains(id)
-        new EmphasizedString(Some(name), emphasizeFrom)
+        new EmphasizedString(Some(name), followerIds.contains(id))
       }
       case 3 => {
         val name = (status \ "user" \ "name").text
         val id = (status \ "user" \ "id").text
-        new EmphasizedString(LinkExtractor.getReplyToUser(getStatusText(status, username)), false)
+        val user = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
+          case Some(u) => Some(usersModel.screenNameToUserNameMap.getOrElse(u, u))
+          case None => None 
+        }
+        new EmphasizedString(user, false)
       }
       case 4 => {
         val st = getStatusText(status, username)

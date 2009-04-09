@@ -30,8 +30,8 @@ object UserColumns {
   val STATUS = 7
 }
 
-class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], followers: List[Node]) extends GridBagPanel {
-  val usersModel = new UsersModel(friends, followers)
+class FriendsFollowersPane(apiHandlers: ApiHandlers, usersModel: UsersModel, 
+    friends: List[Node], followers: List[Node]) extends GridBagPanel {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
     table = new JXTable(usersModel) {
@@ -74,7 +74,7 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
     followersButton = new FriendFollowButton("Followers: " + followers.size) 
     add(followingButton)
     add(followersButton)
-    add(new JLabel("Overlap: " + (friends.size + followers.size - usersModel.combined.size)))
+    add(new JLabel("Overlap: " + (friends.size + followers.size - usersModel.users.size)))
   }
   peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
   
@@ -98,7 +98,7 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, friends: List[Node], follow
     menu
   }
   
-  private def getSelectedUsers = TableUtil.getSelectedModelIndexes(table).map(usersModel.combined(_))
+  private def getSelectedUsers = TableUtil.getSelectedModelIndexes(table).map(usersModel.users(_))
   
   def getSelectedScreenNames: List[String] = {
     getSelectedUsers.map(user => (user \ "screen_name").text)

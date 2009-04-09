@@ -32,11 +32,13 @@ object Main extends GUIApplication {
     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
     val repliesProvider = new RepliesProvider(username, password)
     val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
+    val following = new FriendsDataProvider(username, password).getUsers
     val followers = new FollowersDataProvider(username, password).getUsers
-    val tweetsModel  = new StatusTableModel(new StatusTableOptions(true), tweetsProvider, 
-      getIds(followers), filterSet, username)
+    val usersModel = new UsersModel(following, followers)
+    val tweetsModel  = new StatusTableModel(new StatusTableOptions(true), tweetsProvider,
+      usersModel, getIds(followers), filterSet, username)
     val repliesModel = new StatusTableModel(new StatusTableOptions(false), repliesProvider, 
-      getIds(followers), filterSet, username) with Replies
+      usersModel, getIds(followers), filterSet, username) with Replies
     val filtersPane = new FiltersPane(tweetsModel, filterSet)
     val statusPane  = new ToolbarStatusPane(tweetsModel,  apiHandlers, filtersPane)
     val repliesPane = new RepliesStatusPane(repliesModel, apiHandlers, filtersPane) {table.showColumn(3, false)}
@@ -55,9 +57,8 @@ object Main extends GUIApplication {
         pages.append(new Page("Tweets", statusPane))
         pages.append(new Page("Replies", repliesPane))
 
-        val following = new FriendsDataProvider(username, password).getUsers
         pages.append(new Page("People (" + following.length + ", " + followers.length + ")", 
-          new FriendsFollowersPane(apiHandlers, following, followers)))
+          new FriendsFollowersPane(apiHandlers, usersModel, following, followers)))
         pages.append(filtersPage)
       }
       listenTo(tabbedPane.selection)
