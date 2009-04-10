@@ -2,8 +2,8 @@ package com.davebsoft.sctw.ui
 
 import _root_.scala.xml.Node
 import javax.swing.table.AbstractTableModel
-import filter.TagUsers
 import javax.swing.Icon
+import filter.TagUsers
 
 /**
  * A model for users (followed and followers)
@@ -11,7 +11,7 @@ import javax.swing.Icon
  * @author Dave Briccetti
  */
 
-class UsersModel(friends: List[Node], followers: List[Node]) extends AbstractTableModel {
+class UsersTableModel(friends: List[Node], followers: List[Node]) extends AbstractTableModel {
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
   var users: Array[Node] = _

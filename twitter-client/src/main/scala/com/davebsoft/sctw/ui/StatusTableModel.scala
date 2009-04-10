@@ -15,7 +15,7 @@ import twitter.{Status, DataFetchException, TweetsProvider}
  * Model providing status data to the JTable
  */
 class StatusTableModel(val options: StatusTableOptions, statusDataProvider: TweetsProvider, 
-    usersModel: UsersModel, followerIds: List[String], filterSet: FilterSet, username: String) 
+    usersModel: UsersTableModel, followerIds: List[String], filterSet: FilterSet, username: String) 
     extends AbstractTableModel with Publisher with Reactor {
   
   /** How often, in ms, to fetch and load new data */

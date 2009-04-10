@@ -34,7 +34,7 @@ object Main extends GUIApplication {
     val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
     val following = new FriendsDataProvider(username, password).getUsers
     val followers = new FollowersDataProvider(username, password).getUsers
-    val usersModel = new UsersModel(following, followers)
+    val usersModel = new UsersTableModel(following, followers)
     val tweetsModel  = new StatusTableModel(new StatusTableOptions(true), tweetsProvider,
       usersModel, getIds(followers), filterSet, username)
     val repliesModel = new StatusTableModel(new StatusTableOptions(false), repliesProvider, 
