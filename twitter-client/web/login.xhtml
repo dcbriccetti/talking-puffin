@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<body>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:a="http://m-via.com/jsf"
+        template="template.xhtml">
+
+    <ui:define name="content">
+        
+        <p>Enter your Twitter user name and password, and push Log In. After some time,
+        depending on the speed of Twitter and the number of them,
+        you should see a summary of your friends and followers.</p>    
+    
+        <h:form id="form">
+            <h:panelGrid columns="3">
+                <h:outputLabel for="user" value="User"/>
+                <h:inputText value="#{login.user}" id="user" required="true"/>
+                <h:message for="user"/>
+                <h:outputLabel for="password" value="Password"/>
+                <h:inputSecret value="#{login.password}" id="password" required="true"/>
+                <h:message for="password"/>
+            </h:panelGrid>
+    
+            <h:commandButton id="login" value="Log In" action="#{login.logIn}"/>
+        </h:form>
+
+    </ui:define>
+</ui:composition>
+</body>
+</html>

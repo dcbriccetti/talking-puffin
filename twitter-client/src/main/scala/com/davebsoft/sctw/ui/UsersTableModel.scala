@@ -64,5 +64,7 @@ class UsersTableModel(friends: List[Node], followers: List[Node]) extends Abstra
     }
   }
   override def getColumnName(column: Int) = colNames(column)
+  
+  def getRowAt(rowIndex: Int) = users(rowIndex)
 }
 
