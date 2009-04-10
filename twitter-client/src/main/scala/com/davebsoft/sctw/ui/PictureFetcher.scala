@@ -26,7 +26,7 @@ object PictureFetcher {
     val h = image.getHeight(null)
     val newW: Int = if (w > h) Math.min(w, sideLength) else -1
     val newH: Int = if (w > h) -1 else Math.min(h, sideLength)
-    new ImageIcon(image.getScaledInstance(newW, newH, Image.SCALE_DEFAULT))
+    new ImageIcon(image.getScaledInstance(newW, newH, Image.SCALE_SMOOTH))
   }
 }
 
