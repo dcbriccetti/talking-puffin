@@ -11,15 +11,12 @@ import filter.TagUsers
  * @author Dave Briccetti
  */
 
-class UsersTableModel(friends: List[Node], followers: List[Node]) extends AbstractTableModel {
-  private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
-  private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
+class UsersModel(friends: List[Node], followers: List[Node]) {
   var users: Array[Node] = _
-  private var arrows: Array[String] = _
+  var arrows: Array[String] = _
   var screenNameToUserNameMap = Map[String, String]()
-  buildModelData(true, true)
 
-  def buildModelData(includeFollowing: Boolean, includeFollowers: Boolean) {
+  def build(includeFollowing: Boolean, includeFollowers: Boolean) {
     val set = scala.collection.mutable.Set[Node]()
     if (includeFollowing) set ++ friends
     if (includeFollowers) set ++ followers
@@ -33,11 +30,24 @@ class UsersTableModel(friends: List[Node], followers: List[Node]) extends Abstra
     }).toArray
     screenNameToUserNameMap = 
         Map(users map {user => ((user \ "screen_name").text, (user \ "name").text)} : _*) 
+    
+  }
+  
+}
+
+class UsersTableModel(friends: List[Node], followers: List[Node]) extends AbstractTableModel {
+  private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
+  private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
+  val usersModel = new UsersModel(friends, followers)
+  buildModelData(true, true)
+
+  def buildModelData(includeFollowing: Boolean, includeFollowers: Boolean) {
+    usersModel.build(includeFollowing, includeFollowers)
     fireTableDataChanged
   }
   
   def getColumnCount = 8
-  def getRowCount = users.length
+  def getRowCount = usersModel.users.length
 
   override def getColumnClass(columnIndex: Int) = {
     columnIndex match {
@@ -49,14 +59,14 @@ class UsersTableModel(friends: List[Node], followers: List[Node]) extends Abstra
   val pcell = new PictureCell(this, 1)
 
   def getValueAt(rowIndex: Int, columnIndex: Int) = {
-    val user = users(rowIndex)
+    val user = usersModel.users(rowIndex)
     def colVal = (user \ elementNames(columnIndex)).text
     columnIndex match {
       case UserColumns.PICTURE => {
         val picUrl = (user \ "profile_image_url").text
         pcell.request(picUrl, rowIndex)
       }
-      case UserColumns.ARROWS => arrows(rowIndex)
+      case UserColumns.ARROWS => usersModel.arrows(rowIndex)
       case UserColumns.SCREEN_NAME => new EmphasizedString(Some(colVal), followers.contains(user))
       case UserColumns.TAGS => TagUsers.tagsForUser((user \ "id").text).mkString(", ")
       case UserColumns.STATUS => (user \ "status" \ "text").text
@@ -65,6 +75,6 @@ class UsersTableModel(friends: List[Node], followers: List[Node]) extends Abstra
   }
   override def getColumnName(column: Int) = colNames(column)
   
-  def getRowAt(rowIndex: Int) = users(rowIndex)
+  def getRowAt(rowIndex: Int) = usersModel.users(rowIndex)
 }
 

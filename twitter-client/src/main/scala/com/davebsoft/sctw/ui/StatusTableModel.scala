@@ -67,7 +67,7 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
         val name = (status \ "user" \ "name").text
         val id = (status \ "user" \ "id").text
         val user = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
-          case Some(u) => Some(usersModel.screenNameToUserNameMap.getOrElse(u, u))
+          case Some(u) => Some(usersModel.usersModel.screenNameToUserNameMap.getOrElse(u, u))
           case None => None 
         }
         new EmphasizedString(user, false)

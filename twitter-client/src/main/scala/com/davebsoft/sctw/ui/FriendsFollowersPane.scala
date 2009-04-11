@@ -30,11 +30,11 @@ object UserColumns {
   val STATUS = 7
 }
 
-class FriendsFollowersPane(apiHandlers: ApiHandlers, usersModel: UsersTableModel, 
+class FriendsFollowersPane(apiHandlers: ApiHandlers, tableModel: UsersTableModel, 
     friends: List[Node], followers: List[Node]) extends GridBagPanel {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
-    table = new JXTable(usersModel) {
+    table = new JXTable(tableModel) {
       setColumnControlVisible(true)
       setHighlighters(HighlighterFactory.createSimpleStriping)
       setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
@@ -66,7 +66,7 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, usersModel: UsersTableModel
     class FriendFollowButton(label: String) extends JToggleButton(label) {
       setSelected(true)
       addActionListener(new ActionListener {
-        def actionPerformed(e: ActionEvent) = usersModel.buildModelData(
+        def actionPerformed(e: ActionEvent) = tableModel.buildModelData(
           followingButton.isSelected, followersButton.isSelected)
       })
     }
@@ -74,7 +74,7 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, usersModel: UsersTableModel
     followersButton = new FriendFollowButton("Followers: " + followers.size) 
     add(followingButton)
     add(followersButton)
-    add(new JLabel("Overlap: " + (friends.size + followers.size - usersModel.users.size)))
+    add(new JLabel("Overlap: " + (friends.size + followers.size - tableModel.usersModel.users.size)))
   }
   peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
   
@@ -98,7 +98,7 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, usersModel: UsersTableModel
     menu
   }
   
-  private def getSelectedUsers = TableUtil.getSelectedModelIndexes(table).map(usersModel.users(_))
+  private def getSelectedUsers = TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
   
   def getSelectedScreenNames: List[String] = {
     getSelectedUsers.map(user => (user \ "screen_name").text)

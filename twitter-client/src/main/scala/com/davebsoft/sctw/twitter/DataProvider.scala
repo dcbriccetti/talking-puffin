@@ -25,7 +25,7 @@ abstract class DataProvider extends HttpHandler {
   
   def loadTwitterData(url: String): Node = {
     println(url)
-    val (method, result, responseBody) = doGet(url)
+    val (result, responseBody) = doGet(url)
 
     if (result != 200) {
       println(responseBody)

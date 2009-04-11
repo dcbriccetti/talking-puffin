@@ -1,5 +1,6 @@
 package com.davebsoft.sctw.ui.web
 
+import java.io.Serializable
 import twitter.{FriendsDataProvider, FollowersDataProvider}
 
 /**
@@ -9,7 +10,7 @@ import twitter.{FriendsDataProvider, FollowersDataProvider}
  */
 
 class UserRow(val picUrl: String, val arrows: String, val screenName: String, val name: String, 
-    val location: String, val description: String, val status: String) {
+    val location: String, val description: String, val status: String) extends Serializable {
   def getPicUrl = picUrl
   def getArrows = arrows
   def getScreenName = screenName
@@ -19,20 +20,20 @@ class UserRow(val picUrl: String, val arrows: String, val screenName: String, va
   def getStatus = status
 }
 
-class Users {
+class Users extends Serializable {
   var login: Login = _
   def setLogin(login: Login) = this.login = login
   
   def getUsers: Array[UserRow] = {
     val following = new FriendsDataProvider(login.user, login.password).getUsers
     val followers = new FollowersDataProvider(login.user, login.password).getUsers
-    val usersModel = new UsersTableModel(following, followers)
+    val usersModel = new UsersModel(following, followers)
+    usersModel.build(true, true)
     var users = List[UserRow]()
-    val numRows = usersModel.getRowCount
-    for (i <- 0 until numRows) {
-      val user = usersModel.getRowAt(i)
+    for (i <- 0 until usersModel.users.length) {
+      val user = usersModel.users(i)
       users = new UserRow((user \ "profile_image_url").text,
-        usersModel.getValueAt(i, UserColumns.ARROWS).asInstanceOf[String], 
+        usersModel.arrows(i), 
         (user \ "screen_name").text, 
         (user \ "name").text, 
         (user \ "location").text, 
