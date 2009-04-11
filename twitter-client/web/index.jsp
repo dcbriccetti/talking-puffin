@@ -50,10 +50,11 @@ including for invalid credentials.</p>
 
 <table class="usersTable">
     <tr>
-        <th>Image</th>
         <th> </th>
-        <th>Screen Name</th>
+        <th>Image</th>
         <th>Name</th>
+        <th>Frnds</th>
+        <th>Flwrs</th>
         <th>Location</th>
         <th>Description</th>
         <th>Status</th>
@@ -67,14 +68,16 @@ including for invalid credentials.</p>
     final UserRow[] userRows = users.getUsers();
     for (UserRow user: userRows) {
 %>
-<tr>    
-<td><img alt="Thumbnail" height="48" width="48" src="<%= user.getPicUrl() %>"/></td>
-<td><%= user.getArrows() %></td>
-<td><%= user.getScreenName() %></td>
-<td><%= user.getName() %></td>
-<td><%= user.getLocation() %></td>
-<td><%= user.getDescription() %></td>
-<td><%= user.getStatus() %></td>
+<tr>
+    <td><%= user.getArrows() %></td>
+    <td><img alt="Thumbnail" height="48" width="48" src="<%= user.getPicUrl() %>"/></td>
+    <td><%= user.getName() %><br/>
+    <a href="http://twitter.com/<%=user.getScreenName()%>"><%= user.getScreenName() %></a></td>
+    <td class="number"><%= user.getNumFriends() %></td>
+    <td class="number rightmostNumber"><%= user.getNumFollowers() %></td>
+    <td><%= user.getLocation() %></td>
+    <td><%= user.getDescription() %></td>
+    <td><%= user.getStatus() %></td>
 </tr>
 <%
     }
