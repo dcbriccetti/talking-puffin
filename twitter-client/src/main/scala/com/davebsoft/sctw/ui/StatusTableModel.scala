@@ -120,8 +120,9 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
     }
   }
 
+  val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy", Locale.ENGLISH)
+  
   private def dateToAgeSeconds(date: String): Long = {
-    val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy", Locale.ENGLISH)
     (new Date().getTime - df.parse(date).getTime) / 1000
   }
   
