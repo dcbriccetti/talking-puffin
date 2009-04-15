@@ -1,6 +1,7 @@
 package com.davebsoft.sctw.ui
 
 import _root_.scala.actors.Actor
+import google.common.collect.MapMaker
 import java.awt.Image
 import java.util.concurrent.{ConcurrentHashMap, Executors, LinkedBlockingQueue}
 import java.util.{Collections, HashSet}
@@ -14,8 +15,8 @@ import java.net.URL
  */
 
 object PictureFetcher {
-  val pictureCache = new ConcurrentHashMap[String, ImageIcon]
-  val scaledPictureCache = new ConcurrentHashMap[String, ImageIcon]
+  val pictureCache:       java.util.Map[String, ImageIcon] = new MapMaker().softValues().makeMap()
+  val scaledPictureCache: java.util.Map[String, ImageIcon] = new MapMaker().softValues().makeMap()
   
   /** Derives the full size filename from the thumbnail filename */
   def getFullSizeUrl(thumb: String): String = thumb.replace("_normal", "")
