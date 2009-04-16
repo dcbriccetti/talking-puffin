@@ -1,11 +1,12 @@
 package com.davebsoft.sctw.ui
 
+import _root_.com.davebsoft.sctw.twitter.StreamUtil
 import _root_.scala.swing.event.{ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.swing.{Frame, Label, GridBagPanel, TextArea, BorderPanel}
-import _root_.scala.xml.{NodeSeq, Node}
-
+import _root_.scala.xml.{XML, NodeSeq, Node}
+import geo.GeoCoder
 import java.awt.event.{MouseEvent, KeyAdapter, MouseAdapter, KeyEvent}
 import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Image}
@@ -37,6 +38,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
   var bigPicFrame: Frame = _
   var bigPicLabel: Label = _
   var showingUrl: String = _
+  var geoEnabled = true
           
   private class CustomConstraints extends Constraints {
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
@@ -78,13 +80,19 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
 
   def showStatusDetails(status: NodeSeq) {
     val user = status \ "user"
-    userDescription.text = (user \ "name").text + " • " +
-        (user \ "location").text + " • " + (user \ "description").text  + " • " +
-        (user \ "followers_count").text + " followers"
+    setText(user)
     largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
       (status \ "in_reply_to_status_id").text, (status \ "source").text))
     val picUrl = urlFromUser(user)
     showMediumPicture(picUrl)
+  }
+  
+  private def setText(user: NodeSeq) {
+    val rawLocation = (user \ "location").text
+    var location = if (geoEnabled) GeoCoder.decode(rawLocation) else rawLocation
+    userDescription.text = (user \ "name").text + " • " +
+        location + " • " + (user \ "description").text  + " • " +
+        (user \ "followers_count").text + " followers"
   }
   
   private def urlFromUser(user: NodeSeq): String = (user \ "profile_image_url").text 

@@ -1,13 +1,28 @@
 package com.davebsoft.sctw.twitter
 
 
-import java.io.{InputStreamReader, BufferedInputStream, BufferedReader, OutputStreamWriter}
+import java.io.{InputStreamReader, BufferedInputStream, BufferedReader, OutputStreamWriter, InputStream}
 import java.net.URL
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.httpclient.auth.AuthScope
 import org.apache.commons.httpclient.cookie.CookiePolicy
 import org.apache.commons.httpclient.methods.{PostMethod, GetMethod}
 import org.apache.commons.httpclient.{UsernamePasswordCredentials, HttpMethodBase, HttpMethod, HttpClient}
+
+object StreamUtil {
+  def streamToString(stream: InputStream): String = {
+    val buf = new StringBuilder
+    val br = new BufferedReader(new InputStreamReader(stream))
+    var line: String = null
+    var eof = false
+    while (! eof) {
+      line = br.readLine()
+      if (line == null) eof = true else 
+      buf.append(line).append("\n")
+    }
+    buf.toString
+  }  
+}
 
 /**
  * Generalises Http handling.
@@ -26,18 +41,10 @@ protected trait HttpHandler {
       "Basic " + new String(new Base64().encode((username + ":" + password).getBytes)))
     
     val headers = conn.getHeaderFields
+    //TODO get actual response code
     //val status1 = headers.get("Status").get(0)
     //val result = Integer.parseInt(status1.split(" ")(0))
-    val buf = new StringBuilder
-    val br = new BufferedReader(new InputStreamReader(conn.getInputStream))
-    var line: String = null
-    var eof = false
-    while (! eof) {
-      line = br.readLine()
-      if (line == null) eof = true else 
-      buf.append(line).append("\n")
-    }
-    (200, buf.toString)
+    (200, StreamUtil.streamToString(conn.getInputStream))
   }
   
   def doPost(url: String) = {

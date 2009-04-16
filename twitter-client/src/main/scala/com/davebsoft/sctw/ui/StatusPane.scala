@@ -80,6 +80,16 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   detailsButton = new JToggleButton(showDetailsAction.peer)
   detailsButton.setSelected(true)
 
+  var geoButton: JToggleButton = _ 
+  val geoAction = new Action("Geo") {
+    toolTip = "Enables lookup of locations from latitude and longitude"
+    def apply = {
+      tweetDetailPanel.geoEnabled = geoButton.isSelected    
+    }
+  }
+  geoButton = new JToggleButton(geoAction.peer)
+  geoButton.setSelected(true)
+
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
   
@@ -193,6 +203,7 @@ class ToolbarStatusPane(title: String, statusTableModel: StatusTableModel, apiHa
     })
     add(comboBox.peer)
     add(detailsButton)
+    add(geoButton)
   }
 
   override def newTable: StatusTable = new TweetsTable(statusTableModel, apiHandlers, clearAction, showBigPicture)
