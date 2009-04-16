@@ -1,6 +1,7 @@
 package com.davebsoft.sctw.ui
 
 import java.awt.{Component, Color}
+import javax.swing.border.EmptyBorder
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.{JTextPane, JTable}
 /**
@@ -11,6 +12,7 @@ import javax.swing.{JTextPane, JTable}
 class AgeCellRenderer extends JTextPane with TableCellRenderer {
   setContentType("text/html")
   val renderer = new DefaultTableCellRenderer
+  val border = new EmptyBorder(4, 2, 2, 2)
   
   override def getTableCellRendererComponent(table: JTable, value: Any, 
       isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Component = {
@@ -18,7 +20,7 @@ class AgeCellRenderer extends JTextPane with TableCellRenderer {
     renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column) 
     setForeground(renderer.getForeground) 
     setBackground(renderer.getBackground) 
-    setBorder(renderer.getBorder)
+    setBorder(border)
 
     val time = value.asInstanceOf[Long]
     val days = time / 86400
