@@ -27,7 +27,7 @@ object Thumbnail {
     BufferedImage.TYPE_INT_ARGB))
 }
 
-class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagPanel {
+class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends GridBagPanel {
     
   var picLabel: Label = new Label {
     icon = Thumbnail.transparentMedium
@@ -42,7 +42,7 @@ class TweetDetailPanel(table: JTable, filtersPane: FiltersPane) extends GridBagP
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
   }
   
-  largeTweet = new LargeTweet(filtersPane, table, background)
+  largeTweet = new LargeTweet(filtersDialog, table, background)
   
   peer.add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)

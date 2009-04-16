@@ -5,6 +5,7 @@ import _root_.scala.swing.GridBagPanel._
 import _root_.com.davebsoft.sctw.util.PopupListener
 import _root_.scala.xml.{NodeSeq, Node}
 
+import filter.{TagsRepository, FilterSet}
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
 import java.awt.image.BufferedImage
 import java.awt.{Color, Desktop, Dimension, Insets, Font}
@@ -15,17 +16,25 @@ import javax.swing.{JTable, JTextPane, JButton, JToggleButton, JLabel, ImageIcon
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import scala.swing._
-import filter.TagsRepository
 import twitter.Sender
 import util.TableUtil
 
 /**
  * Displays friend statuses
  */
-class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, filtersPane: FiltersPane) 
+class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
+    filterSet: FilterSet) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
   var lastSelectedRows: List[NodeSeq] = Nil
+  val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet)
+
+  val showFiltersAction = new Action("Filter…") {
+    toolTip = "Set filters for this stream"
+    def apply {
+      filtersDialog.visible = true
+    }
+  }
   val sendAction = new Action("Send…") {
     toolTip = "Opens a window from which you can send a tweet"
     def apply { 
@@ -86,7 +95,7 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
     grid = (0,1); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
   
-  val tweetDetailPanel = new TweetDetailPanel(table, filtersPane)
+  val tweetDetailPanel = new TweetDetailPanel(table, filtersDialog)
   add(tweetDetailPanel, new Constraints{
     grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
   })
@@ -161,12 +170,14 @@ class StatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, f
   }
 }
 
-class ToolbarStatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, filtersPane: FiltersPane) 
-    extends StatusPane(statusTableModel, apiHandlers, filtersPane) {
+class ToolbarStatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
+    filterSet: FilterSet) 
+    extends StatusPane(title, statusTableModel, apiHandlers, filterSet) {
   
   override def toolbar: JToolBar = new JToolBar {
     setFloatable(false)
     add(sendAction.peer)
+    add(showFiltersAction.peer)
     add(clearAction.peer)
     add(loadNewAction.peer)
     add(last200Action.peer)
@@ -188,12 +199,14 @@ class ToolbarStatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHand
   
 }
 
-class RepliesStatusPane(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, filtersPane: FiltersPane) 
-    extends StatusPane(statusTableModel, apiHandlers, filtersPane) {
+class RepliesStatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
+    filterSet: FilterSet) 
+    extends StatusPane(title, statusTableModel, apiHandlers, filterSet) {
   
   override def toolbar: JToolBar = new JToolBar {
     setFloatable(false)
     add(sendAction.peer)
+    add(showFiltersAction.peer)
     add(clearRepliesAction.peer)
     add(loadNewRepliesAction.peer)
   }

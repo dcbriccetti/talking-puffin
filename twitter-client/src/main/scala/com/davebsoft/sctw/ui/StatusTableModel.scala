@@ -220,7 +220,7 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
       preChangeListener.tableChanging
     }
     filterLogic.filter(statuses)
-    publish(new TableContentsChanged(filteredStatuses.size, statuses.size))
+    publish(new TableContentsChanged(this, filteredStatuses.size, statuses.size))
     fireTableDataChanged
   }
 }
@@ -233,7 +233,8 @@ trait PreChangeListener {
   def tableChanging
 }
 
-case class TableContentsChanged(val filteredIn: Int, val total: Int) extends Event
+case class TableContentsChanged(val model: StatusTableModel, val filteredIn: Int, 
+    val total: Int) extends Event
   
 trait Replies extends StatusTableModel {
   override def getStatusText(status: NodeSeq, username: String): String = {

@@ -11,7 +11,7 @@ import javax.swing.{JTable, JTextPane, JPopupMenu}
  * @author Dave Briccetti
  */
 
-class LargeTweet(filtersPane: FiltersPane, table: JTable, backgroundColor: Color) extends JTextPane {
+class LargeTweet(filtersDialog: FiltersDialog, table: JTable, backgroundColor: Color) extends JTextPane {
   val dim = new Dimension(500, 100)
   setBackground(backgroundColor)
   setMinimumSize(dim)
@@ -40,9 +40,9 @@ class LargeTweet(filtersPane: FiltersPane, table: JTable, backgroundColor: Color
           val popup = new JPopupMenu
           val filterInMenu = new MenuItem(
             Action("Include tweets containing “" + text + "”")
-            {filtersPane.addIncludeMatching(text)})
+            {filtersDialog.addIncludeMatching(text)})
           val filterOutMenu = new MenuItem(Action("Exclude tweets containing “" + text + "”")
-            {filtersPane.addExcludeMatching(text)})
+            {filtersDialog.addExcludeMatching(text)})
           popup.add(filterInMenu.peer)
           popup.add(filterOutMenu.peer)
           popup.show(LargeTweet.this, e.getX, e.getY)

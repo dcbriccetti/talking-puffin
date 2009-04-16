@@ -22,26 +22,30 @@ import ui._
 object Main extends GUIApplication {
   private var username: String = ""
   private var password: String = ""
+  private val tweetsTitle = "Tweets"
+  private val repliesTitle = "Replies"
   
   /**
    * Creates the Swing frame.
    */
   def top = {
 
-    val filterSet = new FilterSet
     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
     val repliesProvider = new RepliesProvider(username, password)
     val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
     val following = new FriendsDataProvider(username, password).getUsers
     val followers = new FollowersDataProvider(username, password).getUsers
     val usersModel = new UsersTableModel(following, followers)
+    val tweetsFilterSet = new FilterSet
     val tweetsModel  = new StatusTableModel(new StatusTableOptions(true), tweetsProvider,
-      usersModel, getIds(followers), filterSet, username)
+      usersModel, getIds(followers), tweetsFilterSet, username)
+    val repliesFilterSet = new FilterSet
     val repliesModel = new StatusTableModel(new StatusTableOptions(false), repliesProvider, 
-      usersModel, getIds(followers), filterSet, username) with Replies
-    val filtersPane = new FiltersPane(tweetsModel, filterSet)
-    val statusPane  = new ToolbarStatusPane(tweetsModel,  apiHandlers, filtersPane)
-    val repliesPane = new RepliesStatusPane(repliesModel, apiHandlers, filtersPane) {table.showColumn(3, false)}
+      usersModel, getIds(followers), repliesFilterSet, username) with Replies
+    val statusPane  = new ToolbarStatusPane(tweetsTitle, tweetsModel,  apiHandlers, tweetsFilterSet)
+    val repliesPane = new RepliesStatusPane(repliesTitle, repliesModel, apiHandlers, repliesFilterSet) {
+      table.showColumn(3, false)
+    }
 
     val clearAction = statusPane.clearAction
     new Frame {
@@ -49,22 +53,19 @@ object Main extends GUIApplication {
 
       TagUsers.load
 
-      val filtersPage = new Page("Filters", filtersPane)
-
       val tabbedPane = new TabbedPane() {
         preferredSize = new Dimension(900, 600)
 
-        pages.append(new Page("Tweets", statusPane))
-        pages.append(new Page("Replies", repliesPane))
+        pages.append(new Page(tweetsTitle, statusPane))
+        pages.append(new Page(repliesTitle, repliesPane))
 
         pages.append(new Page("People (" + following.length + ", " + followers.length + ")", 
           new FriendsFollowersPane(apiHandlers, usersModel, following, followers)))
-        pages.append(filtersPage)
       }
       listenTo(tabbedPane.selection)
       listenTo(tweetsModel)
+      listenTo(repliesModel)
       contents = tabbedPane
-      var lastSelectedPane = tabbedPane.selection.page
 
       reactions += {
         case WindowClosing(_) => {
@@ -73,15 +74,11 @@ object Main extends GUIApplication {
           TagUsers.save
           System.exit(1)
         }
-        case SelectionChanged(`tabbedPane`) => {
-          val selectedPage = tabbedPane.selection.page
-          if (lastSelectedPane == filtersPage && selectedPage != filtersPage) {
-            filtersPane.applyChanges
-          }
-          lastSelectedPane = selectedPage
+        case TableContentsChanged(`tweetsModel`, filtered, total) => {
+          tabbedPane.peer.setTitleAt(0, createTweetsTitle(tweetsTitle, filtered, total))
         }
-        case TableContentsChanged(filtered, total) => {
-          tabbedPane.peer.setTitleAt(0, createTweetsTitle(filtered, total))
+        case TableContentsChanged(`repliesModel`, filtered, total) => {
+          tabbedPane.peer.setTitleAt(1, createTweetsTitle(repliesTitle, filtered, total))
         }
       }
 
@@ -90,8 +87,8 @@ object Main extends GUIApplication {
     }
   }
 
-  private def createTweetsTitle(filtered: Int, total: Int): String = {
-    "Tweets (" + filtered + "/" + total + ")"
+  private def createTweetsTitle(paneTitle: String, filtered: Int, total: Int): String = {
+    paneTitle + " (" + filtered + "/" + total + ")"
   }
   
   private def getIds(users: List[Node]): List[String] = {
