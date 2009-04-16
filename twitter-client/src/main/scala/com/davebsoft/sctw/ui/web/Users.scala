@@ -3,6 +3,7 @@ package com.davebsoft.sctw.ui.web
 import _root_.scala.xml.NodeSeq
 import java.io.Serializable
 import twitter.{FriendsDataProvider, FollowersDataProvider}
+import ui.UsersModel
 
 /**
  * Users managed bean.

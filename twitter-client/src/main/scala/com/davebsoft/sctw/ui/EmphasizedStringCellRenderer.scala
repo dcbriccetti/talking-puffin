@@ -22,15 +22,15 @@ class EmphasizedStringCellRenderer extends JTextPane with TableCellRenderer {
     setBorder(renderer.getBorder)
     val fromTo = value.asInstanceOf[EmphasizedString]
     setText(HtmlFormatter.htmlAround(formatValue(fromTo, renderer.getForeground))) 
-    return this
+    this
   }
   
   private def formatValue(string: EmphasizedString, color: Color): String = {
     string.name match {
       case Some(name) => 
-    "<table><tr><td><font face='helvetica' color='#" + // TODO find better way than <table> to get padding 
+        "<font face='helvetica' color='#" +  
         Integer.toHexString(color.getRGB & 0x00ffffff) + "'>" + 
-        decorate(name, string.nameEmphasized) + "</font></td></tr></table>"
+        decorate(name, string.nameEmphasized) + "</font>"
       case None => ""    
     }
   }
