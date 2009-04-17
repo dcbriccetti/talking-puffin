@@ -58,6 +58,11 @@
             <artifactId>specs</artifactId>
             <version>1.4.3</version>
         </dependency>
+        <dependency>
+            <groupId>google</groupId>
+            <artifactId>collections</artifactId>
+            <version>1.0-rc1</version>
+        </dependency>
     </dependencies>
 
     <build>

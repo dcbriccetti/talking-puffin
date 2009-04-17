@@ -17,7 +17,7 @@
     
     <managed-bean>
         <managed-bean-name>users</managed-bean-name>
-        <managed-bean-class>com.davebsoft.sctw.ui.web.Users</managed-bean-class>
+        <managed-bean-class>com.davebsoft.sctw.web.Users</managed-bean-class>
         <managed-bean-scope>session</managed-bean-scope>
         <managed-property>
             <property-name>login</property-name>

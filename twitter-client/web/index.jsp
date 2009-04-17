@@ -11,10 +11,14 @@
 <body>
 <h1>Simple Twitter Client Friends and Followers Summary V0.1</h1>
 
-<p>Thank you for trying this early, experimental Simple Twitter Client web application,
-which shows a summary of the people who follow you and those you follow.</p>
-<img src="davehead-small.jpg" alt="Picture of Dave Briccetti"/><br/>
-<p>Dave Briccetti, <a href="http://twitter.com/dcbriccetti">dcbriccetti</a></p>
+<table><tr>
+    <td><img src="davehead-small.jpg" alt="Picture of Dave Briccetti"/></td>
+    <td valign="top">Thank you for trying this early, experimental Simple Twitter Client web application,
+        which shows a summary of the people who follow you and those you follow.
+    <p>    
+    <a href="http://davebsoft.com/applications/simple-twitter-client">Desktop client and more information</a>
+    </p><p>Dave Briccetti, <a href="http://twitter.com/dcbriccetti">dcbriccetti</a></p></td>
+</tr></table>
 
 <%
     final String userParm = request.getParameter("user");
@@ -24,10 +28,10 @@ which shows a summary of the people who follow you and those you follow.</p>
 %>
 
 <p>Enter your Twitter user name and password, and push <b>Log In</b>. After some time,
-probably less than a minute,
 you should see a summary of your friends and followers. Your credentials will be used
 only for the interaction with Twitter, and will not be stored. There is no error handling,
-including for invalid credentials.</p>    
+including for invalid credentials. Only the first 1,000 of your friends and followers 
+will be shown.</p>    
 
 <form id="form" method="post" action="index.jsp">
     <table>
