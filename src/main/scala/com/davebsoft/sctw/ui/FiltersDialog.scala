@@ -65,7 +65,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
       contents += new Button(cancelAction)
     }, new Constraints {grid=(0,6); fill=Fill.Horizontal; weightx=1})
     
-    preferredSize = new Dimension(400, 600)
+    preferredSize = new Dimension(550, 600)
 
   }
   contents = panel
