@@ -3,11 +3,11 @@ package com.davebsoft.sctw.ui
 import _root_.scala.actors.Actor
 import google.common.collect.MapMaker
 import java.awt.Image
-import java.util.concurrent.{ConcurrentHashMap, Executors, LinkedBlockingQueue}
 import java.util.{Collections, HashSet}
 import javax.swing.{Icon, ImageIcon}
 import scala.actors.Actor._
 import java.net.URL
+import util.{FetchRequest, ResourceReady, BackgroundResourceFetcher}
 /**
  * Fetches pictures in the background, and calls a method in the event
  * dispatching thread when done.
@@ -15,7 +15,8 @@ import java.net.URL
  */
 
 object PictureFetcher {
-  val pictureCache:       java.util.Map[String, ImageIcon] = new MapMaker().softValues().makeMap()
+  type ImageReady = ResourceReady[String,ImageIcon]
+
   val scaledPictureCache: java.util.Map[String, ImageIcon] = new MapMaker().softValues().makeMap()
   
   /** Derives the full size filename from the thumbnail filename */
@@ -31,71 +32,28 @@ object PictureFetcher {
   }
 }
 
-case class FetchImageRequest(val url: String, val id: Object)
-class ImageReady(val url: String, val id: Object, val imageIcon: ImageIcon)
-
 /**
  * A picture fetcher, which when instantiated with an optional scale maximum and a “done” callback,
- * can be called with its requestImage method to request pictures.
+ * can be called with its requestItem method to request pictures.
  */
 class PictureFetcher(scaleTo: Option[Int], 
-    processFinishedImage: (ImageReady) => Unit, processAll: Boolean) {
+    processFinishedImage: (PictureFetcher.ImageReady) => Unit, processAll: Boolean) 
+    extends BackgroundResourceFetcher[String, ImageIcon](processFinishedImage) {
   
-  val requestQueue = new LinkedBlockingQueue[FetchImageRequest]
-  val inProgress = Collections.synchronizedSet(new HashSet[String])
-  val pool = Executors.newFixedThreadPool(15)
-  
-  new Thread(new Runnable {
-    def run = while(true) {
-      processNextImageRequestWithPoolThread
-    }
-  }).start
+  def FetchImageRequest(url: String, id: Object) = new FetchRequest[String](url, id)
 
-  /**
-   * Requests that an image be fetched in a background thread. If the URL is already in the 
-   * cache, the request is ignored. 
-   */
-  def requestImage(url: String, id: Object) {
-    if (! PictureFetcher.pictureCache.containsKey(url)) {
-      val req = new FetchImageRequest(url, id)
-      if (! requestQueue.contains(req) && ! inProgress.contains(url)) {
-        requestQueue.put(req)
+  protected def getResourceFromSource(url: String): ImageIcon = {
+    val icon = new ImageIcon(new URL(url))
+    scaleTo match {
+      case Some(sideLength) => {
+        val processedIcon = PictureFetcher.scaleImageToFitSquare(sideLength, icon)
+        val sCache = PictureFetcher.scaledPictureCache
+        if (sCache.size > 1000) 
+          sCache.clear // TODO clear LRU instead
+        sCache.put(url, processedIcon)
+        processedIcon
       }
+      case None => icon 
     }
-  }
-  
-  private def processNextImageRequestWithPoolThread {
-    val fetchImage = requestQueue.take
-    inProgress.add(fetchImage.url)
-    pool.execute(new Runnable {
-      def run = {
-        var icon = getPictureFromCacheOrWeb(fetchImage.url)
-
-        scaleTo match {
-          case Some(sideLength) => {
-            icon = PictureFetcher.scaleImageToFitSquare(sideLength, icon)
-            if (PictureFetcher.scaledPictureCache.size > 1000) 
-              PictureFetcher.scaledPictureCache.clear // TODO clear LRU instead
-            PictureFetcher.scaledPictureCache.put(fetchImage.url, icon)
-          }
-          case None =>  
-        }
-            
-        inProgress.remove(fetchImage.url)
-        SwingInvoke.invokeLater({processFinishedImage(
-          new ImageReady(fetchImage.url, fetchImage.id, icon))})
-      }
-    })
-  }
-  
-  private def getPictureFromCacheOrWeb(url: String): ImageIcon = {
-    var icon = PictureFetcher.pictureCache.get(url)
-    if (icon == null) {
-      icon = new ImageIcon(new URL(url))
-      if (PictureFetcher.pictureCache.size > 1000) 
-        PictureFetcher.pictureCache.clear // TODO clear LRU instead
-      PictureFetcher.pictureCache.put(url, icon)
-    }
-    icon
   }
 }

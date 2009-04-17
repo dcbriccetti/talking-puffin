@@ -100,12 +100,12 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
   def prefetch(status: NodeSeq) {
     val smallUrl = urlFromUser(status \ "user")
     val mediumUrl = PictureFetcher.getFullSizeUrl(smallUrl)
-    List(smallUrl, mediumUrl).foreach(url => picFetcher.requestImage(url, null))
+    List(smallUrl, mediumUrl).foreach(url => picFetcher.requestItem(picFetcher.FetchImageRequest(url, null)))
   }
 
-  val picFetcher = new PictureFetcher(Some(Thumbnail.MEDIUM_SIZE), (imageReady: ImageReady) => {
-    if (imageReady.url.equals(showingUrl)) {
-      setPicLabelIconAndBigPic(imageReady.imageIcon) 
+  val picFetcher = new PictureFetcher(Some(Thumbnail.MEDIUM_SIZE), (imageReady: PictureFetcher.ImageReady) => {
+    if (imageReady.key.equals(showingUrl)) {
+      setPicLabelIconAndBigPic(imageReady.resource) 
     }
   }, false)
   
@@ -115,7 +115,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
       showingUrl = fullSizeUrl
       var icon = PictureFetcher.scaledPictureCache.get(fullSizeUrl)
       if (icon == null) {  
-        picFetcher.requestImage(fullSizeUrl, null)
+        picFetcher.requestItem(picFetcher.FetchImageRequest(fullSizeUrl, null))
         icon = Thumbnail.transparentMedium
       }
       setPicLabelIconAndBigPic(icon)
@@ -136,7 +136,10 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
 
   private def setBigPicLabelIcon {
     if (bigPicFrame != null && bigPicLabel != null) { 
-      bigPicLabel.icon = PictureFetcher.pictureCache.get(PictureFetcher.getFullSizeUrl(showingUrl))
+      bigPicLabel.icon = picFetcher.getCachedObject(PictureFetcher.getFullSizeUrl(showingUrl)) match {
+        case Some(icon) => icon
+        case None => null
+      }
       bigPicFrame.pack
     }
   }
