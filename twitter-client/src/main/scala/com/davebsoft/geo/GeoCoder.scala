@@ -13,7 +13,7 @@ import _root_.scala.xml.XML
 
 object GeoCoder {
   private val num = """(-?\d+\.\d*)"""
-  private val latLongRegex = ("""(.*\s)?""" + num + """,\s*""" + num).r
+  private val latLongRegex = ("""\D*""" + num + """,\s*""" + num).r
   private val locationCache: java.util.Map[String, String] = new MapMaker().softValues().makeMap()
 
   /**
@@ -23,7 +23,7 @@ object GeoCoder {
    */
   def decode(location: String): String = {
     try {
-      val latLongRegex(text, lat, long) = location
+      val latLongRegex(lat, long) = location
       val latLong = lat + "," + long
       val cachedLoc = locationCache.get(latLong)
       if (cachedLoc != null) return cachedLoc
