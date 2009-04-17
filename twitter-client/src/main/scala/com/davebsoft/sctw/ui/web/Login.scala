@@ -1,4 +1,4 @@
-package com.davebsoft.sctw.ui.web
+package com.davebsoft.sctw.web
 
 import java.io.Serializable
 
