@@ -15,7 +15,7 @@ import twitter.{Status, DataFetchException, TweetsProvider}
  * Model providing status data to the JTable
  */
 class StatusTableModel(val options: StatusTableOptions, statusDataProvider: TweetsProvider, 
-    usersModel: UsersTableModel, followerIds: List[String], filterSet: FilterSet, username: String) 
+    usersModel: UsersTableModel, filterSet: FilterSet, username: String) 
     extends AbstractTableModel with Publisher with Reactor {
   
   /** How often, in ms, to fetch and load new data */
@@ -42,6 +42,12 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
     case FilterSetChanged(s) => filterAndNotify
   }
   
+  private var followerIdsx = List[String]()
+  def followerIds = followerIdsx
+  def followerIds_=(followerIds: List[String]) = {
+    followerIdsx = followerIds
+  }
+  
   def setPreChangeListener(preChangeListener: PreChangeListener) = this.preChangeListener = preChangeListener
   
   def getColumnCount = 5
@@ -61,7 +67,7 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
       case 2 => {
         val name = (status \ "user" \ "name").text
         val id = (status \ "user" \ "id").text
-        new EmphasizedString(Some(name), followerIds.contains(id))
+        new EmphasizedString(Some(name), followerIdsx.contains(id))
       }
       case 3 => {
         val name = (status \ "user" \ "name").text

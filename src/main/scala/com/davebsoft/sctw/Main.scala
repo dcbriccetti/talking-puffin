@@ -33,36 +33,31 @@ object Main extends GUIApplication {
     val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
     val repliesProvider = new RepliesProvider(username, password)
     val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
-    val following = new FriendsDataProvider(username, password).getUsers
-    val followers = new FollowersDataProvider(username, password).getUsers
-    val usersModel = new UsersTableModel(following, followers)
+    val usersModel = new UsersTableModel(List[Node](), List[Node]())
     val tweetsFilterSet = new FilterSet
     val tweetsModel  = new StatusTableModel(new StatusTableOptions(true), tweetsProvider,
-      usersModel, getIds(followers), tweetsFilterSet, username)
+      usersModel, tweetsFilterSet, username)
     val repliesFilterSet = new FilterSet
     val repliesModel = new StatusTableModel(new StatusTableOptions(false), repliesProvider, 
-      usersModel, getIds(followers), repliesFilterSet, username) with Replies
+      usersModel, repliesFilterSet, username) with Replies
     val statusPane  = new ToolbarStatusPane(tweetsTitle, tweetsModel,  apiHandlers, tweetsFilterSet)
     val repliesPane = new RepliesStatusPane(repliesTitle, repliesModel, apiHandlers, repliesFilterSet) {
       table.showColumn(3, false)
     }
+    val tabbedPane = new TabbedPane() {
+      preferredSize = new Dimension(900, 600)
+
+      pages.append(new Page(tweetsTitle, statusPane))
+      pages.append(new Page(repliesTitle, repliesPane))
+
+    }
 
     val clearAction = statusPane.clearAction
-    new Frame {
+    val frame = new Frame {
       title = "Simple Twitter Client"
 
       TagUsers.load
 
-      val tabbedPane = new TabbedPane() {
-        preferredSize = new Dimension(900, 600)
-
-        pages.append(new Page(tweetsTitle, statusPane))
-        pages.append(new Page(repliesTitle, repliesPane))
-
-        pages.append(new Page("People (" + following.length + ", " + followers.length + ")", 
-          new FriendsFollowersPane(apiHandlers, usersModel, following, followers)))
-      }
-      listenTo(tabbedPane.selection)
       listenTo(tweetsModel)
       listenTo(repliesModel)
       contents = tabbedPane
@@ -85,6 +80,28 @@ object Main extends GUIApplication {
       peer.setLocationRelativeTo(null)
       statusPane.requestFocusForTable
     }
+
+    SwingInvoke.execSwingWorker({
+      (new FriendsDataProvider(username, password).getUsers,
+        new FollowersDataProvider(username, password).getUsers)
+    }, 
+      { (result: Tuple2[List[Node],List[Node]]) =>
+      val following = result._1 
+      val followers = result._2 
+              
+      usersModel.friends = following
+      usersModel.followers = followers
+      usersModel.usersChanged
+              
+      tweetsModel.followerIds = getIds(followers)
+      repliesModel.followerIds = getIds(followers)
+              
+      val paneTitle = "People (" + following.length + ", " + followers.length + ")"
+      val pane = new FriendsFollowersPane(apiHandlers, usersModel, following, followers)
+      tabbedPane.pages.append(new TabbedPane.Page(paneTitle, pane))
+    })
+
+    frame
   }
 
   private def createTweetsTitle(paneTitle: String, filtered: Int, total: Int): String = {

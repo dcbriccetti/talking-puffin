@@ -35,15 +35,24 @@ class UsersModel(friends: List[Node], followers: List[Node]) {
   
 }
 
-class UsersTableModel(friends: List[Node], followers: List[Node]) extends AbstractTableModel {
+class UsersTableModel(var friends: List[Node], var followers: List[Node]) extends AbstractTableModel {
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
-  val usersModel = new UsersModel(friends, followers)
+  var usersModel = new UsersModel(friends, followers)
+  var lastIncludeFollowing = true
+  var lastIncludeFollowers = true
   buildModelData(true, true)
 
   def buildModelData(includeFollowing: Boolean, includeFollowers: Boolean) {
+    lastIncludeFollowing = includeFollowing
+    lastIncludeFollowers = includeFollowers
     usersModel.build(includeFollowing, includeFollowers)
     fireTableDataChanged
+  }
+  
+  def usersChanged = {
+    usersModel = new UsersModel(friends, followers)
+    buildModelData(lastIncludeFollowing, lastIncludeFollowers)
   }
   
   def getColumnCount = 8
