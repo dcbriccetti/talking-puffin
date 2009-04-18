@@ -14,6 +14,7 @@ import java.net.{URI, URL}
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import javax.swing.{JTable, JTextPane, ImageIcon}
 import util.{FetchRequest, ResourceReady, TextChangingAnimator}
+
 /**
  * Details of the currently-selected tweet.
  * @author Dave Briccetti
@@ -30,18 +31,18 @@ object Thumbnail {
 
 class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends GridBagPanel {
     
-  val geoCoder = new GeoCoder(processFinishedGeocodes)
-  val animator = new TextChangingAnimator
+  private val geoCoder = new GeoCoder(processFinishedGeocodes)
+  private val animator = new TextChangingAnimator
   
-  var picLabel: Label = new Label {
+  private var picLabel: Label = new Label {
     icon = Thumbnail.transparentMedium
   }
-  var userDescription: TextArea = _
-  var largeTweet: JTextPane = _
-  var bigPicFrame: Frame = _
-  var bigPicLabel: Label = _
-  var showingUrl: String = _
-  var showingUser: NodeSeq = _
+  private var userDescription: TextArea = _
+  private var largeTweet: JTextPane = _
+  private var bigPicFrame: Frame = _
+  private var bigPicLabel: Label = _
+  private var showingUrl: String = _
+  private var showingUser: NodeSeq = _
   var geoEnabled = true
           
   private class CustomConstraints extends Constraints {
@@ -90,6 +91,8 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
     val picUrl = urlFromUser(user)
     showMediumPicture(picUrl)
   }
+  
+  def enableAnimation(enabled: Boolean) = animator.enabled = enabled
   
   private def setText(user: NodeSeq) {
     animator.stop

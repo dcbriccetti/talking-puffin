@@ -90,6 +90,16 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   geoButton = new JToggleButton(geoAction.peer)
   geoButton.setSelected(true)
 
+  var animButton: JToggleButton = _ 
+  val animAction = new Action("Anim") {
+    toolTip = "Enables simple, useful animations"
+    def apply = {
+      tweetDetailPanel.enableAnimation(animButton.isSelected)    
+    }
+  }
+  animButton = new JToggleButton(animAction.peer)
+  animButton.setSelected(true)
+
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
   
@@ -204,6 +214,7 @@ class ToolbarStatusPane(title: String, statusTableModel: StatusTableModel, apiHa
     add(comboBox.peer)
     add(detailsButton)
     add(geoButton)
+    add(animButton)
   }
 
   override def newTable: StatusTable = new TweetsTable(statusTableModel, apiHandlers, clearAction, showBigPicture)
@@ -220,6 +231,9 @@ class RepliesStatusPane(title: String, statusTableModel: StatusTableModel, apiHa
     add(showFiltersAction.peer)
     add(clearRepliesAction.peer)
     add(loadNewRepliesAction.peer)
+    add(detailsButton)
+    add(geoButton)
+    add(animButton)
   }
 
 }
