@@ -72,7 +72,7 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   }
   var detailsButton: JToggleButton = _ 
   val showDetailsAction = new Action("Details") {
-    toolTip = "Hides or shows the details panel"
+    toolTip = "Shows or hides the details panel"
     def apply = {
       tweetDetailPanel.visible = detailsButton.isSelected    
     }
