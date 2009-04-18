@@ -13,7 +13,7 @@ import java.awt.{Dimension, Insets, Image}
 import java.net.{URI, URL}
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import javax.swing.{JTable, JTextPane, ImageIcon}
-
+import util.{FetchRequest, ResourceReady, TextChangingAnimator}
 /**
  * Details of the currently-selected tweet.
  * @author Dave Briccetti
@@ -30,6 +30,9 @@ object Thumbnail {
 
 class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends GridBagPanel {
     
+  val geoCoder = new GeoCoder(processFinishedGeocodes)
+  val animator = new TextChangingAnimator
+  
   var picLabel: Label = new Label {
     icon = Thumbnail.transparentMedium
   }
@@ -38,6 +41,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
   var bigPicFrame: Frame = _
   var bigPicLabel: Label = _
   var showingUrl: String = _
+  var showingUser: NodeSeq = _
   var geoEnabled = true
           
   private class CustomConstraints extends Constraints {
@@ -88,12 +92,47 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
   }
   
   private def setText(user: NodeSeq) {
-    val rawLocation = (user \ "location").text
-    var location = if (geoEnabled) GeoCoder.decode(rawLocation) else rawLocation
+    animator.stop
+    showingUser = user
+    val rawLocationOfShowingItem = userLoc(user)
+
+    if (geoEnabled) {
+      geoCoder.extractLatLong(rawLocationOfShowingItem) match {
+        case Some(latLong) =>
+          geoCoder.getCachedObject(latLong) match {
+            case Some(location) => {
+              setText(user, location)
+              return
+            }
+            case None => geoCoder.requestItem(new FetchRequest[String](latLong, user)) 
+          }
+          
+        case None =>
+      }
+    }
+    setText(user, rawLocationOfShowingItem)
+  }
+  
+  private def setText(user: NodeSeq, location: String) {
     userDescription.text = (user \ "name").text + " • " +
         location + " • " + (user \ "description").text  + " • " +
         (user \ "followers_count").text + " followers"
   }
+
+  private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
+    if (resourceReady.id.equals(showingUser)) {
+      animator.stop
+      var origText = userLoc(showingUser)
+      val newText = resourceReady.resource
+      def callBack(text: String) {
+        setText(showingUser, text)
+      }
+      animator.run(origText, newText, callBack)
+      
+    }
+  }
+  
+  private def userLoc(user: NodeSeq) = (user \ "location").text
   
   private def urlFromUser(user: NodeSeq): String = (user \ "profile_image_url").text 
   
@@ -107,7 +146,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
     if (imageReady.key.equals(showingUrl)) {
       setPicLabelIconAndBigPic(imageReady.resource) 
     }
-  }, false)
+  })
   
   private def showMediumPicture(picUrl: String) {
     val fullSizeUrl = PictureFetcher.getFullSizeUrl(picUrl)
@@ -128,6 +167,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
   }
 
   def clearStatusDetails {
+    animator.stop
     showingUrl = null
     picLabel.icon = Thumbnail.transparentMedium
     userDescription.text = null
@@ -173,5 +213,5 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
     })
     
   }
-  
 }
+

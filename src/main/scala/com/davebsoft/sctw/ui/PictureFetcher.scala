@@ -37,7 +37,7 @@ object PictureFetcher {
  * can be called with its requestItem method to request pictures.
  */
 class PictureFetcher(scaleTo: Option[Int], 
-    processFinishedImage: (PictureFetcher.ImageReady) => Unit, processAll: Boolean) 
+    processFinishedImage: (PictureFetcher.ImageReady) => Unit) 
     extends BackgroundResourceFetcher[String, ImageIcon](processFinishedImage) {
   
   def FetchImageRequest(url: String, id: Object) = new FetchRequest[String](url, id)

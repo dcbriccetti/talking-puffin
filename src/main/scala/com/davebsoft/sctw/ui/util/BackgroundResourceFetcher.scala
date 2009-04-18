@@ -19,14 +19,12 @@ abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceRea
   val threadPool = Executors.newFixedThreadPool(15)
   
   new Thread(new Runnable {
-    def run = while(true) {
-      processNextRequestWithPoolThread
-    }
+    def run = while(true) processNextRequestWithPoolThread
   }).start
 
   private def processNextRequestWithPoolThread {
-    val fetchItem = requestQueue.take
-    val key = fetchItem.key
+    val fetchRequest = requestQueue.take
+    val key = fetchRequest.key
     inProgress.add(key)
     
     threadPool.execute(new Runnable {
@@ -41,7 +39,7 @@ abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceRea
         inProgress.remove(key)
         
         SwingInvoke.invokeLater({
-          processReadyResource(new ResourceReady[K,V](key, fetchItem.id, resource))
+          processReadyResource(new ResourceReady[K,V](key, fetchRequest.id, resource))
         })
       }
     })

@@ -14,7 +14,7 @@ class PictureCell(model: AbstractTableModel, column: Int) {
       val row = imageReady.id.asInstanceOf[Int]
       model.fireTableCellUpdated(row, column)
     }
-  }, true)
+  })
     
   def request(picUrl: String, rowIndex: Int): Icon = {
     picFetcher.getCachedObject(picUrl) match {
