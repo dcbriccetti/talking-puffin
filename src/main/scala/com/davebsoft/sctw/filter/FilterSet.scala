@@ -16,8 +16,8 @@ class FilterSet extends Publisher {
   val mutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
   var selectedTags = List[String]()
   var excludeNotToYouReplies: Boolean = _
-  var includeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
-  var excludeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
+  val includeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
+  val excludeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
   
   def excludedByStringMatches(text: String): Boolean = {
     if (includeTextFilters.size() == 0 && excludeTextFilters.size() == 0) return false

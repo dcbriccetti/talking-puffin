@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.davebsoft.sctw</groupId>
     <artifactId>simple-twitter-client</artifactId>
-    <version>0.55</version>
+    <version>0.56</version>
     <inceptionYear>2008</inceptionYear>
     <properties>
         <scala.version>2.7.3</scala.version>

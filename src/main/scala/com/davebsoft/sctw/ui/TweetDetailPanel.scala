@@ -29,7 +29,7 @@ object Thumbnail {
     BufferedImage.TYPE_INT_ARGB))
 }
 
-class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends GridBagPanel {
+class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Streams) extends GridBagPanel {
     
   private val geoCoder = new GeoCoder(processFinishedGeocodes)
   private val animator = new TextChangingAnimator
@@ -49,7 +49,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog) extends Grid
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
   }
   
-  largeTweet = new LargeTweet(filtersDialog, table, background)
+  largeTweet = new LargeTweet(filtersDialog, streams, table, background)
   
   peer.add(largeTweet, new Constraints{
     insets = new Insets(5,1,5,1)

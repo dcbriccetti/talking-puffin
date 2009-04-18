@@ -23,7 +23,7 @@ import util.TableUtil
  * Displays friend statuses
  */
 class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
-    filterSet: FilterSet) 
+    filterSet: FilterSet, streams: Streams) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
   var lastSelectedRows: List[NodeSeq] = Nil
@@ -115,7 +115,7 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
     grid = (0,1); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
   
-  val tweetDetailPanel = new TweetDetailPanel(table, filtersDialog)
+  val tweetDetailPanel = new TweetDetailPanel(table, filtersDialog, streams)
   add(tweetDetailPanel, new Constraints{
     grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
   })
@@ -191,8 +191,8 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
 }
 
 class ToolbarStatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
-    filterSet: FilterSet) 
-    extends StatusPane(title, statusTableModel, apiHandlers, filterSet) {
+    filterSet: FilterSet, streams: Streams) 
+    extends StatusPane(title, statusTableModel, apiHandlers, filterSet, streams) {
   
   override def toolbar: JToolBar = new JToolBar {
     setFloatable(false)
@@ -222,8 +222,8 @@ class ToolbarStatusPane(title: String, statusTableModel: StatusTableModel, apiHa
 }
 
 class RepliesStatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
-    filterSet: FilterSet) 
-    extends StatusPane(title, statusTableModel, apiHandlers, filterSet) {
+    filterSet: FilterSet, streams: Streams) 
+    extends StatusPane(title, statusTableModel, apiHandlers, filterSet, streams) {
   
   override def toolbar: JToolBar = new JToolBar {
     setFloatable(false)
