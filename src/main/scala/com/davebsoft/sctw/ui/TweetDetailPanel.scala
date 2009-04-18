@@ -100,7 +100,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     val rawLocationOfShowingItem = userLoc(user)
 
     if (geoEnabled) {
-      geoCoder.extractLatLong(rawLocationOfShowingItem) match {
+      GeoCoder.extractLatLong(rawLocationOfShowingItem) match {
         case Some(latLong) =>
           geoCoder.getCachedObject(latLong) match {
             case Some(location) => {

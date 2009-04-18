@@ -11,11 +11,10 @@ import ui.util.{ResourceReady, BackgroundResourceFetcher}
  * 
  * @author Dave Briccetti
  */
-class GeoCoder(processResults: (ResourceReady[String,String]) => Unit) 
-    extends BackgroundResourceFetcher[String, String](processResults) {
+object GeoCoder {
+  private val locationCache: java.util.Map[String, String] = new MapMaker().softValues().makeMap()
   private val num = """(-?\d+\.\d*)"""
   private val latLongRegex = ("""\D*""" + num + """,\s*""" + num).r
-  private val locationCache: java.util.Map[String, String] = new MapMaker().softValues().makeMap()
 
   def extractLatLong(location: String): Option[String] = {
     try {
@@ -26,6 +25,11 @@ class GeoCoder(processResults: (ResourceReady[String,String]) => Unit)
     }
   }
   
+}
+
+class GeoCoder(processResults: (ResourceReady[String,String]) => Unit) 
+    extends BackgroundResourceFetcher[String, String](processResults) {
+
   protected def getResourceFromSource(latLong: String): String = {
     val url = new URL("http://maps.google.com/maps/geo?ll=" + latLong + "&output=xml&oe=utf-8")
     val resp = XML.loadString(StreamUtil.streamToString(url.openConnection.getInputStream))

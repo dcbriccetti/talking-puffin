@@ -31,7 +31,8 @@ object Main extends GUIApplication {
   def createTopFrame = {
 
     val streams = new Streams(username, password)
-    val statusPane  = new ToolbarStatusPane(tweetsTitle,  streams.tweetsModel,  
+    Windows.streams = streams
+    val statusPane  = new TweetsStatusPane(tweetsTitle,  streams.tweetsModel,  
       streams.apiHandlers, streams.tweetsFilterSet, streams)
     val repliesPane = new RepliesStatusPane(repliesTitle, streams.repliesModel, 
       streams.apiHandlers, streams.repliesFilterSet, streams) {
@@ -45,7 +46,7 @@ object Main extends GUIApplication {
       pages += new Page(repliesTitle, repliesPane)
       streams.streamInfoList ::= new StreamInfo(repliesTitle, streams.repliesModel, repliesPane)
     }
-    streams.tabbedPane = tabbedPane
+    Windows.tabbedPane = tabbedPane
 
     val clearAction = statusPane.clearAction
     val frame = new Frame {

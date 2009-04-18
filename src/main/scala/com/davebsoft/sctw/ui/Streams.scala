@@ -1,8 +1,9 @@
 package com.davebsoft.sctw.ui
 
-import _root_.scala.swing.{TabbedPane, Reactor}
+import _root_.scala.swing.{TabbedPane, Component, Reactor}
 import _root_.scala.xml.Node
 import filter.{FilterSet, TextFilter}
+import javax.swing.{JFrame, JComponent, SwingUtilities}
 import twitter.{Follower, RepliesProvider, TweetsProvider, Sender}
 import state.StateRepository
 
@@ -15,7 +16,6 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
  */
 
 class Streams(username: String, password: String) extends Reactor {
-  var tabbedPane: TabbedPane = _
   val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
   val repliesProvider = new RepliesProvider(username, password)
   val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
@@ -36,8 +36,19 @@ class Streams(username: String, password: String) extends Reactor {
   reactions += {
     case TableContentsChanged(model, filtered, total) => {
       val si = streamInfoList.filter(s => s.model == model)(0)
-      tabbedPane.peer.setTitleAt(tabbedPane.peer.indexOfComponent(si.pane.peer), 
-        createTweetsTitle(si.title, filtered, total))
+      setTitleInParent(si.pane.peer, createTweetsTitle(si.title, filtered, total))
+    }
+  }
+
+  private def setTitleInParent(pane: JComponent, title: String) {
+    Windows.tabbedPane.peer.indexOfComponent(pane) match {
+      case -1 => {
+        SwingUtilities.getAncestorOfClass(classOf[JFrame], pane) match {
+          case null =>
+          case parent => parent.asInstanceOf[JFrame].setTitle(title)
+        }
+      }
+      case tabbedPaneIndex => Windows.tabbedPane.peer.setTitleAt(tabbedPaneIndex, title)
     }
   }
 
@@ -57,8 +68,8 @@ class Streams(username: String, password: String) extends Reactor {
     val provider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
     val model  = new StatusTableModel(new StatusTableOptions(true), 
       provider, usersModel, fs, username)
-    val pane = new ToolbarStatusPane(title, model, apiHandlers, fs, this)
-    tabbedPane.pages += new TabbedPane.Page(title, pane)
+    val pane = new TweetsStatusPane(title, model, apiHandlers, fs, this)
+    Windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
     listenTo(model)
     val streamInfo = new StreamInfo(title, model, pane)
     streamInfoList ::= streamInfo
@@ -69,5 +80,6 @@ class Streams(username: String, password: String) extends Reactor {
 
   def createStream: StreamInfo = createStream(None)
   
+  def componentTitle(comp: Component) = streamInfoList.filter(s => s.pane == comp)(0).title
 }
 

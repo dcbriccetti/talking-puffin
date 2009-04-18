@@ -12,9 +12,9 @@ import java.awt.{Color, Desktop, Dimension, Insets, Font}
 import java.awt.event.{KeyEvent, KeyAdapter}
 import java.net.{URI, URL}
 import java.util.Comparator
-import javax.swing.{JTable, JTextPane, JButton, JToggleButton, JLabel, ImageIcon, Icon, SwingWorker, JMenu, JPopupMenu, JMenuItem, JToolBar}
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
+import javax.swing.{JTextPane, SwingWorker, JPopupMenu, JTable, JToolBar, JToggleButton, Icon, JMenu, JButton, JMenuItem, ImageIcon, JTabbedPane, JLabel}
 import scala.swing._
 import twitter.Sender
 import util.TableUtil
@@ -99,6 +99,20 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   }
   animButton = new JToggleButton(animAction.peer)
   animButton.setSelected(true)
+
+  var dockedButton: JToggleButton = _ 
+  val dockedAction = new Action("Docked") {
+    toolTip = "Docks or frees the pane"
+    def apply = {
+      if (! dockedButton.isSelected) {
+        Windows.undock(StatusPane.this)
+      } else {
+        Windows.dock(StatusPane.this)
+      }
+    }
+  }
+  dockedButton = new JToggleButton(dockedAction.peer)
+  dockedButton.setSelected(true)
 
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
@@ -190,7 +204,7 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   }
 }
 
-class ToolbarStatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
+class TweetsStatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
     filterSet: FilterSet, streams: Streams) 
     extends StatusPane(title, statusTableModel, apiHandlers, filterSet, streams) {
   
@@ -212,6 +226,7 @@ class ToolbarStatusPane(title: String, statusTableModel: StatusTableModel, apiHa
       }
     })
     add(comboBox.peer)
+    add(dockedButton)
     add(detailsButton)
     add(geoButton)
     add(animButton)
@@ -231,6 +246,7 @@ class RepliesStatusPane(title: String, statusTableModel: StatusTableModel, apiHa
     add(showFiltersAction.peer)
     add(clearRepliesAction.peer)
     add(loadNewRepliesAction.peer)
+    add(dockedButton)
     add(detailsButton)
     add(geoButton)
     add(animButton)
