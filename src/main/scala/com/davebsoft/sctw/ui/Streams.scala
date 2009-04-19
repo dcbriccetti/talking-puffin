@@ -25,7 +25,7 @@ class Streams(username: String, password: String) extends Reactor {
   var streamInfoList = List[StreamInfo]()
   
   val folTitle = new TitleCreator("Following")
-  val repTitle = new TitleCreator("Replies")
+  val repTitle = new TitleCreator("Mentions")
 
   var followerIds = List[String]()
   

@@ -24,7 +24,7 @@ class MainToolBar(streams: Streams) extends JToolBar {
 
   addSeparator
 
-  add(new Label("Replies: ").peer)
+  add(new Label("Mentions: ").peer)
   addSourceControls(streams.repliesProvider, streams.createRepliesView, false)
   
   private def addSourceControls(provider: TweetsProvider, createStream: => Unit, 

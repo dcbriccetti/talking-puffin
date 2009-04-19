@@ -26,8 +26,6 @@ object Main extends GUIApplication {
   Logger.getRootLogger.setLevel(Level.INFO)
   private var username: String = ""
   private var password: String = ""
-  private val tweetsTitle = "Tweets"
-  private val repliesTitle = "Replies"
   
   /**
    * Creates the Swing frame.

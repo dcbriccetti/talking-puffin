@@ -47,7 +47,7 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
     def apply = clearTweets
   }
   val clearRepliesAction = new Action("Clear") {
-    toolTip = "Removes all replies"
+    toolTip = "Removes all mentions"
     def apply = clearTweets
   }
   var detailsButton: JToggleButton = _ 
