@@ -41,10 +41,11 @@ protected trait HttpHandler {
       "Basic " + new String(new Base64().encode((username + ":" + password).getBytes)))
     
     val headers = conn.getHeaderFields
-    //TODO get actual response code
-    //val status1 = headers.get("Status").get(0)
-    //val result = Integer.parseInt(status1.split(" ")(0))
-    (200, StreamUtil.streamToString(conn.getInputStream))
+    //TODO test or get this working on Google App Engine. Things may be different.
+    val status = headers.get("Status") // Looking for "200 OK"
+    val statusCode = if (status == null || status.size == 0) 200 else 
+      Integer.parseInt(status.get(0).split(" ")(0))
+    (statusCode, StreamUtil.streamToString(conn.getInputStream))
   }
   
   def doPost(url: String) = {
