@@ -18,9 +18,9 @@ object TweetsProvider {
  * @author Dave Briccetti
  */
 
-class TweetsProvider(username: String, password: String, startingId: Option[String]) extends DataProvider {
+class TweetsProvider(username: String, password: String, startingId: Option[String], providerName: String) extends DataProvider {
+  private val log = Logger.getLogger("TweetsProvider " + providerName)
   val propChg = new PropertyChangeSupport(this)
-  private val log = Logger.getLogger("TweetsProvider " + hashCode)
   setCredentials(username, password)
   protected var highestId = startingId match {case Some(s) => s case None => null}
 
@@ -107,7 +107,8 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
   
 }
 
-class RepliesProvider(username: String, password: String) extends TweetsProvider(username, password, None) {
+class RepliesProvider(username: String, password: String) 
+    extends TweetsProvider(username, password, None, "Replies") {
   override def getUrl = "http://twitter.com/statuses/replies.xml"
 }
 

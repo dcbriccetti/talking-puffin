@@ -16,7 +16,8 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
  */
 
 class Streams(username: String, password: String) extends Reactor {
-  val tweetsProvider = new TweetsProvider(username, password, Some(StateRepository.get("highestId", null)))
+  val tweetsProvider = new TweetsProvider(username, password, 
+    Some(StateRepository.get("highestId", null)), "Following")
   val repliesProvider = new RepliesProvider(username, password)
   val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
   val usersModel = new UsersTableModel(List[Node](), List[Node]())
@@ -26,6 +27,8 @@ class Streams(username: String, password: String) extends Reactor {
   val folTitle = new TitleCreator("Following")
   val repTitle = new TitleCreator("Replies")
 
+  var followerIds = List[String]()
+  
   reactions += {
     case TableContentsChanged(model, filtered, total) => {
       if (streamInfoList.length == 0) println("streamInfoList is empty. Ignoring table contents changed.")
@@ -42,6 +45,10 @@ class Streams(username: String, password: String) extends Reactor {
 
   createFollowingView
   createRepliesView
+  
+  // Now that views, models and listeners are in place, get data
+  tweetsProvider.loadNewData
+  repliesProvider.loadNewData
 
   private def setTitleInParent(pane: JComponent, title: String) {
     Windows.tabbedPane.peer.indexOfComponent(pane) match {
@@ -100,8 +107,6 @@ class Streams(username: String, password: String) extends Reactor {
   def createRepliesView: StreamInfo = createStream(repliesProvider, repTitle.create, None)
   
   def componentTitle(comp: Component) = streamInfoList.filter(s => s.pane == comp)(0).title
-  
-  var followerIds = List[String]()
   
   def setFollowerIds(followerIds: List[String]) {
     this.followerIds = followerIds

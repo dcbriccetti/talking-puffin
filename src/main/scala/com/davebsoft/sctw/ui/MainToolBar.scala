@@ -35,7 +35,7 @@ class MainToolBar(streams: Streams) extends JToolBar {
     }
     add(newViewAction.peer)
 
-    add(new RefreshCombo(streams.tweetsProvider).peer)
+    add(new RefreshCombo(provider).peer)
   
     val loadNewAction = new Action("Load New") {
       toolTip = "Loads any new items"
