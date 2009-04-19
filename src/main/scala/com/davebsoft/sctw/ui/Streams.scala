@@ -16,29 +16,32 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
  */
 
 class Streams(username: String, password: String) extends Reactor {
-  val tweetsProvider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
+  val tweetsProvider = new TweetsProvider(username, password, Some(StateRepository.get("highestId", null)))
   val repliesProvider = new RepliesProvider(username, password)
   val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
   val usersModel = new UsersTableModel(List[Node](), List[Node]())
   
-  val tweetsFilterSet = new FilterSet
-  val tweetsModel = new StatusTableModel(new StatusTableOptions(true), tweetsProvider,
-    usersModel, tweetsFilterSet, username)
-  
-  val repliesFilterSet = new FilterSet
-  val repliesModel = new StatusTableModel(new StatusTableOptions(false), repliesProvider, 
-    usersModel, repliesFilterSet, username) with Replies
-  
   var streamInfoList = List[StreamInfo]()
   
-  listenTo(tweetsModel)
-  listenTo(repliesModel)
+  val folTitle = new TitleCreator("Following")
+  val repTitle = new TitleCreator("Replies")
+
   reactions += {
     case TableContentsChanged(model, filtered, total) => {
-      val si = streamInfoList.filter(s => s.model == model)(0)
-      setTitleInParent(si.pane.peer, createTweetsTitle(si.title, filtered, total))
+      if (streamInfoList.length == 0) println("streamInfoList is empty. Ignoring table contents changed.")
+      else {
+        val filteredList = streamInfoList.filter(s => s.model == model)
+        if (filteredList.length == 0) println("No matches in streamInfoList for model " + model)
+        else {
+          val si = filteredList(0)
+          setTitleInParent(si.pane.peer, createTweetsTitle(si.title, filtered, total))
+        }
+      }
     }
   }
+
+  createFollowingView
+  createRepliesView
 
   private def setTitleInParent(pane: JComponent, title: String) {
     Windows.tabbedPane.peer.indexOfComponent(pane) match {
@@ -56,30 +59,53 @@ class Streams(username: String, password: String) extends Reactor {
     paneTitle + " (" + filtered + "/" + total + ")"
   }
 
-  var newStreamIndex = 1
-  def createStream(include: Option[String]): StreamInfo = {
+  private def createStream(source: TweetsProvider, title: String, include: Option[String]): StreamInfo = {
     val fs = new FilterSet
     include match {
       case Some(s) => fs.includeTextFilters.add(new TextFilter(s, false)) 
       case None =>
     }
-    newStreamIndex += 1
-    val title = "Tweets" + newStreamIndex
-    val provider = new TweetsProvider(username, password, StateRepository.get("highestId", null))
-    val model  = new StatusTableModel(new StatusTableOptions(true), 
-      provider, usersModel, fs, username)
-    val pane = new TweetsStatusPane(title, model, apiHandlers, fs, this)
+    val model  = new StatusTableModel(new StatusTableOptions(true), source, usersModel, fs, username)
+    val pane = {
+      if (source.isInstanceOf[RepliesProvider]) {
+        val newPane = new RepliesStatusPane(title, model, apiHandlers, fs, this) 
+        newPane.table.showColumn(3, false)
+        newPane
+      } else 
+        new TweetsStatusPane(title, model, apiHandlers, fs, this)
+    }
+    pane.requestFocusForTable
     Windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
     listenTo(model)
     val streamInfo = new StreamInfo(title, model, pane)
+    streamInfo.model.followerIds = followerIds
     streamInfoList ::= streamInfo
     streamInfo
   }
 
-  def createStreamFor(include: String) = createStream(Some(include))
+  class TitleCreator(baseName: String) {
+    var index = 0
+    def create: String = {
+      index += 1
+      if (index == 1) baseName else baseName + index
+    }
+  }
+  
+  def createFollowingViewFor(include: String) = createStream(tweetsProvider, folTitle.create, Some(include))
 
-  def createStream: StreamInfo = createStream(None)
+  def createFollowingView: StreamInfo = createStream(tweetsProvider, folTitle.create, None)
+  
+  def createRepliesViewFor(include: String) = createStream(repliesProvider, repTitle.create, Some(include))
+
+  def createRepliesView: StreamInfo = createStream(repliesProvider, repTitle.create, None)
   
   def componentTitle(comp: Component) = streamInfoList.filter(s => s.pane == comp)(0).title
+  
+  var followerIds = List[String]()
+  
+  def setFollowerIds(followerIds: List[String]) {
+    this.followerIds = followerIds
+    streamInfoList.foreach(si => si.model.followerIds = followerIds)
+  }
 }
 

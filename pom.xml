@@ -44,9 +44,9 @@
             <version>3.1</version>
         </dependency>
         <dependency>
-            <groupId>swinglabs</groupId>
+            <groupId>org.swinglabs</groupId>
             <artifactId>swingx</artifactId>
-            <version>2009_03_29</version>
+            <version>0.9.5-2</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -59,8 +59,8 @@
             <version>1.4.3</version>
         </dependency>
         <dependency>
-            <groupId>google</groupId>
-            <artifactId>collections</artifactId>
+            <groupId>com.google.collections</groupId>
+            <artifactId>google-collections</artifactId>
             <version>1.0-rc1</version>
         </dependency>
         <dependency>

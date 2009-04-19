@@ -46,29 +46,9 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
     toolTip = "Removes all tweets (including filtered-out ones)"
     def apply = clearTweets
   }
-  val loadNewAction = new Action("Load New") {
-    toolTip = "Loads any new tweets since the last"
-    def apply = {
-      statusTableModel.loadNewData
-    }
-  }
   val clearRepliesAction = new Action("Clear") {
     toolTip = "Removes all replies"
     def apply = clearTweets
-  }
-  val loadNewRepliesAction = new Action("Load New") {
-    toolTip = "Loads the latest replies"
-    def apply = {
-      clearTweets
-      statusTableModel.loadNewData
-    }
-  }
-  val last200Action = new Action("Last 200") {
-    toolTip = "Fetches the last 200 tweets"
-    def apply = {
-      clearSelection
-      statusTableModel.loadLastSet
-    }
   }
   var detailsButton: JToggleButton = _ 
   val showDetailsAction = new Action("Details") {
@@ -134,8 +114,6 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
     grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
   })
   
-  statusTableModel.loadNewData
-
   table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
     def valueChanged(e: ListSelectionEvent) = {
       if (! e.getValueIsAdjusting) {
@@ -213,19 +191,7 @@ class TweetsStatusPane(title: String, statusTableModel: StatusTableModel, apiHan
     add(sendAction.peer)
     add(showFiltersAction.peer)
     add(clearAction.peer)
-    add(loadNewAction.peer)
-    add(last200Action.peer)
-    val comboBox = new ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60))
-    comboBox.peer.setToolTipText("Number of seconds between automatic “Load New”s")
-    var defaultRefresh = 120
-    comboBox.peer.setSelectedItem(defaultRefresh)
-    statusTableModel.setUpdateFrequency(defaultRefresh)
-    comboBox.peer.addActionListener(new ActionListener(){
-      def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
-        statusTableModel.setUpdateFrequency(comboBox.selection.item)
-      }
-    })
-    add(comboBox.peer)
+    addSeparator
     add(dockedButton)
     add(detailsButton)
     add(geoButton)
@@ -245,7 +211,7 @@ class RepliesStatusPane(title: String, statusTableModel: StatusTableModel, apiHa
     add(sendAction.peer)
     add(showFiltersAction.peer)
     add(clearRepliesAction.peer)
-    add(loadNewRepliesAction.peer)
+    addSeparator
     add(dockedButton)
     add(detailsButton)
     add(geoButton)

@@ -5,22 +5,26 @@ import _root_.scala.swing.{Reactor, Publisher}
 import _root_.scala.xml.{NodeSeq, Node}
 import filter._
 import java.awt.event.{ActionEvent, ActionListener}
+import java.beans.{PropertyChangeEvent, PropertyChangeListener}
+
 import java.net.URL
 import java.util.{Locale, Collections, Date, ArrayList}
 import javax.swing._
 import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
-import twitter.{Status, DataFetchException, TweetsProvider}
+import org.apache.log4j.Logger
+import twitter.{TweetsArrived, DataFetchException, TweetsProvider, Status}
+
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(val options: StatusTableOptions, statusDataProvider: TweetsProvider, 
+class StatusTableModel(val options: StatusTableOptions, tweetsProvider: TweetsProvider, 
     usersModel: UsersTableModel, filterSet: FilterSet, username: String) 
     extends AbstractTableModel with Publisher with Reactor {
   
-  /** How often, in ms, to fetch and load new data */
-  private var updateFrequency = 120 * 1000;
-  
+  private val log = Logger.getLogger("StatusTableModel " + hashCode)
+  log.info("Created")
+
   /** All loaded statuses */
   private var statuses = List[Node]()
   
@@ -34,13 +38,24 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
   val filterLogic = new FilterLogic(username, filterSet, filteredStatuses)
   
   private val colNames = List("Age", "Image", "From", "To", "Status")
-  private var timer: Timer = _
   private var preChangeListener: PreChangeListener = _;
   
   listenTo(filterSet)
   reactions += {
     case FilterSetChanged(s) => filterAndNotify
   }
+
+  tweetsProvider.addPropertyChangeListener(new PropertyChangeListener {
+    def propertyChange(evt: PropertyChangeEvent) = {
+      evt.getPropertyName match {
+        case TweetsProvider.CLEAR_EVENT => clear
+        case TweetsProvider.NEW_TWEETS_EVENT => {
+          log.info("Tweets Arrived")
+          processStatuses(evt.getNewValue.asInstanceOf[NodeSeq])
+        }
+      }
+    }
+  })
   
   private var followerIdsx = List[String]()
   def followerIds = followerIdsx
@@ -143,44 +158,6 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
   def getStatuses(rows: List[Int]): List[Node] = 
     rows.map(filteredStatuses.get(_))
 
-  private def createLoadTimer {
-    timer = new Timer(updateFrequency, new ActionListener() {
-      def actionPerformed(event: ActionEvent) {
-        loadNewData
-      }
-    })
-    timer.start
-  }
-  
-  def loadNewData {
-    new SwingWorker[Option[NodeSeq], Object] {
-      override def doInBackground: Option[NodeSeq] = {
-        try {
-          Some(statusDataProvider.loadTwitterStatusData)
-        } catch {
-          case ex: DataFetchException => {
-            println(ex.response)
-            return None
-          }
-        }
-      }
-      override def done = {
-        get match {
-          case Some(statuses) => processStatuses(statuses)
-          case None => // Ignore
-        }
-      }
-    }.execute
-  }
-  
-  def loadLastSet {
-    clear
-    new SwingWorker[NodeSeq, Object] {
-      def doInBackground = statusDataProvider.loadLastSet
-      override def done = processStatuses(get)
-    }.execute
-  }
-  
   private def processStatuses(newStatuses: NodeSeq) {
     for (st <- newStatuses.reverse) {
       statuses = statuses ::: List(st)
@@ -188,20 +165,6 @@ class StatusTableModel(val options: StatusTableOptions, statusDataProvider: Twee
     filterAndNotify
   }
   
-  /**
-   * Sets the update frequency, in seconds.
-   */
-  def setUpdateFrequency(updateFrequency: Int) {
-    this.updateFrequency = updateFrequency * 1000
-    if (timer != null && timer.isRunning) {
-      timer.stop
-    }
-
-    if (updateFrequency > 0) {
-      createLoadTimer
-    }
-  }
-
   /**
    * Clear (remove) all statuses
    */

@@ -45,7 +45,7 @@ class LargeTweet(filtersDialog: FiltersDialog, streams: Streams, table: JTable,
           val filterOut = new MenuItem(Action("Exclude tweets containing “" + text + "”")
             {filtersDialog.addExcludeMatching(text)})
           val newStream = new MenuItem(Action("Create a new stream for “" + text + "”")
-            {streams.createStreamFor(text)})
+            {streams.createFollowingViewFor(text)})
           popup.add(filterIn.peer)
           popup.add(filterOut.peer)
           popup.add(newStream.peer)
