@@ -14,9 +14,6 @@ object ShortUrl {
     val conn = (new URL(url)).openConnection.asInstanceOf[HttpURLConnection]
     conn.setRequestMethod("HEAD")
     conn.setInstanceFollowRedirects(false)
-    if (ShortUrl.redirectionCodes.contains(conn.getResponseCode)) {
-      val newLocation = conn.getHeaderField("Location")
-      Some(newLocation)
-    } else None
+    if (redirectionCodes.contains(conn.getResponseCode)) Some(conn.getHeaderField("Location")) else None
   }
 }
