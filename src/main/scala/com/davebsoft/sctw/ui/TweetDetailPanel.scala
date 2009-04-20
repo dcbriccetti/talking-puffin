@@ -4,17 +4,17 @@ import _root_.com.davebsoft.sctw.twitter.StreamUtil
 import _root_.scala.swing.event.{ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.com.davebsoft.sctw.util.PopupListener
-import _root_.scala.swing.{Frame, Label, GridBagPanel, TextArea, BorderPanel}
+import _root_.scala.swing.{Frame, Label, GridBagPanel, ScrollPane, TextArea, BorderPanel}
 import _root_.scala.xml.{XML, NodeSeq, Node}
 import geo.GeoCoder
 import java.awt.event.{MouseEvent, KeyAdapter, MouseAdapter, KeyEvent}
 import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Image}
-import java.net.{URI, URL}
+import java.net.{HttpURLConnection, URI, URL}
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
-import javax.swing.{JTable, JTextPane, ImageIcon}
-import util.{FetchRequest, ResourceReady, TextChangingAnimator}
-
+import javax.swing.{ScrollPaneConstants, JTable, JTextPane, SwingWorker, ImageIcon, JScrollPane}
+import org.apache.log4j.Logger
+import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
 /**
  * Details of the currently-selected tweet.
  * @author Dave Briccetti
@@ -30,7 +30,7 @@ object Thumbnail {
 }
 
 class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Streams) extends GridBagPanel {
-    
+  private val log = Logger.getLogger("TweetDetailPanel")  
   private val geoCoder = new GeoCoder(processFinishedGeocodes)
   private val animator = new TextChangingAnimator
   
@@ -51,15 +51,19 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
   
   largeTweet = new LargeTweet(filtersDialog, streams, table, background)
   
-  peer.add(largeTweet, new Constraints{
+  peer.add(new JScrollPane {
+    val dim = new Dimension(500, 100)
+    setMinimumSize(dim)
+    setPreferredSize(dim)
+    setViewportView(largeTweet)
+    setBorder(null)
+  }, new Constraints{
     insets = new Insets(5,1,5,1)
     grid = (1,0); gridwidth=2; fill = GridBagPanel.Fill.Both;
   }.peer)
 
   picLabel.peer.addMouseListener(new MouseAdapter {
-    override def mouseClicked(e: MouseEvent) = {
-      if (showingUrl != null) showBigPicture
-    }
+    override def mouseClicked(e: MouseEvent) = if (showingUrl != null) showBigPicture
   })
   add(new BorderPanel {
     val s = new Dimension(Thumbnail.MEDIUM_SIZE + 6, Thumbnail.MEDIUM_SIZE + 6)
@@ -67,9 +71,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     maximumSize = s
     preferredSize = s
     add(picLabel, BorderPanel.Position.Center)
-  }, new CustomConstraints {
-    grid = (0,0); gridheight = 3; insets = new Insets(3, 3, 3, 3)  
-  })
+  }, new CustomConstraints { grid = (0,0); gridheight = 3; insets = new Insets(3, 3, 3, 3)})
 
   userDescription = new TextArea {
     background = TweetDetailPanel.this.background
@@ -88,10 +90,21 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     setText(user)
     largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
       (status \ "in_reply_to_status_id").text, (status \ "source").text))
+
+    substituteExpandedUrlsInLargeTweet(status)
+    
     val picUrl = urlFromUser(user)
     showMediumPicture(picUrl)
   }
   
+  def clearStatusDetails {
+    animator.stop
+    showingUrl = null
+    picLabel.icon = Thumbnail.transparentMedium
+    userDescription.text = null
+    largeTweet.setText(null)
+  }
+
   def enableAnimation(enabled: Boolean) = animator.enabled = enabled
   
   private def setText(user: NodeSeq) {
@@ -109,7 +122,6 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
             }
             case None => geoCoder.requestItem(new FetchRequest[String](latLong, user)) 
           }
-          
         case None =>
       }
     }
@@ -121,6 +133,30 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
         location + " • " + (user \ "description").text  + " • " +
         (user \ "followers_count").text + " followers"
   }
+  
+  private def substituteExpandedUrlsInLargeTweet(status: NodeSeq) {
+    val m = LinkExtractor.hyperlinkPattern.matcher((status \ "text").text)
+    while (m.find) {
+      val url = m.group(1)
+      if (ShortUrl.domains.filter(s => url.contains(s)).length > 0) {
+        new SwingWorker[Option[String],Object] {
+          def doInBackground = {ShortUrl.expand(url)}
+          override def done = {
+            get match {
+              case Some(location) => 
+                val beforeText = largeTweet.getText
+                val afterText = beforeText.replace(url, location)
+                if (beforeText != afterText) {
+                  largeTweet setText afterText
+                }
+              case None =>
+            }
+          }
+        }.execute
+      }
+    }
+    
+  }
 
   private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
     if (resourceReady.id.equals(showingUser)) {
@@ -131,7 +167,6 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
         setText(showingUser, text)
       }
       animator.run(origText, newText, callBack)
-      
     }
   }
   
@@ -169,24 +204,6 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     setBigPicLabelIcon
   }
 
-  def clearStatusDetails {
-    animator.stop
-    showingUrl = null
-    picLabel.icon = Thumbnail.transparentMedium
-    userDescription.text = null
-    largeTweet.setText(null)
-  }
-
-  private def setBigPicLabelIcon {
-    if (bigPicFrame != null && bigPicLabel != null) { 
-      bigPicLabel.icon = picFetcher.getCachedObject(PictureFetcher.getFullSizeUrl(showingUrl)) match {
-        case Some(icon) => icon
-        case None => null
-      }
-      bigPicFrame.pack
-    }
-  }
-
   def showBigPicture {
     bigPicLabel = new Label
     if (bigPicFrame != null) {
@@ -206,15 +223,22 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     }
 
     bigPicLabel.peer.addMouseListener(new MouseAdapter {
-      override def mouseClicked(e: MouseEvent) = {
-        closePicture
-      }
+      override def mouseClicked(e: MouseEvent) = closePicture
     })
     
     bigPicFrame.peer.addKeyListener(new KeyAdapter {
       override def keyPressed(e: KeyEvent) = closePicture
     })
-    
+  }
+
+  private def setBigPicLabelIcon {
+    if (bigPicFrame != null && bigPicLabel != null) { 
+      bigPicLabel.icon = picFetcher.getCachedObject(PictureFetcher.getFullSizeUrl(showingUrl)) match {
+        case Some(icon) => icon
+        case None => null
+      }
+      bigPicFrame.pack
+    }
   }
 }
 

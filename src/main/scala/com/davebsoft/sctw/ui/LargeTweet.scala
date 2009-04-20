@@ -13,10 +13,7 @@ import javax.swing.{JTable, JTextPane, JPopupMenu}
 
 class LargeTweet(filtersDialog: FiltersDialog, streams: Streams, table: JTable, 
     backgroundColor: Color) extends JTextPane {
-  val dim = new Dimension(500, 100)
   setBackground(backgroundColor)
-  setMinimumSize(dim)
-  setPreferredSize(dim)
   setContentType("text/html");
   setEditable(false);
   

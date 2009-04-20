@@ -68,8 +68,7 @@ object Main extends GUIApplication {
         new FollowersDataProvider(username, password).getUsers)
       }, 
       { (result: Tuple2[List[Node],List[Node]]) =>
-      val following = result._1 
-      val followers = result._2 
+      val (following, followers) = result 
               
       streams.usersModel.friends = following
       streams.usersModel.followers = followers
