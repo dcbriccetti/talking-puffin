@@ -21,18 +21,14 @@ class TextChangingAnimator {
           var shrinkingText = origText
           while (keepAnimating.get && shrinkingText.length > 0) {
             shrinkingText = shrinkingText.substring(1)
-            SwingInvoke.invokeLater({
-              callback(shrinkingText)
-            })
+            SwingInvoke.invokeLater({callback(shrinkingText)})
             Thread.sleep(10)
           }
           val newTextBuf = new StringBuilder
           for (i <- 0 until newText.length()) {
             if (keepAnimating.get) {
               newTextBuf.append(newText.charAt(i))
-              SwingInvoke.invokeLater({
-                callback(newTextBuf.toString)
-              })
+              SwingInvoke.invokeLater({callback(newTextBuf.toString)})
               Thread.sleep(10)
             }
           }
