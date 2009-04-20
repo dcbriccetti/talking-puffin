@@ -2,6 +2,7 @@ package com.davebsoft.sctw.filter
 
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.Publisher
+import java.util.regex.Pattern
 import java.util.{ArrayList,Collections}
 import ui.User
 
@@ -37,13 +38,8 @@ class FilterSet extends Publisher {
     false
   }
   
-  private def matches(text: String, search: TextFilter): Boolean = {
-    if (search.isRegEx) {
-      java.util.regex.Pattern.compile(search.text).matcher(text).find
-    } else {
-      text.contains(search.text)
-    }
-  }
+  private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
+    Pattern.matches(search.text, text) else text.toUpperCase.contains(search.text.toUpperCase)
 
   def publish: Unit = publish(new FilterSetChanged(this))
 }
