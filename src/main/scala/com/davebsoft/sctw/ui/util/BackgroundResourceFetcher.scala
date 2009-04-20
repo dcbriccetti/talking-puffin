@@ -36,15 +36,13 @@ abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceRea
         var resource = cache.get(key)
         if (resource == null) {
           resource = getResourceFromSource(key)
-          log.info("Fetched " + key + " from source")
+          log.debug("Fetched from source: " + key)
           store(cache, key, resource)
-        } else {
-          log.info("Found " + key + " in cache")
         }
         inProgress.remove(key)
         
         SwingInvoke.invokeLater({
-          processReadyResource(new ResourceReady[K,V](key, fetchRequest.id, resource))
+          processReadyResource(new ResourceReady[K,V](key, fetchRequest.userData, resource))
         })
       }
     })

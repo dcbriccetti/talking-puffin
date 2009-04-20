@@ -168,18 +168,18 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     val fullSizeUrl = PictureFetcher.getFullSizeUrl(picUrl)
     if (! fullSizeUrl.equals(showingUrl)) {
       showingUrl = fullSizeUrl
-      var icon = PictureFetcher.scaledPictureCache.get(fullSizeUrl)
-      if (icon == null) {  
-        picFetcher.requestItem(picFetcher.FetchImageRequest(fullSizeUrl, null))
-        icon = Thumbnail.transparentMedium
-      }
-      setPicLabelIconAndBigPic(icon)
+      setPicLabelIconAndBigPic(picFetcher.getCachedObject(fullSizeUrl) match {
+        case Some(images) => images
+        case None => 
+          picFetcher.requestItem(picFetcher.FetchImageRequest(fullSizeUrl, null))
+          ImageWithScaled(Thumbnail.transparentMedium, None)
+      })
     }
   }
   
-  private def setPicLabelIconAndBigPic(icon: ImageIcon) {
-    picLabel.icon = icon 
-    setBigPicLabelIcon
+  private def setPicLabelIconAndBigPic(imageWithScaled: ImageWithScaled) {
+    picLabel.icon = imageWithScaled.scaledImage match { case Some(icon) => icon case None => null} 
+    setBigPicLabelIcon(Some(imageWithScaled.image))
   }
 
   def showBigPicture {
@@ -192,7 +192,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
       peer.setLocationRelativeTo(picLabel.peer)
       visible = true
     }
-    setBigPicLabelIcon
+    setBigPicLabelIcon(None)
 
     def closePicture {
       bigPicFrame.dispose
@@ -209,11 +209,15 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     })
   }
 
-  private def setBigPicLabelIcon {
+  private def setBigPicLabelIcon(image: Option[ImageIcon]) {
     if (bigPicFrame != null && bigPicLabel != null) { 
-      bigPicLabel.icon = picFetcher.getCachedObject(PictureFetcher.getFullSizeUrl(showingUrl)) match {
+      bigPicLabel.icon = image match {
         case Some(icon) => icon
-        case None => null
+        case None => 
+          picFetcher.getCachedObject(PictureFetcher.getFullSizeUrl(showingUrl)) match {
+            case Some(imageWithScaledImage) => imageWithScaledImage.image
+            case None => null
+          }
       }
       bigPicFrame.pack
     }

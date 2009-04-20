@@ -16,10 +16,8 @@ import util.{FetchRequest, ResourceReady, BackgroundResourceFetcher}
  */
 
 object PictureFetcher {
-  type ImageReady = ResourceReady[String,ImageIcon]
+  type ImageReady = ResourceReady[String,ImageWithScaled]
 
-  val scaledPictureCache: java.util.Map[String, ImageIcon] = new MapMaker().softValues().makeMap()
-  
   /** Derives the full size filename from the thumbnail filename */
   def getFullSizeUrl(thumb: String): String = thumb.replace("_normal", "")
 
@@ -37,21 +35,21 @@ object PictureFetcher {
  * A picture fetcher, which when instantiated with an optional scale maximum and a “done” callback,
  * can be called with its requestItem method to request pictures.
  */
-class PictureFetcher(scaleTo: Option[Int], 
-    processFinishedImage: (PictureFetcher.ImageReady) => Unit) 
-    extends BackgroundResourceFetcher[String, ImageIcon](processFinishedImage) with Cache[String,ImageIcon] {
+class PictureFetcher(scaleTo: Option[Int], processFinishedImage: (PictureFetcher.ImageReady) => Unit) 
+    extends BackgroundResourceFetcher[String, ImageWithScaled](processFinishedImage) 
+    with Cache[String,ImageWithScaled] {
   
   def FetchImageRequest(url: String, id: Object) = new FetchRequest[String](url, id)
 
-  protected def getResourceFromSource(url: String): ImageIcon = {
+  protected def getResourceFromSource(url: String): ImageWithScaled = {
     val icon = new ImageIcon(new URL(url))
-    scaleTo match {
-      case Some(sideLength) => {
-        val processedIcon = PictureFetcher.scaleImageToFitSquare(sideLength, icon)
-        store(PictureFetcher.scaledPictureCache, url, processedIcon)
-        icon
-      }
-      case None => icon 
-    }
+    ImageWithScaled(icon,
+      scaleTo match {
+        case Some(sideLength) => Some(PictureFetcher.scaleImageToFitSquare(sideLength, icon))
+        case None => None
+      })
   }
+
 }
+
+case class ImageWithScaled(val image: ImageIcon, val scaledImage: Option[ImageIcon])
