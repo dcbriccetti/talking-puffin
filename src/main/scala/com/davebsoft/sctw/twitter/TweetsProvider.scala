@@ -32,7 +32,9 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
   def addPropertyChangeListener   (l: PropertyChangeListener) = propChg.addPropertyChangeListener(l)
   def removePropertyChangeListener(l: PropertyChangeListener) = propChg.removePropertyChangeListener(l)
   
-  def getUrl = "http://twitter.com/statuses/friends_timeline.xml?count=200" + buildSinceParm
+  val urlHost = "http://twitter.com/" 
+  def getUrlFile = "statuses/friends_timeline.xml"
+  def getUrl = urlHost + getUrlFile + "?count=200" + buildSinceParm
   
   protected def buildSinceParm = (if (highestId == null) "" else "&since_id=" + highestId)
   
@@ -72,8 +74,7 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
   
   def loadNewData = loadData(getUrl, false)
   
-  def loadLastBlockOfTweets: Unit = loadData(
-    "http://twitter.com/statuses/friends_timeline.xml?count=200", true)
+  def loadLastBlockOfTweets: Unit = loadData("http://twitter.com/" + getUrlFile + "?count=200", true)
   
   private def loadData(url: String, clear: Boolean): Unit = {
     new SwingWorker[Option[NodeSeq], Object] {
@@ -110,7 +111,7 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
 
 class RepliesProvider(username: String, password: String) 
     extends TweetsProvider(username, password, None, "Mentions") {
-  override def getUrl = "http://twitter.com/statuses/mentions.xml?count=200" + buildSinceParm
+  override def getUrlFile = "statuses/mentions.xml"
 }
 
 case class TweetsArrived(tweets: NodeSeq) extends Event

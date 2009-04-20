@@ -20,15 +20,14 @@ class MainToolBar(streams: Streams) extends JToolBar {
   addSeparator
 
   add(new Label("Following: ").peer)
-  addSourceControls(streams.tweetsProvider, streams.createFollowingView, true)
+  addSourceControls(streams.tweetsProvider, streams.createFollowingView)
 
   addSeparator
 
   add(new Label("Mentions: ").peer)
-  addSourceControls(streams.repliesProvider, streams.createRepliesView, false)
+  addSourceControls(streams.repliesProvider, streams.createRepliesView)
   
-  private def addSourceControls(provider: TweetsProvider, createStream: => Unit, 
-      allowLoadLastBlock: Boolean) {
+  private def addSourceControls(provider: TweetsProvider, createStream: => Unit) {
     val newViewAction = new Action("New View") {
       toolTip = "Creates a new view"
       def apply = createStream
@@ -43,13 +42,11 @@ class MainToolBar(streams: Streams) extends JToolBar {
     }
     add(loadNewAction.peer)
   
-    if (allowLoadLastBlock) {
-      val last200Action = new Action("Last 200") {
-        toolTip = "Fetches the last 200 items"
-        def apply = provider.loadLastBlockOfTweets
-      }
-      add(last200Action.peer)
+    val last200Action = new Action("Last 200") {
+      toolTip = "Fetches the last 200 items"
+      def apply = provider.loadLastBlockOfTweets
     }
+    add(last200Action.peer)
   }
   
   class RefreshCombo(provider: TweetsProvider) extends ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60)) {
