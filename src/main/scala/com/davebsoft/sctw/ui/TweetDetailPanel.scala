@@ -12,6 +12,7 @@ import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Image}
 import java.net.{HttpURLConnection, URI, URL}
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
+import javax.swing.text.JTextComponent
 import javax.swing.{ScrollPaneConstants, JTable, JTextPane, SwingWorker, ImageIcon, JScrollPane}
 import org.apache.log4j.Logger
 import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
@@ -51,13 +52,14 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
   
   largeTweet = new LargeTweet(filtersDialog, streams, table, background)
   
-  peer.add(new JScrollPane {
+  val largeTweetScrollPane = new JScrollPane {
     val dim = new Dimension(500, 100)
     setMinimumSize(dim)
     setPreferredSize(dim)
     setViewportView(largeTweet)
     setBorder(null)
-  }, new Constraints{
+  }
+  peer.add(largeTweetScrollPane, new Constraints {
     insets = new Insets(5,1,5,1)
     grid = (1,0); gridwidth=2; fill = GridBagPanel.Fill.Both;
   }.peer)
@@ -91,7 +93,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
       (status \ "in_reply_to_status_id").text, (status \ "source").text))
 
-    substituteExpandedUrlsInLargeTweet(status)
+    ShortUrl.substituteExpandedUrls((status \ "text").text, largeTweet)
     
     val picUrl = urlFromUser(user)
     showMediumPicture(picUrl)
@@ -132,30 +134,6 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     userDescription.text = (user \ "name").text + " • " +
         location + " • " + (user \ "description").text  + " • " +
         (user \ "followers_count").text + " followers"
-  }
-  
-  private def substituteExpandedUrlsInLargeTweet(status: NodeSeq) {
-    val m = LinkExtractor.hyperlinkPattern.matcher((status \ "text").text)
-    while (m.find) {
-      val url = m.group(1)
-      if (ShortUrl.domains.filter(s => url.contains(s)).length > 0) {
-        new SwingWorker[Option[String],Object] {
-          def doInBackground = {ShortUrl.expand(url)}
-          override def done = {
-            get match {
-              case Some(location) => 
-                val beforeText = largeTweet.getText
-                val afterText = beforeText.replace(url, location)
-                if (beforeText != afterText) {
-                  largeTweet setText afterText
-                }
-              case None =>
-            }
-          }
-        }.execute
-      }
-    }
-    
   }
 
   private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
