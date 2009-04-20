@@ -73,13 +73,9 @@ class Streams(username: String, password: String) extends Reactor {
       case None =>
     }
     val model  = new StatusTableModel(new StatusTableOptions(true), source, usersModel, fs, username)
-    val pane = {
-      if (source.isInstanceOf[RepliesProvider]) {
-        val newPane = new RepliesStatusPane(title, model, apiHandlers, fs, this) 
-        newPane.table.showColumn(3, false)
-        newPane
-      } else 
-        new TweetsStatusPane(title, model, apiHandlers, fs, this)
+    val pane = new StatusPane(title, model, apiHandlers, fs, this)
+    if (source.isInstanceOf[RepliesProvider]) {
+      pane.table.showColumn(3, false)
     }
     pane.requestFocusForTable
     Windows.tabbedPane.pages += new TabbedPane.Page(title, pane)

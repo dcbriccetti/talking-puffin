@@ -165,16 +165,6 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
     ap.addAction(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap.addAction(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
-  }
-
-}
-
-class TweetsTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
-    clearAction: Action, showBigPicture: => Unit) 
-    extends StatusTable(statusTableModel, apiHandlers, clearAction, showBigPicture) {
-  
-  override def buildActions {
-    super.buildActions
     ap.addAction(clearAction, Actions.ks(KeyEvent.VK_C))
     
     val deleteTitle = "Delete selected tweets"
@@ -190,5 +180,5 @@ class TweetsTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
       java.awt.event.InputEvent.SHIFT_DOWN_MASK))  
   }
 
-  
 }
+

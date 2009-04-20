@@ -27,6 +27,7 @@ object StreamUtil {
 /**
  * Generalises Http handling.
  * @author Alf Kristian Støyle  
+ * @author Dave Briccetti  
  */
 protected trait HttpHandler {
 

@@ -26,32 +26,32 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
     filterSet: FilterSet, streams: Streams) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
-  var lastSelectedRows: List[NodeSeq] = Nil
-  val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet)
+  private var lastSelectedRows: List[NodeSeq] = Nil
+  private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet)
 
-  val showFiltersAction = new Action("Filter…") {
+  private val showFiltersAction = new Action("Filter…") {
     toolTip = "Set filters for this stream"
     def apply {
       filtersDialog.visible = true
     }
   }
-  val sendAction = new Action("Send…") {
+  private val sendAction = new Action("Send…") {
     toolTip = "Opens a window from which you can send a tweet"
     def apply { 
       val sm = new SendMsgDialog(null, apiHandlers.sender, None, None)
       sm.visible = true
     }
   }
-  val clearAction = new Action("Clear") {
+  protected val clearAction = new Action("Clear") {
     toolTip = "Removes all tweets (including filtered-out ones)"
     def apply = clearTweets
   }
-  val clearRepliesAction = new Action("Clear") {
+  private val clearRepliesAction = new Action("Clear") {
     toolTip = "Removes all mentions"
     def apply = clearTweets
   }
-  var detailsButton: JToggleButton = _ 
-  val showDetailsAction = new Action("Details") {
+  private var detailsButton: JToggleButton = _ 
+  private val showDetailsAction = new Action("Details") {
     toolTip = "Shows or hides the details panel"
     def apply = {
       tweetDetailPanel.visible = detailsButton.isSelected    
@@ -60,8 +60,8 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   detailsButton = new JToggleButton(showDetailsAction.peer)
   detailsButton.setSelected(true)
 
-  var geoButton: JToggleButton = _ 
-  val geoAction = new Action("Geo") {
+  private var geoButton: JToggleButton = _ 
+  private val geoAction = new Action("Geo") {
     toolTip = "Enables lookup of locations from latitude and longitude"
     def apply = {
       tweetDetailPanel.geoEnabled = geoButton.isSelected    
@@ -70,8 +70,8 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   geoButton = new JToggleButton(geoAction.peer)
   geoButton.setSelected(true)
 
-  var animButton: JToggleButton = _ 
-  val animAction = new Action("Anim") {
+  private var animButton: JToggleButton = _ 
+  private val animAction = new Action("Anim") {
     toolTip = "Enables simple, useful animations"
     def apply = {
       tweetDetailPanel.enableAnimation(animButton.isSelected)    
@@ -80,8 +80,8 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   animButton = new JToggleButton(animAction.peer)
   animButton.setSelected(true)
 
-  var dockedButton: JToggleButton = _ 
-  val dockedAction = new Action("Docked") {
+  private var dockedButton: JToggleButton = _ 
+  private val dockedAction = new Action("Docked") {
     toolTip = "Docks or frees the pane"
     def apply = {
       if (! dockedButton.isSelected) {
@@ -97,7 +97,17 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
   
-  def toolbar: JToolBar = null
+  def toolbar: JToolBar = new JToolBar {
+    setFloatable(false)
+    add(sendAction.peer)
+    add(showFiltersAction.peer)
+    add(clearAction.peer)
+    addSeparator
+    add(dockedButton)
+    add(detailsButton)
+    add(geoButton)
+    add(animButton)
+  }
 
   if (toolbar != null)
     peer.add(toolbar, new Constraints{grid=(0,0); gridwidth=3}.peer)
@@ -109,7 +119,7 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
     grid = (0,1); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
   
-  val tweetDetailPanel = new TweetDetailPanel(table, filtersDialog, streams)
+  private val tweetDetailPanel = new TweetDetailPanel(table, filtersDialog, streams)
   add(tweetDetailPanel, new Constraints{
     grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
   })
@@ -182,40 +192,3 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   }
 }
 
-class TweetsStatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
-    filterSet: FilterSet, streams: Streams) 
-    extends StatusPane(title, statusTableModel, apiHandlers, filterSet, streams) {
-  
-  override def toolbar: JToolBar = new JToolBar {
-    setFloatable(false)
-    add(sendAction.peer)
-    add(showFiltersAction.peer)
-    add(clearAction.peer)
-    addSeparator
-    add(dockedButton)
-    add(detailsButton)
-    add(geoButton)
-    add(animButton)
-  }
-
-  override def newTable: StatusTable = new TweetsTable(statusTableModel, apiHandlers, clearAction, showBigPicture)
-  
-}
-
-class RepliesStatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
-    filterSet: FilterSet, streams: Streams) 
-    extends StatusPane(title, statusTableModel, apiHandlers, filterSet, streams) {
-  
-  override def toolbar: JToolBar = new JToolBar {
-    setFloatable(false)
-    add(sendAction.peer)
-    add(showFiltersAction.peer)
-    add(clearRepliesAction.peer)
-    addSeparator
-    add(dockedButton)
-    add(detailsButton)
-    add(geoButton)
-    add(animButton)
-  }
-
-}
