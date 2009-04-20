@@ -51,7 +51,7 @@ class PictureFetcher(scaleTo: Option[Int],
         if (sCache.size > 1000) 
           sCache.clear // TODO clear LRU instead
         sCache.put(url, processedIcon)
-        processedIcon
+        icon
       }
       case None => icon 
     }

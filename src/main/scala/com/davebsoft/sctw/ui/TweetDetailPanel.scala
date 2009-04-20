@@ -212,7 +212,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     })
     
     bigPicFrame.peer.addKeyListener(new KeyAdapter {
-      override def keyPressed(e: KeyEvent) = if (e.getKeyCode == KeyEvent.VK_ESCAPE) closePicture
+      override def keyPressed(e: KeyEvent) = closePicture
     })
     
   }
