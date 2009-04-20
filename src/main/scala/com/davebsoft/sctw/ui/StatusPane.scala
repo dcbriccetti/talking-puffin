@@ -29,88 +29,11 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   private var lastSelectedRows: List[NodeSeq] = Nil
   private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet)
 
-  private val showFiltersAction = new Action("Filter…") {
-    toolTip = "Set filters for this stream"
-    def apply {
-      filtersDialog.visible = true
-    }
-  }
-  private val sendAction = new Action("Send…") {
-    toolTip = "Opens a window from which you can send a tweet"
-    def apply { 
-      val sm = new SendMsgDialog(null, apiHandlers.sender, None, None)
-      sm.visible = true
-    }
-  }
-  protected val clearAction = new Action("Clear") {
-    toolTip = "Removes all tweets (including filtered-out ones)"
-    def apply = clearTweets
-  }
-  private val clearRepliesAction = new Action("Clear") {
-    toolTip = "Removes all mentions"
-    def apply = clearTweets
-  }
-  private var detailsButton: JToggleButton = _ 
-  private val showDetailsAction = new Action("Details") {
-    toolTip = "Shows or hides the details panel"
-    def apply = {
-      tweetDetailPanel.visible = detailsButton.isSelected    
-    }
-  }
-  detailsButton = new JToggleButton(showDetailsAction.peer)
-  detailsButton.setSelected(true)
-
-  private var geoButton: JToggleButton = _ 
-  private val geoAction = new Action("Geo") {
-    toolTip = "Enables lookup of locations from latitude and longitude"
-    def apply = {
-      tweetDetailPanel.geoEnabled = geoButton.isSelected    
-    }
-  }
-  geoButton = new JToggleButton(geoAction.peer)
-  geoButton.setSelected(true)
-
-  private var animButton: JToggleButton = _ 
-  private val animAction = new Action("Anim") {
-    toolTip = "Enables simple, useful animations"
-    def apply = {
-      tweetDetailPanel.enableAnimation(animButton.isSelected)    
-    }
-  }
-  animButton = new JToggleButton(animAction.peer)
-  animButton.setSelected(true)
-
-  private var dockedButton: JToggleButton = _ 
-  private val dockedAction = new Action("Docked") {
-    toolTip = "Docks or frees the pane"
-    def apply = {
-      if (! dockedButton.isSelected) {
-        Windows.undock(StatusPane.this)
-      } else {
-        Windows.dock(StatusPane.this)
-      }
-    }
-  }
-  dockedButton = new JToggleButton(dockedAction.peer)
-  dockedButton.setSelected(true)
-
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
   
-  def toolbar: JToolBar = new JToolBar {
-    setFloatable(false)
-    add(sendAction.peer)
-    add(showFiltersAction.peer)
-    add(clearAction.peer)
-    addSeparator
-    add(dockedButton)
-    add(detailsButton)
-    add(geoButton)
-    add(animButton)
-  }
-
-  if (toolbar != null)
-    peer.add(toolbar, new Constraints{grid=(0,0); gridwidth=3}.peer)
+  val statusToolBar = new StatusToolBar(filtersDialog, apiHandlers, this, clearTweets)
+  peer.add(statusToolBar, new Constraints{grid=(0,0); gridwidth=3}.peer)
   
   add(new ScrollPane {
     table = newTable
@@ -123,6 +46,8 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   add(tweetDetailPanel, new Constraints{
     grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
   })
+  
+  statusToolBar.tweetDetailPanel = tweetDetailPanel
   
   table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
     def valueChanged(e: ListSelectionEvent) = {
@@ -153,7 +78,8 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
     })
   }
   
-  def newTable: StatusTable = new StatusTable(statusTableModel, apiHandlers, clearAction, showBigPicture)
+  def newTable: StatusTable = new StatusTable(statusTableModel, apiHandlers, 
+    statusToolBar.clearAction, showBigPicture)
   
   def showBigPicture = tweetDetailPanel.showBigPicture
   
@@ -187,8 +113,6 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
     lastSelectedRows = Nil
   }
 
-  def requestFocusForTable {
-    table.requestFocusInWindow
-  }
+  def requestFocusForTable = table.requestFocusInWindow
 }
 
