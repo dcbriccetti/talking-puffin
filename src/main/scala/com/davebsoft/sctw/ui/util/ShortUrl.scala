@@ -12,6 +12,10 @@ import javax.swing.{SwingWorker, JScrollPane}
 object ShortUrl {
   val domains = List("bit.ly", "ff.im", "is.gd", "tinyurl.com", "tr.im")
   val redirectionCodes = List(301, 302)
+  type UrlReady = ResourceReady[String,Option[String]]
+  val fetcher = new BackgroundResourceFetcher[String, Option[String]](processResult) {
+    protected def getResourceFromSource(key: String) = ShortUrl.expand(key)
+  }
   
   def expand(url: String): Option[String] = {
     val conn = (new URL(url)).openConnection.asInstanceOf[HttpURLConnection]
@@ -25,22 +29,33 @@ object ShortUrl {
     while (m.find) {
       val url = m.group(1)
       if (ShortUrl.domains.filter(s => url.contains(s)).length > 0) {
-        new SwingWorker[Option[String],Object] {
-          def doInBackground = {ShortUrl.expand(url)}
-          override def done = {
-            get match {
-              case Some(location) =>
-                val beforeText = target.getText
-                val afterText = beforeText.replace(url, location)
-                if (beforeText != afterText) {
-                  target setText afterText
-                  target scrollRectToVisible new Rectangle(0,0,1,1) // TODO get this scroll to top working
-                }
-              case None =>
-            }
+        fetcher.getCachedObject(url) match {
+          case Some(optLocation) => optLocation match {
+            case Some(loc) => sub(target, url, loc)
+            case None => // Cached value is None (short URL couldn’t be expanded)
           }
-        }.execute
+          case None => fetcher.requestItem(new FetchRequest(url, target))
+        }
       }
     }
+  }
+
+  def processResult(urlReady: UrlReady) = {
+    urlReady.resource match {
+      case Some(location) =>
+        val target = urlReady.id.asInstanceOf[JTextComponent]
+        sub(target, urlReady.key, location)
+      case None =>
+    }
+  }
+  
+  def sub(target: JTextComponent, shortUrl: String, location: String) = {
+    val beforeText = target.getText
+    val afterText = beforeText.replace(shortUrl, location)
+    if (beforeText != afterText) {
+      target setText afterText
+      target scrollRectToVisible new Rectangle(0,0,1,1) // TODO get this scroll to top working
+    }
+    
   }
 }

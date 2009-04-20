@@ -1,6 +1,7 @@
 package com.davebsoft.sctw.ui
 
 import _root_.scala.actors.Actor
+import cache.Cache
 import google.common.collect.MapMaker
 import java.awt.Image
 import java.util.{Collections, HashSet}
@@ -38,7 +39,7 @@ object PictureFetcher {
  */
 class PictureFetcher(scaleTo: Option[Int], 
     processFinishedImage: (PictureFetcher.ImageReady) => Unit) 
-    extends BackgroundResourceFetcher[String, ImageIcon](processFinishedImage) {
+    extends BackgroundResourceFetcher[String, ImageIcon](processFinishedImage) with Cache[String,ImageIcon] {
   
   def FetchImageRequest(url: String, id: Object) = new FetchRequest[String](url, id)
 
@@ -47,10 +48,7 @@ class PictureFetcher(scaleTo: Option[Int],
     scaleTo match {
       case Some(sideLength) => {
         val processedIcon = PictureFetcher.scaleImageToFitSquare(sideLength, icon)
-        val sCache = PictureFetcher.scaledPictureCache
-        if (sCache.size > 1000) 
-          sCache.clear // TODO clear LRU instead
-        sCache.put(url, processedIcon)
+        store(PictureFetcher.scaledPictureCache, url, processedIcon)
         icon
       }
       case None => icon 

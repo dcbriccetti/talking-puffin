@@ -1,9 +1,11 @@
 package com.davebsoft.sctw.ui.util
+import cache.Cache
 import java.util.concurrent.{ConcurrentHashMap, Executors, LinkedBlockingQueue}
 import google.common.collect.MapMaker
 import java.util.{Collections, HashSet}
+import org.apache.log4j.Logger
 
-case class FetchRequest[K](val key: K, val id: Object)
+case class FetchRequest[K](val key: K, val userData: Object)
 
 class ResourceReady[K,V](val key: K, val id: Object, val resource: V)
 
@@ -12,7 +14,9 @@ class ResourceReady[K,V](val key: K, val id: Object, val resource: V)
  * 
  * @author Dave Briccetti
  */
-abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceReady[K,V]) => Unit) {
+abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceReady[K,V]) => Unit) 
+    extends Cache[K,V] {
+  val log = Logger.getLogger(getClass)
   val cache: java.util.Map[K,V] = new MapMaker().softValues().makeMap()
   val requestQueue = new LinkedBlockingQueue[FetchRequest[K]]
   val inProgress = Collections.synchronizedSet(new HashSet[K])
@@ -32,9 +36,10 @@ abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceRea
         var resource = cache.get(key)
         if (resource == null) {
           resource = getResourceFromSource(key)
-          if (cache.size > 1000) 
-            cache.clear // TODO clear LRU instead
-          cache.put(key, resource)
+          log.info("Fetched " + key + " from source")
+          store(cache, key, resource)
+        } else {
+          log.info("Found " + key + " in cache")
         }
         inProgress.remove(key)
         
