@@ -7,7 +7,7 @@ import org.apache.log4j.Logger
 
 case class FetchRequest[K](val key: K, val userData: Object)
 
-class ResourceReady[K,V](val key: K, val id: Object, val resource: V)
+class ResourceReady[K,V](val key: K, val userData: Object, val resource: V)
 
 case class NoSuchResource(resource: String) extends Exception
   

@@ -137,7 +137,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
   }
 
   private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
-    if (resourceReady.id.equals(showingUser)) {
+    if (resourceReady.userData.equals(showingUser)) {
       animator.stop
       var origText = userLoc(showingUser)
       val newText = resourceReady.resource

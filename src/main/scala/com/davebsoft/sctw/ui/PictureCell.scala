@@ -11,7 +11,7 @@ import javax.swing.{Icon, ImageIcon}
 class PictureCell(model: AbstractTableModel, column: Int) {
   val picFetcher = new PictureFetcher(None, (imageReady: PictureFetcher.ImageReady) => {
     if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
-      val row = imageReady.id.asInstanceOf[Int]
+      val row = imageReady.userData.asInstanceOf[Int]
       model.fireTableCellUpdated(row, column)
     }
   })

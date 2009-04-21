@@ -44,7 +44,7 @@ object ShortUrl {
   private def urlIsShortened(url: String) = shortenerDomains.filter(url.contains(_)).length > 0
   
   private def processResult(urlReady: LongUrlReady) = 
-    replaceUrl(urlReady.id.asInstanceOf[JTextComponent], urlReady.key, urlReady.resource)
+    replaceUrl(urlReady.userData.asInstanceOf[JTextComponent], urlReady.key, urlReady.resource)
   
   private def replaceUrl(textComponent: JTextComponent, shortUrl: String, location: String) = {
     val beforeText = textComponent.getText
