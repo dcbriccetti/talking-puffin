@@ -1,9 +1,8 @@
 package com.davebsoft.sctw.ui.util
 
-import java.awt.{Rectangle, Point}
+import java.awt.{Rectangle}
 import java.net.{HttpURLConnection, URL}
 import javax.swing.text.JTextComponent
-import javax.swing.{SwingWorker, JScrollPane}
 
 /**
  * URL shortening and expanding.
@@ -11,47 +10,48 @@ import javax.swing.{SwingWorker, JScrollPane}
  * @author Dave Briccetti
  */
 object ShortUrl {
-  val domains = List("bit.ly", "ff.im", "is.gd", "tinyurl.com", "tr.im")
-  val redirectionCodes = List(301, 302)
-  type UrlReady = ResourceReady[String,Option[String]]
-  val fetcher = new BackgroundResourceFetcher[String, Option[String]](processResult) {
-    protected def getResourceFromSource(key: String) = ShortUrl.getNewLocation(key)
-  }
+  private val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "tinyurl.com", "tr.im")
+  private val redirectionCodes = List(301, 302)
+  private type LongUrlReady = ResourceReady[String,String]
   
-  private def getNewLocation(url: String): Option[String] = {
-    val conn = (new URL(url)).openConnection.asInstanceOf[HttpURLConnection]
-    conn.setRequestMethod("HEAD")
-    conn.setInstanceFollowRedirects(false)
-    if (redirectionCodes.contains(conn.getResponseCode)) Some(conn.getHeaderField("Location")) else None
+  private val fetcher = new BackgroundResourceFetcher[String, String](processResult) {
+    override def getResourceFromSource(url: String): String = {
+      val conn = (new URL(url)).openConnection.asInstanceOf[HttpURLConnection]
+      conn.setRequestMethod("HEAD")
+      conn.setInstanceFollowRedirects(false)
+      if (redirectionCodes.contains(conn.getResponseCode)) conn.getHeaderField("Location") else 
+        throw new NoSuchResource(url)
+    }
   }
-  
-  def substituteExpandedUrls(text: String, target: JTextComponent) {
+
+  /**
+   * Substitutes long forms for all cached shortened URLs found in text, and issues requests for any 
+   * not in the cache.
+   */
+  def substituteExpandedUrls(text: String, textComponent: JTextComponent) {
     val matcher = LinkExtractor.hyperlinkPattern.matcher(text)
     while (matcher.find) {
-      val shortUrl = matcher.group(1)
-      if (domains.filter(domain => shortUrl.contains(domain)).length > 0) {
-        fetcher.getCachedObject(shortUrl) match {
-          case Some(optLongUrl) => optLongUrl match {
-            case Some(longUrl) => substituteExpanded(target, shortUrl, longUrl)
-            case None => // Cached value is None (short URL couldn’t be expanded)
-          }
-          case None => fetcher.requestItem(new FetchRequest(shortUrl, target))
+      val url = matcher.group(1)
+      if (urlIsShortened(url)) {
+        fetcher.getCachedObject(url) match {
+          case Some(longUrl) => replaceUrl(textComponent, url, longUrl)
+          case None => fetcher.requestItem(new FetchRequest(url, textComponent))
         }
       }
     }
   }
   
-  private def processResult(urlReady: UrlReady) = urlReady.resource match {
-    case Some(location) => substituteExpanded(urlReady.id.asInstanceOf[JTextComponent], urlReady.key, location)
-    case None =>
-  }
+  private def urlIsShortened(url: String) = shortenerDomains.filter(url.contains(_)).length > 0
   
-  private def substituteExpanded(target: JTextComponent, shortUrl: String, location: String) = {
-    val beforeText = target.getText
+  private def processResult(urlReady: LongUrlReady) = 
+    replaceUrl(urlReady.id.asInstanceOf[JTextComponent], urlReady.key, urlReady.resource)
+  
+  private def replaceUrl(textComponent: JTextComponent, shortUrl: String, location: String) = {
+    val beforeText = textComponent.getText
     val afterText = beforeText.replace(shortUrl, location)
     if (beforeText != afterText) {
-      target setText afterText
-      target scrollRectToVisible new Rectangle(0,0,1,1) // TODO get this scroll to top working
+      textComponent setText afterText
+      textComponent scrollRectToVisible new Rectangle(0,0,1,1) // TODO get this scroll to top working
     }
   }
 }

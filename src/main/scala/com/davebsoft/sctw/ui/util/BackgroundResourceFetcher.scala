@@ -9,6 +9,8 @@ case class FetchRequest[K](val key: K, val userData: Object)
 
 class ResourceReady[K,V](val key: K, val id: Object, val resource: V)
 
+case class NoSuchResource(resource: String) extends Exception
+  
 /**
  * Fetches resources in the background, and calls a function in the Swing event thread when ready.
  * 
@@ -33,17 +35,21 @@ abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceRea
     
     threadPool.execute(new Runnable {
       def run = {
-        var resource = cache.get(key)
-        if (resource == null) {
-          resource = getResourceFromSource(key)
-          log.debug("Fetched from source: " + key)
-          store(cache, key, resource)
+        try {
+          var resource = cache.get(key)
+          if (resource == null) {
+            resource = getResourceFromSource(key)
+            log.debug("Fetched from source: " + key)
+            store(cache, key, resource)
+          }
+          
+          SwingInvoke.invokeLater({
+            processReadyResource(new ResourceReady[K,V](key, fetchRequest.userData, resource))
+          })
+        } catch {
+          case e: NoSuchResource => // Do nothing
         }
         inProgress.remove(key)
-        
-        SwingInvoke.invokeLater({
-          processReadyResource(new ResourceReady[K,V](key, fetchRequest.userData, resource))
-        })
       }
     })
   }
