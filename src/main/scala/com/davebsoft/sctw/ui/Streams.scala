@@ -4,7 +4,7 @@ import _root_.scala.swing.{TabbedPane, Component, Reactor}
 import _root_.scala.xml.Node
 import filter.{FilterSet, TextFilter}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
-import twitter.{Follower, RepliesProvider, TweetsProvider, Sender}
+import twitter.{Follower, MentionsProvider, TweetsProvider, Sender}
 import state.StateRepository
 
 case class StreamInfo(val title: String, val model: StatusTableModel, val pane: StatusPane)
@@ -18,7 +18,8 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
 class Streams(username: String, password: String) extends Reactor {
   val tweetsProvider = new TweetsProvider(username, password, 
     Some(StateRepository.get("highestId", null)), "Following")
-  val repliesProvider = new RepliesProvider(username, password)
+  val mentionsProvider = new MentionsProvider(username, password, 
+    Some(StateRepository.get("highestMentionId", null)))
   val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
   val usersModel = new UsersTableModel(List[Node](), List[Node]())
   
@@ -48,7 +49,7 @@ class Streams(username: String, password: String) extends Reactor {
   
   // Now that views, models and listeners are in place, get data
   tweetsProvider.loadNewData
-  repliesProvider.loadNewData
+  mentionsProvider.loadNewData
 
   private def setTitleInParent(pane: JComponent, title: String) {
     Windows.tabbedPane.peer.indexOfComponent(pane) match {
@@ -74,7 +75,7 @@ class Streams(username: String, password: String) extends Reactor {
     }
     val model  = new StatusTableModel(new StatusTableOptions(true), source, usersModel, fs, username)
     val pane = new StatusPane(title, model, apiHandlers, fs, this)
-    if (source.isInstanceOf[RepliesProvider]) {
+    if (source.isInstanceOf[MentionsProvider]) {
       pane.table.showColumn(3, false)
     }
     pane.requestFocusForTable
@@ -98,9 +99,9 @@ class Streams(username: String, password: String) extends Reactor {
 
   def createFollowingView: StreamInfo = createStream(tweetsProvider, folTitle.create, None)
   
-  def createRepliesViewFor(include: String) = createStream(repliesProvider, repTitle.create, Some(include))
+  def createRepliesViewFor(include: String) = createStream(mentionsProvider, repTitle.create, Some(include))
 
-  def createRepliesView: StreamInfo = createStream(repliesProvider, repTitle.create, None)
+  def createRepliesView: StreamInfo = createStream(mentionsProvider, repTitle.create, None)
   
   def componentTitle(comp: Component) = streamInfoList.filter(s => s.pane == comp)(0).title
   

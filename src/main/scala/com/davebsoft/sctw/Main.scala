@@ -24,6 +24,7 @@ import ui._
 object Main {
   BasicConfigurator.configure
   Logger.getRootLogger.setLevel(Level.INFO)
+  val log = Logger getLogger "Main"
   private var username: String = ""
   private var password: String = ""
   
@@ -52,9 +53,7 @@ object Main {
 
     reactions += {
       case WindowClosing(_) => {
-        StateRepository.set("highestId", streams.tweetsProvider.getHighestId)
-        StateRepository.save
-        TagUsers.save
+        saveState
         System.exit(1)
       }
     }
@@ -78,6 +77,16 @@ object Main {
       val pane = new FriendsFollowersPane(streams.apiHandlers, streams.usersModel, following, followers)
       tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
     })
+    
+    private def saveState {
+      val highFol = streams.tweetsProvider.getHighestId
+      val highMen = streams.mentionsProvider.getHighestId
+      log info("Saving last seen IDs. Following: " + highFol + ", mentions: " + highMen)
+      StateRepository.set("highestId", highFol)
+      StateRepository.set("highestMentionId", highMen)
+      StateRepository.save
+      TagUsers.save
+    }
   }
   
   def main(args: Array[String]): Unit = {

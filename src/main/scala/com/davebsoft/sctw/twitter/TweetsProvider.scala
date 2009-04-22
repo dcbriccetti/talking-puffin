@@ -109,8 +109,8 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
   
 }
 
-class RepliesProvider(username: String, password: String) 
-    extends TweetsProvider(username, password, None, "Mentions") {
+class MentionsProvider(username: String, password: String, startingId: Option[String]) 
+    extends TweetsProvider(username, password, startingId, "Mentions") {
   override def getUrlFile = "statuses/mentions.xml"
 }
 
