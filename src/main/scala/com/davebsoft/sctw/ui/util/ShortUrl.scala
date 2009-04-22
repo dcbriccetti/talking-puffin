@@ -10,7 +10,7 @@ import javax.swing.text.JTextComponent
  * @author Dave Briccetti
  */
 object ShortUrl {
-  private val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "tinyurl.com", "tr.im")
+  private val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "short.ie", "tinyurl.com", "tr.im")
   private val redirectionCodes = List(301, 302)
   private type LongUrlReady = ResourceReady[String,String]
   
@@ -41,7 +41,7 @@ object ShortUrl {
     }
   }
   
-  private def urlIsShortened(url: String) = shortenerDomains.filter(url.contains(_)).length > 0
+  private def urlIsShortened(url: String) = shortenerDomains.exists(url.contains(_))
   
   private def processResult(urlReady: LongUrlReady) = 
     replaceUrl(urlReady.userData.asInstanceOf[JTextComponent], urlReady.key, urlReady.resource)
@@ -51,7 +51,7 @@ object ShortUrl {
     val afterText = beforeText.replace(shortUrl, location)
     if (beforeText != afterText) {
       textComponent setText afterText
-      textComponent scrollRectToVisible new Rectangle(0,0,1,1) // TODO get this scroll to top working
+      textComponent setCaretPosition 0
     }
   }
 }

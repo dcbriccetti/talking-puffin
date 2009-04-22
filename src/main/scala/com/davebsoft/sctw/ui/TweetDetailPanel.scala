@@ -92,6 +92,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
     setText(user)
     largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
       (status \ "in_reply_to_status_id").text, (status \ "source").text))
+    largeTweet setCaretPosition 0
 
     ShortUrl.substituteExpandedUrls((status \ "text").text, largeTweet)
     
