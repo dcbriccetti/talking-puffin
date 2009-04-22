@@ -21,16 +21,16 @@ import ui._
  *
  * @Author Dave Briccetti, daveb@davebsoft.com, @dcbriccetti
  */
-object Main extends GUIApplication {
+object Main {
   BasicConfigurator.configure
   Logger.getRootLogger.setLevel(Level.INFO)
   private var username: String = ""
   private var password: String = ""
   
   /**
-   * Creates the Swing frame.
+   * The Swing frame.
    */
-  def createTopFrame = {
+  class TopFrame extends Frame {
 
     val tabbedPane = new TabbedPane() {
       preferredSize = new Dimension(900, 600)
@@ -40,28 +40,26 @@ object Main extends GUIApplication {
     val streams = new Streams(username, password)
     Windows.streams = streams
     
-    val frame = new Frame {
-      title = "Simple Twitter Client"
+    title = "Simple Twitter Client"
 
-      TagUsers.load
+    TagUsers.load
 
-      contents = new BorderPanel {
-        val toolBar = new MainToolBar(streams)
-        peer.add(new FlowPanel(FlowPanel.Alignment.Left) {peer.add(toolBar)}.peer, BorderLayout.NORTH)
-        add(tabbedPane, BorderPanel.Position.Center)
-      }
-
-      reactions += {
-        case WindowClosing(_) => {
-          StateRepository.set("highestId", streams.tweetsProvider.getHighestId)
-          StateRepository.save
-          TagUsers.save
-          System.exit(1)
-        }
-      }
-
-      peer.setLocationRelativeTo(null)
+    contents = new BorderPanel {
+      val toolBar = new MainToolBar(streams)
+      peer.add(new FlowPanel(FlowPanel.Alignment.Left) {peer.add(toolBar)}.peer, BorderLayout.NORTH)
+      add(tabbedPane, BorderPanel.Position.Center)
     }
+
+    reactions += {
+      case WindowClosing(_) => {
+        StateRepository.set("highestId", streams.tweetsProvider.getHighestId)
+        StateRepository.save
+        TagUsers.save
+        System.exit(1)
+      }
+    }
+
+    peer.setLocationRelativeTo(null)
 
     SwingInvoke.execSwingWorker({
       (new FriendsDataProvider(username, password).getUsers,
@@ -74,47 +72,30 @@ object Main extends GUIApplication {
       streams.usersModel.followers = followers
       streams.usersModel.usersChanged
  
-      streams.setFollowerIds(getIds(followers))
+      streams setFollowerIds (followers map (u => (u \ "id").text))
               
       val paneTitle = "People (" + following.length + ", " + followers.length + ")"
       val pane = new FriendsFollowersPane(streams.apiHandlers, streams.usersModel, following, followers)
       tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
     })
-
-    frame
   }
   
-  private def getIds(users: List[Node]): List[String] = {
-    users map (u => (u \ "id").text)
-  }
-
   def main(args: Array[String]): Unit = {
-    
-    try {
-      UIManager setLookAndFeel UIManager.getSystemLookAndFeelClassName
-      JFrame setDefaultLookAndFeelDecorated true
-    } catch {
-      case e: Exception => // Ignore
-    }
+    UIManager setLookAndFeel UIManager.getSystemLookAndFeelClassName
+    JFrame setDefaultLookAndFeelDecorated true
     
     def startUp(userName: String, pwd: String) {
       username = userName
       password = pwd
-      setUpUi
+
+      new TopFrame {
+        pack
+        visible = true
+      }
     }
 
-    def shutDown = System.exit(1)
-
-    new LoginDialog(new twitter.AuthenticationProvider, shutDown, startUp).display
+    new LoginDialog(new twitter.AuthenticationProvider, System.exit(1), startUp).display
   }
-  
-  def setUpUi {
-    init
-    val frame = createTopFrame
-    frame.pack
-    frame.visible = true
-  }
-
 }
 
 class ApiHandlers(val sender: Sender, val follower: Follower)
