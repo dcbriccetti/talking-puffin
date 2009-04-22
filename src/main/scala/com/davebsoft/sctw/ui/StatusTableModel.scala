@@ -175,7 +175,7 @@ class StatusTableModel(val options: StatusTableOptions, tweetsProvider: TweetsPr
   
   def removeStatuses(indexes: List[Int]) {
     val deleteStatuses = getStatuses(indexes)
-    statuses = statuses.filter(s => ! deleteStatuses.contains(s))
+    statuses = statuses.filter(! deleteStatuses.contains(_))
     filterAndNotify
   }
   

@@ -34,7 +34,7 @@ class Streams(username: String, password: String) extends Reactor {
     case TableContentsChanged(model, filtered, total) => {
       if (streamInfoList.length == 0) println("streamInfoList is empty. Ignoring table contents changed.")
       else {
-        val filteredList = streamInfoList.filter(s => s.model == model)
+        val filteredList = streamInfoList.filter(_.model == model)
         if (filteredList.length == 0) println("No matches in streamInfoList for model " + model)
         else {
           val si = filteredList(0)
