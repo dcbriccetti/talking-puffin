@@ -50,8 +50,9 @@ class StatusTableModel(val options: StatusTableOptions, tweetsProvider: TweetsPr
       evt.getPropertyName match {
         case TweetsProvider.CLEAR_EVENT => clear
         case TweetsProvider.NEW_TWEETS_EVENT => {
-          log.info("Tweets Arrived")
-          processStatuses(evt.getNewValue.asInstanceOf[NodeSeq])
+          val newTweets = evt.getNewValue.asInstanceOf[NodeSeq]
+          log.info("Tweets Arrived: " + newTweets.length)
+          processStatuses(newTweets)
         }
       }
     }
