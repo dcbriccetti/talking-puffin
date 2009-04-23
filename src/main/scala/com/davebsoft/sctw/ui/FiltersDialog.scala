@@ -72,14 +72,12 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
   peer.setLocationRelativeTo(null)
   
   def addIncludeMatching(text: String) {
-    filterSet.includeTextFilters.add(new TextFilter(text, false))
-    panel.includeTable.dataChanged
+    panel.includeTable.addTextFilter(text, false)
     applyChanges
   }
 
   def addExcludeMatching(text: String) {
-    filterSet.excludeTextFilters.add(new TextFilter(text, false))  
-    panel.excludeTable.dataChanged
+    panel.excludeTable.addTextFilter(text, false)
     applyChanges
   }
 
