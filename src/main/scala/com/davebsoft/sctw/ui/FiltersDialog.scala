@@ -84,5 +84,6 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
   def applyChanges {
     filterSet.excludeNotToYouReplies = panel.excludeNotToYouReplies.selected
     filterSet.publish
+    Status.message.text = "Filters changed"
   }
 }

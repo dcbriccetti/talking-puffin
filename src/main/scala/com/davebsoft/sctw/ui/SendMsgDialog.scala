@@ -59,5 +59,6 @@ class SendMsgDialog(parent: java.awt.Component, sender: Sender, recipients: Opti
   private def send {
     sender.send(message.text, replyToId)
     visible = false
+    Status.message.text = "Message sent"    
   }
 }

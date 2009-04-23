@@ -1,9 +1,11 @@
 package com.davebsoft.sctw
 
+import _root_.scala.swing.GridBagPanel._
 import _root_.scala.swing.event.{ButtonClicked, SelectionChanged, WindowClosing}
 import filter.{FilterSet, TextFilter, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
-import java.awt.{Dimension, BorderLayout}
+import java.awt.{Dimension, BorderLayout, Insets}
+import javax.swing.border.{BevelBorder, EmptyBorder}
 import javax.swing.{JToolBar, UIManager, JFrame}
 import org.apache.log4j.Logger
 import scala.swing._
@@ -43,10 +45,18 @@ object Main {
 
     TagUsers.load
 
-    contents = new BorderPanel {
+    contents = new GridBagPanel {
+      val status = new Panel() {
+        add(Status.message, new Constraints {anchor=Anchor.West; insets=new Insets(5,5,5,5)})
+      }
+      add(status, new Constraints {
+        grid = (0,0); fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
+        })
       val toolBar = new MainToolBar(streams)
-      peer.add(new FlowPanel(FlowPanel.Alignment.Left) {peer.add(toolBar)}.peer, BorderLayout.NORTH)
-      add(tabbedPane, BorderPanel.Position.Center)
+      peer.add(toolBar, new Constraints {
+        grid = (0,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; }.peer)
+      add(tabbedPane, new Constraints {
+        grid = (0,2); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; })
     }
 
     reactions += {
@@ -107,3 +117,6 @@ object Main {
 
 class ApiHandlers(val sender: Sender, val follower: Follower)
 
+object Status {
+  val message = new Label(" ")
+}

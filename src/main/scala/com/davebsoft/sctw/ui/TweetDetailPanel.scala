@@ -88,6 +88,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
   val statusTableModel = table.getModel.asInstanceOf[StatusTableModel]
 
   def showStatusDetails(status: NodeSeq) {
+    Status.message.text = " "
     val user = status \ "user"
     setText(user)
     largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
@@ -101,6 +102,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
   }
   
   def clearStatusDetails {
+    Status.message.text = " "
     animator.stop
     showingUrl = null
     picLabel.icon = Thumbnail.transparentMedium
