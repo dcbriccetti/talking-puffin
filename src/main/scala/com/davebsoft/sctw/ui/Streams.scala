@@ -73,9 +73,15 @@ class Streams(username: String, password: String) extends Reactor {
       case Some(s) => fs.includeTextFilters.add(new TextFilter(s, false)) 
       case None =>
     }
-    val model  = new StatusTableModel(new StatusTableOptions(true), source, usersModel, fs, username)
+    val sto = new StatusTableOptions(true)
+    val isMentions = source.isInstanceOf[MentionsProvider] // TODO do without this test
+    val model = if (isMentions) {
+      new StatusTableModel(sto, source, usersModel, fs, username) with Mentions
+    } else {
+      new StatusTableModel(sto, source, usersModel, fs, username)
+    }
     val pane = new StatusPane(title, model, apiHandlers, fs, this)
-    if (source.isInstanceOf[MentionsProvider]) {
+    if (isMentions) {
       pane.table.showColumn(3, false)
     }
     pane.requestFocusForTable

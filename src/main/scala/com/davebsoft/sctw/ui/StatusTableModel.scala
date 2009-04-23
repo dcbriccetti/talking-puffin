@@ -206,7 +206,7 @@ trait PreChangeListener {
 case class TableContentsChanged(val model: StatusTableModel, val filteredIn: Int, 
     val total: Int) extends Event
   
-trait Replies extends StatusTableModel {
+trait Mentions extends StatusTableModel {
   override def getStatusText(status: NodeSeq, username: String): String = {
     val text = (status \ "text").text
     val userTag = "@" + username
