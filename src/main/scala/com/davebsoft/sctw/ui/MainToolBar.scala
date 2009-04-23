@@ -5,6 +5,7 @@ import _root_.scala.swing.{Label, ComboBox, Action}
 import java.awt.event.{ActionEvent, ActionListener}
 
 import javax.swing.JToolBar
+import time.TimeFormatter
 /**
  * The main ToolBar
  * 
@@ -34,7 +35,12 @@ class MainToolBar(streams: Streams) extends JToolBar {
     }
     add(newViewAction.peer)
 
-    add(new RefreshCombo(provider).peer)
+    val tenThruFiftySecs = List.range(10, 50, 10)
+    val oneThruNineMins = List.range(60, 600, 60)
+    val tenThruSixtyMins = List.range(10 * 60, 60 * 60 + 1, 10 * 60)
+    val assortedTimes = tenThruFiftySecs ::: oneThruNineMins ::: tenThruSixtyMins 
+
+    add(new RefreshCombo(provider, assortedTimes).peer)
   
     val loadNewAction = new Action("Load New") {
       toolTip = "Loads any new items"
@@ -49,14 +55,18 @@ class MainToolBar(streams: Streams) extends JToolBar {
     add(last200Action.peer)
   }
   
-  class RefreshCombo(provider: TweetsProvider) extends ComboBox(List.range(0, 50, 10) ::: List.range(60, 600, 60)) {
-    peer.setToolTipText("Number of seconds between automatic “Load New”s")
-    var defaultRefresh = 120
+  case class DisplayTime(val seconds: Int) {
+    override def toString = TimeFormatter(seconds).longForm
+  }
+  
+  class RefreshCombo(provider: TweetsProvider, times: List[Int]) extends ComboBox(times map(DisplayTime(_))) {
+    peer.setToolTipText("How often to load new items")
+    var defaultRefresh = DisplayTime(120)
     peer.setSelectedItem(defaultRefresh)
-    provider.setUpdateFrequency(defaultRefresh)
+    provider.setUpdateFrequency(defaultRefresh.seconds)
     peer.addActionListener(new ActionListener(){
       def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
-        provider.setUpdateFrequency(selection.item)
+        provider.setUpdateFrequency(selection.item.seconds)
       }
     })
     

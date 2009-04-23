@@ -4,6 +4,7 @@ import java.awt.{Component, Color}
 import javax.swing.border.EmptyBorder
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.{JTextPane, JTable}
+import time.TimeFormatter
 /**
  * Renderer for the Age column
  * @author Dave Briccetti
@@ -22,23 +23,11 @@ class AgeCellRenderer extends JTextPane with TableCellRenderer {
     setBackground(renderer.getBackground) 
     setBorder(border)
 
-    val time = value.asInstanceOf[Long]
-    val days = time / 86400
-    val hours = (time / 3600) - (days * 24)
-    val mins = (time / 60) - (days * 1440) - (hours * 60)
-    val seconds = time % 60
-    val sb = new StringBuilder
-    if (days > 0)                   sb.append(twoDigitNum(days)) .append(":")
-    if (hours > 0 || sb.length > 0) sb.append(twoDigitNum(hours)).append(":")
-    if (mins > 0  || sb.length > 0) sb.append(twoDigitNum(mins)) .append(":")
-    sb.append(twoDigitNum(seconds))
     setText(HtmlFormatter.htmlAround("<font size='-1' face='helvetica' color='#" +  
         Integer.toHexString(renderer.getForeground.getRGB & 0x00ffffff) + "'>" + 
-        sb.toString + "</font>"))
+        TimeFormatter(value.asInstanceOf[Long]).colonSeparated + "</font>"))
     this
   }
 
-  private def twoDigitNum(num: java.lang.Long): String = String.format("%02d", num)
-  
 }
 
