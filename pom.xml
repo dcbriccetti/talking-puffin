@@ -72,6 +72,11 @@
 
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>
+        <resources>
+          <resource>
+            <directory>config</directory>
+          </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.scala-tools</groupId>

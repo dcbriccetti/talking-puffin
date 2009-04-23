@@ -5,7 +5,7 @@ import filter.{FilterSet, TextFilter, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Dimension, BorderLayout}
 import javax.swing.{JToolBar, UIManager, JFrame}
-import org.apache.log4j.{Level, Logger, BasicConfigurator}
+import org.apache.log4j.Logger
 import scala.swing._
 import scala.xml._
 
@@ -22,8 +22,6 @@ import ui._
  * @Author Dave Briccetti, daveb@davebsoft.com, @dcbriccetti
  */
 object Main {
-  BasicConfigurator.configure
-  Logger.getRootLogger.setLevel(Level.INFO)
   val log = Logger getLogger "Main"
   private var username: String = ""
   private var password: String = ""
