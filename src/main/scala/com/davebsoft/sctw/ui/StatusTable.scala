@@ -152,27 +152,25 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
   }
 
   protected def buildActions = {
-    ap.add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
-    ap.add(new OpenLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
-    ap.add(Action("Mute") {statusTableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
+    ap add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
+    ap add(new OpenLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
+    ap add(Action("Mute") {statusTableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
       Actions.ks(KeyEvent.VK_M))
-    ap.add(new NextTAction(this))
-    ap.add(new PrevTAction(this))
-    ap.add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
-    ap.add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
-    ap.add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
+    ap add new NextTAction(this)
+    ap add new PrevTAction(this)
+    ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
+    ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
+    ap add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
-    ap.add(clearAction, Actions.ks(KeyEvent.VK_C))
+    ap add(clearAction, Actions.ks(KeyEvent.VK_C))
     
-    val deleteTitle = "Delete selected tweets"
-    ap.add(Action(deleteTitle) {
-      statusTableModel.removeStatuses(TableUtil.getSelectedModelIndexes(this)) 
+    ap add(Action("Delete selected tweets") {
+      statusTableModel removeStatuses TableUtil.getSelectedModelIndexes(this) 
     }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask),
       Actions.ks(KeyEvent.VK_DELETE), Actions.ks(KeyEvent.VK_BACK_SPACE))
 
-    val deleteSelectedFromTitle = "Delete all tweets from all selected users"
-    ap.add(Action(deleteSelectedFromTitle) {
-      statusTableModel.removeStatusesFrom(getSelectedScreenNames) 
+    ap add(Action("Delete all tweets from all selected users") {
+      statusTableModel removeStatusesFrom getSelectedScreenNames 
     }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask | 
       java.awt.event.InputEvent.SHIFT_DOWN_MASK))  
   }
