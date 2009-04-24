@@ -83,11 +83,11 @@ class FriendsFollowersPane(session: Session, apiHandlers: ApiHandlers, tableMode
   })
 
   private def buildActions(ap: ActionPrep, comp: java.awt.Component) = {
-    ap.addAction(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
-    ap.addAction(new NextTAction(comp))
-    ap.addAction(new PrevTAction(comp))
-    ap.addAction(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
-    ap.addAction(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
+    ap.add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
+    ap.add(new NextTAction(comp))
+    ap.add(new PrevTAction(comp))
+    ap.add(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
+    ap.add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
   }
 

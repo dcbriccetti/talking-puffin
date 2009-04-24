@@ -45,7 +45,7 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
   val ap = new ActionPrep(this)
   buildActions
 
-  addMouseListener(new PopupListener(this, getPopupMenu))
+  addMouseListener(new PopupListener(this, new PopupMenu))
   addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = if (e.getClickCount == 2) reply
   })
@@ -78,15 +78,14 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
     if (row == -1) None else Some(statusTableModel.getStatusAt(convertRowIndexToModel(row)))
   }
 
-  def getPopupMenu: JPopupMenu = {
-    val menu = new JPopupMenu
-
+  class PopupMenu extends JPopupMenu {
     for (action <- ap.actions.reverse) 
-      menu.add(new MenuItem(action).peer)
+      add(new MenuItem(action).peer)
 
     val tagAl = new ActionListener() {
       def actionPerformed(e: ActionEvent) = {
-        statusTableModel.tagSelectedUsers(TableUtil.getSelectedModelIndexes(StatusTable.this), e.getActionCommand)
+        statusTableModel.tagSelectedUsers(TableUtil.getSelectedModelIndexes(StatusTable.this), 
+          e.getActionCommand)
       }
     }
     
@@ -96,9 +95,7 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
       tagSmi.addActionListener(tagAl)
       tagMi.add(tagSmi)
     }
-    menu.add(tagMi)
-
-    menu
+    add(tagMi)
   }
   
   private def configureColumns {
@@ -155,26 +152,26 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
   }
 
   protected def buildActions = {
-    ap.addAction(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
-    ap.addAction(new OpenLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
-    ap.addAction(Action("Mute") {statusTableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
+    ap.add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
+    ap.add(new OpenLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
+    ap.add(Action("Mute") {statusTableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
       Actions.ks(KeyEvent.VK_M))
-    ap.addAction(new NextTAction(this))
-    ap.addAction(new PrevTAction(this))
-    ap.addAction(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
-    ap.addAction(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
-    ap.addAction(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
+    ap.add(new NextTAction(this))
+    ap.add(new PrevTAction(this))
+    ap.add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
+    ap.add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
+    ap.add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
-    ap.addAction(clearAction, Actions.ks(KeyEvent.VK_C))
+    ap.add(clearAction, Actions.ks(KeyEvent.VK_C))
     
     val deleteTitle = "Delete selected tweets"
-    ap.addAction(Action(deleteTitle) {
+    ap.add(Action(deleteTitle) {
       statusTableModel.removeStatuses(TableUtil.getSelectedModelIndexes(this)) 
     }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask),
       Actions.ks(KeyEvent.VK_DELETE), Actions.ks(KeyEvent.VK_BACK_SPACE))
 
     val deleteSelectedFromTitle = "Delete all tweets from all selected users"
-    ap.addAction(Action(deleteSelectedFromTitle) {
+    ap.add(Action(deleteSelectedFromTitle) {
       statusTableModel.removeStatusesFrom(getSelectedScreenNames) 
     }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask | 
       java.awt.event.InputEvent.SHIFT_DOWN_MASK))  

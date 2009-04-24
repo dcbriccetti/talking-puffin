@@ -32,7 +32,7 @@ object Actions {
 
 class ActionPrep(comp: JComponent) {
   var actions = List[Action]()
-  def addAction(action: Action, keys: KeyStroke*) {
+  def add(action: Action, keys: KeyStroke*) {
     action.accelerator = Some(keys(0))
     comp.getActionMap.put(action.title, action.peer)
     for (key <- keys) 
@@ -40,8 +40,8 @@ class ActionPrep(comp: JComponent) {
     actions ::= action
   }
 
-  def addAction(kta: KeyTriggeredAction) {
-    addAction(kta.action, kta.keyStroke: _*)
+  def add(kta: KeyTriggeredAction) {
+    add(kta.action, kta.keyStroke: _*)
   }
 }
   
