@@ -40,6 +40,7 @@ object Main {
 
     TopFrame.numFrames += 1
     val session = new Session()
+    Globals.sessions ::= session
     iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
     
     val tabbedPane = new TabbedPane() {
@@ -76,6 +77,7 @@ object Main {
 
     reactions += {
       case WindowClosing(_) => {
+        Globals.sessions = Globals.sessions remove(s => s == session) // TODO is this best way?
         saveState
         TopFrame.numFrames -= 1
         if (TopFrame.numFrames == 0) System.exit(1)
@@ -143,4 +145,8 @@ class ApiHandlers(val sender: Sender, val follower: Follower)
 class Session {
   val windows = new Windows
   val status = new Label(" ")
+}
+
+object Globals {
+  var sessions: List[Session] = Nil
 }

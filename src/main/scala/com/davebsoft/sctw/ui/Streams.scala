@@ -68,7 +68,7 @@ class Streams(session: Session, username: String, password: String) extends Reac
   }
 
   private def createStream(source: TweetsProvider, title: String, include: Option[String]): StreamInfo = {
-    val fs = new FilterSet
+    val fs = new FilterSet(session)
     include match {
       case Some(s) => fs.includeTextFilters.add(new TextFilter(s, false)) 
       case None =>

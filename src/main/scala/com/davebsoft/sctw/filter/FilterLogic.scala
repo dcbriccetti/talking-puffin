@@ -9,26 +9,25 @@ import ui.LinkExtractor
  * @author Dave Briccetti
  */
 
-class FilterLogic(username: String, filterSet: FilterSet, 
-    filteredStatuses: java.util.List[Node]) {
+class FilterLogic(username: String, filterSet: FilterSet, filteredStatuses: java.util.List[Node]) {
   
   def filter(statuses: List[Node]) {
     filteredStatuses.clear
-    for (st <- statuses) {
-      if (filterStatus(st)) {
-        filteredStatuses.add(st)
-      }
+    for (st <- statuses if filterStatus(st)) {
+      filteredStatuses.add(st)
     }
   }
 
   private def filterStatus(st: Node): Boolean = { 
-    var id = (st \ "user" \ "id").text
-    if (! filterSet.mutedUsers.contains(id)) {
-      if (tagFiltersInclude(id)) {
+    val userId = (st \ "user" \ "id").text
+    if (! filterSet.mutedUsers.contains(userId)) {
+      if (tagFiltersInclude(userId)) {
         val text = (st \ "text").text 
         if (! excludedBecauseReplyAndNotToYou(text)) {
           if (! filterSet.excludedByStringMatches(text)) {
-            return true
+            if (! filterSet.excludedByOverlap(userId)) {
+              return true
+            }
           }
         }
       }
@@ -36,10 +35,10 @@ class FilterLogic(username: String, filterSet: FilterSet,
     false
   }
   
-  private def tagFiltersInclude(id: String): Boolean = {
+  private def tagFiltersInclude(userId: String): Boolean = {
     if (filterSet.selectedTags.length == 0) true else {
       for (tag <- filterSet.selectedTags) {
-        if (com.davebsoft.sctw.filter.TagUsers.contains(new TagUser(tag, id))) {
+        if (TagUsers.contains(new TagUser(tag, userId))) {
           return true
         }
       }

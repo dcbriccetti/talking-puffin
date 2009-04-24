@@ -13,10 +13,11 @@ import ui.User
 
 class TextFilter (var text: String, var isRegEx: Boolean)
 
-class FilterSet extends Publisher {
+class FilterSet(session: Session) extends Publisher {
   val mutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
   var selectedTags = List[String]()
   var excludeNotToYouReplies: Boolean = _
+  var excludeOverlapping: Boolean = _
   val includeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
   val excludeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
   
@@ -38,6 +39,19 @@ class FilterSet extends Publisher {
     false
   }
   
+  
+  def excludedByOverlap(userId: String): Boolean = {
+    if (! excludeOverlapping) return false
+    for (aSession <- Globals.sessions if aSession != session) {
+      aSession.windows.streams.usersModel.friends.foreach(friend => {
+        val friendId = (friend \ "id").text
+        if (friendId == userId) 
+          return true
+      })
+    }
+    false
+  }
+
   private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
     Pattern.matches(search.text, text) else text.toUpperCase.contains(search.text.toUpperCase)
 

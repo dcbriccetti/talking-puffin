@@ -1,9 +1,9 @@
 package com.davebsoft.sctw.ui
 
 import _root_.scala.swing.Action
-import scala.swing.Component
-import javax.swing.{JToolBar, JToggleButton}
+import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
 
+import scala.swing.Component
 /**
  * Status pane tool bar
  * @author Dave Briccetti
@@ -14,7 +14,11 @@ class StatusToolBar(session: Session, filtersDialog: FiltersDialog, apiHandlers:
   
   val showFiltersAction = new Action("Filter…") {
     toolTip = "Set filters for this stream"
-    def apply = filtersDialog.visible = true
+    def apply = {
+      filtersDialog.peer.setLocationRelativeTo(SwingUtilities.getAncestorOfClass(classOf[JFrame], 
+        statusPane.peer))
+      filtersDialog.visible = true
+    }
   }
 
   val clearAction = new Action("Clear") {

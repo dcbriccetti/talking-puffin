@@ -14,7 +14,7 @@ import java.net.{URI, URL}
 import java.util.Comparator
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
-import javax.swing.{JTextPane, SwingWorker, JPopupMenu, JTable, JToolBar, JToggleButton, Icon, JMenu, JButton, JMenuItem, ImageIcon, JTabbedPane, JLabel}
+import javax.swing.{SwingUtilities, JTable, Icon, JMenu, ImageIcon, JLabel, JTextPane, SwingWorker, JPopupMenu, JFrame, JToolBar, JToggleButton, JButton, JMenuItem, JTabbedPane}
 import scala.swing._
 import twitter.Sender
 import util.TableUtil

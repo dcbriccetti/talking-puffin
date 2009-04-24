@@ -45,7 +45,11 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     }, new Constraints {grid=(0,0); gridwidth=3; anchor=Anchor.West})
   
     val excludeNotToYouReplies = new CheckBox("Exclude replies not to you")
-    add(excludeNotToYouReplies, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
+    val excludeOverlapping = new CheckBox("Exclude Tweets appearing in other sessions")
+    add(new FlowPanel(FlowPanel.Alignment.Left) {
+      contents += excludeNotToYouReplies
+      contents += excludeOverlapping
+    }, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
   
     class TextFilterTableConstraints(y: Int) extends Constraints {
       grid=(0,y); gridwidth=3; anchor=Anchor.West; fill=Fill.Both; weightx=1
@@ -83,6 +87,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
 
   def applyChanges {
     filterSet.excludeNotToYouReplies = panel.excludeNotToYouReplies.selected
+    filterSet.excludeOverlapping = panel.excludeOverlapping.selected
     filterSet.publish
   }
 }
