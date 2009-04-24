@@ -30,7 +30,8 @@ object Thumbnail {
     BufferedImage.TYPE_INT_ARGB))
 }
 
-class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Streams) extends GridBagPanel {
+class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDialog, streams: Streams) 
+    extends GridBagPanel {
   private val log = Logger.getLogger("TweetDetailPanel")  
   private val geoCoder = new GeoCoder(processFinishedGeocodes)
   private val animator = new TextChangingAnimator
@@ -88,7 +89,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
   val statusTableModel = table.getModel.asInstanceOf[StatusTableModel]
 
   def showStatusDetails(status: NodeSeq) {
-    Status.message.text = " "
+    session.status.text = " "
     val user = status \ "user"
     setText(user)
     largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
@@ -102,7 +103,7 @@ class TweetDetailPanel(table: JTable, filtersDialog: FiltersDialog, streams: Str
   }
   
   def clearStatusDetails {
-    Status.message.text = " "
+    session.status.text = " "
     animator.stop
     showingUrl = null
     picLabel.icon = Thumbnail.transparentMedium

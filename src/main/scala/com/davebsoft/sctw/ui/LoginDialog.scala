@@ -20,7 +20,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
     startup: (String, String) => Unit) 
     extends Frame {
   
-  title = "Simple Twitter Client - Log In"
+  title = "TalkingPuffin - Log In"
   def username = usernameTextField.text
   def password = new String(passwordTextField.password)
   private var ok = false

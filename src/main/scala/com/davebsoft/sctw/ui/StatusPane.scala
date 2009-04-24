@@ -22,8 +22,8 @@ import util.TableUtil
 /**
  * Displays friend statuses
  */
-class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers, 
-    filterSet: FilterSet, streams: Streams) 
+class StatusPane(session: Session, title: String, statusTableModel: StatusTableModel, 
+    apiHandlers: ApiHandlers, filterSet: FilterSet, streams: Streams) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
   private var lastSelectedRows: List[NodeSeq] = Nil
@@ -32,7 +32,7 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
   
-  val statusToolBar = new StatusToolBar(filtersDialog, apiHandlers, this, clearTweets)
+  val statusToolBar = new StatusToolBar(session, filtersDialog, apiHandlers, this, clearTweets)
   peer.add(statusToolBar, new Constraints{grid=(0,0); gridwidth=3}.peer)
   
   add(new ScrollPane {
@@ -42,7 +42,7 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
     grid = (0,1); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
   
-  private val tweetDetailPanel = new TweetDetailPanel(table, filtersDialog, streams)
+  private val tweetDetailPanel = new TweetDetailPanel(session, table, filtersDialog, streams)
   add(tweetDetailPanel, new Constraints{
     grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
   })
@@ -78,7 +78,7 @@ class StatusPane(title: String, statusTableModel: StatusTableModel, apiHandlers:
     })
   }
   
-  def newTable: StatusTable = new StatusTable(statusTableModel, apiHandlers, 
+  def newTable: StatusTable = new StatusTable(session, statusTableModel, apiHandlers, 
     statusToolBar.clearAction, showBigPicture)
   
   def showBigPicture = tweetDetailPanel.showBigPicture

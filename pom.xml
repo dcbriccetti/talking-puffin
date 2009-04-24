@@ -74,7 +74,7 @@
         <sourceDirectory>src/main/scala</sourceDirectory>
         <resources>
           <resource>
-            <directory>config</directory>
+            <directory>resources</directory>
           </resource>
         </resources>
         <plugins>

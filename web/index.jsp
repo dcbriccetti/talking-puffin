@@ -4,16 +4,16 @@
 <%@page pageEncoding="UTF-8" import="com.davebsoft.sctw.ui.web.*" %>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Simple Twitter Client Friends and Followers Summary V0.1</title>
+    <title>TalkingPuffin Friends and Followers Summary V0.1</title>
     <link href="main.css" rel="stylesheet" type="text/css"/>
 </head>
 
 <body>
-<h1>Simple Twitter Client Friends and Followers Summary V0.1</h1>
+<h1>TalkingPuffin Friends and Followers Summary V0.1</h1>
 
 <table><tr>
     <td><img src="davehead-small.jpg" alt="Picture of Dave Briccetti"/></td>
-    <td valign="top">Thank you for trying this early, experimental Simple Twitter Client web application,
+    <td valign="top">Thank you for trying this early, experimental web application,
         which shows a summary of the people who follow you and those you follow.
     <p>    
     <a href="http://davebsoft.com/applications/simple-twitter-client">Desktop client and more information</a>

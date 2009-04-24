@@ -8,8 +8,8 @@ import javax.swing.{JToolBar, JToggleButton}
  * Status pane tool bar
  * @author Dave Briccetti
  */
-class StatusToolBar(filtersDialog: FiltersDialog, apiHandlers: ApiHandlers, statusPane: Component, 
-    clearTweets: => Unit) extends JToolBar {
+class StatusToolBar(session: Session, filtersDialog: FiltersDialog, apiHandlers: ApiHandlers, 
+    statusPane: Component, clearTweets: => Unit) extends JToolBar {
   var tweetDetailPanel: TweetDetailPanel = _
   
   val showFiltersAction = new Action("Filter…") {
@@ -24,7 +24,7 @@ class StatusToolBar(filtersDialog: FiltersDialog, apiHandlers: ApiHandlers, stat
 
   val sendAction = new Action("Send…") {
     toolTip = "Opens a window from which you can send a tweet"
-    def apply = (new SendMsgDialog(null, apiHandlers.sender, None, None)).visible = true
+    def apply = (new SendMsgDialog(session, null, apiHandlers.sender, None, None)).visible = true
   }
 
   val clearRepliesAction = new Action("Clear") {
@@ -61,9 +61,9 @@ class StatusToolBar(filtersDialog: FiltersDialog, apiHandlers: ApiHandlers, stat
     toolTip = "Docks or frees the pane"
     def apply = {
       if (! dockedButton.isSelected) {
-        Windows.undock(statusPane)
+        session.windows.undock(statusPane)
       } else {
-        Windows.dock(statusPane)
+        session.windows.dock(statusPane)
       }
     }
   }

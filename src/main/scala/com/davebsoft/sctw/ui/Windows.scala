@@ -8,7 +8,7 @@ import javax.swing.{JFrame, SwingUtilities}
  * @author Dave Briccetti
  */
 
-object Windows {
+class Windows {
   var tabbedPane: TabbedPane = _
   var streams: Streams = _
     

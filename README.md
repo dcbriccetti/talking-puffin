@@ -1,4 +1,4 @@
-Simple Twitter Client
+TalkingPuffin
 =====================
 
 See http://davebsoft.com/applications/simple-twitter-client

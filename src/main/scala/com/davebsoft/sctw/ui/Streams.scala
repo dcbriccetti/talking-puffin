@@ -15,11 +15,11 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
  * @author Dave Briccetti
  */
 
-class Streams(username: String, password: String) extends Reactor {
+class Streams(session: Session, username: String, password: String) extends Reactor {
   val tweetsProvider = new TweetsProvider(username, password, 
-    Some(StateRepository.get("highestId", null)), "Following")
+    Some(StateRepository.get(username + "-highestId", null)), "Following")
   val mentionsProvider = new MentionsProvider(username, password, 
-    Some(StateRepository.get("highestMentionId", null)))
+    Some(StateRepository.get(username + "-highestMentionId", null)))
   val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
   val usersModel = new UsersTableModel(List[Node](), List[Node]())
   
@@ -52,14 +52,14 @@ class Streams(username: String, password: String) extends Reactor {
   mentionsProvider.loadNewData
 
   private def setTitleInParent(pane: JComponent, title: String) {
-    Windows.tabbedPane.peer.indexOfComponent(pane) match {
+    session.windows.tabbedPane.peer.indexOfComponent(pane) match {
       case -1 => {
         SwingUtilities.getAncestorOfClass(classOf[JFrame], pane) match {
           case null =>
           case parent => parent.asInstanceOf[JFrame].setTitle(title)
         }
       }
-      case tabbedPaneIndex => Windows.tabbedPane.peer.setTitleAt(tabbedPaneIndex, title)
+      case tabbedPaneIndex => session.windows.tabbedPane.peer.setTitleAt(tabbedPaneIndex, title)
     }
   }
 
@@ -80,12 +80,12 @@ class Streams(username: String, password: String) extends Reactor {
     } else {
       new StatusTableModel(sto, source, usersModel, fs, username)
     }
-    val pane = new StatusPane(title, model, apiHandlers, fs, this)
+    val pane = new StatusPane(session, title, model, apiHandlers, fs, this)
     if (isMentions) {
       pane.table.showColumn(3, false)
     }
     pane.requestFocusForTable
-    Windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
+    session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
     listenTo(model)
     val streamInfo = new StreamInfo(title, model, pane)
     streamInfo.model.followerIds = followerIds

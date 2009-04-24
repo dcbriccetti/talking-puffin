@@ -6,7 +6,7 @@ import filter.{FilterSet, TextFilter, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Dimension, BorderLayout, Insets}
 import javax.swing.border.{BevelBorder, EmptyBorder}
-import javax.swing.{JToolBar, UIManager, JFrame}
+import javax.swing.{JToolBar, ImageIcon, UIManager, JFrame}
 import org.apache.log4j.Logger
 import scala.swing._
 import scala.xml._
@@ -17,7 +17,7 @@ import twitter._
 import ui._
 
 /**
- * “Simple Twitter Client”
+ * “TalkingPuffin”
  *
  * Your feedback is welcome!
  *
@@ -25,29 +25,44 @@ import ui._
  */
 object Main {
   val log = Logger getLogger "Main"
+  val title = "TalkingPuffin" 
   private var username: String = ""
   private var password: String = ""
+  
+  object TopFrame {
+    var numFrames = 0
+  }
   
   /**
    * The Swing frame.
    */
-  class TopFrame extends Frame {
+  class TopFrame(username: String) extends Frame {
 
+    TopFrame.numFrames += 1
+    val session = new Session()
+    iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
+    
     val tabbedPane = new TabbedPane() {
       preferredSize = new Dimension(900, 600)
     }
-    Windows.tabbedPane = tabbedPane
+    session.windows.tabbedPane = tabbedPane
 
-    val streams = new Streams(username, password)
-    Windows.streams = streams
+    val streams = new Streams(session, username, password)
+    session.windows.streams = streams
     
-    title = "Simple Twitter Client"
+    title = Main.title + " - " + username
+    
+    menuBar = new MenuBar {
+      contents += new Menu("Session") {
+        contents += new MenuItem(Action("New...") { launchSession })
+      }
+    }
 
     TagUsers.load
 
     contents = new GridBagPanel {
       val status = new Panel() {
-        add(Status.message, new Constraints {anchor=Anchor.West; insets=new Insets(5,5,5,5)})
+        add(session.status, new Constraints {anchor=Anchor.West; insets=new Insets(5,5,5,5)})
       }
       add(status, new Constraints {
         grid = (0,0); fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
@@ -62,7 +77,8 @@ object Main {
     reactions += {
       case WindowClosing(_) => {
         saveState
-        System.exit(1)
+        TopFrame.numFrames -= 1
+        if (TopFrame.numFrames == 0) System.exit(1)
       }
     }
 
@@ -82,7 +98,7 @@ object Main {
       streams setFollowerIds (followers map (u => (u \ "id").text))
               
       val paneTitle = "People (" + following.length + ", " + followers.length + ")"
-      val pane = new FriendsFollowersPane(streams.apiHandlers, streams.usersModel, following, followers)
+      val pane = new FriendsFollowersPane(session, streams.apiHandlers, streams.usersModel, following, followers)
       tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
     })
     
@@ -90,22 +106,29 @@ object Main {
       val highFol = streams.tweetsProvider.getHighestId
       val highMen = streams.mentionsProvider.getHighestId
       log info("Saving last seen IDs. Following: " + highFol + ", mentions: " + highMen)
-      StateRepository.set("highestId", highFol)
-      StateRepository.set("highestMentionId", highMen)
+      StateRepository.set(username + "-highestId", highFol)
+      StateRepository.set(username + "-highestMentionId", highMen)
       StateRepository.save
       TagUsers.save
     }
   }
   
   def main(args: Array[String]): Unit = {
+    val props = System.getProperties
+    props setProperty("apple.laf.useScreenMenuBar", "true")
+    props setProperty("com.apple.mrj.application.apple.menu.about.name", Main.title)
     UIManager setLookAndFeel UIManager.getSystemLookAndFeelClassName
     JFrame setDefaultLookAndFeelDecorated true
-    
+
+    launchSession
+  }
+  
+  def launchSession {
     def startUp(userName: String, pwd: String) {
       username = userName
       password = pwd
 
-      new TopFrame {
+      new TopFrame(username) {
         pack
         visible = true
       }
@@ -117,6 +140,7 @@ object Main {
 
 class ApiHandlers(val sender: Sender, val follower: Follower)
 
-object Status {
-  val message = new Label(" ")
+class Session {
+  val windows = new Windows
+  val status = new Label(" ")
 }

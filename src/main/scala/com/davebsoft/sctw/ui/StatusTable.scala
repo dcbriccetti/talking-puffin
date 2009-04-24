@@ -29,7 +29,7 @@ import util.{TableUtil, DesktopUtil}
  * @author Dave Briccetti
  */
 
-class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
+class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
       clearAction: Action, showBigPicture: => Unit) 
     extends JXTable(statusTableModel) {
 
@@ -61,7 +61,7 @@ class StatusTable(statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
   def reply {
     val statuses = getSelectedStatuses
     val names = statuses.map(status => ("@" + new Status(status).getScreenNameFromStatus)).mkString(" ")
-    val sm = new SendMsgDialog(null, apiHandlers.sender, Some(names), Some((statuses(0) \ "id").text))
+    val sm = new SendMsgDialog(session, null, apiHandlers.sender, Some(names), Some((statuses(0) \ "id").text))
     sm.visible = true
   }
   

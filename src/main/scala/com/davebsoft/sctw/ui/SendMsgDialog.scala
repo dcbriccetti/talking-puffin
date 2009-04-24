@@ -15,7 +15,7 @@ import twitter.Sender
  * @author Dave Briccetti
  */
 
-class SendMsgDialog(parent: java.awt.Component, sender: Sender, recipients: Option[String],
+class SendMsgDialog(session: Session, parent: java.awt.Component, sender: Sender, recipients: Option[String],
     replyToId: Option[String]) extends Frame {
   
   class CustomTextArea extends TextArea { 
@@ -59,6 +59,6 @@ class SendMsgDialog(parent: java.awt.Component, sender: Sender, recipients: Opti
   private def send {
     sender.send(message.text, replyToId)
     visible = false
-    Status.message.text = "Message sent"    
+    session.status.text = "Message sent"    
   }
 }

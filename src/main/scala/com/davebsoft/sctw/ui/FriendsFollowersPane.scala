@@ -30,7 +30,7 @@ object UserColumns {
   val STATUS = 7
 }
 
-class FriendsFollowersPane(apiHandlers: ApiHandlers, tableModel: UsersTableModel, 
+class FriendsFollowersPane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTableModel, 
     friends: List[Node], followers: List[Node]) extends GridBagPanel {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
@@ -115,7 +115,7 @@ class FriendsFollowersPane(apiHandlers: ApiHandlers, tableModel: UsersTableModel
   
   private def reply {
     val names = getSelectedUsers.map(user => ("@" + (user \ "screen_name").text)).mkString(" ")
-    val sm = new SendMsgDialog(null, apiHandlers.sender, Some(names), None)
+    val sm = new SendMsgDialog(session, null, apiHandlers.sender, Some(names), None)
     sm.visible = true
   }
 
