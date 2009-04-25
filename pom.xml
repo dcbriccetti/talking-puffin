@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.davebsoft.sctw</groupId>
-    <artifactId>simple-twitter-client</artifactId>
+    <artifactId>talking-puffin</artifactId>
     <version>0.59</version>
     <inceptionYear>2008</inceptionYear>
     <properties>
