@@ -20,7 +20,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, sender: Sender
   
   class CustomTextArea extends TextArea { 
     preferredSize = new Dimension(400, 80); wordWrap = true; lineWrap = true
-    font = new Font(font.getFontName, Font.BOLD, font.getSize * 150 / 100)
+    font = new Font("Serif", Font.PLAIN, 18)
   }
 
   val message = new CustomTextArea

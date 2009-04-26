@@ -42,7 +42,7 @@ class FriendsFollowersPane(session: Session, apiHandlers: ApiHandlers, tableMode
       
       List(UserColumns.NAME, UserColumns.TAGS, UserColumns.LOCATION, UserColumns.STATUS, 
         UserColumns.DESCRIPTION).foreach(i => {
-        getColumnModel.getColumn(i).setCellRenderer(new WordWrappingCellRenderer)
+        getColumnModel.getColumn(i).setCellRenderer(new HtmlCellRenderer)
       })
       
       getColumnModel.getColumn(UserColumns.ARROWS).setPreferredWidth(20)

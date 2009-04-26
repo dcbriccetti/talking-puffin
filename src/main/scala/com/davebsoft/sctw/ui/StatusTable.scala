@@ -123,10 +123,7 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
     
     val statusCol = colModel.getColumn(4)
     statusCol.setPreferredWidth(600)
-    statusCol.setCellRenderer(new WordWrappingCellRenderer {
-      val normalFont = getFont
-      setFont(new Font(normalFont.getFontName, Font.PLAIN, normalFont.getSize * 120 / 100))
-    })
+    statusCol.setCellRenderer(new HtmlCellRenderer)
 
     colModel.addColumnModelListener(new TableColumnModelExtListener {
       def columnPropertyChange(event: PropertyChangeEvent) = {

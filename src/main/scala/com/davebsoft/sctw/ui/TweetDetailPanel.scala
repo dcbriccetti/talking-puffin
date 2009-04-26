@@ -9,7 +9,7 @@ import _root_.scala.xml.{XML, NodeSeq, Node}
 import geo.GeoCoder
 import java.awt.event.{MouseEvent, KeyAdapter, MouseAdapter, KeyEvent}
 import java.awt.image.BufferedImage
-import java.awt.{Dimension, Insets, Image}
+import java.awt.{Dimension, Insets, Image, Font}
 import java.net.{HttpURLConnection, URI, URL}
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import javax.swing.text.JTextComponent
@@ -77,6 +77,7 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
   }, new CustomConstraints { grid = (0,0); gridheight = 3; insets = new Insets(3, 3, 3, 3)})
 
   userDescription = new TextArea {
+    font = new Font("SansSerif", Font.PLAIN, 14)
     background = TweetDetailPanel.this.background
     lineWrap = true
     wordWrap = true

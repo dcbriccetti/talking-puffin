@@ -10,10 +10,10 @@ import javax.swing.{JTextArea, JTextPane, JTable}
  * @author Dave Briccetti
  */
 
-class EmphasizedStringCellRenderer extends JTextPane with TableCellRenderer {
+class HtmlCellRenderer extends JTextPane with TableCellRenderer {
   setContentType("text/html")
   val renderer = new DefaultTableCellRenderer
-  val border = new EmptyBorder(4, 2, 2, 2)
+  val border = new EmptyBorder(2, 2, 2, 2)
   
   override def getTableCellRendererComponent(table: JTable, value: Any, 
       isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Component = {
@@ -22,9 +22,26 @@ class EmphasizedStringCellRenderer extends JTextPane with TableCellRenderer {
     setForeground(renderer.getForeground) 
     setBackground(renderer.getBackground) 
     setBorder(border)
+    setFormattedText(value)
+    this
+  }
+  
+  protected def setFormattedText(value: Any) {
+    val fromTo = value.asInstanceOf[String]
+    setText(HtmlFormatter.htmlAround(formatValue(fromTo, renderer.getForeground))) 
+  }
+  
+  private def formatValue(string: String, color: Color): String = {
+    "<font face='helvetica' color='#" +  
+    Integer.toHexString(color.getRGB & 0x00ffffff) + "'>" + 
+    string + "</font>"
+  }
+}
+
+class EmphasizedStringCellRenderer extends HtmlCellRenderer {
+  override def setFormattedText(value: Any) {
     val fromTo = value.asInstanceOf[EmphasizedString]
     setText(HtmlFormatter.htmlAround(formatValue(fromTo, renderer.getForeground))) 
-    this
   }
   
   private def formatValue(string: EmphasizedString, color: Color): String = {
