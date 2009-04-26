@@ -32,7 +32,6 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
   def addPropertyChangeListener   (l: PropertyChangeListener) = propChg.addPropertyChangeListener(l)
   def removePropertyChangeListener(l: PropertyChangeListener) = propChg.removePropertyChangeListener(l)
   
-  val urlHost = "http://twitter.com/" 
   def getUrlFile = "statuses/friends_timeline.xml"
   def getUrl = urlHost + getUrlFile + "?count=200" + buildSinceParm
   
@@ -74,7 +73,7 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
   
   def loadNewData = loadData(getUrl, false)
   
-  def loadLastBlockOfTweets: Unit = loadData("http://twitter.com/" + getUrlFile + "?count=200", true)
+  def loadLastBlockOfTweets: Unit = loadData(urlHost + getUrlFile + "?count=200", true)
   
   private def loadData(url: String, clear: Boolean): Unit = {
     new SwingWorker[Option[NodeSeq], Object] {
@@ -85,7 +84,7 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
         } catch {
           case ex: DataFetchException => {
             log.error(ex.response)
-            return None
+            None
           }
         }
       }
@@ -93,7 +92,6 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
         get match {
           case Some(statuses) => {
             if (statuses.length > 0) {
-              log.debug("Publishing TweetsArrived for " + statuses.length)
               if (sendClear) 
                 propChg.firePropertyChange(new PropertyChangeEvent(TweetsProvider.this, 
                   TweetsProvider.CLEAR_EVENT, null, null))

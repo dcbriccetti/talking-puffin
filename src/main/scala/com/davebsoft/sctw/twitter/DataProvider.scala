@@ -13,7 +13,8 @@ case class DataFetchException(val code: Int, val response: String) extends Excep
  * A provider of Twitter data
  */
 abstract class DataProvider extends HttpHandler {
-  private val log = Logger.getLogger(getClass)
+  private val log = Logger.getLogger("DataProvider")
+  var urlHost = "http://twitter.com/" 
   
   def getUrl: String
 
@@ -24,7 +25,6 @@ abstract class DataProvider extends HttpHandler {
   def loadTwitterData: Node = loadTwitterData(getUrl)
   
   def loadTwitterData(url: String): Node = {
-    log.info(url)
     val (result, responseBody) = doGet(url)
 
     if (result != 200) {

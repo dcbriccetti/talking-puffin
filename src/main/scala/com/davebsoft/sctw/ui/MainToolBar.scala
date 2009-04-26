@@ -13,13 +13,9 @@ import time.TimeFormatter
  */
 
 class MainToolBar(streams: Streams) extends JToolBar {
+  val remaining = new Label
   setFloatable(false)
   
-  add(new Label("Sources: "){tooltip = 
-    "There is one source each for the “following” and “replies” timelines, no matter how many views you create"}.peer)
-
-  addSeparator
-
   add(new Label("Following: ").peer)
   addSourceControls(streams.tweetsProvider, streams.createFollowingView)
 
@@ -27,6 +23,13 @@ class MainToolBar(streams: Streams) extends JToolBar {
 
   add(new Label("Mentions: ").peer)
   addSourceControls(streams.mentionsProvider, streams.createRepliesView)
+
+  /*  TODO finish adding rate limiting status. How often and from where to invoke?
+  addSeparator
+
+  add(new Label("Rem: ") {tooltip = "The number of requests remaining"}.peer)
+  add(remaining.peer)
+  */
   
   private def addSourceControls(provider: TweetsProvider, createStream: => Unit) {
     val newViewAction = new Action("New View") {

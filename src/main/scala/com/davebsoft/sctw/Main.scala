@@ -39,7 +39,7 @@ object Main {
   class TopFrame(username: String) extends Frame {
 
     TopFrame.numFrames += 1
-    val session = new Session()
+    val session = new Session
     Globals.sessions ::= session
     iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
     
@@ -50,6 +50,7 @@ object Main {
 
     val streams = new Streams(session, username, password)
     session.windows.streams = streams
+    val mainToolBar = new MainToolBar(streams)
     
     title = Main.title + " - " + username
     
@@ -68,8 +69,7 @@ object Main {
       add(status, new Constraints {
         grid = (0,0); fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
         })
-      val toolBar = new MainToolBar(streams)
-      peer.add(toolBar, new Constraints {
+      peer.add(mainToolBar, new Constraints {
         grid = (0,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; }.peer)
       add(tabbedPane, new Constraints {
         grid = (0,2); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; })

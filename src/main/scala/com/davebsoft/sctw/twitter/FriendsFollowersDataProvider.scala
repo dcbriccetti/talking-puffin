@@ -32,12 +32,12 @@ abstract class FriendsFollowersDataProvider(username: String, password: String) 
 class FriendsDataProvider(username: String, password: String) 
     extends FriendsFollowersDataProvider(username, password) {
 
-  def getUrl = "http://twitter.com/statuses/friends.xml"
+  def getUrl = urlHost + "statuses/friends.xml"
 }
 
 class FollowersDataProvider(username: String, password: String) 
     extends FriendsFollowersDataProvider(username, password) {
 
-  def getUrl = "http://twitter.com/statuses/followers.xml"
+  def getUrl = urlHost + "statuses/followers.xml"
 }
 

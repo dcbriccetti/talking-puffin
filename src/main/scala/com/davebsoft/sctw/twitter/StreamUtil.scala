@@ -1,6 +1,5 @@
 package com.davebsoft.sctw.twitter
 
-
 import java.io.{InputStreamReader, BufferedInputStream, BufferedReader, OutputStreamWriter, InputStream}
 import java.net.URL
 import org.apache.commons.codec.binary.Base64
@@ -8,6 +7,7 @@ import org.apache.commons.httpclient.auth.AuthScope
 import org.apache.commons.httpclient.cookie.CookiePolicy
 import org.apache.commons.httpclient.methods.{PostMethod, GetMethod}
 import org.apache.commons.httpclient.{UsernamePasswordCredentials, HttpMethodBase, HttpMethod, HttpClient}
+import org.apache.log4j.Logger
 
 object StreamUtil {
   def streamToString(stream: InputStream): String = {
@@ -30,12 +30,13 @@ object StreamUtil {
  * @author Dave Briccetti  
  */
 protected trait HttpHandler {
-
+  private val log = Logger.getLogger(getClass)
   val httpClient = new HttpClient()
   var username: String = _
   var password: String = _
   
   def doGet(urlString: String) = {
+    log.info("Fetching " + urlString)
     val url = new URL(urlString)
     val conn = url.openConnection
     conn.addRequestProperty("Authorization", 
