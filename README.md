@@ -8,4 +8,4 @@ See http://davebsoft.com/applications/simple-twitter-client
 Thanks to the people helping me, including:
 
 @michaelg, @bjartek, @vdichev, @jorgeortiz85, @stevej, @crichardson, @fredriv, @stoyle,
-Bill Venners
+Bill Venners, @eishay
