@@ -1,7 +1,7 @@
 TalkingPuffin
 =====================
 
-See http://davebsoft.com/applications/simple-twitter-client
+See http://TalkingPuffin.org
 
 ## Thanks
 
