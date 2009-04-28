@@ -108,8 +108,8 @@ object Main {
       val highFol = streams.tweetsProvider.getHighestId
       val highMen = streams.mentionsProvider.getHighestId
       log info("Saving last seen IDs. Following: " + highFol + ", mentions: " + highMen)
-      StateRepository.set(username + "-highestId", highFol)
-      StateRepository.set(username + "-highestMentionId", highMen)
+      if (highFol != null) StateRepository.set(username + "-highestId", highFol)
+      if (highMen != null) StateRepository.set(username + "-highestMentionId", highMen)
       StateRepository.save
       TagUsers.save
     }
