@@ -15,6 +15,7 @@ import TabbedPane._
 import state.StateRepository
 import twitter._
 import ui._
+import ui.util.FetchRequest
 
 /**
  * “TalkingPuffin”
@@ -26,6 +27,7 @@ import ui._
 object Main {
   var log = Logger getLogger "Main"
   val title = "TalkingPuffin" 
+  private var user: Node = _
   private var username: String = ""
   private var password: String = ""
   
@@ -63,16 +65,21 @@ object Main {
     TagUsers.load
 
     contents = new GridBagPanel {
-      val status = new Panel() {
-        add(session.status, new Constraints {anchor=Anchor.West; insets=new Insets(5,5,5,5)})
-      }
-      add(status, new Constraints {
-        grid = (0,0); fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
+      val userPic = new Label
+      val picFetcher = new PictureFetcher(None, (imageReady: PictureFetcher.ImageReady) => {
+        if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
+          userPic.icon = imageReady.resource.image 
+        }
+      })
+      picFetcher.requestItem(new FetchRequest((user \ "profile_image_url").text, null))
+      add(userPic, new Constraints { grid = (0,0); gridheight=2})
+      add(session.status, new Constraints {
+        grid = (1,0); fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
         })
       peer.add(mainToolBar, new Constraints {
-        grid = (0,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; }.peer)
+        grid = (1,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; }.peer)
       add(tabbedPane, new Constraints {
-        grid = (0,2); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; })
+        grid = (0,2); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; gridwidth=2})
     }
 
     reactions += {
@@ -126,7 +133,8 @@ object Main {
   }
   
   def launchSession {
-    def startUp(username: String, pwd: String) {
+    def startUp(username: String, pwd: String, user: Node) {
+      this.user = user
       this.username = username
       password = pwd
       log = Logger getLogger "Main (" + username + ")"

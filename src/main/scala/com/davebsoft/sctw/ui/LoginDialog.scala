@@ -2,6 +2,7 @@ package com.davebsoft.sctw.ui
 
 import _root_.scala.swing._
 import _root_.scala.swing.event.{ButtonClicked, EditDone}
+import _root_.scala.xml.Node
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.Color
 import javax.swing.JDialog
@@ -17,7 +18,7 @@ import event.Event
  */
 
 class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit, 
-    startup: (String, String) => Unit) 
+    startup: (String, String, Node) => Unit) 
     extends Frame {
   
   title = "TalkingPuffin - Log In"
@@ -90,11 +91,13 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
   
   private def handleLogin {
     enableButtons(false)
+    var loggedInUser: Node = null
     LongRunningSpinner.run(this, null, 
       { 
         () =>
         authenticator.userAuthenticates(username, password) match {
-          case Some(user) => 
+          case Some(user) =>
+            loggedInUser = user
             storeUserInfoIfSet()
             true
           case None =>
@@ -108,7 +111,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
         () =>
         infoLabel.foreground = Color.BLACK
         infoLabel.text = "Login successful. Initializing…"
-        startup(username, password)
+        startup(username, password, loggedInUser)
         visible = false
         true
       }
