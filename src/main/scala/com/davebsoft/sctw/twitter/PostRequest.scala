@@ -24,7 +24,7 @@ class Sender(username: String, password: String) extends PostRequest(username, p
         case Some(s) => "&in_reply_to_status_id=" + URLEncoder.encode(s, "UTF-8")
         case None => ""
       }
-    val url = "http://twitter.com/statuses/update.xml?source=simpletwitterclient&status=" + 
+    val url = "http://twitter.com/statuses/update.xml?source=talkingpuffin&status=" + 
       URLEncoder.encode(message, "UTF-8") + replyToParm 
     
     processUrl(url)
