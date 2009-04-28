@@ -24,7 +24,7 @@ import ui._
  * @Author Dave Briccetti, daveb@davebsoft.com, @dcbriccetti
  */
 object Main {
-  val log = Logger getLogger "Main"
+  var log = Logger getLogger "Main"
   val title = "TalkingPuffin" 
   private var username: String = ""
   private var password: String = ""
@@ -126,9 +126,10 @@ object Main {
   }
   
   def launchSession {
-    def startUp(userName: String, pwd: String) {
-      username = userName
+    def startUp(username: String, pwd: String) {
+      this.username = username
       password = pwd
+      log = Logger getLogger "Main (" + username + ")"
 
       new TopFrame(username) {
         pack

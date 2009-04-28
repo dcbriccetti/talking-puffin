@@ -40,7 +40,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
   
   private val enterReaction: PartialFunction[Event, Unit] = { case EditDone(f) => loginButton.peer.doClick() }
   
-  setupEnterClick(true)
+  setUpEnterClick(true)
   
   def storeUserInfoIfSet() {
     if(saveUserInfoCheckBox.peer.isSelected) StateRepository.set((usernameKey, username), (pwdKey, password))
@@ -49,11 +49,10 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
 
   if (storedUser != null) saveUserInfoCheckBox.peer.setSelected(true)
   
-  private def setupEnterClick(enable: Boolean) {
+  private def setUpEnterClick(enable: Boolean) {
     enterDoesLoginClick(usernameTextField, enable)
     enterDoesLoginClick(passwordTextField, enable)
   }
-  
   
   private def enterDoesLoginClick(t: TextField, enable: Boolean) {
     if (enable) t.reactions += enterReaction
@@ -89,21 +88,20 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
     listenTo(cancelButton)
   }
   
-
   private def handleLogin {
     enableButtons(false)
     LongRunningSpinner.run(this, null, 
       { 
         () =>
-        if(authenticator.userAuthenticates(username, password)) {
-          storeUserInfoIfSet()
-          true
-        }
-        else {
-          infoLabel.foreground = Color.RED
-          infoLabel.text = "Login failed"
-          enableButtons(true)
-          false
+        authenticator.userAuthenticates(username, password) match {
+          case Some(user) => 
+            storeUserInfoIfSet()
+            true
+          case None =>
+            infoLabel.foreground = Color.RED
+            infoLabel.text = "Login failed"
+            enableButtons(true)
+            false
         }
       }, 
       { 
@@ -123,7 +121,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
     cancelButton.enabled = enable
     loginButton.enabled = enable
     saveUserInfoCheckBox.enabled = enable
-    setupEnterClick(enable)
+    setUpEnterClick(enable)
   }
   
   def display = {

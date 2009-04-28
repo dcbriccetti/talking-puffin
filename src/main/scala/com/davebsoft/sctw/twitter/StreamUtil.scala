@@ -34,7 +34,11 @@ protected trait HttpHandler {
   val httpClient = new HttpClient()
   var username: String = _
   var password: String = _
-  
+
+  /**
+   * Fetches the requested resource and returns a tuple of the status code
+   * and the response body.
+   */
   def doGet(urlString: String) = {
     log.info("Fetching " + urlString)
     val url = new URL(urlString)
