@@ -8,4 +8,4 @@ See http://TalkingPuffin.org
 Thanks to the people helping me, including:
 
 @michaelg, @bjartek, @vdichev, @jorgeortiz85, @stevej, @crichardson, @fredriv, @stoyle,
-Bill Venners, @eishay
+Bill Venners, @eishay, @mccv, @billrobertson42
