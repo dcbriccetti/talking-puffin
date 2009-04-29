@@ -19,7 +19,8 @@ class UnmutePane(tableModel: StatusTableModel, filterSet: FilterSet) extends Gri
 
   val mutedUsersList = new ListView(filterSet.mutedUsers.values.toList)
   add(new ScrollPane {
-    contents = mutedUsersList; preferredSize=new Dimension(150,130); minimumSize=new Dimension(150,130)
+    val dim = new Dimension(150,130)
+    contents = mutedUsersList; preferredSize=dim; minimumSize=dim
   }, new Constraints {grid=(0,0); anchor=Anchor.West})
 
   tableModel.addTableModelListener(this)
