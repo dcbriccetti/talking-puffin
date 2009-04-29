@@ -4,6 +4,7 @@ import _root_.scala.xml.{XML, Node}
 import java.net.URLEncoder
 
 class PostRequest(username: String, password: String) extends HttpHandler {
+  var urlHost = "http://twitter.com/" 
   setCredentials(username, password)
   
   def processUrl(url: String): Node = {
@@ -24,7 +25,7 @@ class Sender(username: String, password: String) extends PostRequest(username, p
         case Some(s) => "&in_reply_to_status_id=" + URLEncoder.encode(s, "UTF-8")
         case None => ""
       }
-    val url = "http://twitter.com/statuses/update.xml?source=talkingpuffin&status=" + 
+    val url = urlHost + "statuses/update.xml?source=talkingpuffin&status=" + 
       URLEncoder.encode(message, "UTF-8") + replyToParm 
     
     processUrl(url)
@@ -38,8 +39,11 @@ class Sender(username: String, password: String) extends PostRequest(username, p
 
 class Follower(username: String, password: String) extends PostRequest(username, password) {
   
-  def unfollow(screenName: String): Node = {
-    val url = "http://twitter.com/friendships/destroy/" + screenName + ".xml?id=" + screenName
+  def follow  (screenName: String) = befriend(screenName, "create")
+  def unfollow(screenName: String) = befriend(screenName, "destroy")
+    
+  def befriend(screenName: String, verb: String): Node = {
+    val url = urlHost + "friendships/" + verb + "/" + screenName + ".xml?id=" + screenName
     processUrl(url)
   }
 }
