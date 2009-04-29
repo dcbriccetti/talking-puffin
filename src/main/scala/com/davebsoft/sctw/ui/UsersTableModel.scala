@@ -15,6 +15,7 @@ class UsersModel(friends: List[Node], followers: List[Node]) {
   var users: Array[Node] = _
   var arrows: Array[String] = _
   var screenNameToUserNameMap = Map[String, String]()
+  var friendScreenNames: Set[String] = _
 
   def build(includeFollowing: Boolean, includeFollowers: Boolean) {
     val set = scala.collection.mutable.Set[Node]()
@@ -30,7 +31,7 @@ class UsersModel(friends: List[Node], followers: List[Node]) {
     }).toArray
     screenNameToUserNameMap = 
         Map(users map {user => ((user \ "screen_name").text, (user \ "name").text)} : _*) 
-    
+    friendScreenNames = Set(friends map {f => (f \ "screen_name").text} : _*)    
   }
   
 }

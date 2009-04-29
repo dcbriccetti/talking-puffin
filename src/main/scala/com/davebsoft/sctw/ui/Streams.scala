@@ -22,7 +22,7 @@ class Streams(session: Session, username: String, password: String) extends Reac
   val mentionsProvider = new MentionsProvider(username, password, 
     Some(StateRepository.get(username + "-highestMentionId", null)))
   val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
-  val usersModel = new UsersTableModel(List[Node](), List[Node]())
+  val usersTableModel = new UsersTableModel(List[Node](), List[Node]())
   
   var streamInfoList = List[StreamInfo]()
   
@@ -77,9 +77,9 @@ class Streams(session: Session, username: String, password: String) extends Reac
     val sto = new StatusTableOptions(true)
     val isMentions = source.isInstanceOf[MentionsProvider] // TODO do without this test
     val model = if (isMentions) {
-      new StatusTableModel(sto, source, usersModel, fs, username) with Mentions
+      new StatusTableModel(sto, source, usersTableModel, fs, username) with Mentions
     } else {
-      new StatusTableModel(sto, source, usersModel, fs, username)
+      new StatusTableModel(sto, source, usersTableModel, fs, username)
     }
     val pane = new StatusPane(session, title, model, apiHandlers, fs, this)
     if (isMentions) {

@@ -18,11 +18,9 @@ import ui._
 import ui.util.FetchRequest
 
 /**
- * “TalkingPuffin”
+ * TalkingPuffin
  *
- * Your feedback is welcome!
- *
- * @Author Dave Briccetti, daveb@davebsoft.com, @dcbriccetti
+ * @author Dave Briccetti, daveb@davebsoft.com, @dcbriccetti
  */
 object Main {
   var log = Logger getLogger "Main"
@@ -74,7 +72,7 @@ object Main {
       picFetcher.requestItem(new FetchRequest((user \ "profile_image_url").text, null))
       add(userPic, new Constraints { grid = (0,0); gridheight=2})
       add(session.status, new Constraints {
-        grid = (1,0); fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
+        grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
         })
       peer.add(mainToolBar, new Constraints {
         grid = (1,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; }.peer)
@@ -100,14 +98,14 @@ object Main {
       { (result: Tuple2[List[Node],List[Node]]) =>
       val (following, followers) = result 
               
-      streams.usersModel.friends = following
-      streams.usersModel.followers = followers
-      streams.usersModel.usersChanged
+      streams.usersTableModel.friends = following
+      streams.usersTableModel.followers = followers
+      streams.usersTableModel.usersChanged
  
       streams setFollowerIds (followers map (u => (u \ "id").text))
               
       val paneTitle = "People (" + following.length + ", " + followers.length + ")"
-      val pane = new FriendsFollowersPane(session, streams.apiHandlers, streams.usersModel, following, followers)
+      val pane = new FriendsFollowersPane(session, streams.apiHandlers, streams.usersTableModel, following, followers)
       tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
     })
     

@@ -6,6 +6,7 @@ import ui.LinkExtractor
 /**
  * Logic to do filtering, given a FilterSet, and collections of statuses and
  * filtered statuses.
+
  * @author Dave Briccetti
  */
 
@@ -23,7 +24,7 @@ class FilterLogic(username: String, filterSet: FilterSet, filteredStatuses: java
     if (! filterSet.mutedUsers.contains(userId)) {
       if (tagFiltersInclude(userId)) {
         val text = (st \ "text").text 
-        if (! excludedBecauseReplyAndNotToYou(text)) {
+        if (! excludedBecauseReplyToStranger(text)) {
           if (! filterSet.excludedByStringMatches(text)) {
             if (! filterSet.excludedByOverlap(userId)) {
               return true
@@ -35,24 +36,19 @@ class FilterLogic(username: String, filterSet: FilterSet, filteredStatuses: java
     false
   }
   
-  private def tagFiltersInclude(userId: String): Boolean = {
-    if (filterSet.selectedTags.length == 0) true else {
-      for (tag <- filterSet.selectedTags) {
-        if (TagUsers.contains(new TagUser(tag, userId))) {
-          return true
-        }
-      }
-      false
-    }
+  private def tagFiltersInclude(userId: String) = filterSet.selectedTags.length match {
+    case 0 => true
+    case _ => filterSet.selectedTags.exists(tag => TagUsers.contains(new TagUser(tag, userId))) 
   }
     
-  private def excludedBecauseReplyAndNotToYou(text: String): Boolean = {
-    if (! filterSet.excludeNotToYouReplies) return false
-
-    LinkExtractor.getReplyToUser(text) match {
-      case Some(user) => ! user.equals(username)
-      case None => false
+  private def excludedBecauseReplyToStranger(text: String) = 
+    filterSet.excludeNotToFollowingReplies match {
+      case true =>
+        LinkExtractor.getReplyToUser(text) match {
+          case Some(user) => ! user.equals(username) && ! filterSet.friendScreenNames.contains(user)
+          case None => false
+        }
+      case false => false
     }
-  }
 }
   

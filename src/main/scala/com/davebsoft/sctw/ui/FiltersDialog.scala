@@ -44,10 +44,10 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
       contents += new UnmutePane(tableModel, filterSet)
     }, new Constraints {grid=(0,0); gridwidth=3; anchor=Anchor.West})
   
-    val excludeNotToYouReplies = new CheckBox("Exclude replies not to you")
+    val excludeNotToFollowingReplies = new CheckBox("Exclude replies not to following")
     val excludeOverlapping = new CheckBox("Exclude Tweets appearing in other sessions")
     add(new FlowPanel(FlowPanel.Alignment.Left) {
-      contents += excludeNotToYouReplies
+      contents += excludeNotToFollowingReplies
       contents += excludeOverlapping
     }, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
   
@@ -86,7 +86,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
   }
 
   def applyChanges {
-    filterSet.excludeNotToYouReplies = panel.excludeNotToYouReplies.selected
+    filterSet.excludeNotToFollowingReplies = panel.excludeNotToFollowingReplies.selected
     filterSet.excludeOverlapping = panel.excludeOverlapping.selected
     filterSet.publish
   }
