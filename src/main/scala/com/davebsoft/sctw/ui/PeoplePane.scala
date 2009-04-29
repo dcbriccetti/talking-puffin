@@ -30,7 +30,7 @@ object UserColumns {
   val STATUS = 7
 }
 
-class FriendsFollowersPane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTableModel, 
+class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTableModel, 
     friends: List[Node], followers: List[Node]) extends GridBagPanel {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {

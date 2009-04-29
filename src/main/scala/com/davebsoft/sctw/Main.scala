@@ -105,7 +105,7 @@ object Main {
       streams setFollowerIds (followers map (u => (u \ "id").text))
               
       val paneTitle = "People (" + following.length + ", " + followers.length + ")"
-      val pane = new FriendsFollowersPane(session, streams.apiHandlers, streams.usersTableModel, following, followers)
+      val pane = new PeoplePane(session, streams.apiHandlers, streams.usersTableModel, following, followers)
       tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
     })
     
