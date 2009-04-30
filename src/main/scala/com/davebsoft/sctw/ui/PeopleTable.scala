@@ -4,7 +4,7 @@ import javax.swing.table.DefaultTableCellRenderer
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.decorator.HighlighterFactory
 import org.jdesktop.swingx.table.TableColumnExt
-
+import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator}
 /**
  * People Table
  * 

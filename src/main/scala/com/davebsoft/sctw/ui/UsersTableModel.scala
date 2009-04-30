@@ -4,6 +4,7 @@ import _root_.scala.xml.Node
 import javax.swing.table.AbstractTableModel
 import javax.swing.Icon
 import filter.TagUsers
+import table.EmphasizedString
 
 /**
  * A model for users (followed and followers)

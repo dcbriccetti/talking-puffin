@@ -3,7 +3,8 @@ package com.davebsoft.sctw.ui
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
 import _root_.scala.xml.{NodeSeq, Node}
-import filter._
+import filter.{FilterSet, FilterLogic, FilterSetChanged, TagUser}
+
 import java.awt.event.{ActionEvent, ActionListener}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
@@ -13,6 +14,8 @@ import javax.swing._
 import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
 import org.apache.log4j.Logger
+import _root_.com.davebsoft.sctw
+import ui.table.EmphasizedString
 import twitter.{TweetsArrived, DataFetchException, TweetsProvider, Status}
 
 /**

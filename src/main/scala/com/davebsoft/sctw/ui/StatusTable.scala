@@ -22,6 +22,8 @@ import org.jdesktop.swingx.decorator.HighlighterFactory
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
+import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator}
+
 import twitter.{Status, Sender}
 import util.{TableUtil, DesktopUtil}
 /**
