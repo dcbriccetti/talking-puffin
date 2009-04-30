@@ -1,0 +1,11 @@
+.usersTable tr td {
+    vertical-align: top;
+}
+.usersTable tr td.number {
+    text-align: right;
+}
+
+.usersTable tr td.rightmostNumber {
+    padding-right: 1em;
+}
+

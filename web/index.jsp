@@ -16,7 +16,7 @@
     <td valign="top">Thank you for trying this early, experimental web application,
         which shows a summary of the people who follow you and those you follow.
     <p>    
-    <a href="http://davebsoft.com/applications/simple-twitter-client">Desktop client and more information</a>
+    <a href="http://TalkingPuffin.org">Desktop client and more information</a>
     </p><p>Dave Briccetti, <a href="http://twitter.com/dcbriccetti">dcbriccetti</a></p></td>
 </tr></table>
 
