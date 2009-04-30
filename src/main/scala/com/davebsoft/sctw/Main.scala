@@ -74,8 +74,7 @@ object Main {
       add(session.status, new Constraints {
         grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
         })
-      peer.add(mainToolBar, new Constraints {
-        grid = (1,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; }.peer)
+      peer.add(mainToolBar, new Constraints {grid = (1,1); anchor=GridBagPanel.Anchor.West}.peer)
       add(tabbedPane, new Constraints {
         grid = (0,2); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; gridwidth=2})
     }
