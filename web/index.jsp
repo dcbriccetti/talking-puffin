@@ -91,6 +91,7 @@ will be shown.</p>
 <%
     }
 %>
+<script src='http://davebsoft.com/scripts/analytics.js' type="text/javascript"></script>
 
 </body>
 </html>
