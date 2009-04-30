@@ -44,7 +44,7 @@ class Users extends Serializable {
     val following = new FriendsDataProvider(login.user, login.password).getUsers
     val followers = new FollowersDataProvider(login.user, login.password).getUsers
     val usersModel = new UsersModel(following, followers)
-    usersModel.build(true, true)
+    usersModel.build(UserSelection(true, true, None))
     var users = List[UserRow]()
     for (i <- 0 until usersModel.users.length) {
       val user = usersModel.users(i)

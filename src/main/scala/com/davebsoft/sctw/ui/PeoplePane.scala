@@ -1,10 +1,11 @@
 package com.davebsoft.sctw.ui
 
 import _root_.com.davebsoft.sctw.util.PopupListener
+import _root_.scala.swing.event.EditDone
 import _root_.scala.xml.{NodeSeq, Node}
 import filter.TagUsers
 import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
-import java.awt.{Toolkit, Font}
+import java.awt.{Toolkit, Dimension, Font}
 import java.util.Comparator
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, AbstractTableModel}
 import javax.swing.{JPopupMenu, JToolBar, JTable, JToggleButton, KeyStroke, Icon, JLabel}
@@ -39,26 +40,39 @@ class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTa
   table.addMouseListener(new PopupListener(table, getPopupMenu(ap)))
   var followingButton: JToggleButton = _
   var followersButton: JToggleButton = _
+  val searchText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
+  listenTo(searchText)
+  reactions += {
+    case EditDone(`searchText`) => buildModelData
+  }
   val toolbar = new JToolBar {
     setFloatable(false)
     class FriendFollowButton(label: String) extends JToggleButton(label) {
       setSelected(true)
       addActionListener(new ActionListener {
-        def actionPerformed(e: ActionEvent) = tableModel.buildModelData(
-          followingButton.isSelected, followersButton.isSelected)
+        def actionPerformed(e: ActionEvent) = buildModelData
       })
     }
     followingButton = new FriendFollowButton("Following: " + friends.size)
     followersButton = new FriendFollowButton("Followers: " + followers.size) 
     add(followingButton)
     add(followersButton)
-    add(new JLabel("Overlap: " + (friends.size + followers.size - tableModel.usersModel.users.size)))
+    add(new JLabel(" Overlap: " + (friends.size + followers.size - tableModel.usersModel.users.size)))
+    addSeparator
+    add(new JLabel("Search user name: "))
+    add(searchText.peer) 
   }
   peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
   
   add(tableScrollPane, new Constraints { 
     grid=(0,1); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1 
   })
+  
+  private def buildModelData = tableModel.buildModelData(UserSelection(
+    followingButton.isSelected, followersButton.isSelected, searchText.text.length match {
+      case 0 => None
+      case _ => Some(searchText.text)
+    }))
 
   private def buildActions(ap: ActionPrep, comp: java.awt.Component) = {
     ap.add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))

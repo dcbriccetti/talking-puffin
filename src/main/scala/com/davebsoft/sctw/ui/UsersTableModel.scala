@@ -18,10 +18,10 @@ class UsersModel(friends: List[Node], followers: List[Node]) {
   var screenNameToUserNameMap = Map[String, String]()
   var friendScreenNames: Set[String] = _
 
-  def build(includeFollowing: Boolean, includeFollowers: Boolean) {
-    val set = scala.collection.mutable.Set[Node]()
-    if (includeFollowing) set ++ friends
-    if (includeFollowers) set ++ followers
+  def build(sel: UserSelection) {
+    var set = scala.collection.mutable.Set[Node]()
+    if (sel.includeFollowing) set ++ selected(friends  , sel.searchString)
+    if (sel.includeFollowers) set ++ selected(followers, sel.searchString)
     val combinedList = set.toList.sort((a,b) => 
       ((a \ "name").text.toLowerCase compareTo (b \ "name").text.toLowerCase) < 0)
     users = combinedList.toArray
@@ -35,7 +35,14 @@ class UsersModel(friends: List[Node], followers: List[Node]) {
     friendScreenNames = Set(friends map {f => (f \ "screen_name").text} : _*)    
   }
   
+  def selected(users: List[Node], search: Option[String]) = search match {
+    case None => users
+    case Some(search) => users.filter(u => (u \ "name").text.toLowerCase.contains(search.toLowerCase))
+  }
 }
+
+case class UserSelection(val includeFollowing: Boolean, val includeFollowers: Boolean, 
+  val searchString: Option[String])
 
 class UsersTableModel(var friends: List[Node], var followers: List[Node]) extends AbstractTableModel {
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
@@ -43,18 +50,20 @@ class UsersTableModel(var friends: List[Node], var followers: List[Node]) extend
   var usersModel = new UsersModel(friends, followers)
   var lastIncludeFollowing = true
   var lastIncludeFollowers = true
-  buildModelData(true, true)
+  var lastSearch: Option[String] = None
+  buildModelData(UserSelection(true, true, None))
 
-  def buildModelData(includeFollowing: Boolean, includeFollowers: Boolean) {
-    lastIncludeFollowing = includeFollowing
-    lastIncludeFollowers = includeFollowers
-    usersModel.build(includeFollowing, includeFollowers)
+  def buildModelData(sel: UserSelection) {
+    lastIncludeFollowing = sel.includeFollowing
+    lastIncludeFollowers = sel.includeFollowers
+    lastSearch = sel.searchString
+    usersModel.build(sel)
     fireTableDataChanged
   }
   
   def usersChanged = {
     usersModel = new UsersModel(friends, followers)
-    buildModelData(lastIncludeFollowing, lastIncludeFollowers)
+    buildModelData(UserSelection(lastIncludeFollowing, lastIncludeFollowers, lastSearch))
   }
   
   def getColumnCount = 8
