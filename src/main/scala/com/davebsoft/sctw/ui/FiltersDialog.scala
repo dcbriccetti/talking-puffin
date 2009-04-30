@@ -65,8 +65,6 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
       contents += new Button(applyAction)
       val okAction = Action("OK") {applyChanges; FiltersDialog.this.visible = false}
       contents += new Button(okAction)
-      val cancelAction = Action("Cancel") {FiltersDialog.this.visible = false}
-      contents += new Button(cancelAction)
     }, new Constraints {grid=(0,6); fill=Fill.Horizontal; weightx=1})
     
     preferredSize = new Dimension(550, 600)
