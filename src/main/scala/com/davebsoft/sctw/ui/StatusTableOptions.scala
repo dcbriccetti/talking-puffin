@@ -4,4 +4,4 @@ package com.davebsoft.sctw.ui
  * @author Dave Briccetti
  */
 
-class StatusTableOptions (var showToColumn: Boolean)
+class StatusTableOptions (var showAgeColumn: Boolean, var showNameColumn: Boolean, var showToColumn: Boolean)

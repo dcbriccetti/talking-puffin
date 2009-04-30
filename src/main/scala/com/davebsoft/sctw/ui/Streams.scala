@@ -74,7 +74,7 @@ class Streams(session: Session, username: String, password: String) extends Reac
       case Some(s) => fs.includeTextFilters.add(new TextFilter(s, false)) 
       case None =>
     }
-    val sto = new StatusTableOptions(true)
+    val sto = new StatusTableOptions(true, true, true)
     val isMentions = source.isInstanceOf[MentionsProvider] // TODO do without this test
     val model = if (isMentions) {
       new StatusTableModel(sto, source, usersTableModel, fs, username) with Mentions

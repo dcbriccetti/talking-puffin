@@ -22,8 +22,7 @@ import org.jdesktop.swingx.decorator.HighlighterFactory
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
-import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator}
-
+import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
 import twitter.{Status, Sender}
 import util.{TableUtil, DesktopUtil}
 /**
@@ -41,7 +40,9 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
 
-  var toCol: TableColumnExt = _
+  var ageCol:  TableColumnExt = _
+  var nameCol: TableColumnExt = _
+  var toCol:   TableColumnExt = _
   configureColumns
 
   val ap = new ActionPrep(this)
@@ -103,7 +104,7 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
   private def configureColumns {
     val colModel = getColumnModel
     
-    val ageCol = colModel.getColumn(0)
+    ageCol = colModel.getColumn(0).asInstanceOf[TableColumnExt]
     ageCol.setPreferredWidth(60)
     ageCol.setMaxWidth(100)
     ageCol.setCellRenderer(new AgeCellRenderer)
@@ -111,7 +112,7 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
     val picCol = colModel.getColumn(1)
     picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
     
-    val nameCol = colModel.getColumn(2).asInstanceOf[TableColumnExt]
+    nameCol = colModel.getColumn(2).asInstanceOf[TableColumnExt]
     nameCol.setPreferredWidth(100)
     nameCol.setMaxWidth(200)
     nameCol.setCellRenderer(new EmphasizedStringCellRenderer)
@@ -125,14 +126,15 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
     
     val statusCol = colModel.getColumn(4)
     statusCol.setPreferredWidth(600)
-    statusCol.setCellRenderer(new HtmlCellRenderer)
+    statusCol.setCellRenderer(new StatusCellRenderer)
 
     colModel.addColumnModelListener(new TableColumnModelExtListener {
-      def columnPropertyChange(event: PropertyChangeEvent) = {
-        if (event.getPropertyName.equals("visible") && event.getSource == toCol) {
-          showToColumn(toCol.isVisible)
+      def columnPropertyChange(event: PropertyChangeEvent) = 
+        if (event.getPropertyName.equals("visible")) {
+          if (event.getSource == ageCol)  statusTableModel.options.showAgeColumn  = ageCol.isVisible
+          if (event.getSource == nameCol) statusTableModel.options.showNameColumn = nameCol.isVisible
+          if (event.getSource == toCol)   statusTableModel.options.showToColumn   = toCol.isVisible
         }
-      }
 
       def columnSelectionChanged(e: ListSelectionEvent) = {}
       def columnRemoved(e: TableColumnModelEvent) = {}
@@ -146,10 +148,6 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
     getColumnModel.getColumn(index).asInstanceOf[TableColumnExt].setVisible(show)
   }
   
-  def showToColumn(show: Boolean) {
-    statusTableModel.options.showToColumn = show
-  }
-
   protected def buildActions = {
     ap add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
     ap add(new OpenLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))

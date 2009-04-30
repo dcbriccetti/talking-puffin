@@ -10,25 +10,26 @@ import javax.swing.text.JTextComponent
  * @author Dave Briccetti
  */
 class EmphasizedStringCellRenderer extends HtmlCellRenderer {
-  override def setFormattedText(component: JTextComponent, value: Any) {
-    val fromTo = value.asInstanceOf[EmphasizedString]
-    component.setText(HtmlFormatter.htmlAround(formatValue(fromTo, renderer.getForeground))) 
-  }
+  override def setFormattedText(component: JTextComponent, value: Any) = component.setText(
+    HtmlFormatter.htmlAround(formatValue(value.asInstanceOf[EmphasizedString], renderer.getForeground))) 
   
   private def formatValue(string: EmphasizedString, color: Color): String = {
     string.name match {
       case Some(name) => 
         "<font face='helvetica' color='#" +  
         Integer.toHexString(color.getRGB & 0x00ffffff) + "'>" + 
-        decorate(name, string.nameEmphasized) + "</font>"
+        EmphasizedStringCellRenderer.decorate(name, string.nameEmphasized) + 
+        "</font>"
       case None => ""    
     }
   }
   
-  private def decorate(text: String, embolden: Boolean): String = {
+}
+
+object EmphasizedStringCellRenderer {
+  def decorate(text: String, embolden: Boolean): String = {
     (if (embolden) "<b>" else "") + text + (if (embolden) "</b>" else "")
   }
-  
 }
 
 class EmphasizedString(val name: Option[String], val nameEmphasized: Boolean)

@@ -15,7 +15,8 @@ import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
 import org.apache.log4j.Logger
 import _root_.com.davebsoft.sctw
-import ui.table.EmphasizedString
+import ui.table.{EmphasizedString, StatusCell}
+import time.TimeFormatter
 import twitter.{TweetsArrived, DataFetchException, TweetsProvider, Status}
 
 /**
@@ -77,29 +78,37 @@ class StatusTableModel(val options: StatusTableOptions, tweetsProvider: TweetsPr
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val status = filteredStatuses.get(rowIndex)
+    
+    def age(status: Node) = java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
+    def senderName(status: Node) = (status \ "user" \ "name").text
+    def senderNameEs(status: Node): EmphasizedString = {
+      val name = senderName(status)
+      val id = (status \ "user" \ "id").text
+      new EmphasizedString(Some(name), followerIdsx.contains(id))
+    }
+    def toName(status: Node) = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
+      case Some(u) => Some(usersModel.usersModel.screenNameToUserNameMap.getOrElse(u, u))
+      case None => None 
+    }
+    
     columnIndex match {
-      case 0 => java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
+      case 0 => age(status)
       case 1 => {
         val picUrl = (status \ "user" \ "profile_image_url").text
         pcell.request(picUrl, rowIndex)
       }
-      case 2 => {
-        val name = (status \ "user" \ "name").text
-        val id = (status \ "user" \ "id").text
-        new EmphasizedString(Some(name), followerIdsx.contains(id))
-      }
+      case 2 => senderNameEs(status)
       case 3 => {
         val name = (status \ "user" \ "name").text
         val id = (status \ "user" \ "id").text
-        val user = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
-          case Some(u) => Some(usersModel.usersModel.screenNameToUserNameMap.getOrElse(u, u))
-          case None => None 
-        }
+        val user = toName(status)
         new EmphasizedString(user, false)
       }
       case 4 => {
-        val st = getStatusText(status, username)
-        if (options.showToColumn) LinkExtractor.getWithoutUser(st) else st 
+        var st = getStatusText(status, username)
+        st = if (options.showToColumn) LinkExtractor.getWithoutUser(st) else st
+        StatusCell(if (options.showAgeColumn) None else Some(age(status)),
+          if (options.showNameColumn) None else Some(senderNameEs(status)), st)
       }
     }
   }
@@ -116,7 +125,7 @@ class StatusTableModel(val options: StatusTableOptions, tweetsProvider: TweetsPr
       case 1 => classOf[Icon]
       case 2 => classOf[String]
       case 3 => classOf[String] 
-      case 4 => classOf[String] 
+      case 4 => classOf[StatusCell] 
     }
   }
 

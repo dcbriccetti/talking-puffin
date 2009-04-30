@@ -8,7 +8,7 @@ import javax.swing.text.JTextComponent
 import javax.swing.{JTextArea, JTextPane, JTable}
 
 /**
- * From cell renderer.
+ * HTML cell renderer.
  * @author Dave Briccetti
  */
 class HtmlCellRenderer extends TableCellRenderer {
@@ -25,10 +25,8 @@ class HtmlCellRenderer extends TableCellRenderer {
     setFormattedText(this, value)
   }
   
-  protected def setFormattedText(component: JTextComponent, value: Any) {
-    val fromTo = value.asInstanceOf[String]
-    component.setText(HtmlFormatter.htmlAround(formatValue(fromTo, renderer.getForeground))) 
-  }
+  protected def setFormattedText(component: JTextComponent, value: Any) = component.setText(
+    HtmlFormatter.htmlAround(formatValue(value.asInstanceOf[String], renderer.getForeground))) 
   
   private def formatValue(string: String, color: Color): String = {
     "<font face='helvetica' color='#" +  
