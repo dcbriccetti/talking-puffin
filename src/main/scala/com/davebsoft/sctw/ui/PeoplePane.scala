@@ -8,16 +8,10 @@ import java.awt.{Toolkit, Font}
 import java.util.Comparator
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, AbstractTableModel}
 import javax.swing.{JPopupMenu, JToolBar, JTable, JToggleButton, KeyStroke, Icon, JLabel}
-import org.jdesktop.swingx.decorator.{HighlighterFactory, Highlighter}
-import org.jdesktop.swingx.JXTable
-import org.jdesktop.swingx.table.TableColumnExt
 import scala.swing._
 import scala.swing.GridBagPanel._
 import twitter.{FriendsFollowersDataProvider}
 import util.{TableUtil, DesktopUtil}
-/**
- * Displays a list of friends or followers
- */
 
 object UserColumns {
   val ARROWS = 0
@@ -30,35 +24,19 @@ object UserColumns {
   val STATUS = 7
 }
 
+/**
+ * Displays a list of friends or followers
+ */
 class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTableModel, 
     friends: List[Node], followers: List[Node]) extends GridBagPanel {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
-    table = new JXTable(tableModel) {
-      setColumnControlVisible(true)
-      setHighlighters(HighlighterFactory.createSimpleStriping)
-      setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
-      setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
-      
-      List(UserColumns.NAME, UserColumns.TAGS, UserColumns.LOCATION, UserColumns.STATUS, 
-        UserColumns.DESCRIPTION).foreach(i => {
-        getColumnModel.getColumn(i).setCellRenderer(new HtmlCellRenderer)
-      })
-      
-      getColumnModel.getColumn(UserColumns.ARROWS).setPreferredWidth(20)
-      getColumnModel.getColumn(UserColumns.ARROWS).setMaxWidth(30)
-      getColumnModel.getColumn(UserColumns.PICTURE).setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
-      val screenNameCol = getColumnModel.getColumn(UserColumns.SCREEN_NAME).asInstanceOf[TableColumnExt]
-      screenNameCol.setCellRenderer(new EmphasizedStringCellRenderer)
-      screenNameCol.setComparator(EmphasizedStringComparator)
-      getColumnModel.getColumn(UserColumns.DESCRIPTION).setPreferredWidth(250)
-      getColumnModel.getColumn(UserColumns.STATUS).setPreferredWidth(250)
-      val ap = new ActionPrep(this)
-      buildActions(ap, this)
-      addMouseListener(new PopupListener(this, getPopupMenu(ap)))
-    }
+    table = new PeopleTable(tableModel)
     peer.setViewportView(table)
   }
+  val ap = new ActionPrep(table)
+  buildActions(ap, table)
+  table.addMouseListener(new PopupListener(table, getPopupMenu(ap)))
   var followingButton: JToggleButton = _
   var followersButton: JToggleButton = _
   val toolbar = new JToolBar {
