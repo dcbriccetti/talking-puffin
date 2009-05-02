@@ -3,6 +3,7 @@ package com.davebsoft.sctw
 import _root_.scala.swing.GridBagPanel._
 import _root_.scala.swing.event.{ButtonClicked, SelectionChanged, WindowClosing}
 import filter.{FilterSet, TextFilter, TagUsers}
+import java.lang.reflect.{Proxy,InvocationHandler,Method}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Dimension, BorderLayout, Insets}
 import javax.swing.border.{BevelBorder, EmptyBorder}
@@ -30,15 +31,49 @@ object Main {
   private var password: String = ""
   
   object TopFrame {
-    var numFrames = 0
+    var frames = List[TopFrame]()
+
+    def addFrame(f: TopFrame){
+      frames = f :: frames
+      log debug "new frame added.  Number of frames is " + frames.size
+    }
+
+    def removeFrame(f: TopFrame){
+      frames = frames.remove {f == _}
+      log debug "frame removed.  Number of frames is " + frames.size
+      if(frames.size == 0){
+          log info "no more frames active, exiting"
+          // it's kinda ugly to put the exit logic here, but not sure where
+          // else to put it.'
+          System.exit(0)
+      }
+    }
+
+    def numFrames():Int = { frames.size}
+
+    def closeAll() {
+      closeAll(frames)
+    }
+
+    def closeAll(frames: List[TopFrame]) {
+      frames match {
+        case frame :: rest => {
+          frame.dispose
+          TopFrame.removeFrame(frame)
+          closeAll(rest)
+        }
+        case Nil =>
+      }
+    }
+
   }
   
   /**
    * The Swing frame.
    */
-  class TopFrame(username: String) extends Frame {
+  class TopFrame(username: String) extends Frame{
 
-    TopFrame.numFrames += 1
+    TopFrame.addFrame(this)
     val session = new Session
     Globals.sessions ::= session
     iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
@@ -83,10 +118,43 @@ object Main {
       case WindowClosing(_) => {
         Globals.sessions = Globals.sessions remove(s => s == session) // TODO is this best way?
         saveState
-        TopFrame.numFrames -= 1
-        if (TopFrame.numFrames == 0) System.exit(1)
+        TopFrame.removeFrame(this)
       }
     }
+
+    try{
+       
+      // For handling OSX shutdown stuff
+
+      // use a proxy here, as we can't pull in the Mac ApplicationHandler class'
+		  class ShutdownHandler extends InvocationHandler{
+		    def invoke(proxy: Any, m: Method, args: Array[Object]):Object = {
+          m.getName() match {
+              case "handleQuit" => {
+                  log.info("application exiting ")
+                  saveState
+                  TopFrame.closeAll()
+              }
+              case _ =>
+          }
+		    }
+		  }
+
+      // look up the Mac Application class.  If it isn't found, we should
+      // fall through to the ClassNotFoundException catch and just proceed'
+	    val applicationClass = Class.forName("com.apple.eawt.Application")
+	    val macOSXApplication = applicationClass.getConstructor().newInstance()
+	    val applicationListenerClass = Class.forName("com.apple.eawt.ApplicationListener")
+      val addListenerMethod = applicationClass.getDeclaredMethod("addApplicationListener", applicationListenerClass);
+      // create a proxy that implements ApplicationListener.  This is ugly, but since we can't actually pull in ApplicationListener
+      // this is pretty much the best we can do'
+	    val osxAdapterProxy = Proxy.newProxyInstance(getClass().getClassLoader(), Array(applicationListenerClass), new ShutdownHandler());
+	    addListenerMethod.invoke(macOSXApplication,osxAdapterProxy)
+    } catch {
+      // this is expected if not running on OSX
+      case cnfe: ClassNotFoundException =>
+    }
+
 
     peer.setLocationRelativeTo(null)
 
@@ -107,7 +175,7 @@ object Main {
       val pane = new PeoplePane(session, streams.apiHandlers, streams.usersTableModel, following, followers)
       tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
     })
-    
+
     private def saveState {
       val highFol = streams.tweetsProvider.getHighestId
       val highMen = streams.mentionsProvider.getHighestId
