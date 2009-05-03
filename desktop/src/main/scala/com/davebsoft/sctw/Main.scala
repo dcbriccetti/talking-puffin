@@ -1,14 +1,13 @@
 package com.davebsoft.sctw
 
-import _root_.scala.swing.GridBagPanel._
-import _root_.scala.swing.event.{ButtonClicked, SelectionChanged, WindowClosing}
+import _root_.scala.swing.event.WindowClosing
 import filter.{FilterSet, TextFilter, TagUsers}
-import java.lang.reflect.{Proxy,InvocationHandler,Method}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Dimension, BorderLayout, Insets}
 import javax.swing.border.{BevelBorder, EmptyBorder}
 import javax.swing.{JToolBar, ImageIcon, UIManager, JFrame}
 import org.apache.log4j.Logger
+import org.talkingpuffin.mac.QuitHandler
 import scala.swing._
 import scala.xml._
 
@@ -19,12 +18,13 @@ import ui._
 import ui.util.FetchRequest
 
 /**
- * TalkingPuffin
+ * TalkingPuffin main object
  *
- * @author Dave Briccetti, daveb@davebsoft.com, @dcbriccetti
+ * @author Dave Briccetti
+ * @author Mark McBride
  */
 object Main {
-  var log = Logger getLogger "Main"
+  val log = Logger getLogger "Main"
   val title = "TalkingPuffin" 
   private var user: Node = _
   private var username: String = ""
@@ -33,76 +33,43 @@ object Main {
   object TopFrame {
     var frames = List[TopFrame]()
 
-    try{
-
-      // For handling OSX shutdown stuff
-
-      // use a proxy here, as we can't pull in the Mac ApplicationHandler class'
-		  class ShutdownHandler extends InvocationHandler{
-		    def invoke(proxy: Any, m: Method, args: Array[Object]):Object = {
-          m.getName() match {
-              case "handleQuit" => {
-                  log.info("application exiting ")
-                  TopFrame.closeAll()
-              }
-              case _ =>
-          }
-		    }
-		  }
-
-      // look up the Mac Application class.  If it isn't found, we should
-      // fall through to the ClassNotFoundException catch and just proceed'
-	    val applicationClass = Class.forName("com.apple.eawt.Application")
-	    val macOSXApplication = applicationClass.getConstructor().newInstance()
-	    val applicationListenerClass = Class.forName("com.apple.eawt.ApplicationListener")
-      val addListenerMethod = applicationClass.getDeclaredMethod("addApplicationListener", applicationListenerClass);
-      // create a proxy that implements ApplicationListener.  This is ugly, but since we can't actually pull in ApplicationListener
-      // this is pretty much the best we can do'
-	    val osxAdapterProxy = Proxy.newProxyInstance(getClass().getClassLoader(), Array(applicationListenerClass), new ShutdownHandler());
-	    addListenerMethod.invoke(macOSXApplication,osxAdapterProxy)
-    } catch {
-      // this is expected if not running on OSX
-      case cnfe: ClassNotFoundException =>
-    }
+    QuitHandler register TopFrame.closeAll
 
     def addFrame(f: TopFrame){
       frames = f :: frames
-      log debug "new frame added.  Number of frames is " + frames.size
+      log debug "New frame added. Number of frames is " + frames.size
     }
 
     def removeFrame(f: TopFrame){
       frames = frames.remove {f == _}
-      log debug "frame removed.  Number of frames is " + frames.size
+      log debug "Frame removed. Number of frames is " + frames.size
       if(frames.size == 0){
-          log info "no more frames active, exiting"
+          log debug "No more frames active. Exiting."
           // it's kinda ugly to put the exit logic here, but not sure where
           // else to put it.'
           System.exit(0)
       }
     }
 
-    def numFrames():Int = { frames.size}
+    def numFrames = frames.size
 
-    def closeAll() {
-      closeAll(frames)
-    }
+    def closeAll: Unit = closeAll(frames)
 
-    def closeAll(frames: List[TopFrame]) {
-      frames match {
-        case frame :: rest => {
-          frame.dispose
-          frame.saveState
-          TopFrame.removeFrame(frame)
-          closeAll(rest)
-        }
-        case Nil =>
+    def closeAll(frames: List[TopFrame]): Unit = frames match {
+      case frame :: rest => {
+        frame.dispose
+        frame.saveState
+        TopFrame removeFrame frame
+        closeAll(rest)
       }
+      case Nil =>
     }
-
   }
   
   /**
    * The Swing frame.
+
+   * @author Dave Briccetti
    */
   class TopFrame(username: String) extends Frame{
 
@@ -201,7 +168,6 @@ object Main {
       this.user = user
       this.username = username
       password = pwd
-      log = Logger getLogger "Main (" + username + ")"
 
       new TopFrame(username) {
         pack
