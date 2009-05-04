@@ -4,7 +4,7 @@
     <groupId>org.talkingpuffin</groupId>
     <artifactId>twitter-api</artifactId>
     <parent>
-      <groupId>com.davebsoft.sctw</groupId>
+      <groupId>org.talkingpuffin</groupId>
       <artifactId>talking-puffin-base</artifactId>
       <version>0.63</version>
     </parent>
