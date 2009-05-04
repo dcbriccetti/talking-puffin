@@ -1,36 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.davebsoft.sctw</groupId>
+    <groupId>org.talkingpuffin</groupId>
     <artifactId>talking-puffin</artifactId>
-    <version>0.63</version>
-    <inceptionYear>2008</inceptionYear>
-    <properties>
-        <scala.version>2.7.3</scala.version>
-    </properties>
+    <parent>
+      <groupId>org.talkingpuffin</groupId>
+      <artifactId>talking-puffin-base</artifactId>
+      <version>0.63</version>
+    </parent>
     <name>TalkingPuffin Desktop Client</name>
     <url>http://TalkingPuffin.org/</url>
-    <organization>
-        <name>Dave Briccetti Software Consulting</name>
-        <url>http://davebsoft.com/</url>
-    </organization>
     <description>TalkingPuffin desktop Twitter client</description>
-
-    <repositories>
-        <repository>
-            <id>scala-tools.org</id>
-            <name>Scala-Tools Maven2 Repository</name>
-            <url>http://scala-tools.org/repo-releases</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>scala-tools.org</id>
-            <name>Scala-Tools Maven2 Repository</name>
-            <url>http://scala-tools.org/repo-releases</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -71,7 +51,7 @@
                     <launchers>
                         <launcher>
                             <id>main</id>
-                            <mainClass>com.davebsoft.sctw.Main</mainClass>
+                            <mainClass>org.talkingpuffin.Main</mainClass>
                         </launcher>
                     </launchers>
                 </configuration>
@@ -86,12 +66,4 @@
             </plugin>
         </plugins>
     </build>
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </reporting>
 </project>
