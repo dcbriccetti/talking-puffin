@@ -1,4 +1,4 @@
-package com.davebsoft.sctw.state
+package org.talkingpuffin.state
 
 import org.specs.runner.JUnit4
 import org.specs.Specification
