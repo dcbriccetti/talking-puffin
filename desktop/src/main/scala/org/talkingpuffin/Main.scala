@@ -1,6 +1,6 @@
 package org.talkingpuffin
 
-import _root_.scala.swing.event.WindowClosing
+import _root_.scala.swing.event.{ButtonClicked, WindowClosing}
 import filter.{FilterSet, TextFilter, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Dimension, BorderLayout, Insets}
@@ -37,12 +37,12 @@ object Main {
 
     def addFrame(f: TopFrame){
       frames = f :: frames
-      log debug "New frame added. Number of frames is " + frames.size
+      log debug "New frame added. Number of frames is " + frames.size + "."
     }
 
     def removeFrame(f: TopFrame){
       frames = frames.remove {f == _}
-      log debug "Frame removed. Number of frames is " + frames.size
+      log debug "Frame removed. Number of frames is " + frames.size + "."
       if(frames.size == 0){
           log debug "No more frames active. Exiting."
           // it's kinda ugly to put the exit logic here, but not sure where
@@ -92,6 +92,26 @@ object Main {
     menuBar = new MenuBar {
       contents += new Menu("Session") {
         contents += new MenuItem(Action("New...") { launchSession })
+      }
+      contents += new Menu("Options") {
+        object ItemFactory {
+          def instance(title: String, tooltip: String, checked: Boolean, 
+              mutator: (Boolean) => Unit): MenuItem = {
+            val item = new CheckMenuItem(title) {this.tooltip = tooltip; selected = checked}
+            listenTo(item)
+            reactions += {
+              case r: ButtonClicked => if (r.source == item) mutator(item.selected)
+              case _ =>
+            }
+            item
+          }
+        }
+        contents += ItemFactory.instance("Use animations", "Enables simple, useful animations", 
+          Globals.options.useAnimations, Globals.options.useAnimations_=_)
+        contents += ItemFactory.instance("Look up locations", "Enables lookup of locations from latitude and longitude", 
+          Globals.options.lookUpLocations, Globals.options.lookUpLocations_=_)
+        contents += ItemFactory.instance("Expand URLs", "Enables fetching original URL from shortened form", 
+          Globals.options.expandUrls, Globals.options.expandUrls_=_)
       }
     }
 
@@ -188,4 +208,6 @@ class Session {
 
 object Globals {
   var sessions: List[Session] = Nil
+  class Options(var useAnimations: Boolean, var lookUpLocations: Boolean, var expandUrls: Boolean)
+  val options = new Options(false, true, false)
 }

@@ -44,22 +44,6 @@ class StatusToolBar(session: Session, filtersDialog: FiltersDialog, apiHandlers:
   detailsButton = new JToggleButton(showDetailsAction.peer)
   detailsButton.setSelected(true)
 
-  var geoButton: JToggleButton = _ 
-  val geoAction = new Action("Geo") {
-    toolTip = "Enables lookup of locations from latitude and longitude"
-    def apply = tweetDetailPanel.geoEnabled = geoButton.isSelected
-  }
-  geoButton = new JToggleButton(geoAction.peer)
-  geoButton.setSelected(true)
-
-  var animButton: JToggleButton = _ 
-  val animAction = new Action("Anim") {
-    toolTip = "Enables simple, useful animations"
-    def apply = tweetDetailPanel.enableAnimation(animButton.isSelected)
-  }
-  animButton = new JToggleButton(animAction.peer)
-  animButton.setSelected(true)
-
   var dockedButton: JToggleButton = _ 
   val dockedAction = new Action("Docked") {
     toolTip = "Docks or frees the pane"
@@ -81,7 +65,5 @@ class StatusToolBar(session: Session, filtersDialog: FiltersDialog, apiHandlers:
   addSeparator
   add(dockedButton)
   add(detailsButton)
-  add(geoButton)
-  add(animButton)
 }
   

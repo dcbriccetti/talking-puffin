@@ -9,10 +9,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 class TextChangingAnimator {
   val keepAnimating = new AtomicBoolean
   var thread: Thread = _
-  var enabled: Boolean = true
   
   def run(origText: String, newText: String, callback: (String) => Unit) {
-    if (! enabled) {
+    if (! Globals.options.useAnimations) {
       callback(newText) // Simply show end result
     } else {
       keepAnimating.set(true)
