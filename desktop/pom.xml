@@ -51,7 +51,7 @@
                     <launchers>
                         <launcher>
                             <id>main</id>
-                            <mainClass>com.davebsoft.sctw.Main</mainClass>
+                            <mainClass>org.talkingpuffin.Main</mainClass>
                         </launcher>
                     </launchers>
                 </configuration>
