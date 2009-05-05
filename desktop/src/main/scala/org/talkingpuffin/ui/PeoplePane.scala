@@ -109,7 +109,7 @@ class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTa
   
   private def reply {
     val names = getSelectedUsers.map(user => ("@" + (user \ "screen_name").text)).mkString(" ")
-    val sm = new SendMsgDialog(session, null, apiHandlers.sender, Some(names), None)
+    val sm = new SendMsgDialog(session, null, apiHandlers.sender, Some(names), None, None)
     sm.visible = true
   }
 

@@ -16,7 +16,7 @@ import twitter.Sender
  */
 
 class SendMsgDialog(session: Session, parent: java.awt.Component, sender: Sender, recipients: Option[String],
-    replyToId: Option[String]) extends Frame {
+    replyToId: Option[String], msg : Option[String]) extends Frame {
   
   class CustomTextArea extends TextArea { 
     preferredSize = new Dimension(400, 80); wordWrap = true; lineWrap = true
@@ -48,6 +48,10 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, sender: Sender
         userNames = r
         message.text = userNames + " "
       }
+      case None =>
+    }
+    msg match {
+      case Some(m) => message.text = "RT " + message.text + " " + m
       case None =>
     }
     add(message, new Constr {grid=(0,0); fill=GridBagPanel.Fill.Both; weightx=1; weighty=1})

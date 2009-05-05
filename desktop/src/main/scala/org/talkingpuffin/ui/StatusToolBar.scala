@@ -28,7 +28,7 @@ class StatusToolBar(session: Session, filtersDialog: FiltersDialog, apiHandlers:
 
   val sendAction = new Action("Send…") {
     toolTip = "Opens a window from which you can send a tweet"
-    def apply = (new SendMsgDialog(session, null, apiHandlers.sender, None, None)).visible = true
+    def apply = (new SendMsgDialog(session, null, apiHandlers.sender, None, None, None)).visible = true
   }
 
   val clearRepliesAction = new Action("Clear") {
