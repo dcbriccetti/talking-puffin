@@ -45,7 +45,6 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
   private var bigPicLabel: Label = _
   private var showingUrl: String = _
   private var showingUser: NodeSeq = _
-  var geoEnabled = true
           
   private class CustomConstraints extends Constraints {
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
@@ -97,7 +96,7 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
       (status \ "in_reply_to_status_id").text, (status \ "source").text))
     largeTweet setCaretPosition 0
 
-    ShortUrl.substituteExpandedUrls((status \ "text").text, largeTweet)
+    if (Globals.options.expandUrls) ShortUrl.substituteExpandedUrls((status \ "text").text, largeTweet)
     
     val picUrl = urlFromUser(user)
     showMediumPicture(picUrl)
@@ -112,14 +111,12 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
     largeTweet.setText(null)
   }
 
-  def enableAnimation(enabled: Boolean) = animator.enabled = enabled
-  
   private def setText(user: NodeSeq) {
     animator.stop
     showingUser = user
     val rawLocationOfShowingItem = userLoc(user)
 
-    if (geoEnabled) {
+    if (Globals.options.lookUpLocations) {
       GeoCoder.extractLatLong(rawLocationOfShowingItem) match {
         case Some(latLong) =>
           geoCoder.getCachedObject(latLong) match {
