@@ -8,7 +8,7 @@ import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
 import java.awt.{Toolkit, Dimension, Font}
 import java.util.Comparator
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, AbstractTableModel}
-import javax.swing.{JPopupMenu, JToolBar, JTable, JToggleButton, KeyStroke, Icon, JLabel}
+import javax.swing.{JPopupMenu, JToolBar, JTable, JToggleButton, KeyStroke, Icon, JLabel, JOptionPane}
 import scala.swing._
 import scala.swing.GridBagPanel._
 import twitter.{FriendsFollowersDataProvider}
@@ -98,10 +98,30 @@ class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTa
     getSelectedUsers.map(user => (user \ "screen_name").text)
   }
 
-  private def follow = getSelectedScreenNames foreach apiHandlers.follower.follow
-  private def unfollow = getSelectedScreenNames foreach apiHandlers.follower.unfollow
-  private def block = getSelectedScreenNames foreach apiHandlers.follower.block
+  private def processScreenNames(screenNames:List[String],action:((String) => Unit),errHandler:((Exception,String) => Unit)) = {
+    screenNames foreach{screenName =>
+      try{
+        action(screenName)
+      }catch{
+        case e:Exception => errHandler(e,screenName)
+      }
+    }
+  }
 
+  private def showFollowErr(e:Exception,action:String,screenName:String){
+    JOptionPane.showMessageDialog(null, "Error " + action + " " + screenName)
+  }
+
+  private def follow = processScreenNames(getSelectedScreenNames,
+                                          apiHandlers.follower.follow,
+                                          showFollowErr(_,"following",_))
+  private def unfollow = processScreenNames(getSelectedScreenNames,
+                                            apiHandlers.follower.unfollow,
+                                            showFollowErr(_,"unfollowing",_))
+  private def block = processScreenNames(getSelectedScreenNames,
+                                            apiHandlers.follower.block,
+                                            showFollowErr(_,"blocking",_))
+  
   private def viewSelected {
     getSelectedUsers.foreach(user => {
       var uri = "http://twitter.com/" + (user \ "screen_name").text

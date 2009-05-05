@@ -50,9 +50,9 @@ class Follower(username: String, password: String) extends PostRequest(username,
 
     val (subject, verb2) = verb match {
       case "follow" => ("friendships","create")
-      case "unfollow" =>("friendships","delete")
+      case "unfollow" =>("friendships","destroy")
       case "block" => ("blocks","create")
-      case "unblock" =>("blocks","delete")
+      case "unblock" =>("blocks","destroy")
     }
 
     val url = urlHost + subject + "/" + verb2 + "/" + screenName + ".xml?id=" + screenName
