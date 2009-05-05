@@ -39,11 +39,21 @@ class Sender(username: String, password: String) extends PostRequest(username, p
 
 class Follower(username: String, password: String) extends PostRequest(username, password) {
   
-  def follow  (screenName: String) = befriend(screenName, "create")
-  def unfollow(screenName: String) = befriend(screenName, "destroy")
-    
+  def follow  (screenName: String) = befriend(screenName, "follow")
+  def unfollow(screenName: String) = befriend(screenName, "unfollow")
+  def block(screenName: String) = befriend(screenName, "block")
+  def unblock(screenName: String) = befriend(screenName, "unblock")
+
   def befriend(screenName: String, verb: String): Node = {
-    val url = urlHost + "friendships/" + verb + "/" + screenName + ".xml?id=" + screenName
+
+    val (subject, verb2) = verb match {
+      case "follow" => ("friendships","create")
+      case "unfollow" =>("friendships","delete")
+      case "block" => ("blocks","create")
+      case "unblock" =>("blocks","delete")
+    }
+
+    val url = urlHost + subject + "/" + verb + "/" + screenName + ".xml?id=" + screenName
     processUrl(url)
   }
 }

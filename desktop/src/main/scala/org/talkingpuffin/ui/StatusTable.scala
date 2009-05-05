@@ -64,11 +64,27 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
   def reply {
     val statuses = getSelectedStatuses
     val names = statuses.map(status => ("@" + new Status(status).getScreenNameFromStatus)).mkString(" ")
-    val sm = new SendMsgDialog(session, null, apiHandlers.sender, Some(names), Some((statuses(0) \ "id").text))
+    val sm = new SendMsgDialog(session, null, apiHandlers.sender, Some(names), Some((statuses(0) \ "id").text),None)
     sm.visible = true
   }
   
+
+  def retweet {
+    val statuses = getSelectedStatuses
+    if (statuses.length == 1 )  {
+      val name = statuses.map(status => ("@" + new Status(status).getScreenNameFromStatus)).mkString(" ")
+      val sm = new SendMsgDialog(session, null, apiHandlers.sender, Some(name), Some((statuses(0) \ "id").text), Some((statuses(0) \ "text").text))
+
+      sm.visible = true
+    }
+  }
+
+
   private def unfollow = getSelectedScreenNames foreach apiHandlers.follower.unfollow
+
+  private def block = getSelectedScreenNames foreach apiHandlers.follower.block
+  private def unblock = getSelectedScreenNames foreach apiHandlers.follower.unblock
+
   
   def getSelectedStatuses: List[Node] = {
     statusTableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
@@ -157,7 +173,10 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
     ap add new PrevTAction(this)
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
-    ap add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, 
+    ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_T))
+    ap add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U,
+      Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+    ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
     ap add(clearAction, Actions.ks(KeyEvent.VK_C))
     
