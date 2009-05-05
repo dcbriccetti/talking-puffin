@@ -76,16 +76,22 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
     add(picLabel, BorderPanel.Position.Center)
   }, new CustomConstraints { grid = (0,0); gridheight = 3; insets = new Insets(3, 3, 3, 3)})
 
-  userDescription = new TextArea {
+  class UserDescription extends TextArea {
     font = new Font("SansSerif", Font.PLAIN, 14)
     background = TweetDetailPanel.this.background
     lineWrap = true
     wordWrap = true
     editable = false
   }
-  add(userDescription, new CustomConstraints {
-    grid = (1,1); gridheight=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
-  })
+  addFreshUserDescription
+  /** Recreate the entire control as a defense against Hebrew characters which break the control */
+  def addFreshUserDescription {
+    if (userDescription != null) TweetDetailPanel.this.peer.remove(userDescription.peer)
+    userDescription = new UserDescription
+    add(userDescription, new CustomConstraints {
+      grid = (1,1); gridheight=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
+    })
+  }
   
   val statusTableModel = table.getModel.asInstanceOf[StatusTableModel]
 
@@ -134,6 +140,7 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
   }
   
   private def setText(user: NodeSeq, location: String) {
+    addFreshUserDescription
     def fmt(value: String) = NumberFormat.getIntegerInstance.format(Integer.parseInt(value))
     userDescription.text = (user \ "name").text + " • " +
         location + " • " + (user \ "description").text  + " • " +
