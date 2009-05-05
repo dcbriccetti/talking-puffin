@@ -11,6 +11,7 @@ import java.awt.event.{MouseEvent, KeyAdapter, MouseAdapter, KeyEvent}
 import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Image, Font}
 import java.net.{HttpURLConnection, URI, URL}
+import java.text.NumberFormat
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import javax.swing.text.JTextComponent
 import javax.swing.{ScrollPaneConstants, JTable, JTextPane, SwingWorker, ImageIcon, JScrollPane}
@@ -133,9 +134,11 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
   }
   
   private def setText(user: NodeSeq, location: String) {
+    def fmt(value: String) = NumberFormat.getIntegerInstance.format(Integer.parseInt(value))
     userDescription.text = (user \ "name").text + " • " +
         location + " • " + (user \ "description").text  + " • " +
-        (user \ "followers_count").text + " followers"
+        fmt((user \ "followers_count").text) + " followers, following " +
+        fmt((user \ "friends_count").text)
   }
 
   private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
