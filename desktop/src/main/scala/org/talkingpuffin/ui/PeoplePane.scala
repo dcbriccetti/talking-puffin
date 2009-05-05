@@ -82,6 +82,7 @@ class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTa
     val mask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
     ap.add(Action("Follow") { follow }, KeyStroke.getKeyStroke(KeyEvent.VK_F, mask))
     ap.add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, mask))
+    ap.add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B, mask))
   }
 
   private def getPopupMenu(ap: ActionPrep): JPopupMenu = {
@@ -99,7 +100,8 @@ class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTa
 
   private def follow = getSelectedScreenNames foreach apiHandlers.follower.follow
   private def unfollow = getSelectedScreenNames foreach apiHandlers.follower.unfollow
-  
+  private def block = getSelectedScreenNames foreach apiHandlers.follower.block
+
   private def viewSelected {
     getSelectedUsers.foreach(user => {
       var uri = "http://twitter.com/" + (user \ "screen_name").text

@@ -1,6 +1,7 @@
 package org.talkingpuffin.twitter
 
 import _root_.scala.xml.{XML, Node}
+import apache.log4j.Logger
 import java.net.URLEncoder
 
 class PostRequest(username: String, password: String) extends HttpHandler {
@@ -38,7 +39,8 @@ class Sender(username: String, password: String) extends PostRequest(username, p
  */
 
 class Follower(username: String, password: String) extends PostRequest(username, password) {
-  
+  private val log = Logger.getLogger("PostRequestFollower" )
+
   def follow  (screenName: String) = befriend(screenName, "follow")
   def unfollow(screenName: String) = befriend(screenName, "unfollow")
   def block(screenName: String) = befriend(screenName, "block")
@@ -53,7 +55,9 @@ class Follower(username: String, password: String) extends PostRequest(username,
       case "unblock" =>("blocks","delete")
     }
 
-    val url = urlHost + subject + "/" + verb + "/" + screenName + ".xml?id=" + screenName
+    val url = urlHost + subject + "/" + verb2 + "/" + screenName + ".xml?id=" + screenName
+
+    log.info("url = " + url)
     processUrl(url)
   }
 }
