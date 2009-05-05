@@ -95,7 +95,7 @@ object Main {
       }
       contents += new Menu("Options") {
         object ItemFactory {
-          def instance(title: String, tooltip: String, checked: Boolean, 
+          def apply(title: String, tooltip: String, checked: Boolean, 
               mutator: (Boolean) => Unit): MenuItem = {
             val item = new CheckMenuItem(title) {this.tooltip = tooltip; selected = checked}
             listenTo(item)
@@ -106,11 +106,11 @@ object Main {
             item
           }
         }
-        contents += ItemFactory.instance("Use animations", "Enables simple, useful animations", 
+        contents += ItemFactory("Use animations", "Enables simple, useful animations", 
           Globals.options.useAnimations, Globals.options.useAnimations_=_)
-        contents += ItemFactory.instance("Look up locations", "Enables lookup of locations from latitude and longitude", 
+        contents += ItemFactory("Look up locations", "Enables lookup of locations from latitude and longitude", 
           Globals.options.lookUpLocations, Globals.options.lookUpLocations_=_)
-        contents += ItemFactory.instance("Expand URLs", "Enables fetching original URL from shortened form", 
+        contents += ItemFactory("Expand URLs", "Enables fetching original URL from shortened form", 
           Globals.options.expandUrls, Globals.options.expandUrls_=_)
       }
     }
