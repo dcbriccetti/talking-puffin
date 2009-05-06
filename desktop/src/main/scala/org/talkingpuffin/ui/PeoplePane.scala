@@ -82,6 +82,7 @@ class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTa
     val mask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
     ap.add(Action("Follow") { follow }, KeyStroke.getKeyStroke(KeyEvent.VK_F, mask))
     ap.add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, mask))
+    ap.add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B, mask))
   }
 
   private def getPopupMenu(ap: ActionPrep): JPopupMenu = {
@@ -117,7 +118,9 @@ class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTa
   private def unfollow = processScreenNames(getSelectedScreenNames,
                                             apiHandlers.follower.unfollow,
                                             showFollowErr(_,"unfollowing",_))
-  
+  private def block = processScreenNames(getSelectedScreenNames,
+                                            apiHandlers.follower.block,
+                                            showFollowErr(_,"blocking",_))
   
   private def viewSelected {
     getSelectedUsers.foreach(user => {
