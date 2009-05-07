@@ -10,21 +10,26 @@ abstract class FriendsFollowersDataProvider(username: String, password: String) 
   setCredentials(username, password)
   
   def getUsers: List[Node] = {
-    var usersList = List[Node]()
-    var page = 1
-    var users: NodeSeq = null
-    
-    do {
-      val elem = loadTwitterData(getUrl + "?page=" + page)
-      if (elem != null) {
-        users = elem \ "user"
-      
-        for (user <- users) {
-          usersList ::= user
-        }
-        page += 1
+    getUsers(1)
+  }
+
+  def getUsers(page:Int): List[Node] = {
+    loadTwitterData(getUrl + "?page=" + page) match {
+      case HttpXMLSuccess(_,_,n) => {
+          parseUsers(n) match {
+            case Nil => Nil
+            case l => l ::: getUsers(page+1)
+          }
       }
-    } while (users.length > 0)
+      case _ => Nil
+    }
+  }
+
+  def parseUsers(x:Node) = {
+    var usersList = List[Node]()
+    for (user <- x \ "user") {
+      usersList ::= user
+    }
     usersList
   }
 }

@@ -2,6 +2,9 @@ package org.talkingpuffin.twitter
 
 import java.io.{InputStreamReader, BufferedInputStream, BufferedReader, OutputStreamWriter, InputStream}
 import java.net.URL
+
+import _root_.scala.xml.{XML,Node}
+
 import org.apache.commons.codec.binary.Base64
 import org.apache.commons.httpclient.auth.AuthScope
 import org.apache.commons.httpclient.cookie.CookiePolicy
@@ -24,6 +27,14 @@ object StreamUtil {
   }  
 }
 
+case class HttpResult
+case class HttpResponse(code:Int,response:String) extends HttpResult
+case class HttpSuccess(override val code:Int,override val response:String) extends HttpResponse(code,response)
+
+case class HttpXMLSuccess(override val code:Int, override val response:String, xml:Node) extends HttpSuccess(code,response)
+
+case class HttpError(override val code:Int,override val response:String) extends HttpResponse(code,response)
+case class HttpException(exception:Throwable) extends HttpResult
 /**
  * Generalises Http handling.
  * @author Alf Kristian Støyle  
@@ -41,26 +52,43 @@ protected trait HttpHandler {
    */
   def doGet(urlString: String) = {
     log.info("Fetching " + urlString)
-    val url = new URL(urlString)
-    val conn = url.openConnection
-    conn.addRequestProperty("Authorization", 
-      "Basic " + new String(new Base64().encode((username + ":" + password).getBytes)))
-    
-    val headers = conn.getHeaderFields
-    //TODO test or get this working on Google App Engine. Things may be different.
-    val status = headers.get("Status") // Looking for "200 OK"
-    val statusCode = if (status == null || status.size == 0) 200 else 
-      Integer.parseInt(status.get(0).split(" ")(0))
-    (statusCode, StreamUtil.streamToString(conn.getInputStream))
+    try{
+      val url = new URL(urlString)
+      val conn = url.openConnection
+      conn.addRequestProperty("Authorization",
+        "Basic " + new String(new Base64().encode((username + ":" + password).getBytes)))
+
+      val headers = conn.getHeaderFields
+      //TODO test or get this working on Google App Engine. Things may be different.
+      val status = headers.get("Status") // Looking for "200 OK"
+      val statusCode = if (status == null || status.size == 0) 200 else
+        Integer.parseInt(status.get(0).split(" ")(0))
+       
+      val responseBody = StreamUtil.streamToString(conn.getInputStream)
+      statusCode match {
+        case 200 => HttpSuccess(statusCode,responseBody)
+        case code => HttpError(statusCode,responseBody)
+      }
+    } catch {
+      case e => HttpException(e)
+    }
   }
   
   def doPost(url: String) = {
-    val method = new PostMethod(url)
-    handleCommonMethodSetup(method)
-    val result = httpClient.executeMethod(method)
-    val responseBody = method.getResponseBodyAsString()
-    method.releaseConnection
-    (method, result, responseBody)
+    try{
+      val method = new PostMethod(url)
+      handleCommonMethodSetup(method)
+      val result = httpClient.executeMethod(method)
+      val responseBody = method.getResponseBodyAsString()
+      val statusCode = method.getStatusCode
+      method.releaseConnection
+      statusCode match {
+        case 200 => HttpSuccess(statusCode,responseBody)
+        case code => HttpError(statusCode,responseBody)
+      }
+    } catch {
+      case e => HttpException(e)
+    }
   }
 
   private def handleCommonMethodSetup(method: HttpMethod) {

@@ -7,8 +7,6 @@ import scala.xml._
 import javax.swing.table.AbstractTableModel
 import org.apache.commons.httpclient.methods.GetMethod
 
-case class DataFetchException(val code: Int, val response: String) extends Exception
-  
 /**
  * A provider of Twitter data
  */
@@ -22,16 +20,13 @@ abstract class DataProvider extends HttpHandler {
    * Load data for the appropriate Twitter service (determined by the subclass),
    * and return it as XML.
    */
-  def loadTwitterData: Node = loadTwitterData(getUrl)
+  def loadTwitterData:HttpResponse = loadTwitterData(getUrl)
   
-  def loadTwitterData(url: String): Node = {
-    val (result, responseBody) = doGet(url)
-
-    if (result != 200) {
-      log.error(responseBody)
-      throw new DataFetchException(result, responseBody)
+  def loadTwitterData(url: String) = {
+    doGet(url) match {
+      case HttpSuccess(code,responseBody) => HttpXMLSuccess(code,responseBody,XML.loadString(responseBody))
+      case r:HttpResponse => r
     }
-    XML.loadString(responseBody)
   }
   
 }

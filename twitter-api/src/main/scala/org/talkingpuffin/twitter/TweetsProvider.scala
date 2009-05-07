@@ -79,13 +79,10 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
     new SwingWorker[Option[NodeSeq], Object] {
       val sendClear = clear
       override def doInBackground: Option[NodeSeq] = {
-        try {
-          Some(formatData(loadTwitterData(url)))
-        } catch {
-          case ex: DataFetchException => {
-            log.error(ex.response)
-            None
-          }
+        loadTwitterData(url) match {
+          case HttpXMLSuccess(_,_,n) => Some(formatData(n))
+          case HttpException(e) => log.error(e); None
+          case _ => None
         }
       }
       override def done = {

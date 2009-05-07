@@ -17,7 +17,7 @@ import org.apache.log4j.Logger
 import _root_.org.talkingpuffin
 import ui.table.{EmphasizedString, StatusCell}
 import time.TimeFormatter
-import twitter.{TweetsArrived, DataFetchException, TweetsProvider, Status}
+import twitter.{TweetsArrived, TweetsProvider, Status}
 
 /**
  * Model providing status data to the JTable
