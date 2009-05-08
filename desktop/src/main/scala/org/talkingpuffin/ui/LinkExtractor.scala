@@ -12,7 +12,7 @@ object LinkExtractor {
   
   val urlCharClass = """[^'"()\s]"""
   val hyperlinkRegex = "(https?://" + urlCharClass + "+)"
-  val usernameRegex = """@([^\s:.,]+)"""
+  val usernameRegex = """@([^\s:.,()]+)"""
   val usernameUrl = "http://twitter.com/$1"
   val hyperlinkPattern = Pattern.compile(hyperlinkRegex)
   val usernamePattern = Pattern.compile(usernameRegex)
