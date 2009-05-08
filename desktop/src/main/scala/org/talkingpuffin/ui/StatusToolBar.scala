@@ -1,9 +1,9 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.Action
+import _root_.scala.swing.{Component, Action, Key}
+import java.awt.event.KeyEvent
 import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
 
-import scala.swing.Component
 /**
  * Status pane tool bar
  * @author Dave Briccetti
@@ -14,6 +14,7 @@ class StatusToolBar(session: Session, filtersDialog: FiltersDialog, apiHandlers:
   
   val showFiltersAction = new Action("Filter…") {
     toolTip = "Set filters for this stream"
+    mnemonic = KeyEvent.VK_F
     def apply = {
       filtersDialog.peer.setLocationRelativeTo(SwingUtilities.getAncestorOfClass(classOf[JFrame], 
         statusPane.peer))
@@ -23,16 +24,19 @@ class StatusToolBar(session: Session, filtersDialog: FiltersDialog, apiHandlers:
 
   val clearAction = new Action("Clear") {
     toolTip = "Removes all tweets (including filtered-out ones)"
+    mnemonic = KeyEvent.VK_C
     def apply = clearTweets
   }
 
   val sendAction = new Action("Send…") {
     toolTip = "Opens a window from which you can send a tweet"
+    mnemonic = KeyEvent.VK_S
     def apply = (new SendMsgDialog(session, null, apiHandlers.sender, None, None, None)).visible = true
   }
 
   val clearRepliesAction = new Action("Clear") {
     toolTip = "Removes all mentions"
+    mnemonic = KeyEvent.VK_C
     def apply = clearTweets
   }
 

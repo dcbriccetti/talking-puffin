@@ -3,6 +3,7 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.GridBagPanel._
 import _root_.scala.swing.{ListView, Frame, GridBagPanel, UIElement, FlowPanel, Button, CheckBox, Label, ScrollPane, Action}
 import filter.{TagsRepository, FilterSet, TextFilter, FilterSetChanged}
+import java.awt.event.KeyEvent
 import java.awt.{Dimension, Insets}
 import javax.swing.event.{ListSelectionListener, ListSelectionEvent, TableModelListener, TableModelEvent}
 import javax.swing.{JTable, BorderFactory}
@@ -63,7 +64,10 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     add(new FlowPanel {
       val applyAction = Action("Apply") {applyChanges}
       contents += new Button(applyAction)
-      val okAction = Action("OK") {applyChanges; FiltersDialog.this.visible = false}
+      val okAction = new Action("OK") {
+        mnemonic = KeyEvent.VK_O
+        def apply = {applyChanges; FiltersDialog.this.visible = false}
+      }
       contents += new Button(okAction)
     }, new Constraints {grid=(0,6); fill=Fill.Horizontal; weightx=1})
     
