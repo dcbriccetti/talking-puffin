@@ -3,9 +3,9 @@ package org.talkingpuffin
 import _root_.scala.swing.event.{ButtonClicked, WindowClosing}
 import filter.{FilterSet, TextFilter, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
-import java.awt.{Dimension, BorderLayout, Insets}
+import java.awt.{Toolkit, Dimension, BorderLayout, Insets}
 import javax.swing.border.{BevelBorder, EmptyBorder}
-import javax.swing.{JToolBar, ImageIcon, UIManager, JFrame}
+import javax.swing.{JToolBar, KeyStroke, ImageIcon, UIManager, JFrame}
 import org.apache.log4j.Logger
 import org.talkingpuffin.mac.QuitHandler
 import scala.swing._
@@ -91,7 +91,12 @@ object Main {
     
     menuBar = new MenuBar {
       contents += new Menu("Session") {
-        contents += new MenuItem(Action("New...") { launchSession })
+        contents += new MenuItem(new Action("New...") {
+          mnemonic = KeyEvent.VK_S
+          accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, 
+            Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+          def apply = launchSession 
+        })
       }
       contents += new Menu("Options") {
         object ItemFactory {
