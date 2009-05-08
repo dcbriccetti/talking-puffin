@@ -44,18 +44,6 @@ class MainToolBar(streams: Streams) extends JToolBar {
     val assortedTimes = tenThruFiftySecs ::: oneThruNineMins ::: tenThruSixtyMins 
 
     add(new RefreshCombo(provider, assortedTimes).peer)
-  
-    val loadNewAction = new Action("Load New") {
-      toolTip = "Loads any new items"
-      def apply = provider.loadNewData
-    }
-    add(loadNewAction.peer)
-  
-    val last200Action = new Action("Last 200") {
-      toolTip = "Fetches the last 200 items"
-      def apply = provider.loadLastBlockOfTweets
-    }
-    add(last200Action.peer)
   }
   
   case class DisplayTime(val seconds: Int) {

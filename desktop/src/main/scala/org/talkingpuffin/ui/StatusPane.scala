@@ -32,7 +32,8 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
   
-  val statusToolBar = new StatusToolBar(session, filtersDialog, apiHandlers, this, clearTweets)
+  val statusToolBar = new StatusToolBar(session, statusTableModel.tweetsProvider, 
+    filtersDialog, apiHandlers, this, clearTweets)
   peer.add(statusToolBar, new Constraints{grid=(0,0); gridwidth=3}.peer)
   
   add(new ScrollPane {

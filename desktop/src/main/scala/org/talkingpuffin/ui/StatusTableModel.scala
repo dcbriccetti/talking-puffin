@@ -22,7 +22,7 @@ import twitter.{TweetsArrived, TweetsProvider, Status}
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(val options: StatusTableOptions, tweetsProvider: TweetsProvider, 
+class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: TweetsProvider, 
     usersModel: UsersTableModel, filterSet: FilterSet, username: String) 
     extends AbstractTableModel with Publisher with Reactor {
   
