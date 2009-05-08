@@ -1,5 +1,6 @@
 package org.talkingpuffin.ui
 
+import _root_.org.talkingpuffin.twitter.TweetsProvider
 import _root_.scala.swing.{Component, Action, Key}
 import java.awt.event.KeyEvent
 import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
@@ -8,8 +9,8 @@ import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
  * Status pane tool bar
  * @author Dave Briccetti
  */
-class StatusToolBar(session: Session, filtersDialog: FiltersDialog, apiHandlers: ApiHandlers, 
-    statusPane: Component, clearTweets: => Unit) extends JToolBar {
+class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDialog: FiltersDialog, 
+    apiHandlers: ApiHandlers, statusPane: Component, clearTweets: => Unit) extends JToolBar {
   var tweetDetailPanel: TweetDetailPanel = _
   
   val showFiltersAction = new Action("Filter…") {
@@ -40,6 +41,16 @@ class StatusToolBar(session: Session, filtersDialog: FiltersDialog, apiHandlers:
     def apply = clearTweets
   }
 
+  val loadNewAction = new Action("Load New") {
+    toolTip = "Loads any new items"
+    def apply = tweetsProvider.loadNewData
+  }
+  
+  val last200Action = new Action("Last 200") {
+    toolTip = "Fetches the last 200 items"
+    def apply = tweetsProvider.loadLastBlockOfTweets
+  }
+
   var detailsButton: JToggleButton = _ 
   val showDetailsAction = new Action("Details") {
     toolTip = "Shows or hides the details panel"
@@ -66,6 +77,8 @@ class StatusToolBar(session: Session, filtersDialog: FiltersDialog, apiHandlers:
   add(sendAction.peer)
   add(showFiltersAction.peer)
   add(clearAction.peer)
+  add(loadNewAction.peer)
+  add(last200Action.peer)
   addSeparator
   add(dockedButton)
   add(detailsButton)
