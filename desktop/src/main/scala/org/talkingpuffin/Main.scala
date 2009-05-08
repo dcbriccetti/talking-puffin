@@ -92,7 +92,6 @@ object Main {
     menuBar = new MenuBar {
       contents += new Menu("Session") {
         contents += new MenuItem(new Action("New...") {
-          mnemonic = KeyEvent.VK_S
           accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, 
             Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
           def apply = launchSession 
