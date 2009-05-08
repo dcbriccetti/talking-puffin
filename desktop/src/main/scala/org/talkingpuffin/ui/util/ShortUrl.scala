@@ -10,7 +10,7 @@ import javax.swing.text.JTextComponent
  * @author Dave Briccetti
  */
 object ShortUrl {
-  val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "short.ie", "tinyurl.com", "tr.im")
+  val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "ping.fm", "short.ie", "tinyurl.com", "tr.im")
   val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + LinkExtractor.urlCharClass + "*"
   private val redirectionCodes = List(301, 302)
   private type LongUrlReady = ResourceReady[String,String]
