@@ -4,3 +4,4 @@
 .settings
 nbactions.xml
 target
+.gitignore
