@@ -4,6 +4,7 @@ import java.awt.Color
 import java.util.Comparator
 import javax.swing.text.JTextComponent
 import time.TimeFormatter
+import util.ShortUrl
 
 /**
  * Status cell renderer.
@@ -22,7 +23,7 @@ class StatusCellRenderer extends HtmlCellRenderer {
         case None => ""
       }
       case None => ""
-    }) + cell.status + (cell.age match {
+    }) + cell.status.replaceAll(ShortUrl.regex, "⁕") + (cell.age match {
       case Some(age) => "<font size='-2'> " + 
               TimeFormatter(age.asInstanceOf[Long]).colonSeparated + " ago</font>"
       case None => ""
