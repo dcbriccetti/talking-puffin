@@ -31,7 +31,7 @@ import util.{TableUtil, DesktopUtil}
  */
 
 class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
-      clearAction: Action, showBigPicture: => Unit) 
+      showBigPicture: => Unit) 
     extends JXTable(statusTableModel) {
 
   setColumnControlVisible(true)
@@ -178,7 +178,6 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
     ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
-    ap add(clearAction, Actions.ks(KeyEvent.VK_C))
     
     ap add(Action("Delete selected tweets") {
       statusTableModel removeStatuses TableUtil.getSelectedModelIndexes(this) 

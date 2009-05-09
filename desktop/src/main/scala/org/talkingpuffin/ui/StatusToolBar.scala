@@ -43,11 +43,13 @@ class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDia
 
   val loadNewAction = new Action("Load New") {
     toolTip = "Loads any new items"
+    mnemonic = KeyEvent.VK_N
     def apply = tweetsProvider.loadNewData
   }
   
   val last200Action = new Action("Last 200") {
     toolTip = "Fetches the last 200 items"
+    mnemonic = KeyEvent.VK_2
     def apply = tweetsProvider.loadLastBlockOfTweets
   }
 
