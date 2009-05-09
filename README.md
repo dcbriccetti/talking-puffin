@@ -1,7 +1,7 @@
 TalkingPuffin
 =====================
 
-See http://TalkingPuffin.org
+See http://TalkingPuffin.org and http://groups.google.com/group/talkingpuffin
 
 ## Thanks
 
