@@ -79,8 +79,7 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
     })
   }
   
-  def newTable: StatusTable = new StatusTable(session, statusTableModel, apiHandlers, 
-    statusToolBar.clearAction, showBigPicture)
+  def newTable = new StatusTable(session, statusTableModel, apiHandlers, showBigPicture)
   
   def showBigPicture = tweetDetailPanel.showBigPicture
   
