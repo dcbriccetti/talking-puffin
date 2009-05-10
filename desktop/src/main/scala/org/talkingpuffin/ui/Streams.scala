@@ -2,7 +2,7 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.{TabbedPane, Component, Reactor}
 import _root_.scala.xml.Node
-import filter.{FilterSet, TextFilter}
+import filter.{FilterSet, TextFilter, TagUsers}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
 import state.PreferencesFactory
 import twitter.{Follower, RateLimitStatusProvider, TweetsProvider, Sender, MentionsProvider}
@@ -15,7 +15,7 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
  * @author Dave Briccetti
  */
 
-class Streams(session: Session, username: String, password: String) extends Reactor {
+class Streams(session: Session, tagUsers: TagUsers, username: String, password: String) extends Reactor {
   val rateLimitStatusProvider = new RateLimitStatusProvider(username, password)
   val prefs = PreferencesFactory.prefsForUser(username)
   
@@ -24,7 +24,7 @@ class Streams(session: Session, username: String, password: String) extends Reac
   val mentionsProvider = new MentionsProvider(username, password, 
     prefs.get("highestMentionId", null) match {case null => None; case v => Some(v)})
   val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
-  val usersTableModel = new UsersTableModel(List[Node](), List[Node]())
+  val usersTableModel = new UsersTableModel(tagUsers, List[Node](), List[Node]())
   
   var streamInfoList = List[StreamInfo]()
   
@@ -79,9 +79,9 @@ class Streams(session: Session, username: String, password: String) extends Reac
     val sto = new StatusTableOptions(true, true, true)
     val isMentions = source.isInstanceOf[MentionsProvider] // TODO do without this test
     val model = if (isMentions) {
-      new StatusTableModel(sto, source, usersTableModel, fs, username) with Mentions
+      new StatusTableModel(sto, source, usersTableModel, fs, username, tagUsers) with Mentions
     } else {
-      new StatusTableModel(sto, source, usersTableModel, fs, username)
+      new StatusTableModel(sto, source, usersTableModel, fs, username, tagUsers)
     }
     val pane = new StatusPane(session, title, model, apiHandlers, fs, this)
     if (isMentions) {

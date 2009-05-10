@@ -44,7 +44,8 @@ class UsersModel(friends: List[Node], followers: List[Node]) {
 case class UserSelection(val includeFollowing: Boolean, val includeFollowers: Boolean, 
   val searchString: Option[String])
 
-class UsersTableModel(var friends: List[Node], var followers: List[Node]) extends AbstractTableModel {
+class UsersTableModel(tagUsers: TagUsers, var friends: List[Node], var followers: List[Node]) 
+    extends AbstractTableModel {
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
   var usersModel = new UsersModel(friends, followers)
@@ -88,7 +89,7 @@ class UsersTableModel(var friends: List[Node], var followers: List[Node]) extend
       }
       case UserColumns.ARROWS => usersModel.arrows(rowIndex)
       case UserColumns.SCREEN_NAME => new EmphasizedString(Some(colVal), followers.contains(user))
-      case UserColumns.TAGS => TagUsers.tagsForUser((user \ "id").text).mkString(", ")
+      case UserColumns.TAGS => tagUsers.tagsForUser((user \ "id").text).mkString(", ")
       case UserColumns.STATUS => (user \ "status" \ "text").text
       case _ => colVal
     }

@@ -10,7 +10,8 @@ import ui.LinkExtractor
  * @author Dave Briccetti
  */
 
-class FilterLogic(username: String, filterSet: FilterSet, filteredStatuses: java.util.List[Node]) {
+class FilterLogic(username: String, tagUsers: TagUsers, filterSet: FilterSet, 
+  filteredStatuses: java.util.List[Node]) {
   
   def filter(statuses: List[Node]) {
     filteredStatuses.clear
@@ -38,7 +39,7 @@ class FilterLogic(username: String, filterSet: FilterSet, filteredStatuses: java
   
   private def tagFiltersInclude(userId: String) = filterSet.selectedTags.length match {
     case 0 => true
-    case _ => filterSet.selectedTags.exists(tag => TagUsers.contains(new TagUser(tag, userId))) 
+    case _ => filterSet.selectedTags.exists(tag => tagUsers.contains(tag, userId)) 
   }
     
   private def excludedBecauseReplyToStranger(text: String) = 

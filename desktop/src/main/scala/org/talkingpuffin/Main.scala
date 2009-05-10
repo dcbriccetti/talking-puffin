@@ -74,6 +74,7 @@ object Main {
    */
   class TopFrame(username: String) extends Frame{
 
+    val tagUsers = new TagUsers(username)
     TopFrame.addFrame(this)
     val session = new Session
     Globals.sessions ::= session
@@ -84,7 +85,7 @@ object Main {
     }
     session.windows.tabbedPane = tabbedPane
 
-    val streams = new Streams(session, username, password)
+    val streams = new Streams(session, tagUsers, username, password)
     session.windows.streams = streams
     val mainToolBar = new MainToolBar(streams)
     
@@ -119,8 +120,6 @@ object Main {
           Globals.options.expandUrls, Globals.options.expandUrls_=_)
       }
     }
-
-    TagUsers.load
 
     contents = new GridBagPanel {
       val userPic = new Label
@@ -174,7 +173,7 @@ object Main {
       val prefs = PreferencesFactory.prefsForUser(username)
       if (highFol != null) prefs.put("highestId", highFol)
       if (highMen != null) prefs.put("highestMentionId", highMen)
-      TagUsers.save
+      tagUsers.save
     }
   }
   
