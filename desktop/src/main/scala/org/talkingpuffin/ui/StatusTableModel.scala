@@ -3,8 +3,7 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
 import _root_.scala.xml.{NodeSeq, Node}
-import filter.{FilterSet, FilterLogic, FilterSetChanged, TagUser}
-
+import filter.{FilterSet, FilterLogic, FilterSetChanged, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
@@ -23,7 +22,7 @@ import twitter.{TweetsArrived, TweetsProvider, Status}
  * Model providing status data to the JTable
  */
 class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: TweetsProvider, 
-    usersModel: UsersTableModel, filterSet: FilterSet, username: String) 
+    usersModel: UsersTableModel, filterSet: FilterSet, username: String, tagUsers: TagUsers) 
     extends AbstractTableModel with Publisher with Reactor {
   
   private val log = Logger.getLogger("StatusTableModel " + hashCode)
@@ -39,7 +38,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   
   def filteredStatusCount = filteredStatuses.size
 
-  val filterLogic = new FilterLogic(username, filterSet, filteredStatuses)
+  val filterLogic = new FilterLogic(username, tagUsers, filterSet, filteredStatuses)
   
   private val colNames = List("Age", "Image", "From", "To", "Status")
   private var preChangeListener: PreChangeListener = _;
@@ -150,7 +149,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
 
   def tagSelectedUsers(rows: List[Int], tag: String) {
     for (user <- getUsers(rows)) {
-      filter.TagUsers.add(new TagUser(tag, user.id))
+      tagUsers.add(tag, user.id)
     }
   }
 

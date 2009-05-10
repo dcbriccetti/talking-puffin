@@ -1,6 +1,8 @@
 package org.talkingpuffin.filter
 
+import com.google.common.collect.{Multimap, HashMultimap}
 import java.io.{File, PrintWriter, FileNotFoundException, FileWriter}
+import java.util.ArrayList
 import scala.collection.mutable.Set
 import scala.io.Source
 import state.PreferencesFactory
@@ -9,47 +11,44 @@ import state.PreferencesFactory
  * Repository of tag -> user mappings
  * @author Dave Briccetti
  */
-
-case class TagUser(tag: String, userId: String)
-
-/**
- * A set of tag -> user pairings
- */
-object TagUsers {
-  private val tagUsers = Set[TagUser]()
+class TagUsers(username: String) {
+  private val prefs = PreferencesFactory.prefsForUser(username).node("tags")
+  private val tagUsers: HashMultimap[String,String] = HashMultimap.create()
+  prefs.keys.foreach(tag => {
+    prefs.get(tag, null).split("\t").foreach(userId => add(tag, userId))
+  })
   
-  def add(tagUser: TagUser) {
-    tagUsers += tagUser
+  def add(tag: String, userId: String) {
+    tagUsers.put(tag, userId)
   }
   
-  def contains(tagUser: TagUser): Boolean = {
-    tagUsers.contains(tagUser)
-  }
+  def contains(tag: String, userId: String) = tagUsers.get(tag).contains(userId)
   
   def tagsForUser(userId: String): List[String] = {
-    for (tu <- tagUsers.toList; if (tu.userId.equals(userId))) yield tu.tag
-  }
-
-  private def getFile = {
-    val homeDir = new File(System.getProperty("user.home"));
-    new File(homeDir, ".simple-twitter-client-tag-assigns.properties");
-  }
-                                  
-  def load {
-    tagUsers.clear
-    try {
-      val src = Source.fromFile(getFile)  
-      src.getLines.map(_.split("=")).foreach((tu) => tagUsers += new TagUser(tu(0), tu(1).trim))  
-    } catch {
-      case ex: FileNotFoundException => // Ignore
+    var tags = List[String]()
+    val el = getEntriesAsList
+    for (i <- 0 until el.size) {
+      val tu = el.get(i)
+      if (tu.getValue == userId) tags = tu.getKey :: tags
     }
+    tags
   }
   
   def save {
-    val out = new PrintWriter(new FileWriter(getFile))
-    for (tu <- tagUsers) {
-      out.println(tu.tag + "=" + tu.userId)
+    prefs.clear
+    val el = getKeysAsList
+    for (i <- 0 until el.size) {
+      val tag = el.get(i)
+      val users = new ArrayList[String](tagUsers.get(tag))
+      val sb = new StringBuilder
+      for (j <- 0 until users.size) {
+        sb.append(users.get(j)).append("\t")
+      }
+      prefs.put(tag, sb.toString)
     }
-    out.close
   }
+  
+  private def getEntriesAsList = new ArrayList[java.util.Map.Entry[String,String]](tagUsers.entries) 
+  private def getKeysAsList = new ArrayList[String](tagUsers.keys) 
+
 }
