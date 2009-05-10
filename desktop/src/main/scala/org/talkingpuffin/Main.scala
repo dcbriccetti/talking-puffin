@@ -4,6 +4,7 @@ import _root_.scala.swing.event.{ButtonClicked, WindowClosing}
 import filter.{FilterSet, TextFilter, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Toolkit, Dimension, BorderLayout, Insets}
+import java.util.prefs.Preferences
 import javax.swing.border.{BevelBorder, EmptyBorder}
 import javax.swing.{JToolBar, KeyStroke, ImageIcon, UIManager, JFrame}
 import org.apache.log4j.Logger
@@ -12,7 +13,7 @@ import scala.swing._
 import scala.xml._
 
 import TabbedPane._
-import state.StateRepository
+import state.PreferencesFactory
 import twitter._
 import ui._
 import ui.util.FetchRequest
@@ -169,10 +170,10 @@ object Main {
     private def saveState {
       val highFol = streams.tweetsProvider.getHighestId
       val highMen = streams.mentionsProvider.getHighestId
-      log info("Saving last seen IDs. Following: " + highFol + ", mentions: " + highMen)
-      if (highFol != null) StateRepository.set(username + "-highestId", highFol)
-      if (highMen != null) StateRepository.set(username + "-highestMentionId", highMen)
-      StateRepository.save
+      log info("Saving last seen IDs for " + username + ". Following: " + highFol + ", mentions: " + highMen)
+      val prefs = PreferencesFactory.prefsForUser(username)
+      if (highFol != null) prefs.put("highestId", highFol)
+      if (highMen != null) prefs.put("highestMentionId", highMen)
       TagUsers.save
     }
   }

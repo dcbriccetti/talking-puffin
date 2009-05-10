@@ -3,7 +3,7 @@ package org.talkingpuffin.filter
 import java.io.{File, PrintWriter, FileNotFoundException, FileWriter}
 import scala.collection.mutable.Set
 import scala.io.Source
-import state.StateRepository
+import state.PreferencesFactory
 
 /**
  * Repository of tag -> user mappings
