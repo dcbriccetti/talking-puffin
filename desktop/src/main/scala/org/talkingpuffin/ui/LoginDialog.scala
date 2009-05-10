@@ -88,7 +88,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
           handleLogin
         } else {
           // Cancel pressed
-          visible = false
+          LoginDialog.this.visible = false
           cancelPressed
         }
     }
