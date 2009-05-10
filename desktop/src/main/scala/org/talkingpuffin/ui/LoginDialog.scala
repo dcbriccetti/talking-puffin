@@ -6,7 +6,7 @@ import _root_.scala.xml.Node
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.Color
 import javax.swing.JDialog
-import state.StateRepository
+import state.PreferencesFactory
 import twitter.AuthenticationProvider
 import LongRunningSpinner._
 import event.Event
@@ -28,8 +28,9 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
 
   val usernameKey = "username"
   val pwdKey = "password"
-  private var storedUser = StateRepository.get(usernameKey)
-  private var storedPwd = StateRepository.get(pwdKey)
+  val prefs = PreferencesFactory.prefs
+  private var storedUser = prefs.get(usernameKey, null)
+  private var storedPwd = prefs.get(pwdKey, null)
   
   private val loginButton = new Button("Log In")
   private val cancelButton = new Button("Cancel")
@@ -44,8 +45,14 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
   setUpEnterClick(true)
   
   def storeUserInfoIfSet() {
-    if(saveUserInfoCheckBox.peer.isSelected) StateRepository.set((usernameKey, username), (pwdKey, password))
-    else StateRepository.remove(usernameKey, pwdKey)
+    if(saveUserInfoCheckBox.peer.isSelected) {
+      prefs.put(usernameKey, username)
+      prefs.put(pwdKey, password)
+    }
+    else  {
+      prefs.remove(usernameKey)
+      prefs.remove(pwdKey)
+    }
   }
 
   if (storedUser != null) saveUserInfoCheckBox.peer.setSelected(true)

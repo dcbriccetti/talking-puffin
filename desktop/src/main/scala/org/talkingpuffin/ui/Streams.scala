@@ -4,7 +4,7 @@ import _root_.scala.swing.{TabbedPane, Component, Reactor}
 import _root_.scala.xml.Node
 import filter.{FilterSet, TextFilter}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
-import state.StateRepository
+import state.PreferencesFactory
 import twitter.{Follower, RateLimitStatusProvider, TweetsProvider, Sender, MentionsProvider}
 
 case class StreamInfo(val title: String, val model: StatusTableModel, val pane: StatusPane)
@@ -16,11 +16,13 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
  */
 
 class Streams(session: Session, username: String, password: String) extends Reactor {
-  val rateLimitStatusProvider = new RateLimitStatusProvider(username, password) 
-  val tweetsProvider = new TweetsProvider(username, password, 
-    Some(StateRepository.get(username + "-highestId", null)), "Following")
+  val rateLimitStatusProvider = new RateLimitStatusProvider(username, password)
+  val prefs = PreferencesFactory.prefsForUser(username)
+  
+  val tweetsProvider = new TweetsProvider(username, password,
+    prefs.get("highestId", null) match {case null => None; case v => Some(v)}, "Following")
   val mentionsProvider = new MentionsProvider(username, password, 
-    Some(StateRepository.get(username + "-highestMentionId", null)))
+    prefs.get("highestMentionId", null) match {case null => None; case v => Some(v)})
   val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
   val usersTableModel = new UsersTableModel(List[Node](), List[Node]())
   
