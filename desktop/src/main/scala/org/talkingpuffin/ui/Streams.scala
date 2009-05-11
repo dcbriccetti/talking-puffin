@@ -15,7 +15,7 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
  * @author Dave Briccetti
  */
 
-class Streams(session: Session, tagUsers: TagUsers, username: String, password: String) extends Reactor {
+class Streams(session: Session, val tagUsers: TagUsers, username: String, password: String) extends Reactor {
   val rateLimitStatusProvider = new RateLimitStatusProvider(username, password)
   val prefs = PreferencesFactory.prefsForUser(username)
   

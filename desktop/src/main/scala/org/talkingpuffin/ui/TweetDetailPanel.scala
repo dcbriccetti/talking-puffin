@@ -142,10 +142,12 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
   private def setText(user: NodeSeq, location: String) {
     addFreshUserDescription
     def fmt(value: String) = NumberFormat.getIntegerInstance.format(Integer.parseInt(value))
+    val tags = streams.tagUsers.tagsForUser((user \ "id").text).mkString(", ")
     userDescription.text = (user \ "name").text + " • " +
         location + " • " + (user \ "description").text  + " • " +
         fmt((user \ "followers_count").text) + " followers, following " +
-        fmt((user \ "friends_count").text)
+        fmt((user \ "friends_count").text) + 
+        (tags.length match { case 0 => "" case _ => " • Tags: " + tags})
   }
 
   private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {

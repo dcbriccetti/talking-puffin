@@ -147,11 +147,13 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filterAndNotify
   }
 
-  def tagSelectedUsers(rows: List[Int], tag: String) {
-    for (user <- getUsers(rows)) {
+  def tagSelectedUsers(rows: List[Int], tag: String) =
+    for (user <- getUsers(rows)) 
       tagUsers.add(tag, user.id)
-    }
-  }
+
+  def untagSelectedUsers(rows: List[Int]) =
+    for (user <- getUsers(rows)) 
+      tagUsers.removeForUser(user.id)
 
   val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy", Locale.ENGLISH)
   
