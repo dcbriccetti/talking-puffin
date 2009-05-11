@@ -1,5 +1,6 @@
 package org.talkingpuffin.filter
 
+import apache.log4j.Logger
 import com.google.common.collect.{Multimap, HashMultimap}
 import java.io.{File, PrintWriter, FileNotFoundException, FileWriter}
 import java.util.ArrayList
@@ -12,17 +13,27 @@ import state.PreferencesFactory
  * @author Dave Briccetti
  */
 class TagUsers(username: String) {
+  private val log = Logger getLogger "TagUsers"
   private val prefs = PreferencesFactory.prefsForUser(username).node("tags")
-  private val tagUsers: HashMultimap[String,String] = HashMultimap.create()
+  private val tagUsers: Multimap[String,String] = HashMultimap.create()
   prefs.keys.foreach(tag => {
     prefs.get(tag, null).split("\t").foreach(userId => add(tag, userId))
   })
   
-  def add(tag: String, userId: String) {
-    tagUsers.put(tag, userId)
-  }
+  def add(tag: String, userId: String) = tagUsers.put(tag, userId)
   
   def contains(tag: String, userId: String) = tagUsers.get(tag).contains(userId)
+  
+  def removeForUser(userId: String) {
+    val it = tagUsers.entries.iterator
+    while (it.hasNext) {
+      val item = it.next
+      if (item.getValue == userId) {
+        log.debug("Removing " + item)
+        it.remove
+      }
+    }
+  }
   
   def tagsForUser(userId: String): List[String] = {
     var tags = List[String]()
