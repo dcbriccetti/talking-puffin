@@ -79,18 +79,12 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
     }
   }
 
-
   private def unfollow = getSelectedScreenNames foreach apiHandlers.follower.unfollow
-
   private def block = getSelectedScreenNames foreach apiHandlers.follower.block
   private def unblock = getSelectedScreenNames foreach apiHandlers.follower.unblock
 
-  
-  def getSelectedStatuses: List[Node] = {
-    statusTableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
-  }
-
-  def getSelectedScreenNames: List[String] = getSelectedStatuses.map(s => new Status(s).getScreenNameFromStatus)
+  def getSelectedScreenNames = getSelectedStatuses.map(s => new Status(s).getScreenNameFromStatus)
+  def getSelectedStatuses = statusTableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
 
   def getSelectedStatus: Option[NodeSeq] = {
     val row = getSelectedRow
@@ -100,21 +94,6 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
   class PopupMenu extends JPopupMenu {
     for (action <- ap.actions.reverse) 
       add(new MenuItem(action).peer)
-
-    val tagAl = new ActionListener() {
-      def actionPerformed(e: ActionEvent) = {
-        statusTableModel.tagSelectedUsers(TableUtil.getSelectedModelIndexes(StatusTable.this), 
-          e.getActionCommand)
-      }
-    }
-    
-    val tagMi = new JMenu("Tag With")
-    for (tag <- TagsRepository.get) {
-      val tagSmi = new JMenuItem(tag)
-      tagSmi.addActionListener(tagAl)
-      tagMi.add(tagSmi)
-    }
-    add(tagMi)
   }
   
   private def configureColumns {
@@ -171,9 +150,10 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
       Actions.ks(KeyEvent.VK_M))
     ap add new NextTAction(this)
     ap add new PrevTAction(this)
+    ap add(new TagAction(getSelectedStatus, this, statusTableModel), Actions.ks(KeyEvent.VK_T))
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
-    ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_T))
+    ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
     ap add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U,
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
     ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
