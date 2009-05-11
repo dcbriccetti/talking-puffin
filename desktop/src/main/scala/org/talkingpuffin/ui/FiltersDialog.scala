@@ -16,13 +16,15 @@ import javax.swing.{JTable, BorderFactory}
 class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: FilterSet) extends Frame {
   title = (paneTitle + " Filters")
   val panel = new GridBagPanel {
-    val tagsPanel = new TagsPanel
+    val tagsPanel = new TagsPanel(true) {
+      preferredSize = new Dimension(150, 170)
+    }
   
-    add(new FlowPanel {
+    add(new FlowPanel(FlowPanel.Alignment.Left) {
       hGap = 10
       contents += tagsPanel
       contents += new UnmutePane(tableModel, filterSet)
-    }, new Constraints {grid=(0,0); gridwidth=3; anchor=Anchor.West})
+    }, new Constraints {grid=(0,0); gridwidth=3; anchor=Anchor.West; fill=Fill.Horizontal; weightx=1})
   
     val excludeNotToFollowingReplies = new CheckBox("Exclude replies not to following")
     val excludeOverlapping = new CheckBox("Exclude Tweets appearing in other sessions")
@@ -47,11 +49,12 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
         mnemonic = KeyEvent.VK_O
         def apply = {applyChanges; FiltersDialog.this.visible = false}
       }
-      contents += new Button(okAction)
+      val okButton = new Button(okAction) 
+      defaultButton = okButton
+      contents += okButton
     }, new Constraints {grid=(0,6); fill=Fill.Horizontal; weightx=1})
     
     preferredSize = new Dimension(550, 600)
-
   }
   contents = panel
   peer.setLocationRelativeTo(null)
