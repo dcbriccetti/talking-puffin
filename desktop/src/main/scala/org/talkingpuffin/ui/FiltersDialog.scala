@@ -16,28 +16,7 @@ import javax.swing.{JTable, BorderFactory}
 class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: FilterSet) extends Frame {
   title = (paneTitle + " Filters")
   val panel = new GridBagPanel {
-    val tagsPanel = new GridBagPanel {
-      add(new Label("Tags"), new Constraints {grid=(0,0)})
-  
-      add(new ScrollPane {
-        preferredSize = new Dimension(100, 170)
-        minimumSize = new Dimension(100, 100)
-        val listView = new ListView(TagsRepository.get)
-        val selModel = listView.peer.getSelectionModel
-        selModel.addListSelectionListener(new ListSelectionListener(){
-          def valueChanged(e: ListSelectionEvent) = {
-            if (! e.getValueIsAdjusting()) {
-              var selectedTags = List[String]()
-              for (tag <- listView.peer.getSelectedValues) {
-                selectedTags ::= tag.asInstanceOf[String]
-              }
-              filterSet.selectedTags = selectedTags
-            }
-          }
-        })
-        contents = listView
-      }, new Constraints {grid=(0,1)})
-    }
+    val tagsPanel = new TagsPanel
   
     add(new FlowPanel {
       hGap = 10
@@ -88,6 +67,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
   }
 
   def applyChanges {
+    filterSet.selectedTags = panel.tagsPanel.selectedTags
     filterSet.excludeNotToFollowingReplies = panel.excludeNotToFollowingReplies.selected
     filterSet.excludeOverlapping = panel.excludeOverlapping.selected
     filterSet.publish
