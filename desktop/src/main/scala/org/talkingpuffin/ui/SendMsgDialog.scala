@@ -15,8 +15,8 @@ import twitter.Sender
  * @author Dave Briccetti
  */
 
-class SendMsgDialog(session: Session, parent: java.awt.Component, sender: Sender, recipients: Option[String],
-    replyToId: Option[String], msg : Option[String]) extends Frame {
+class SendMsgDialog(session: Session, parent: java.awt.Component, sender: Sender, recipientsOption: Option[String],
+    replyToId: Option[String], retweetMsgOption: Option[String]) extends Frame {
   
   class CustomTextArea extends TextArea { 
     preferredSize = new Dimension(400, 80); wordWrap = true; lineWrap = true
@@ -43,15 +43,15 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, sender: Sender
     preferredSize = new Dimension(600, 200)
     border = Swing.EmptyBorder(5,5,5,5)
     class Constr extends Constraints { anchor=GridBagPanel.Anchor.West }
-    recipients match {
-      case Some(r) => {
-        userNames = r
+    recipientsOption match {
+      case Some(recipients) => {
+        userNames = recipients
         message.text = userNames + " "
       }
       case None =>
     }
-    msg match {
-      case Some(m) => message.text = "RT " + message.text + " " + m
+    retweetMsgOption match {
+      case Some(retweetMsg) => message.text = "RT " + userNames + " " + retweetMsg
       case None =>
     }
     add(message, new Constr {grid=(0,0); fill=GridBagPanel.Fill.Both; weightx=1; weighty=1})
