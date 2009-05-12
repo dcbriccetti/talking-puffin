@@ -18,7 +18,7 @@ import ui._
 import ui.util.FetchRequest
 
 /**
- * The Swing frame.
+ * The top-level application Swing frame window. There is one per user session.
 
  * @author Dave Briccetti
  */
@@ -40,36 +40,7 @@ class TopFrame(username: String, password: String, user: Node) extends Frame{
   val mainToolBar = new MainToolBar(streams)
     
   title = Main.title + " - " + username
-    
-  menuBar = new MenuBar {
-    contents += new Menu("Session") {
-      contents += new MenuItem(new Action("New...") {
-        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, 
-          Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
-        def apply = Main.launchSession 
-      })
-    }
-    contents += new Menu("Options") {
-      object ItemFactory {
-        def apply(title: String, tooltip: String, checked: Boolean, 
-            mutator: (Boolean) => Unit): MenuItem = {
-          val item = new CheckMenuItem(title) {this.tooltip = tooltip; selected = checked}
-          listenTo(item)
-          reactions += {
-            case r: ButtonClicked => if (r.source == item) mutator(item.selected)
-            case _ =>
-          }
-          item
-        }
-      }
-      contents += ItemFactory("Use animations", "Enables simple, useful animations", 
-        Globals.options.useAnimations, Globals.options.useAnimations_=_)
-      contents += ItemFactory("Look up locations", "Enables lookup of locations from latitude and longitude", 
-        Globals.options.lookUpLocations, Globals.options.lookUpLocations_=_)
-      contents += ItemFactory("Expand URLs", "Enables fetching original URL from shortened form", 
-        Globals.options.expandUrls, Globals.options.expandUrls_=_)
-    }
-  }
+  menuBar = new MainMenuBar
 
   contents = new GridBagPanel {
     val userPic = new Label
