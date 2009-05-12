@@ -17,7 +17,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
   title = (paneTitle + " Filters")
   val panel = new GridBagPanel {
     val tagsPanel = new TagsPanel(true) {
-      preferredSize = new Dimension(150, 170)
+      preferredSize = new Dimension(180, 200)
     }
   
     add(new FlowPanel(FlowPanel.Alignment.Left) {

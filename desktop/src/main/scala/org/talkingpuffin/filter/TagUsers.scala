@@ -20,7 +20,10 @@ class TagUsers(username: String) {
     prefs.get(tag, null).split("\t").foreach(userId => add(tag, userId))
   })
   
-  def add(tag: String, userId: String) = tagUsers.put(tag, userId)
+  def add(tag: String, userId: String) = {        
+    log.debug("Tagging " + tag + ": " + userId)
+    tagUsers.put(tag, userId)
+  }
   
   def contains(tag: String, userId: String) = tagUsers.get(tag).contains(userId)
   
