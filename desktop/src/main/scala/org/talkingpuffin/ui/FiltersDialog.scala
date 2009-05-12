@@ -5,6 +5,7 @@ import _root_.scala.swing.{ListView, Frame, GridBagPanel, UIElement, FlowPanel, 
 import filter.{TagsRepository, FilterSet, TextFilter, FilterSetChanged}
 import java.awt.event.KeyEvent
 import java.awt.{Dimension, Insets}
+import javax.swing.border.EmptyBorder
 import javax.swing.event.{ListSelectionListener, ListSelectionEvent, TableModelListener, TableModelEvent}
 import javax.swing.{JTable, BorderFactory}
 
@@ -16,18 +17,18 @@ import javax.swing.{JTable, BorderFactory}
 class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: FilterSet) extends Frame {
   title = (paneTitle + " Filters")
   val panel = new GridBagPanel {
+    border = new EmptyBorder(5, 5, 0, 5)
     val tagsPanel = new TagsPanel(true) {
-      preferredSize = new Dimension(180, 200)
+      minimumSize = new Dimension(180, 100)
     }
   
-    add(new FlowPanel(FlowPanel.Alignment.Left) {
-      hGap = 10
-      contents += tagsPanel
-      contents += new UnmutePane(tableModel, filterSet)
-    }, new Constraints {grid=(0,0); gridwidth=3; anchor=Anchor.West; fill=Fill.Horizontal; weightx=1})
+    add(tagsPanel, new Constraints {grid=(0,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
+    add(new UnmutePane(tableModel, filterSet),
+      new Constraints {grid=(1,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
+    add(new Label(" "), new Constraints {grid=(2,0); fill=Fill.Horizontal; weightx=1})
   
-    val excludeNotToFollowingReplies = new CheckBox("Exclude replies not to following")
-    val excludeOverlapping = new CheckBox("Exclude Tweets appearing in other sessions")
+    val excludeNotToFollowingReplies = new CheckBox("No replies not to following")
+    val excludeOverlapping = new CheckBox("No Tweets appearing in other sessions")
     add(new FlowPanel(FlowPanel.Alignment.Left) {
       contents += excludeNotToFollowingReplies
       contents += excludeOverlapping
