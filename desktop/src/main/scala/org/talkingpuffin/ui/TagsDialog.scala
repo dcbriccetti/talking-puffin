@@ -32,7 +32,7 @@ class TagsDialog(owner: java.awt.Frame) extends JDialog(owner, "Tags", true) {
   setContentPane(panel.peer)
   setPreferredSize(new Dimension(200,300))
   pack
-  setLocationRelativeTo(null)
+  setLocationRelativeTo(owner)
   
   def selectedTags = panel.tagsPanel.selectedTags
 }

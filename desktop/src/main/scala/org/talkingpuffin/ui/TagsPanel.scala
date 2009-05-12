@@ -22,17 +22,21 @@ class TagsPanel(showTitle: Boolean) extends BorderPanel {
   def selectedTags: List[String] = {
     var selectedTags = List[String]()
     for (tag <- checkBoxView.getSelectedValues) {
-      selectedTags ::= tag.asInstanceOf[String]
+      selectedTags ::= tag.asInstanceOf[String].split(CheckBoxView.mnemonicSep)(1)
     }
     selectedTags        
   }
+}
+
+object CheckBoxView {
+  val mnemonicSep = ": "
 }
 
 class CheckBoxView(values: List[String]) extends BoxPanel(Orientation.Vertical) {
   var i = 0
   for (value <- values) {
     val keyVal = KeyEvent.VK_A + i
-      contents += new CheckBox("" + keyVal.toChar + ": " + value) {
+      contents += new CheckBox("" + keyVal.toChar + CheckBoxView.mnemonicSep + value) {
       peer.setMnemonic(keyVal)
       i += 1
     }
