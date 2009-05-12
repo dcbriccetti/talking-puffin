@@ -76,13 +76,19 @@ class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDia
   dockedButton.setSelected(true)
 
   setFloatable(false)
-  add(sendAction.peer)
-  add(showFiltersAction.peer)
-  add(clearAction.peer)
-  add(loadNewAction.peer)
-  add(last200Action.peer)
-  addSeparator
-  add(dockedButton)
-  add(detailsButton)
+  addComponentsToToolBar
+  
+  private def addComponentsToToolBar {
+    def aa(action: javax.swing.Action) = add(action).setFocusable(false)
+    def ac(comp: java.awt.Component)   = add(comp  ).setFocusable(false)
+    aa(sendAction.peer)
+    aa(showFiltersAction.peer)
+    aa(clearAction.peer)
+    aa(loadNewAction.peer)
+    aa(last200Action.peer)
+    addSeparator
+    ac(dockedButton)
+    ac(detailsButton)
+  }
 }
   
