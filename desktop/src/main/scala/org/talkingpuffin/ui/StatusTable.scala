@@ -63,22 +63,23 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
   
   def reply {
     val statuses = getSelectedStatuses
-    val names = statuses.map(status => ("@" + new Status(status).getScreenNameFromStatus)).mkString(" ")
-    val sm = new SendMsgDialog(session, null, apiHandlers.sender, Some(names), Some((statuses(0) \ "id").text),None)
-    sm.visible = true
+    val recipients = statuses.map(status => ("@" + new Status(status).getScreenNameFromStatus)).mkString(" ")
+    createSendMsgDialog(statuses(0), Some(recipients), None).visible = true
   }
   
-
   def retweet {
     val statuses = getSelectedStatuses
     if (statuses.length == 1 )  {
-      val name = statuses.map(status => ("@" + new Status(status).getScreenNameFromStatus)).mkString(" ")
-      val sm = new SendMsgDialog(session, null, apiHandlers.sender, Some(name), Some((statuses(0) \ "id").text), Some((statuses(0) \ "text").text))
-
-      sm.visible = true
+      val status = statuses(0) 
+      val name = "@" + new Status(status).getScreenNameFromStatus
+      createSendMsgDialog(status, Some(name), Some((status \ "text").text)).visible = true
     }
   }
-
+  
+  private def createSendMsgDialog(status: Node, names: Option[String], retweetMsg: Option[String]) = 
+    new SendMsgDialog(session, null, apiHandlers.sender, names, 
+        Some((status \ "id").text), retweetMsg) 
+  
   private def unfollow = getSelectedScreenNames foreach apiHandlers.follower.unfollow
   private def block = getSelectedScreenNames foreach apiHandlers.follower.block
   private def unblock = getSelectedScreenNames foreach apiHandlers.follower.unblock
