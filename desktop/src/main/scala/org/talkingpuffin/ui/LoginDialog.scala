@@ -6,7 +6,7 @@ import _root_.scala.xml.Node
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.Color
 import javax.swing.JDialog
-import state.PreferencesFactory
+import state.{GlobalPrefs, PreferencesFactory}
 import twitter.AuthenticationProvider
 import LongRunningSpinner._
 import event.Event
@@ -28,7 +28,7 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
 
   val usernameKey = "username"
   val pwdKey = "password"
-  val prefs = PreferencesFactory.prefs
+  val prefs = GlobalPrefs.prefs
   private var storedUser = prefs.get(usernameKey, null)
   private var storedPwd = prefs.get(pwdKey, null)
   

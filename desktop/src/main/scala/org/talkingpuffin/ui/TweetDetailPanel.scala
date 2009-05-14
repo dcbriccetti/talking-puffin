@@ -16,6 +16,7 @@ import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import javax.swing.text.JTextComponent
 import javax.swing.{ScrollPaneConstants, JTable, JTextPane, SwingWorker, ImageIcon, JScrollPane}
 import org.apache.log4j.Logger
+import state.{GlobalPrefs, PrefKeys}
 import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
 /**
  * Details of the currently-selected tweet.
@@ -103,7 +104,8 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
       (status \ "in_reply_to_status_id").text, (status \ "source").text))
     largeTweet setCaretPosition 0
 
-    if (Globals.options.expandUrls) ShortUrl.substituteExpandedUrls((status \ "text").text, largeTweet)
+    if (GlobalPrefs.prefs.getBoolean(PrefKeys.EXPAND_URLS, false)) 
+      ShortUrl.substituteExpandedUrls((status \ "text").text, largeTweet)
     
     val picUrl = urlFromUser(user)
     showMediumPicture(picUrl)
@@ -123,7 +125,7 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
     showingUser = user
     val rawLocationOfShowingItem = userLoc(user)
 
-    if (Globals.options.lookUpLocations) {
+    if (GlobalPrefs.prefs.getBoolean(PrefKeys.LOOK_UP_LOCATIONS, false)) { 
       GeoCoder.extractLatLong(rawLocationOfShowingItem) match {
         case Some(latLong) =>
           geoCoder.getCachedObject(latLong) match {
