@@ -65,6 +65,5 @@ class Session {
 
 object Globals {
   var sessions: List[Session] = Nil
-  class Options(var useAnimations: Boolean, var lookUpLocations: Boolean, var expandUrls: Boolean)
-  val options = new Options(false, true, false)
 }
+
