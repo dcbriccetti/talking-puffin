@@ -62,6 +62,10 @@ class UnauthenticatedSession() extends TwitterSession{
     new Parser[TwitterStatus](new URL("http://twitter.com/statuses/public_timeline.xml"),fetcher,TwitterStatus.apply).parseXMLList("status")
   }
 
+  def getPublicTimeline(page: Int) :List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/public_timeline.xml?page=" + page),fetcher,TwitterStatus.apply).parseXMLList("status")
+  }
+
   def getStatus(id: Int) :TwitterStatus = {
     new Parser[TwitterStatus](new URL("http://twitter.com/statuses/show/" + id.toString() + ".xml"),fetcher,TwitterStatus.apply).parseXMLElement()
   }
@@ -117,6 +121,28 @@ class AuthenticatedSession(user: String, password: String) extends Unauthenticat
     new Parser[TwitterStatus](new URL("http://twitter.com/statuses/friends_timeline/" + URLEncoder.encode(id) + ".xml"),authFetcher,TwitterStatus.apply).parseXMLList("status")
   }
 
+  def getFriendsTimeline(id: String,page: Int) :List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/friends_timeline/" + URLEncoder.encode(id) + ".xml?page=" + page),authFetcher,TwitterStatus.apply).parseXMLList("status")
+  }
+
+  /**
+  * @param id the user id <i>or</i> user name of the desired user's timeline
+  */
+  def getUserTimeline(id: String) :List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/user_timeline/" + URLEncoder.encode(id) + ".xml"),authFetcher,TwitterStatus.apply).parseXMLList("status")
+  }
+  def getUserTimeline(id: String, page: Int) :List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/user_timeline/" + URLEncoder.encode(id) + ".xml?page=" + page),authFetcher,TwitterStatus.apply).parseXMLList("status")
+  }
+  /**
+  * @param id the user id <i>or</i> user name who was mentioned
+  */
+  def getMentions(id: String) :List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/mentions/" + URLEncoder.encode(id) + ".xml"),authFetcher,TwitterStatus.apply).parseXMLList("status")
+  }
+  def getMentions(id: String, page: Int) :List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/mentions/" + URLEncoder.encode(id) + ".xml?page=" + page),authFetcher,TwitterStatus.apply).parseXMLList("status")
+  }
   /**
   * @param id the user id <i>or</i> user name to get details for
   */
@@ -176,6 +202,10 @@ class AuthenticatedSession(user: String, password: String) extends Unauthenticat
   
   def getArchive(): List[TwitterStatus] = {
     new Parser[TwitterStatus](new URL("http://twitter.com/account/archive.xml"),authFetcher,TwitterStatus.apply).parseXMLList("status")
+  }
+
+  def getArchive(page: Int): List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/account/archive.xml?page=" + page),authFetcher,TwitterStatus.apply).parseXMLList("status")
   }
   
   def updateStatus(status: String) :TwitterStatus = {
