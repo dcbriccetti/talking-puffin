@@ -56,7 +56,7 @@ object Main {
   }
 }
 
-class ApiHandlers(val sender: Sender, val follower: Follower)
+class ApiHandlers(val sender: Sender, val relationships: Relationships)
 
 class Session {
   val windows = new Windows
