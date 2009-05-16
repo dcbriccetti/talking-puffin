@@ -2,8 +2,6 @@ package org.talkingpuffin.time
 
 /**
  * Time formatter
- * 
- * @author Dave Briccetti
  */
 case class TimeFormatter(time: Long) {
   val days = time / 86400

@@ -12,7 +12,6 @@ import util.{FetchRequest, ResourceReady, BackgroundResourceFetcher}
 /**
  * Fetches pictures in the background, and calls a method in the event
  * dispatching thread when done.
- * @author Dave Briccetti
  */
 
 object PictureFetcher {

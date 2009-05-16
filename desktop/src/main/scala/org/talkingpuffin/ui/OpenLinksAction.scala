@@ -8,9 +8,7 @@ import javax.swing.{JTable, KeyStroke, JPopupMenu}
 
 /**
  * Shows a menu of links, or launches the browser on the link if there is only one. 
- * @author Dave Briccetti
  */
-
 class OpenLinksAction(getSelectedStatus: => Option[NodeSeq], table: JTable, 
     browse: (String) => Unit) extends Action("Open Links…") {
   def apply {

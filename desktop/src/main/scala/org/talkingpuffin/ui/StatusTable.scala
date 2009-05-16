@@ -27,7 +27,6 @@ import twitter.{Status, Sender}
 import util.{TableUtil, DesktopUtil}
 /**
  * Table of statuses.
- * @author Dave Briccetti
  */
 
 class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,

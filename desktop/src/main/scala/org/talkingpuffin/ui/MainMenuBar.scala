@@ -6,12 +6,10 @@ import javax.swing.KeyStroke
 import java.awt.event.KeyEvent
 import java.awt.Toolkit
 import state.{GlobalPrefs, PrefKeys}
+
 /**
  * Main menu bar
- * 
- * @author Dave Briccetti
  */
-
 class MainMenuBar extends MenuBar {
   val prefs = GlobalPrefs.prefs
   

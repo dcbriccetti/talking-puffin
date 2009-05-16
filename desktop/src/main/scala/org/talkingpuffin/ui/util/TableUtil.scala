@@ -4,9 +4,7 @@ import javax.swing.JTable
 
 /**
  * Table utilities.
- * @author Dave Briccetti
  */
-
 object TableUtil {
   def getSelectedModelIndexes(table: JTable): List[Int] = {
     val tableRows = table.getSelectedRows

@@ -11,7 +11,6 @@ import javax.swing.{JTable, BorderFactory}
 
 /**
  * Dialog for setting filters
- * @author Dave Briccetti
  */
 
 class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: FilterSet) extends Frame {

@@ -16,7 +16,6 @@ import scala.xml._
 * <li>502 Bad Gateway: returned if Twitter is down or being upgraded.</li>
 * <li>503 Service Unavailable: the Twitter servers are up, but are overloaded with requests.  Try again later.</li>
 * </ul>
-* @author mmcbride
 */
 case class TwitterException(twitterMessage: String) extends Throwable
 case class TwitterNotModified(override val twitterMessage: String) extends TwitterException(twitterMessage)
@@ -32,7 +31,6 @@ case class TwitterBadXML() extends TwitterException("couldn't process XML as req
 
 /**
 * Factory object to construct TwitterException instances from an HTTP response code
-* @author mmcbride
 */
 object TwitterException {
   def apply(message: String, code: Int) = code match {

@@ -9,7 +9,6 @@ import javax.swing.{JTextArea, JTextPane, JTable}
 
 /**
  * HTML cell renderer.
- * @author Dave Briccetti
  */
 class HtmlCellRenderer extends TableCellRenderer {
   val renderer = new DefaultTableCellRenderer

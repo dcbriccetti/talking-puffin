@@ -8,7 +8,6 @@ import ui.User
 
 /**
  * A set of all filters
- * @author Dave Briccetti
  */
 
 class TextFilter (var text: String, var isRegEx: Boolean)

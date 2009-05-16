@@ -8,8 +8,6 @@ import table.EmphasizedString
 
 /**
  * A model for users (followed and followers)
- * 
- * @author Dave Briccetti
  */
 
 class UsersModel(friends: List[Node], followers: List[Node]) {

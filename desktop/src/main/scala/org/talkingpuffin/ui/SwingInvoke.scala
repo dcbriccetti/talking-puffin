@@ -4,7 +4,6 @@ import javax.swing.{SwingUtilities, SwingWorker}
 
 /**
  * Simplifies calling the EventDispatchThread
- * @author Alf Kristian Støyle
  */
 object SwingInvoke {
   

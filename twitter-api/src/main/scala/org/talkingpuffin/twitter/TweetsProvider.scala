@@ -15,7 +15,6 @@ object TweetsProvider {
 
 /**
  * Provides tweets
- * @author Dave Briccetti
  */
 
 class TweetsProvider(username: String, password: String, startingId: Option[String], providerName: String) extends DataProvider {

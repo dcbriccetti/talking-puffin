@@ -4,8 +4,6 @@ import java.util.prefs.Preferences
 
 /**
  * Provides Preferences.
- * 
- * @author Dave Briccetti
  */
 
 object PreferencesFactory {

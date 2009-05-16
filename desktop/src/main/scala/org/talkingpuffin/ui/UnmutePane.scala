@@ -11,7 +11,6 @@ import _root_.scala.swing.GridBagPanel._
 
 /**
  * A panel for unmuting any muted users
- * @author Dave Briccetti
  */
 
 class UnmutePane(tableModel: StatusTableModel, filterSet: FilterSet) extends GridBagPanel with TableModelListener {
