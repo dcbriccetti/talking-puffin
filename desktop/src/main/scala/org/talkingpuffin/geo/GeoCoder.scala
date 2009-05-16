@@ -7,8 +7,6 @@ import ui.util.{ResourceReady, BackgroundResourceFetcher}
 
 /**
  * Geocoding.
- * 
- * @author Dave Briccetti
  */
 object GeoCoder {
   private val locationCache: java.util.Map[String, String] = new MapMaker().softValues().makeMap()

@@ -12,7 +12,6 @@ import twitter.Sender
 
 /**
  * A dialog for sending messages
- * @author Dave Briccetti
  */
 
 class SendMsgDialog(session: Session, parent: java.awt.Component, sender: Sender, recipientsOption: Option[String],

@@ -7,7 +7,6 @@ import org.apache.log4j._
 /**
 * Represents a twitter status update.
 * This object is represented in several API calls.
-* @author mmcbride
 */
 class TwitterStatus() extends Validated{
   var text: String = null
@@ -33,7 +32,6 @@ class TwitterStatus() extends Validated{
 * val xml = getXML()
 * val status = TwitterStatus(xml)
 * </pre></tt>
-* @author mmcbride
 */ 
 object TwitterStatus{
   val logger = Logger.getLogger("twitter")

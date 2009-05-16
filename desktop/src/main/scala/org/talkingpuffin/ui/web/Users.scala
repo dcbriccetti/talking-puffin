@@ -7,10 +7,7 @@ import ui.UsersModel
 
 /**
  * Users managed bean.
- * 
- * @author Dave Briccetti
  */
-
 class UserRow(val picUrl: String, val arrows: String, val screenName: String, val name: String,
     val numFriends: Int, val numFollowers: Int,
     val location: String, val description: String, val status: String) extends Serializable {

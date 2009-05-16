@@ -19,8 +19,6 @@ import ui.util.FetchRequest
 
 /**
  * The top-level application Swing frame window. There is one per user session.
-
- * @author Dave Briccetti
  */
 class TopFrame(username: String, password: String, user: Node) extends Frame{
   val log = Logger getLogger "TopFrame"

@@ -11,7 +11,6 @@ import scala.swing._
 
 /**
  * A control for maintaining a list of TextFilters.
- * @author Dave Briccetti
  */
 
 class TextFilterControl(label: String, textFilters: java.util.List[TextFilter]) extends BoxPanel(Orientation.Vertical) {

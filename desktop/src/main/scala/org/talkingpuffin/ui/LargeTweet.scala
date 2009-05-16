@@ -8,7 +8,6 @@ import javax.swing.{JTable, JTextPane, JPopupMenu}
 
 /**
  * A large version of the tweet, that can contain hyperlinks, and from which filters can be created.
- * @author Dave Briccetti
  */
 
 class LargeTweet(filtersDialog: FiltersDialog, streams: Streams, table: JTable, 

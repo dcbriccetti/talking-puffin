@@ -7,8 +7,6 @@ import org.jdesktop.swingx.table.TableColumnExt
 import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator}
 /**
  * People Table
- * 
- * @author Dave Briccetti
  */
 
 class PeopleTable(tableModel: UsersTableModel) extends JXTable(tableModel) {

@@ -5,7 +5,6 @@ import javax.swing.{Icon, ImageIcon}
 
 /**
  * A JTable cell with an asynchronously-loaded image in it.
- * @author Dave Briccetti
  */
 
 class PictureCell(model: AbstractTableModel, column: Int) {

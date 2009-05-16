@@ -20,7 +20,6 @@ import state.{GlobalPrefs, PrefKeys}
 import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
 /**
  * Details of the currently-selected tweet.
- * @author Dave Briccetti
  */
 
 object Thumbnail {

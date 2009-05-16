@@ -5,7 +5,6 @@ import java.util.regex.Pattern
 
 /**
  * Extracts links from Twitter status
- * @author Dave Briccetti
  */
 
 object LinkExtractor {

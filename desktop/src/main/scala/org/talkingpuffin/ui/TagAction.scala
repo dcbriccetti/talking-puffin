@@ -8,8 +8,6 @@ import util.TableUtil
 
 /**
  * Selecting the tags to apply to users.
- *  
- * @author Dave Briccetti
  */
 class TagAction(getSelectedStatus: => Option[NodeSeq], table: JTable, statusTableModel: StatusTableModel) 
     extends Action("Tag With…") {

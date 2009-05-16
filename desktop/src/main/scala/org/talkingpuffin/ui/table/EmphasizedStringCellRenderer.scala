@@ -6,8 +6,6 @@ import javax.swing.text.JTextComponent
 
 /**
  * Emphasized string renderer.
- * 
- * @author Dave Briccetti
  */
 class EmphasizedStringCellRenderer extends HtmlCellRenderer {
   override def setFormattedText(component: JTextComponent, value: Any) = component.setText(

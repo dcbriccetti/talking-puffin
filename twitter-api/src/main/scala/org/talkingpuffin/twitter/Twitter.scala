@@ -15,7 +15,6 @@ import scala.xml._
 * </pre></tt>
 * will return an AuthenticatedSession.  This extends UnauthenticatedSession, and provides additional
 * calls that require authentication
-* @author mmcbride
 */
 object TwitterSession {
   /**
@@ -36,7 +35,6 @@ object TwitterSession {
 
 /**
 * The base class of both TwitterSession objects
-* @author mmcbride
 */
 abstract class TwitterSession
 
@@ -51,7 +49,6 @@ abstract class TwitterSession
 *
 * All methods are fairly direct representations of calls specified in the 
 * <a href="http://groups.google.com/group/twitter-development-talk/web/api-documentation">Twitter API Doc</a>
-* @author mmcbride
 */
 class UnauthenticatedSession() extends TwitterSession{
   
@@ -104,7 +101,6 @@ class UnauthenticatedSession() extends TwitterSession{
 * Provides access to Twitter API methods that require authentication.
 * Like UnauthenticatedSession, this class is thread safe, and more or less directly mirrors the
 * <a href="http://groups.google.com/group/twitter-development-talk/web/api-documentation">Twitter API Doc</a>
-* @author mmcbride
 */
 class AuthenticatedSession(user: String, password: String) extends UnauthenticatedSession{
 

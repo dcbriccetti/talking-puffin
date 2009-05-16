@@ -20,8 +20,6 @@ import ui.util.FetchRequest
 
 /**
  * TalkingPuffin main object
- *
- * @author Dave Briccetti
  */
 object Main {
   val log = Logger getLogger "Main"

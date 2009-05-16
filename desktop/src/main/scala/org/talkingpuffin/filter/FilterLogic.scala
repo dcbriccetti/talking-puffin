@@ -6,8 +6,6 @@ import ui.LinkExtractor
 /**
  * Logic to do filtering, given a FilterSet, and collections of statuses and
  * filtered statuses.
-
- * @author Dave Briccetti
  */
 
 class FilterLogic(username: String, tagUsers: TagUsers, filterSet: FilterSet, 

@@ -13,8 +13,6 @@ import event.Event
 
 /**
  * Collect user name and password for Twitter authentication.
- * @author Dave Briccetti
- * @author Alf Kristian Støyle  
  */
 
 class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit, 

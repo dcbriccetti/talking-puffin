@@ -4,11 +4,10 @@ import _root_.scala.swing.Action
 import java.awt.Component
 import java.awt.event.KeyEvent
 import javax.swing.{KeyStroke, JComponent}
+
 /**
  * Reusable actions with associated accelerators
- * @author Dave Briccetti
  */
-
 class EventGeneratingAction(title: String, comp: java.awt.Component, resultKey: Int) extends Action(title) {
   def apply {
     comp.dispatchEvent(new KeyEvent(comp, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 

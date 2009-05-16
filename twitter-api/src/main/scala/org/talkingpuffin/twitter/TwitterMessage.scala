@@ -6,7 +6,6 @@ import org.apache.log4j._
 
 /**
 * Represents a twitter direct message.
-* @author mmcbride
 */
 
 class TwitterMessage() extends Validated{
@@ -33,7 +32,6 @@ class TwitterMessage() extends Validated{
 * val xml = getXML()
 * val message = TwitterMessage(xml)
 * </pre></tt>
-* @author mmcbride
 */ 
 
 object TwitterMessage{
