@@ -113,13 +113,13 @@ class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTa
   }
 
   private def follow = processScreenNames(getSelectedScreenNames,
-                                          apiHandlers.follower.follow,
+                                          apiHandlers.relationships.follow,
                                           showFollowErr(_,"following",_))
   private def unfollow = processScreenNames(getSelectedScreenNames,
-                                            apiHandlers.follower.unfollow,
+                                            apiHandlers.relationships.unfollow,
                                             showFollowErr(_,"unfollowing",_))
   private def block = processScreenNames(getSelectedScreenNames,
-                                            apiHandlers.follower.block,
+                                            apiHandlers.relationships.block,
                                             showFollowErr(_,"blocking",_))
   
   private def viewSelected {

@@ -80,9 +80,9 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
     new SendMsgDialog(session, null, apiHandlers.sender, names, 
         Some((status \ "id").text), retweetMsg) 
   
-  private def unfollow = getSelectedScreenNames foreach apiHandlers.follower.unfollow
-  private def block = getSelectedScreenNames foreach apiHandlers.follower.block
-  private def unblock = getSelectedScreenNames foreach apiHandlers.follower.unblock
+  private def unfollowSelected = getSelectedScreenNames foreach apiHandlers.relationships.unfollow
+  private def blockSelected    = getSelectedScreenNames foreach apiHandlers.relationships.block
+  private def unblockSelected  = getSelectedScreenNames foreach apiHandlers.relationships.unblock
 
   def getSelectedScreenNames = getSelectedStatuses.map(s => new Status(s).getScreenNameFromStatus)
   def getSelectedStatuses = statusTableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
@@ -155,9 +155,9 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
-    ap add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U,
+    ap add(Action("Unfollow") { unfollowSelected }, KeyStroke.getKeyStroke(KeyEvent.VK_U,
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
-    ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
+    ap add(Action("Block") { blockSelected }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
     
     ap add(Action("Delete selected tweets") {

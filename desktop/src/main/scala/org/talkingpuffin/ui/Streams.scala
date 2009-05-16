@@ -5,7 +5,7 @@ import _root_.scala.xml.Node
 import filter.{FilterSet, TextFilter, TagUsers}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
 import state.PreferencesFactory
-import twitter.{Follower, RateLimitStatusProvider, TweetsProvider, Sender, MentionsProvider}
+import twitter.{Relationships, RateLimitStatusProvider, TweetsProvider, Sender, MentionsProvider}
 
 case class StreamInfo(val title: String, val model: StatusTableModel, val pane: StatusPane)
 
@@ -23,7 +23,7 @@ class Streams(session: Session, val tagUsers: TagUsers, username: String, passwo
     prefs.get("highestId", null) match {case null => None; case v => Some(v)}, "Following")
   val mentionsProvider = new MentionsProvider(username, password, 
     prefs.get("highestMentionId", null) match {case null => None; case v => Some(v)})
-  val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
+  val apiHandlers = new ApiHandlers(new Sender(username, password), new Relationships(username, password))
   val usersTableModel = new UsersTableModel(tagUsers, List[Node](), List[Node]())
   
   var streamInfoList = List[StreamInfo]()

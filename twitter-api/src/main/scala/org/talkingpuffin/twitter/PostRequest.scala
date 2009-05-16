@@ -35,29 +35,24 @@ class Sender(username: String, password: String) extends PostRequest(username, p
   }
 }
 
-/**
- * Unfollows
- * @author Dave Briccetti
- */
-
-class Follower(username: String, password: String) extends PostRequest(username, password) {
-  private val log = Logger.getLogger("PostRequestFollower" )
+class Relationships(username: String, password: String) extends PostRequest(username, password) {
+  private val log = Logger.getLogger(getClass)
 
   def follow  (screenName: String) = befriend(screenName, "follow")
   def unfollow(screenName: String) = befriend(screenName, "unfollow")
-  def block(screenName: String) = befriend(screenName, "block")
-  def unblock(screenName: String) = befriend(screenName, "unblock")
+  def block   (screenName: String) = befriend(screenName, "block")
+  def unblock (screenName: String) = befriend(screenName, "unblock")
 
-  def befriend(screenName: String, verb: String): Option[Node] = {
+  def befriend(screenName: String, request: String): Option[Node] = {
 
-    val (subject, verb2) = verb match {
-      case "follow" => ("friendships","create")
-      case "unfollow" =>("friendships","destroy")
-      case "block" => ("blocks","create")
-      case "unblock" =>("blocks","destroy")
+    val (subject, verb) = request match {
+      case "follow"   => ("friendships","create")
+      case "unfollow" => ("friendships","destroy")
+      case "block"    => ("blocks"     ,"create")
+      case "unblock"  => ("blocks"     ,"destroy")
     }
 
-    val url = urlHost + subject + "/" + verb2 + "/" + screenName + ".xml?id=" + screenName
+    val url = urlHost + subject + "/" + verb + "/" + screenName + ".xml?id=" + screenName
 
     log.info("url = " + url)
     processUrl(url) match {
