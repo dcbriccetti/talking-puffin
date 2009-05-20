@@ -150,7 +150,7 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
       Actions.ks(KeyEvent.VK_M))
     ap add new NextTAction(this)
     ap add new PrevTAction(this)
-    ap add(new TagAction(getSelectedStatus, this, statusTableModel), Actions.ks(KeyEvent.VK_T))
+    ap add(new TagAction(this, statusTableModel), Actions.ks(KeyEvent.VK_T))
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
