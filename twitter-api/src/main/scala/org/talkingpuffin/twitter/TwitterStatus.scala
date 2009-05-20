@@ -14,10 +14,10 @@ class TwitterStatus() extends Validated{
   var id: Int = 0
   var createdAt: Date = null
   var source: String = null
-  var truncated: boolean = false
+  var truncated: Boolean = false
   var inReplyToStatusId: Int = 0
   var inReplyToUserId: Int = 0
-  var favorited: boolean = false
+  var favorited: Boolean = false
 
   def isValid() = {
     text != null && user != null

@@ -25,7 +25,7 @@ class TwitterUser() extends Validated{
   /** the user's personal site URL (if specified) */
   var url: String = null
   /** a flag indicating whether or not updates from this user are protected */
-  var isProtected: boolean = false
+  var isProtected: Boolean = false
   /** the number of people who follow this user */
   var followersCount: Int = 0
   /** this user's last status, if available */
