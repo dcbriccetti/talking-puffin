@@ -9,21 +9,19 @@ import util.TableUtil
 /**
  * Selecting the tags to apply to users.
  */
-class TagAction(getSelectedStatus: => Option[NodeSeq], table: JTable, statusTableModel: StatusTableModel) 
-    extends Action("Tag With…") {
+class TagAction(table: JTable, taggingSupport: TaggingSupport) extends Action("Tag With…") {
   def apply {
-    getSelectedStatus match {
-      case Some(status) => 
-        val tagsDialog = new TagsDialog(SwingUtilities.getAncestorOfClass(classOf[java.awt.Frame], 
-          table).asInstanceOf[java.awt.Frame])
-        tagsDialog.setVisible(true)
-        if (tagsDialog.ok) {
-          statusTableModel.untagSelectedUsers(TableUtil.getSelectedModelIndexes(table))
-          for (tag <- tagsDialog.selectedTags) {
-            statusTableModel.tagSelectedUsers(TableUtil.getSelectedModelIndexes(table), tag) 
-          }
+    val selectedModelIndexes = TableUtil.getSelectedModelIndexes(table)
+    if (selectedModelIndexes.length > 0) {
+      val tagsDialog = new TagsDialog(SwingUtilities.getAncestorOfClass(classOf[java.awt.Frame], 
+        table).asInstanceOf[java.awt.Frame])
+      tagsDialog.setVisible(true)
+      if (tagsDialog.ok) {
+        taggingSupport.untagSelectedUsers(selectedModelIndexes)
+        for (tag <- tagsDialog.selectedTags) {
+          taggingSupport.tagSelectedUsers(selectedModelIndexes, tag) 
         }
-      case None =>
+      }
     }
   }
 }
