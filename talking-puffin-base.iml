@@ -21,10 +21,40 @@
             <attribute name="method" value="1" />
             <attribute name="URI" value="/WEB-INF/classes" />
           </containerElement>
+          <containerElement type="module" name="talking-puffin">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/classes" />
+          </containerElement>
+          <containerElement type="library" name="scala-2.7.4.final" level="application">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/lib" />
+          </containerElement>
+          <containerElement type="module" name="twitter-api">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/classes" />
+          </containerElement>
+          <containerElement type="library" name="Maven: commons-httpclient:commons-httpclient:3.1" level="project">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/lib" />
+          </containerElement>
+          <containerElement type="library" name="Maven: log4j:log4j:1.2.14" level="project">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/lib" />
+          </containerElement>
+          <containerElement type="library" name="Maven: commons-logging:commons-logging:1.0.4" level="project">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/lib" />
+          </containerElement>
+          <containerElement type="library" name="Maven: commons-codec:commons-codec:1.2" level="project">
+            <attribute name="method" value="1" />
+            <attribute name="URI" value="/WEB-INF/lib" />
+          </containerElement>
         </packaging>
       </configuration>
       <facet type="google-app-engine" name="Google App Engine">
-        <configuration />
+        <configuration>
+          <sdk-home-path>/usr/local/tools/appengine-java-sdk-1.2.1</sdk-home-path>
+        </configuration>
       </facet>
     </facet>
     <facet type="Scala" name="Scala">
@@ -74,6 +104,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="talking-puffin" />
   </component>
 </module>
 
