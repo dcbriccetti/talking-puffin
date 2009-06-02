@@ -7,7 +7,7 @@ import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.Color
 import javax.swing.JDialog
 import state.PreferencesFactory
-import twitter.AuthenticationProvider
+import org.talkingpuffin.twitter.{TwitterSession,AuthenticatedSession}
 import LongRunningSpinner._
 import event.Event
 
@@ -17,8 +17,8 @@ import event.Event
  * @author Alf Kristian Støyle  
  */
 
-class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit, 
-    startup: (String, String, Node) => Unit) 
+class LoginDialog(cancelPressed: => Unit, 
+    startup: (String, String, AuthenticatedSession) => Unit)
     extends Frame {
   
   title = "TalkingPuffin - Log In"
@@ -98,16 +98,16 @@ class LoginDialog(authenticator: AuthenticationProvider, cancelPressed: => Unit,
   
   private def handleLogin {
     enableButtons(false)
-    var loggedInUser: Node = null
+    var loggedInUser: AuthenticatedSession = null
     LongRunningSpinner.run(this, null, 
       { 
         () =>
-        authenticator.userAuthenticates(username, password) match {
-          case Some(user) =>
-            loggedInUser = user
+        val sess = TwitterSession(username,password)
+        if(sess.verifyCredentials){
+            loggedInUser = sess
             storeUserInfoIfSet()
             true
-          case None =>
+        }else{
             infoLabel.foreground = Color.RED
             infoLabel.text = "Login failed"
             enableButtons(true)

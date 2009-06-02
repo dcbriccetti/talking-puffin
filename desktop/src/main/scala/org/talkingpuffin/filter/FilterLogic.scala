@@ -2,6 +2,7 @@ package org.talkingpuffin.filter
 
 import _root_.scala.xml.Node
 import ui.LinkExtractor
+import org.talkingpuffin.twitter.{TwitterStatus}
 
 /**
  * Logic to do filtering, given a FilterSet, and collections of statuses and
@@ -11,20 +12,20 @@ import ui.LinkExtractor
  */
 
 class FilterLogic(username: String, tagUsers: TagUsers, filterSet: FilterSet, 
-  filteredStatuses: java.util.List[Node]) {
+  filteredStatuses: java.util.List[TwitterStatus]) {
   
-  def filter(statuses: List[Node]) {
+  def filter(statuses: List[TwitterStatus]) {
     filteredStatuses.clear
     for (st <- statuses if filterStatus(st)) {
       filteredStatuses.add(st)
     }
   }
 
-  private def filterStatus(st: Node): Boolean = { 
-    val userId = (st \ "user" \ "id").text
+  private def filterStatus(st: TwitterStatus): Boolean = {
+    val userId = st.user.id.toString()
     if (! filterSet.mutedUsers.contains(userId)) {
       if (tagFiltersInclude(userId)) {
-        val text = (st \ "text").text 
+        val text = st.text
         if (! excludedBecauseReplyToStranger(text)) {
           if (! filterSet.excludedByStringMatches(text)) {
             if (! filterSet.excludedByOverlap(userId)) {

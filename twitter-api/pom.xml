@@ -53,6 +53,11 @@
           <version>3.8.1</version>
           <scope>test</scope>
         </dependency>
+        <dependency>
+          <groupId>joda-time</groupId>
+          <artifactId>joda-time</artifactId>
+          <version>1.6</version>
+        </dependency>
     </dependencies>
 
     <build>

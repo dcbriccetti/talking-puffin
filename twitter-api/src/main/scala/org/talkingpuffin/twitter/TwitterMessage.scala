@@ -3,7 +3,8 @@ package org.talkingpuffin.twitter
 import java.util.Date
 import scala.xml._
 import org.apache.log4j._
-
+import org.joda.time._
+import org.joda.time.format._
 /**
 * Represents a twitter direct message.
 * @author mmcbride
@@ -16,13 +17,24 @@ class TwitterMessage() extends Validated{
   var senderId: Int = 0
   var recipientId: Int = 0
   var recipientScreenName: String = null
-  var createdAt: Date = null
+  var createdAt: DateTime = null
   var sender: TwitterUser = null
   var recipient: TwitterUser = null
   
   def isValid() = {
     text != null && senderScreenName != null
   }
+
+  override def equals(obj: Any):Boolean = {
+    if(obj.isInstanceOf[TwitterMessage]){
+      obj.asInstanceOf[TwitterMessage].id == id
+    }else{
+      false
+    }
+  }
+
+  override def hashCode() = id
+
 }
 
 /**
@@ -38,7 +50,8 @@ class TwitterMessage() extends Validated{
 
 object TwitterMessage{
   val logger = Logger.getLogger("twitter")
-  
+  val fmt = DateTimeFormat.forPattern("EE MMM dd HH:mm:ss Z yyyy")
+
   /**
   * construct a TwitterMessage object from an XML node
   */
@@ -52,7 +65,7 @@ object TwitterMessage{
         case <recipient_id>{Text(text)}</recipient_id> => message.recipientId = Integer.parseInt(text)
         case <sender_screen_name>{Text(text)}</sender_screen_name> => message.senderScreenName = text
         case <recipient_screen_name>{Text(text)}</recipient_screen_name> => message.recipientScreenName = text
-        case <created_at>{Text(text)}</created_at> => Nil // fix this!
+        case <created_at>{Text(text)}</created_at> => message.createdAt = fmt.parseDateTime(text)
         case <sender>{ _* }</sender> => message.sender = TwitterUser(sub)
         case <recipient>{ _* }</recipient> => message.recipient = TwitterUser(sub)
         case _ => Nil

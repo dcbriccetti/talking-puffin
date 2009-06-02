@@ -5,7 +5,7 @@ import _root_.scala.xml.Node
 import filter.{FilterSet, TextFilter, TagUsers}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
 import state.PreferencesFactory
-import twitter.{Follower, RateLimitStatusProvider, TweetsProvider, Sender, MentionsProvider}
+import twitter.{AuthenticatedSession, RateLimitStatusProvider, TweetsProvider, MentionsProvider, TwitterUser}
 
 case class StreamInfo(val title: String, val model: StatusTableModel, val pane: StatusPane)
 
@@ -15,16 +15,15 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
  * @author Dave Briccetti
  */
 
-class Streams(session: Session, val tagUsers: TagUsers, username: String, password: String) extends Reactor {
+class Streams(user: AuthenticatedSession, session: Session, val tagUsers: TagUsers, username: String, password: String) extends Reactor {
   val rateLimitStatusProvider = new RateLimitStatusProvider(username, password)
   val prefs = PreferencesFactory.prefsForUser(username)
   
-  val tweetsProvider = new TweetsProvider(username, password,
-    prefs.get("highestId", null) match {case null => None; case v => Some(v)}, "Following")
-  val mentionsProvider = new MentionsProvider(username, password, 
-    prefs.get("highestMentionId", null) match {case null => None; case v => Some(v)})
-  val apiHandlers = new ApiHandlers(new Sender(username, password), new Follower(username, password))
-  val usersTableModel = new UsersTableModel(tagUsers, List[Node](), List[Node]())
+  val tweetsProvider = new TweetsProvider(user,
+    prefs.get("highestId", null) match {case null => None; case v => Some(Integer.parseInt(v))}, "Following")
+  val mentionsProvider = new MentionsProvider(user,
+    prefs.get("highestMentionId", null) match {case null => None; case v => Some(Integer.parseInt(v))})
+  val usersTableModel = new UsersTableModel(tagUsers, List[TwitterUser](), List[TwitterUser]())
   
   var streamInfoList = List[StreamInfo]()
   
@@ -83,7 +82,7 @@ class Streams(session: Session, val tagUsers: TagUsers, username: String, passwo
     } else {
       new StatusTableModel(sto, source, usersTableModel, fs, username, tagUsers)
     }
-    val pane = new StatusPane(session, title, model, apiHandlers, fs, this)
+    val pane = new StatusPane(session, title, model, fs, this)
     if (isMentions) {
       pane.table.showColumn(3, false)
     }

@@ -15,7 +15,7 @@ class AgeCellRenderer extends JTextPane with TableCellRenderer {
   val renderer = new DefaultTableCellRenderer
   val border = new EmptyBorder(4, 2, 2, 2)
   
-  override def getTableCellRendererComponent(table: JTable, value: Any, 
+  override def getTableCellRendererComponent(table: JTable, value: Any,
       isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Component = {
 
     renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column) 

@@ -5,7 +5,7 @@ import _root_.org.talkingpuffin.util.PopupListener
 import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.swing.{MenuItem, Action}
 import java.awt.{Desktop, Toolkit, Component, Font}
-import _root_.scala.xml.{NodeSeq, Node}
+//import _root_.scala.xml.{NodeSeq, Node}
 
 import _root_.scala.{Option}
 import java.awt.event.{KeyEvent, ActionEvent, ActionListener, MouseEvent, MouseAdapter}
@@ -23,15 +23,14 @@ import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
 import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
-import twitter.{Status, Sender}
+import twitter.{TwitterStatus}
 import util.{TableUtil, DesktopUtil}
 /**
  * Table of statuses.
  * @author Dave Briccetti
  */
 
-class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandlers: ApiHandlers,
-      showBigPicture: => Unit) 
+class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigPicture: => Unit)
     extends JXTable(statusTableModel) {
 
   setColumnControlVisible(true)
@@ -56,14 +55,14 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
   private def viewSelected {
     getSelectedStatuses.foreach(status => {
       var uri = "http://twitter.com/" +
-          new Status(status).getScreenNameFromStatus + "/statuses/" + (status \ "id").text
+          status.user.screenName + "/statuses/" + status.id
       DesktopUtil.browse(uri)
     })
   }
   
   def reply {
     val statuses = getSelectedStatuses
-    val recipients = statuses.map(status => ("@" + new Status(status).getScreenNameFromStatus)).mkString(" ")
+    val recipients = statuses.map(status => ("@" + status.user.screenName)).mkString(" ")
     createSendMsgDialog(statuses(0), Some(recipients), None).visible = true
   }
   
@@ -71,23 +70,23 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, apiHandl
     val statuses = getSelectedStatuses
     if (statuses.length == 1 )  {
       val status = statuses(0) 
-      val name = "@" + new Status(status).getScreenNameFromStatus
-      createSendMsgDialog(status, Some(name), Some((status \ "text").text)).visible = true
+      val name = "@" + status.user.screenName
+      createSendMsgDialog(status, Some(name), Some(status.text)).visible = true
     }
   }
   
-  private def createSendMsgDialog(status: Node, names: Option[String], retweetMsg: Option[String]) = 
-    new SendMsgDialog(session, null, apiHandlers.sender, names, 
-        Some((status \ "id").text), retweetMsg) 
+  private def createSendMsgDialog(status: TwitterStatus, names: Option[String], retweetMsg: Option[String]) =
+    new SendMsgDialog(session, null, names, 
+        Some(status.id.toString()), retweetMsg)
   
-  private def unfollow = getSelectedScreenNames foreach apiHandlers.follower.unfollow
-  private def block = getSelectedScreenNames foreach apiHandlers.follower.block
-  private def unblock = getSelectedScreenNames foreach apiHandlers.follower.unblock
+  private def unfollow = getSelectedScreenNames foreach session.twitterSession.destroyFriendship
+  private def block = getSelectedScreenNames foreach session.twitterSession.blockUser
+  private def unblock = getSelectedScreenNames foreach session.twitterSession.unblockUser
 
-  def getSelectedScreenNames = getSelectedStatuses.map(s => new Status(s).getScreenNameFromStatus)
+  def getSelectedScreenNames = getSelectedStatuses.map(s => s.user.screenName)
   def getSelectedStatuses = statusTableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
 
-  def getSelectedStatus: Option[NodeSeq] = {
+  def getSelectedStatus: Option[TwitterStatus] = {
     val row = getSelectedRow
     if (row == -1) None else Some(statusTableModel.getStatusAt(convertRowIndexToModel(row)))
   }

@@ -18,11 +18,10 @@ object TweetsProvider {
  * @author Dave Briccetti
  */
 
-class TweetsProvider(username: String, password: String, startingId: Option[String], providerName: String) extends DataProvider {
+class TweetsProvider(session: AuthenticatedSession, startingId: Option[Int], providerName: String) {
   private val log = Logger.getLogger("TweetsProvider " + providerName)
   val propChg = new PropertyChangeSupport(this)
-  setCredentials(username, password)
-  protected var highestId = startingId match {case Some(s) => s case None => null}
+  protected var highestId:Option[Int] = startingId
 
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
@@ -32,23 +31,15 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
   def addPropertyChangeListener   (l: PropertyChangeListener) = propChg.addPropertyChangeListener(l)
   def removePropertyChangeListener(l: PropertyChangeListener) = propChg.removePropertyChangeListener(l)
   
-  def getUrlFile = "statuses/friends_timeline.xml"
-  def getUrl = urlHost + getUrlFile + "?count=200" + buildSinceParm
+  //def getUrlFile = "statuses/friends_timeline.xml"
+  //def getUrl = urlHost + getUrlFile + "?count=200" + buildSinceParm
   
-  protected def buildSinceParm = (if (highestId == null) "" else "&since_id=" + highestId)
-  
-  def getHighestId = highestId
-
-  private def formatData(elem: Node): NodeSeq = {
-    if (elem != null) {
-      val statuses = elem \\ "status"
-      if (statuses.length > 0) {
-        highestId = (statuses(0) \ "id").text 
-      }
-      return statuses
-    }
-    List[Node]()
+  protected def buildSinceParm(args: TwitterArgs) = highestId match {
+    case None => args
+    case Some(i) => args.since(i)
   }
+  protected def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getFriendsTimeline
+  def getHighestId = highestId
 
   /**
    * Sets the update frequency, in seconds.
@@ -71,18 +62,22 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
     timer.start
   }
   
-  def loadNewData = loadData(getUrl, false)
+  def loadNewData = {
+    loadData(session.user,buildSinceParm(TwitterArgs.maxResults(200)),false)
+  }
   
-  def loadLastBlockOfTweets: Unit = loadData(urlHost + getUrlFile + "?count=200", true)
+  def loadLastBlockOfTweets = {
+    loadData(session.user,TwitterArgs.maxResults(200),true)
+  }
   
-  private def loadData(url: String, clear: Boolean): Unit = {
-    new SwingWorker[Option[NodeSeq], Object] {
+  private def loadData(username: String, args: TwitterArgs, clear: Boolean): Unit = {
+    new SwingWorker[Option[List[TwitterStatus]], Object] {
       val sendClear = clear
-      override def doInBackground: Option[NodeSeq] = {
-        loadTwitterData(url) match {
-          case HttpXMLSuccess(_,_,n) => Some(formatData(n))
-          case HttpException(e) => log.error(e); None
-          case _ => None
+      override def doInBackground: Option[List[TwitterStatus]] = {
+        try{
+          Some(updateFunc(args))
+        } catch {
+          case e => log.error(e); None
         }
       }
       override def done = {
@@ -104,9 +99,9 @@ class TweetsProvider(username: String, password: String, startingId: Option[Stri
   
 }
 
-class MentionsProvider(username: String, password: String, startingId: Option[String]) 
-    extends TweetsProvider(username, password, startingId, "Mentions") {
-  override def getUrlFile = "statuses/mentions.xml"
+class MentionsProvider(session: AuthenticatedSession, startingId: Option[Int])
+    extends TweetsProvider(session, startingId, "Mentions") {
+    override def updateFunc = session.getReplies
 }
 
 case class TweetsArrived(tweets: NodeSeq) extends Event

@@ -2,7 +2,6 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
-import _root_.scala.xml.{NodeSeq, Node}
 import filter.{FilterSet, FilterLogic, FilterSetChanged, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
@@ -16,7 +15,7 @@ import org.apache.log4j.Logger
 import _root_.org.talkingpuffin
 import ui.table.{EmphasizedString, StatusCell}
 import time.TimeFormatter
-import twitter.{TweetsArrived, TweetsProvider, Status}
+import twitter.{TweetsArrived, TweetsProvider, TwitterStatus}
 
 /**
  * Model providing status data to the JTable
@@ -29,12 +28,12 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   log.info("Created")
 
   /** All loaded statuses */
-  private var statuses = List[Node]()
+  private var statuses = List[TwitterStatus]()
   
   def statusCount = statuses.size
   
   /** Statuses, after filtering */
-  private val filteredStatuses = Collections.synchronizedList(new ArrayList[Node]())
+  private val filteredStatuses = Collections.synchronizedList(new ArrayList[TwitterStatus]())
   
   def filteredStatusCount = filteredStatuses.size
 
@@ -53,7 +52,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
       evt.getPropertyName match {
         case TweetsProvider.CLEAR_EVENT => clear
         case TweetsProvider.NEW_TWEETS_EVENT => {
-          val newTweets = evt.getNewValue.asInstanceOf[NodeSeq]
+          val newTweets = evt.getNewValue.asInstanceOf[List[TwitterStatus]]
           log.info("Tweets Arrived: " + newTweets.length)
           processStatuses(newTweets)
         }
@@ -78,14 +77,14 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val status = filteredStatuses.get(rowIndex)
     
-    def age(status: Node) = java.lang.Long.valueOf(dateToAgeSeconds((status \ "created_at").text))
-    def senderName(status: Node) = (status \ "user" \ "name").text
-    def senderNameEs(status: Node): EmphasizedString = {
+    def age(status: TwitterStatus):java.lang.Long = dateToAgeSeconds(status.createdAt.toDate().getTime())
+    def senderName(status: TwitterStatus) = status.user.name
+    def senderNameEs(status: TwitterStatus): EmphasizedString = {
       val name = senderName(status)
-      val id = (status \ "user" \ "id").text
+      val id = status.user.id.toString()
       new EmphasizedString(Some(name), followerIdsx.contains(id))
     }
-    def toName(status: Node) = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
+    def toName(status: TwitterStatus) = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
       case Some(u) => Some(usersModel.usersModel.screenNameToUserNameMap.getOrElse(u, u))
       case None => None 
     }
@@ -93,13 +92,13 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     columnIndex match {
       case 0 => age(status)
       case 1 => {
-        val picUrl = (status \ "user" \ "profile_image_url").text
+          val picUrl = status.user.profileImageURL
         pcell.request(picUrl, rowIndex)
       }
       case 2 => senderNameEs(status)
       case 3 => {
-        val name = (status \ "user" \ "name").text
-        val id = (status \ "user" \ "id").text
+        val name = status.user.name
+        val id = status.user.id
         val user = toName(status)
         new EmphasizedString(user, false)
       }
@@ -112,9 +111,9 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     }
   }
   
-  def getStatusText(status: NodeSeq, username: String): String = (status \ "text").text 
+  def getStatusText(status: TwitterStatus, username: String): String = status.text
 
-  def getStatusAt(rowIndex: Int): NodeSeq = {
+  def getStatusAt(rowIndex: Int): TwitterStatus = {
     filteredStatuses.get(rowIndex)
   }
 
@@ -157,22 +156,22 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
 
   val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy", Locale.ENGLISH)
   
-  private def dateToAgeSeconds(date: String): Long = {
-    (new Date().getTime - df.parse(date).getTime) / 1000
+  private def dateToAgeSeconds(date: Long): Long = {
+    date / 1000
   }
   
   private def getUsers(rows: List[Int]): List[User] = 
     rows.map(i => {
       val node = filteredStatuses.get(i)
-      val id = (node \ "user" \ "id").text
-      val name = (node \ "user" \ "name").text
+      val id = node.user.id.toString
+      val name = node.user.name
       new User(id, name)
     })
   
-  def getStatuses(rows: List[Int]): List[Node] = 
+  def getStatuses(rows: List[Int]): List[TwitterStatus] =
     rows.map(filteredStatuses.get(_))
 
-  private def processStatuses(newStatuses: NodeSeq) {
+  private def processStatuses(newStatuses: List[TwitterStatus]) {
     for (st <- newStatuses.reverse) {
       statuses = statuses ::: List(st)
     }
@@ -183,7 +182,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
    * Clear (remove) all statuses
    */
   def clear {
-    statuses = List[Node]()
+    statuses = List[TwitterStatus]()
     filterAndNotify
   }
   
@@ -194,7 +193,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   }
   
   def removeStatusesFrom(screenNames: List[String]) {
-    statuses = statuses.filter(s => ! screenNames.contains(new Status(s).getScreenNameFromStatus))
+    statuses = statuses.filter(s => ! screenNames.contains(s.user.screenName))
     filterAndNotify
   }
 
@@ -220,8 +219,8 @@ case class TableContentsChanged(val model: StatusTableModel, val filteredIn: Int
     val total: Int) extends Event
   
 trait Mentions extends StatusTableModel {
-  override def getStatusText(status: NodeSeq, username: String): String = {
-    val text = (status \ "text").text
+  override def getStatusText(status: TwitterStatus, username: String): String = {
+    val text = status.text
     val userTag = "@" + username
     if (text.startsWith(userTag)) text.substring(userTag.length).trim else text
   }

@@ -8,14 +8,13 @@ import java.awt.event.{KeyAdapter, KeyEvent}
 import java.awt.{Dimension, Font}
 import java.net.URLEncoder
 import javax.swing.KeyStroke
-import twitter.Sender
 
 /**
  * A dialog for sending messages
  * @author Dave Briccetti
  */
 
-class SendMsgDialog(session: Session, parent: java.awt.Component, sender: Sender, recipientsOption: Option[String],
+class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOption: Option[String],
     replyToId: Option[String], retweetMsgOption: Option[String]) extends Frame {
   
   class CustomTextArea extends TextArea { 
@@ -61,7 +60,11 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, sender: Sender
   peer.setLocationRelativeTo(parent)
   
   private def send {
-    sender.send(message.text, replyToId)
+    replyToId match {
+      case Some(idStr) => session.twitterSession.updateStatus(message.text, Integer.parseInt(idStr))
+      case _ => session.twitterSession.updateStatus(message.text)
+    }
+    
     visible = false
     session.status.text = "Message sent"    
   }

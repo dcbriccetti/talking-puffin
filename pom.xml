@@ -6,7 +6,7 @@
     <version>0.64</version>
     <inceptionYear>2008</inceptionYear>
     <properties>
-        <scala.version>2.7.3</scala.version>
+        <scala.version>2.7.5</scala.version>
     </properties>
     <name>TalkingPuffin Base POM</name>
     <packaging>pom</packaging>

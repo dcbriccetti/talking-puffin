@@ -5,7 +5,7 @@ import _root_.scala.swing.event.{ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.org.talkingpuffin.util.PopupListener
 import _root_.scala.swing.{Frame, Label, GridBagPanel, ScrollPane, TextArea, BorderPanel}
-import _root_.scala.xml.{XML, NodeSeq, Node}
+//import _root_.scala.xml.{XML, NodeSeq, Node}
 import geo.GeoCoder
 import java.awt.event.{MouseEvent, KeyAdapter, MouseAdapter, KeyEvent}
 import java.awt.image.BufferedImage
@@ -17,6 +17,7 @@ import javax.swing.text.JTextComponent
 import javax.swing.{ScrollPaneConstants, JTable, JTextPane, SwingWorker, ImageIcon, JScrollPane}
 import org.apache.log4j.Logger
 import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
+import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
 /**
  * Details of the currently-selected tweet.
  * @author Dave Briccetti
@@ -45,7 +46,7 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
   private var bigPicFrame: Frame = _
   private var bigPicLabel: Label = _
   private var showingUrl: String = _
-  private var showingUser: NodeSeq = _
+  private var showingUser: TwitterUser = _
           
   private class CustomConstraints extends Constraints {
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
@@ -95,15 +96,16 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
   
   val statusTableModel = table.getModel.asInstanceOf[StatusTableModel]
 
-  def showStatusDetails(status: NodeSeq) {
+  def showStatusDetails(status: TwitterStatus) {
     session.status.text = " "
-    val user = status \ "user"
+    val user = status.user
     setText(user)
-    largeTweet.setText(HtmlFormatter.createTweetHtml((status \ "text").text, 
-      (status \ "in_reply_to_status_id").text, (status \ "source").text))
+    largeTweet.setText(HtmlFormatter.createTweetHtml(status.text,
+                                                     status.inReplyToStatusId.toString,
+                                                     status.source))
     largeTweet setCaretPosition 0
 
-    if (Globals.options.expandUrls) ShortUrl.substituteExpandedUrls((status \ "text").text, largeTweet)
+    if (Globals.options.expandUrls) ShortUrl.substituteExpandedUrls(status.text, largeTweet)
     
     val picUrl = urlFromUser(user)
     showMediumPicture(picUrl)
@@ -118,7 +120,7 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
     largeTweet.setText(null)
   }
 
-  private def setText(user: NodeSeq) {
+  private def setText(user: TwitterUser) {
     animator.stop
     showingUser = user
     val rawLocationOfShowingItem = userLoc(user)
@@ -139,14 +141,14 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
     setText(user, rawLocationOfShowingItem)
   }
   
-  private def setText(user: NodeSeq, location: String) {
+  private def setText(user: TwitterUser, location: String) {
     addFreshUserDescription
-    def fmt(value: String) = NumberFormat.getIntegerInstance.format(Integer.parseInt(value))
-    val tags = streams.tagUsers.tagsForUser((user \ "id").text).mkString(", ")
-    userDescription.text = (user \ "name").text + " • " +
-        location + " • " + (user \ "description").text  + " • " +
-        fmt((user \ "followers_count").text) + " followers, following " +
-        fmt((user \ "friends_count").text) + 
+    def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
+    val tags = streams.tagUsers.tagsForUser(user.id.toString()).mkString(", ")
+    userDescription.text = user.name + " • " +
+        location + " • " + user.description  + " • " +
+        fmt(user.followersCount) + " followers, following " +
+        fmt(user.friendsCount) +
         (tags.length match { case 0 => "" case _ => " • Tags: " + tags})
   }
 
@@ -162,12 +164,12 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
     }
   }
   
-  private def userLoc(user: NodeSeq) = (user \ "location").text
+  private def userLoc(user: TwitterUser) = user.location
   
-  private def urlFromUser(user: NodeSeq): String = (user \ "profile_image_url").text 
+  private def urlFromUser(user: TwitterUser): String = user.profileImageURL
   
-  def prefetch(status: NodeSeq) {
-    val smallUrl = urlFromUser(status \ "user")
+  def prefetch(status: TwitterStatus) {
+    val smallUrl = urlFromUser(status.user)
     val mediumUrl = PictureFetcher.getFullSizeUrl(smallUrl)
     List(smallUrl, mediumUrl).foreach(url => picFetcher.requestItem(picFetcher.FetchImageRequest(url, null)))
   }

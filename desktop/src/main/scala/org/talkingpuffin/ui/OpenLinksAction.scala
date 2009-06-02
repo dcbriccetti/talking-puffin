@@ -1,17 +1,17 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.{Action,MenuItem}
-import _root_.scala.xml.NodeSeq
 import java.awt.{Component, Point}
 import java.awt.event.KeyEvent
 import javax.swing.{JTable, KeyStroke, JPopupMenu}
+import org.talkingpuffin.twitter.{TwitterStatus}
 
 /**
  * Shows a menu of links, or launches the browser on the link if there is only one. 
  * @author Dave Briccetti
  */
 
-class OpenLinksAction(getSelectedStatus: => Option[NodeSeq], table: JTable, 
+class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
     browse: (String) => Unit) extends Action("Open Links…") {
   def apply {
     getSelectedStatus match {

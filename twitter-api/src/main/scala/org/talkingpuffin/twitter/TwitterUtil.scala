@@ -29,7 +29,15 @@ class XMLFetcher(user: String, password: String){
     }
     getXML(conn)
   }
-  
+
+  def doDelete(url: URL) = {
+    val conn: HttpURLConnection = (url.openConnection).asInstanceOf[HttpURLConnection]
+    if(encoding != null){
+      conn.setRequestProperty ("Authorization", "Basic " + encoding);
+    }
+    conn.setRequestMethod("DELETE")
+    getXML(conn)
+  }
   /*
   * post to the specified URL with the given params, return an XML node built from the response
   * @param url the URL to post to

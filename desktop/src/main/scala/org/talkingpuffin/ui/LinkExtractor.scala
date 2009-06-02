@@ -2,6 +2,7 @@ package org.talkingpuffin.ui
 
 import _root_.scala.xml.NodeSeq
 import java.util.regex.Pattern
+import org.talkingpuffin.twitter.{TwitterStatus}
 
 /**
  * Extracts links from Twitter status
@@ -25,21 +26,21 @@ object LinkExtractor {
    * <li>Hyperlinks
    * </ol> 
    */
-  def getAllLinks(status: NodeSeq): List[String] = {
+  def getAllLinks(status: TwitterStatus): List[String] = {
     var urls: List[String] = List()
     
-    val replyTo = (status \ "in_reply_to_status_id").text
-    getReplyToUser((status \ "text").text) match {
+    val replyTo = status.inReplyToStatusId.toString
+    getReplyToUser(status.text) match {
       case Some(user) => if (replyTo.length > 0) urls = getStatusUrl(replyTo, user) :: urls; 
       case None =>        
     }
 
-    var m = usernamePattern.matcher((status \ "text").text)
+    var m = usernamePattern.matcher(status.text)
     while (m.find) {
       urls = "http://twitter.com/" + m.group(1) :: urls
     }
     
-    m = hyperlinkPattern.matcher((status \ "text").text)
+    m = hyperlinkPattern.matcher(status.text)
     while (m.find) {
       urls = m.group(1) :: urls
     }

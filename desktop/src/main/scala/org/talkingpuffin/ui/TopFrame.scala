@@ -22,11 +22,11 @@ import ui.util.FetchRequest
 
  * @author Dave Briccetti
  */
-class TopFrame(username: String, password: String, user: Node) extends Frame{
+class TopFrame(username: String, password: String, user: AuthenticatedSession) extends Frame{
   val log = Logger getLogger "TopFrame"
   val tagUsers = new TagUsers(username)
   TopFrames.addFrame(this)
-  val session = new Session
+  val session = new Session(user)
   Globals.sessions ::= session
   iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
     
@@ -35,7 +35,7 @@ class TopFrame(username: String, password: String, user: Node) extends Frame{
   }
   session.windows.tabbedPane = tabbedPane
 
-  val streams = new Streams(session, tagUsers, username, password)
+  val streams = new Streams(user, session, tagUsers, username, password)
   session.windows.streams = streams
   val mainToolBar = new MainToolBar(streams)
     
@@ -49,7 +49,7 @@ class TopFrame(username: String, password: String, user: Node) extends Frame{
         userPic.icon = imageReady.resource.image 
       }
     })
-    picFetcher.requestItem(new FetchRequest((user \ "profile_image_url").text, null))
+    picFetcher.requestItem(new FetchRequest(user.getUserDetail().profileImageURL, null))
     add(userPic, new Constraints { grid = (0,0); gridheight=2})
     add(session.status, new Constraints {
       grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
@@ -70,20 +70,20 @@ class TopFrame(username: String, password: String, user: Node) extends Frame{
   peer.setLocationRelativeTo(null)
 
   SwingInvoke.execSwingWorker({
-    (new FriendsDataProvider(username, password).getUsers,
-      new FollowersDataProvider(username, password).getUsers)
+    (user.getFriends(),
+      user.getFollowers())
     }, 
-    { (result: Tuple2[List[Node],List[Node]]) =>
+    { (result: Tuple2[List[TwitterUser],List[TwitterUser]]) =>
     val (following, followers) = result 
               
     streams.usersTableModel.friends = following
     streams.usersTableModel.followers = followers
     streams.usersTableModel.usersChanged
  
-    streams setFollowerIds (followers map (u => (u \ "id").text))
+    streams setFollowerIds (followers map (u => u.id.toString()))
               
     val paneTitle = "People (" + following.length + ", " + followers.length + ")"
-    val pane = new PeoplePane(session, streams.apiHandlers, streams.usersTableModel, following, followers)
+    val pane = new PeoplePane(session, streams.usersTableModel, following, followers)
     tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
   })
 
@@ -92,8 +92,14 @@ class TopFrame(username: String, password: String, user: Node) extends Frame{
     val highMen = streams.mentionsProvider.getHighestId
     log info("Saving last seen IDs for " + username + ". Following: " + highFol + ", mentions: " + highMen)
     val prefs = PreferencesFactory.prefsForUser(username)
-    if (highFol != null) prefs.put("highestId", highFol)
-    if (highMen != null) prefs.put("highestMentionId", highMen)
+    highFol match {
+      case Some(i) => prefs.put("highestId", i.toString())
+      case _ => // noop
+    }
+    highMen match {
+      case Some(i) => prefs.put("highestMentionId", i.toString())
+      case _ => //noop
+    }
     tagUsers.save
   }
 }

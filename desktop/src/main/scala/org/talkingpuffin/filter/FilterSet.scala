@@ -4,6 +4,7 @@ import _root_.scala.swing.event.Event
 import _root_.scala.swing.Publisher
 import java.util.regex.Pattern
 import java.util.{ArrayList,Collections}
+import org.talkingpuffin.twitter.{AuthenticatedSession}
 import ui.User
 
 /**
@@ -43,7 +44,7 @@ class FilterSet(session: Session) extends Publisher {
     if (! excludeOverlapping) return false
     for (aSession <- Globals.sessions if aSession != session) {
       aSession.windows.streams.usersTableModel.friends.foreach(friend => {
-        val friendId = (friend \ "id").text
+        val friendId = friend.id.toString()
         if (friendId == userId) 
           return true
       })

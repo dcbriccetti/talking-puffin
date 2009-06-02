@@ -28,7 +28,7 @@ object Main {
   val title = "TalkingPuffin" 
   private var username: String = ""
   private var password: String = ""
-  private var user: Node = _
+  private var user: TwitterSession = _
   
   def main(args: Array[String]): Unit = {
     val props = System.getProperties
@@ -41,7 +41,7 @@ object Main {
   }
   
   def launchSession {
-    def startUp(username: String, password: String, user: Node) {
+    def startUp(username: String, password: String, user: AuthenticatedSession) {
       this.username = username
       this.password = password
       this.user = user
@@ -52,13 +52,13 @@ object Main {
       }
     }
 
-    new LoginDialog(new twitter.AuthenticationProvider, TopFrames.exitIfNoFrames, startUp).display
+    new LoginDialog(TopFrames.exitIfNoFrames, startUp).display
   }
 }
 
-class ApiHandlers(val sender: Sender, val follower: Follower)
+//class ApiHandlers(val sender: Sender, val follower: Follower)
 
-class Session {
+class Session(val twitterSession: AuthenticatedSession) {
   val windows = new Windows
   val status = new Label(" ")
 }

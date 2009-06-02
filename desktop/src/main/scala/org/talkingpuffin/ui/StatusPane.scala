@@ -3,7 +3,6 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.event.{ComponentResized, ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.org.talkingpuffin.util.PopupListener
-import _root_.scala.xml.{NodeSeq, Node}
 
 import filter.{TagsRepository, FilterSet}
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
@@ -16,24 +15,24 @@ import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
 import javax.swing.{SwingUtilities, JTable, Icon, JMenu, ImageIcon, JLabel, JTextPane, SwingWorker, JPopupMenu, JFrame, JToolBar, JToggleButton, JButton, JMenuItem, JTabbedPane}
 import scala.swing._
-import twitter.Sender
+import twitter.{TwitterStatus}
 import util.TableUtil
 
 /**
  * Displays friend statuses
  */
 class StatusPane(session: Session, title: String, statusTableModel: StatusTableModel, 
-    apiHandlers: ApiHandlers, filterSet: FilterSet, streams: Streams) 
+    filterSet: FilterSet, streams: Streams) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
-  private var lastSelectedRows: List[NodeSeq] = Nil
+  private var lastSelectedRows: List[TwitterStatus] = Nil
   private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet)
 
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)
   
   val statusToolBar = new StatusToolBar(session, statusTableModel.tweetsProvider, 
-    filtersDialog, apiHandlers, this, clearTweets)
+    filtersDialog, this, clearTweets)
   peer.add(statusToolBar, new Constraints{grid=(0,0); gridwidth=3}.peer)
   
   add(new ScrollPane {
@@ -79,7 +78,7 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
     })
   }
   
-  def newTable = new StatusTable(session, statusTableModel, apiHandlers, showBigPicture)
+  def newTable = new StatusTable(session, statusTableModel, showBigPicture)
   
   def showBigPicture = tweetDetailPanel.showBigPicture
   

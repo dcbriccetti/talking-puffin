@@ -1,7 +1,7 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.Action
-import _root_.scala.xml.NodeSeq
+import twitter.TwitterStatus
 import filter.TagsRepository
 import javax.swing.{JTable, SwingUtilities}
 import util.TableUtil
@@ -11,7 +11,7 @@ import util.TableUtil
  *  
  * @author Dave Briccetti
  */
-class TagAction(getSelectedStatus: => Option[NodeSeq], table: JTable, statusTableModel: StatusTableModel) 
+class TagAction(getSelectedStatus: => Option[TwitterStatus], table: JTable, statusTableModel: StatusTableModel)
     extends Action("Tag With…") {
   def apply {
     getSelectedStatus match {

@@ -1,6 +1,5 @@
 package org.talkingpuffin.twitter
 
-import java.util.Date
 import scala.xml._
 import org.apache.log4j._
 
@@ -29,13 +28,24 @@ class TwitterUser() extends Validated{
   var isProtected: boolean = false
   /** the number of people who follow this user */
   var followersCount: Int = 0
+  /** the number of people this user follows */
+  var friendsCount: Int = 0
   /** this user's last status, if available */
   var status: TwitterStatus = null
   
   def isValid() = {
     screenName != null
   }
-  
+
+  override def equals(obj: Any) = {
+    if(obj.isInstanceOf[TwitterUser]){
+      obj.asInstanceOf[TwitterUser].id == id
+    }else{
+      false
+    }
+  }
+
+  override def hashCode() = id
 }
 
 /**
@@ -70,6 +80,7 @@ object TwitterUser{
         case <url>{Text(text)}</url> => user.url = text
         case <protected>{Text(text)}</protected> => user.isProtected = java.lang.Boolean.valueOf(text).booleanValue
         case <followers_count>{Text(text)}</followers_count> => user.followersCount = Integer.parseInt(text)
+        case <friends_count>{Text(text)}</friends_count> => user.friendsCount = Integer.parseInt(text)
         case <status>{ _* }</status> => user.status = TwitterStatus(sub)
         case _ => Nil
       }

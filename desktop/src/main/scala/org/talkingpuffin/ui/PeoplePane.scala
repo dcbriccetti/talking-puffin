@@ -11,8 +11,8 @@ import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, AbstractTabl
 import javax.swing.{JPopupMenu, JToolBar, JTable, JToggleButton, KeyStroke, Icon, JLabel, JOptionPane}
 import scala.swing._
 import scala.swing.GridBagPanel._
-import twitter.{FriendsFollowersDataProvider}
 import util.{TableUtil, DesktopUtil}
+import org.talkingpuffin.twitter.{TwitterUser}
 
 object UserColumns {
   val ARROWS = 0
@@ -28,8 +28,8 @@ object UserColumns {
 /**
  * Displays a list of friends or followers
  */
-class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTableModel, 
-    friends: List[Node], followers: List[Node]) extends GridBagPanel {
+class PeoplePane(session: Session, tableModel: UsersTableModel, 
+    friends: List[TwitterUser], followers: List[TwitterUser]) extends GridBagPanel {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
     table = new PeopleTable(tableModel)
@@ -92,10 +92,10 @@ class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTa
     menu
   }
   
-  private def getSelectedUsers = TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
+  private def getSelectedUsers:List[TwitterUser] = TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
   
   def getSelectedScreenNames: List[String] = {
-    getSelectedUsers.map(user => (user \ "screen_name").text)
+    getSelectedUsers.map(user => user.screenName)
   }
 
   private def processScreenNames(screenNames:List[String],action:((String) => Unit),errHandler:((Exception,String) => Unit)) = {
@@ -113,25 +113,25 @@ class PeoplePane(session: Session, apiHandlers: ApiHandlers, tableModel: UsersTa
   }
 
   private def follow = processScreenNames(getSelectedScreenNames,
-                                          apiHandlers.follower.follow,
+                                          session.twitterSession.createFriendship,
                                           showFollowErr(_,"following",_))
   private def unfollow = processScreenNames(getSelectedScreenNames,
-                                            apiHandlers.follower.unfollow,
+                                            session.twitterSession.destroyFriendship,
                                             showFollowErr(_,"unfollowing",_))
   private def block = processScreenNames(getSelectedScreenNames,
-                                            apiHandlers.follower.block,
+                                            session.twitterSession.blockUser,
                                             showFollowErr(_,"blocking",_))
   
   private def viewSelected {
     getSelectedUsers.foreach(user => {
-      var uri = "http://twitter.com/" + (user \ "screen_name").text
+      var uri = "http://twitter.com/" + user.screenName
       DesktopUtil.browse(uri)
     })
   }
   
   private def reply {
-    val names = getSelectedUsers.map(user => ("@" + (user \ "screen_name").text)).mkString(" ")
-    val sm = new SendMsgDialog(session, null, apiHandlers.sender, Some(names), None, None)
+    val names = getSelectedUsers.map(user => ("@" + user.screenName)).mkString(" ")
+    val sm = new SendMsgDialog(session, null, Some(names), None, None)
     sm.visible = true
   }
 

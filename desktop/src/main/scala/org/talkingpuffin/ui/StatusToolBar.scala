@@ -10,7 +10,7 @@ import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
  * @author Dave Briccetti
  */
 class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDialog: FiltersDialog, 
-    apiHandlers: ApiHandlers, statusPane: Component, clearTweets: => Unit) extends JToolBar {
+    statusPane: Component, clearTweets: => Unit) extends JToolBar {
   var tweetDetailPanel: TweetDetailPanel = _
   
   val showFiltersAction = new Action("Filter…") {
@@ -32,7 +32,7 @@ class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDia
   val sendAction = new Action("Send…") {
     toolTip = "Opens a window from which you can send a tweet"
     mnemonic = KeyEvent.VK_S
-    def apply = (new SendMsgDialog(session, null, apiHandlers.sender, None, None, None)).visible = true
+    def apply = (new SendMsgDialog(session, null, None, None, None)).visible = true
   }
 
   val clearRepliesAction = new Action("Clear") {

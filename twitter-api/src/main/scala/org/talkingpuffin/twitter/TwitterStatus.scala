@@ -3,6 +3,8 @@ package org.talkingpuffin.twitter
 import java.util.Date
 import scala.xml._
 import org.apache.log4j._
+import org.joda.time._
+import org.joda.time.format._
 
 /**
 * Represents a twitter status update.
@@ -13,7 +15,7 @@ class TwitterStatus() extends Validated{
   var text: String = null
   var user: TwitterUser = null
   var id: Int = 0
-  var createdAt: Date = null
+  var createdAt: DateTime = null
   var source: String = null
   var truncated: boolean = false
   var inReplyToStatusId: Int = 0
@@ -23,6 +25,17 @@ class TwitterStatus() extends Validated{
   def isValid() = {
     text != null && user != null
   }
+
+  override def equals(obj: Any) = {
+    if(obj.isInstanceOf[TwitterStatus]){
+      obj.asInstanceOf[TwitterStatus].id == id
+    }else{
+      false
+    }
+  }
+
+  override def hashCode() = id
+
 }
 
 /**
@@ -37,6 +50,7 @@ class TwitterStatus() extends Validated{
 */ 
 object TwitterStatus{
   val logger = Logger.getLogger("twitter")
+  val fmt = DateTimeFormat.forPattern("EE MMM dd HH:mm:ss Z yyyy")
 
   /**
   * construct a TwitterStatus object from an XML node
@@ -46,7 +60,7 @@ object TwitterStatus{
     n.child foreach {(sub) => 
       sub match {
         case <id>{Text(text)}</id> => status.id = Integer.parseInt(text)
-        case <created_at>{Text(text)}</created_at> => status.createdAt = null // fix this!
+        case <created_at>{Text(text)}</created_at> => status.createdAt = fmt.parseDateTime(text)
         case <text>{Text(text)}</text> => status.text = text
         case <source>{Text(text)}</source> => status.source = text
         case <truncated>{Text(text)}</truncated> => status.truncated = java.lang.Boolean.valueOf(text).booleanValue
