@@ -5,11 +5,7 @@ import mac.QuitHandler
 
 /**
  * Keeps track of top-level frames.
- * 
- * @author Dave Briccetti
- * @author Mark McBride
  */
-
 object TopFrames {
   val log = Logger getLogger "TopFrames"
   private var frames = List[TopFrame]()

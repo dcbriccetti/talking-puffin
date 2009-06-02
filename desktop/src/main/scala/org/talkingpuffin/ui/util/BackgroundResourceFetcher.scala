@@ -13,8 +13,6 @@ case class NoSuchResource(resource: String) extends Exception
   
 /**
  * Fetches resources in the background, and calls a function in the Swing event thread when ready.
- * 
- * @author Dave Briccetti
  */
 abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceReady[K,V]) => Unit) 
     extends Cache[K,V] {

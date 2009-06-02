@@ -15,7 +15,6 @@ object TweetsProvider {
 
 /**
  * Provides tweets
- * @author Dave Briccetti
  */
 
 class TweetsProvider(session: AuthenticatedSession, startingId: Option[Int], providerName: String) {

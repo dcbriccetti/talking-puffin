@@ -7,7 +7,6 @@ import org.joda.time._
 import org.joda.time.format._
 /**
 * Represents a twitter direct message.
-* @author mmcbride
 */
 
 class TwitterMessage() extends Validated{
@@ -45,7 +44,6 @@ class TwitterMessage() extends Validated{
 * val xml = getXML()
 * val message = TwitterMessage(xml)
 * </pre></tt>
-* @author mmcbride
 */ 
 
 object TwitterMessage{

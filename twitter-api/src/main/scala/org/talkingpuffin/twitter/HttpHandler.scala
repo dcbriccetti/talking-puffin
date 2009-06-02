@@ -22,9 +22,6 @@ case class HttpException(exception:Throwable) extends HttpResult
 
 /**
  * Generalises Http handling.
- * @author Alf Kristian Støyle  
- * @author Dave Briccetti  
- * @author Mark McBride  
  */
 protected trait HttpHandler {
   private val log = Logger.getLogger(getClass)

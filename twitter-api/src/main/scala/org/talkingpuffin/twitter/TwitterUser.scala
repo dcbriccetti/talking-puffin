@@ -7,7 +7,6 @@ import org.apache.log4j._
 * 
 * Represents a twitter user XML fragment.
 * This object is represented in several API calls
-* @author mmcbride
 */
 class TwitterUser() extends Validated{
   /** the screen name of this user */
@@ -25,7 +24,7 @@ class TwitterUser() extends Validated{
   /** the user's personal site URL (if specified) */
   var url: String = null
   /** a flag indicating whether or not updates from this user are protected */
-  var isProtected: boolean = false
+  var isProtected: Boolean = false
   /** the number of people who follow this user */
   var followersCount: Int = 0
   /** the number of people this user follows */
@@ -56,7 +55,6 @@ class TwitterUser() extends Validated{
 * val xml = getXML()
 * val user = TwitterUser(xml)
 * </pre></tt>
-* @author mmcbride
 */ 
 object TwitterUser{
   val logger = Logger.getLogger("twitter")

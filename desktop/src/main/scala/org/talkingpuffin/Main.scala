@@ -20,8 +20,6 @@ import ui.util.FetchRequest
 
 /**
  * TalkingPuffin main object
- *
- * @author Dave Briccetti
  */
 object Main {
   val log = Logger getLogger "Main"
@@ -56,8 +54,6 @@ object Main {
   }
 }
 
-//class ApiHandlers(val sender: Sender, val follower: Follower)
-
 class Session(val twitterSession: AuthenticatedSession) {
   val windows = new Windows
   val status = new Label(" ")
@@ -65,6 +61,5 @@ class Session(val twitterSession: AuthenticatedSession) {
 
 object Globals {
   var sessions: List[Session] = Nil
-  class Options(var useAnimations: Boolean, var lookUpLocations: Boolean, var expandUrls: Boolean)
-  val options = new Options(false, true, false)
 }
+

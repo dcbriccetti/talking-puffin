@@ -6,8 +6,6 @@ import javax.swing.text.JTextComponent
 
 /**
  * URL shortening and expanding.
- * 
- * @author Dave Briccetti
  */
 object ShortUrl {
   val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "ping.fm", "short.ie", "tinyurl.com", "tr.im")

@@ -2,12 +2,10 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.{Frame, TabbedPane, Component}
 import javax.swing.{JFrame, SwingUtilities}
+
 /**
  * Window manager.
- * 
- * @author Dave Briccetti
  */
-
 class Windows {
   var tabbedPane: TabbedPane = _
   var streams: Streams = _

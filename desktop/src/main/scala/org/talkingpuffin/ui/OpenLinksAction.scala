@@ -8,7 +8,6 @@ import org.talkingpuffin.twitter.{TwitterStatus}
 
 /**
  * Shows a menu of links, or launches the browser on the link if there is only one. 
- * @author Dave Briccetti
  */
 
 class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,

@@ -1,17 +1,16 @@
 package org.talkingpuffin.ui.util
 import java.util.concurrent.atomic.AtomicBoolean
+import state.{GlobalPrefs, PrefKeys}
 
 /**
  * An animator to make old text slide out and new text slide in.
- * 
- * @author Dave Briccetti
  */
 class TextChangingAnimator {
   val keepAnimating = new AtomicBoolean
   var thread: Thread = _
   
   def run(origText: String, newText: String, callback: (String) => Unit) {
-    if (! Globals.options.useAnimations) {
+    if (! GlobalPrefs.prefs.getBoolean(PrefKeys.USE_ANIMATIONS, false)) {
       callback(newText) // Simply show end result
     } else {
       keepAnimating.set(true)

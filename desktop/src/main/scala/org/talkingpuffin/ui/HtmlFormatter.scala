@@ -4,7 +4,6 @@ import java.util.regex.Pattern
 
 /**
  * Helps with creating HTML for display in the UI
- * @author Dave Briccetti
  */
 
 object HtmlFormatter {

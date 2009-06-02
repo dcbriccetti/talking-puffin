@@ -5,7 +5,6 @@ import javax.swing.table.AbstractTableModel
 
 /**
  * Model for table of TextFilters 
- * @author Dave Briccetti
  */
 
 class TextFilterModel(textFilters: java.util.List[TextFilter]) extends AbstractTableModel {

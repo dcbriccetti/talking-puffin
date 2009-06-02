@@ -5,8 +5,6 @@ import java.lang.reflect.{Proxy, InvocationHandler, Method}
 
 /**
  * Mac OS application quit handler
- *
- * @author Mark McBride
  */
 
 object QuitHandler {

@@ -21,8 +21,8 @@ import twitter.{TweetsArrived, TweetsProvider, TwitterStatus}
  * Model providing status data to the JTable
  */
 class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: TweetsProvider, 
-    usersModel: UsersTableModel, filterSet: FilterSet, username: String, tagUsers: TagUsers) 
-    extends AbstractTableModel with Publisher with Reactor {
+    usersModel: UsersTableModel, filterSet: FilterSet, username: String, val tagUsers: TagUsers) 
+    extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
   
   private val log = Logger.getLogger("StatusTableModel " + hashCode)
   log.info("Created")
@@ -146,21 +146,13 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filterAndNotify
   }
 
-  def tagSelectedUsers(rows: List[Int], tag: String) =
-    for (user <- getUsers(rows)) 
-      tagUsers.add(tag, user.id)
-
-  def untagSelectedUsers(rows: List[Int]) =
-    for (user <- getUsers(rows)) 
-      tagUsers.removeForUser(user.id)
-
   val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy", Locale.ENGLISH)
   
   private def dateToAgeSeconds(date: Long): Long = {
     date / 1000
   }
   
-  private def getUsers(rows: List[Int]): List[User] = 
+  def getUsers(rows: List[Int]): List[User] = 
     rows.map(i => {
       val node = filteredStatuses.get(i)
       val id = node.user.id.toString
@@ -225,3 +217,4 @@ trait Mentions extends StatusTableModel {
     if (text.startsWith(userTag)) text.substring(userTag.length).trim else text
   }
 }
+

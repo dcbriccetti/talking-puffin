@@ -11,7 +11,6 @@ import javax.swing.KeyStroke
 
 /**
  * A dialog for sending messages
- * @author Dave Briccetti
  */
 
 class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOption: Option[String],

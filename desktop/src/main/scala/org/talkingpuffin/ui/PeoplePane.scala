@@ -78,6 +78,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel,
     ap.add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
     ap.add(new NextTAction(comp))
     ap.add(new PrevTAction(comp))
+    ap add(new TagAction(table, tableModel), Actions.ks(KeyEvent.VK_T))
     ap.add(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
     val mask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
     ap.add(Action("Follow") { follow }, KeyStroke.getKeyStroke(KeyEvent.VK_F, mask))

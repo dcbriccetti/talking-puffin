@@ -5,11 +5,10 @@ import javax.swing.border.EmptyBorder
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.{JTextPane, JTable}
 import time.TimeFormatter
+
 /**
  * Renderer for the Age column
- * @author Dave Briccetti
  */
-
 class AgeCellRenderer extends JTextPane with TableCellRenderer {
   setContentType("text/html")
   val renderer = new DefaultTableCellRenderer

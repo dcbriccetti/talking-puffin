@@ -13,5 +13,5 @@ rm $JAR
 jar cf $JAR *
 
 jarsigner -keystore ~/.keystore $JAR mykey
-scp $JAR db:jws/lib
 popd
+mv /tmp/a/$JAR ../website/jws

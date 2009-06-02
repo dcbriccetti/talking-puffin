@@ -8,8 +8,6 @@ import util.ShortUrl
 
 /**
  * Status cell renderer.
- * 
- * @author Dave Briccetti
  */
 class StatusCellRenderer extends HtmlCellRenderer {
   override def setFormattedText(component: JTextComponent, value: Any) = component.setText(

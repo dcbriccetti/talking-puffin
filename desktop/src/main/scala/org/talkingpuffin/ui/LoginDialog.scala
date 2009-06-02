@@ -6,15 +6,13 @@ import _root_.scala.xml.Node
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.Color
 import javax.swing.JDialog
-import state.PreferencesFactory
 import org.talkingpuffin.twitter.{TwitterSession,AuthenticatedSession}
+import state.{GlobalPrefs, PreferencesFactory}
 import LongRunningSpinner._
 import event.Event
 
 /**
  * Collect user name and password for Twitter authentication.
- * @author Dave Briccetti
- * @author Alf Kristian Støyle  
  */
 
 class LoginDialog(cancelPressed: => Unit, 
@@ -28,7 +26,7 @@ class LoginDialog(cancelPressed: => Unit,
 
   val usernameKey = "username"
   val pwdKey = "password"
-  val prefs = PreferencesFactory.prefs
+  val prefs = GlobalPrefs.prefs
   private var storedUser = prefs.get(usernameKey, null)
   private var storedPwd = prefs.get(pwdKey, null)
   

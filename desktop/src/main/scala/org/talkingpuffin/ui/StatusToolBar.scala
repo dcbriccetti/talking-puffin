@@ -7,7 +7,6 @@ import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
 
 /**
  * Status pane tool bar
- * @author Dave Briccetti
  */
 class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDialog: FiltersDialog, 
     statusPane: Component, clearTweets: => Unit) extends JToolBar {

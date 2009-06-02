@@ -8,8 +8,6 @@ import java.awt.event.KeyEvent
 import javax.swing.{KeyStroke, JCheckBox}
 /**
  * A panel displaying and allowing selection of tags.
- * 
- * @author Dave Briccetti
  */
 class TagsPanel(showTitle: Boolean) extends BorderPanel {
   val checkBoxView = new CheckBoxView(TagsRepository.get)

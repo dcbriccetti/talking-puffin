@@ -27,7 +27,6 @@ import twitter.{TwitterStatus}
 import util.{TableUtil, DesktopUtil}
 /**
  * Table of statuses.
- * @author Dave Briccetti
  */
 
 class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigPicture: => Unit)
@@ -150,11 +149,11 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigP
       Actions.ks(KeyEvent.VK_M))
     ap add new NextTAction(this)
     ap add new PrevTAction(this)
-    ap add(new TagAction(getSelectedStatus, this, statusTableModel), Actions.ks(KeyEvent.VK_T))
+    ap add(new TagAction(this, statusTableModel), Actions.ks(KeyEvent.VK_T))
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
-    ap add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U,
+    ap add(Action("Unfollow") { unfollow}, KeyStroke.getKeyStroke(KeyEvent.VK_U,
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
     ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))

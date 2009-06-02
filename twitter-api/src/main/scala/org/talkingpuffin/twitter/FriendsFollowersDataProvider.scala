@@ -4,7 +4,6 @@ import _root_.scala.xml.{NodeSeq, Node}
 
 /**
  * Friends and followers data providers
- * @author Dave Briccetti
  */
 abstract class FriendsFollowersDataProvider(session: AuthenticatedSession){
   def getUsers: List[TwitterUser] = {

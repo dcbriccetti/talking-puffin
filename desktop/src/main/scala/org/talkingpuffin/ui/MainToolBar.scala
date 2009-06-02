@@ -6,12 +6,10 @@ import java.awt.event.{ActionEvent, ActionListener}
 
 import javax.swing.JToolBar
 import time.TimeFormatter
+
 /**
  * The main ToolBar
- * 
- * @author Dave Briccetti
  */
-
 class MainToolBar(streams: Streams) extends JToolBar {
   val remaining = new Label
   setFloatable(false)

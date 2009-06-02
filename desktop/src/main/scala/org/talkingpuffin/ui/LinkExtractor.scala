@@ -6,7 +6,6 @@ import org.talkingpuffin.twitter.{TwitterStatus}
 
 /**
  * Extracts links from Twitter status
- * @author Dave Briccetti
  */
 
 object LinkExtractor {

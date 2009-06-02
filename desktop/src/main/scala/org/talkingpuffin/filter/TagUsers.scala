@@ -10,7 +10,6 @@ import state.PreferencesFactory
 
 /**
  * Repository of tag -> user mappings
- * @author Dave Briccetti
  */
 class TagUsers(username: String) {
   private val log = Logger getLogger "TagUsers"

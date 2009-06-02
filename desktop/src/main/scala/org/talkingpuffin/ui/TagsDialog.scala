@@ -7,8 +7,6 @@ import java.awt.Dimension
 
 /**
  * A dialog from which tags can be selected.
- * 
- * @author Dave Briccetti
  */
 
 class TagsDialog(owner: java.awt.Frame) extends JDialog(owner, "Tags", true) {

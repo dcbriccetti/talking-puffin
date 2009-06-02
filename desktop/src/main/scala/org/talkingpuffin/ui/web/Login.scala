@@ -4,8 +4,6 @@ import java.io.Serializable
 
 /**
  * Login managed bean.
- * 
- * @author Dave Briccetti
  */
 class Login extends Serializable {
   var user = ""

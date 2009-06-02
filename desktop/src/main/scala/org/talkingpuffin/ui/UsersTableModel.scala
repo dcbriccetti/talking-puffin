@@ -9,8 +9,6 @@ import twitter.{TwitterUser}
 
 /**
  * A model for users (followed and followers)
- * 
- * @author Dave Briccetti
  */
 
 class UsersModel(friends: List[TwitterUser], followers: List[TwitterUser]) {
@@ -45,8 +43,8 @@ class UsersModel(friends: List[TwitterUser], followers: List[TwitterUser]) {
 case class UserSelection(val includeFollowing: Boolean, val includeFollowers: Boolean, 
   val searchString: Option[String])
 
-class UsersTableModel(tagUsers: TagUsers, var friends: List[TwitterUser], var followers: List[TwitterUser])
-    extends AbstractTableModel {
+class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], var followers: List[TwitterUser])
+    extends AbstractTableModel with TaggingSupport{
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
   var usersModel = new UsersModel(friends, followers)
@@ -100,5 +98,13 @@ class UsersTableModel(tagUsers: TagUsers, var friends: List[TwitterUser], var fo
   override def getColumnName(column: Int) = colNames(column)
   
   def getRowAt(rowIndex: Int) = usersModel.users(rowIndex)
+
+  def getUsers(rows: List[Int]): List[User] = 
+    rows.map(rowIndex => {
+      val user = usersModel.users(rowIndex)
+      val id = user.id.toString()
+      val name = user.name
+      new User(id, name)
+    })
 }
 
