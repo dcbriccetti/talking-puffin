@@ -155,7 +155,7 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigP
     ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
     ap add(Action("Unfollow") { unfollow}, KeyStroke.getKeyStroke(KeyEvent.VK_U,
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
-    ap add(Action("Block") { blockSelected }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
+    ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
     
     ap add(Action("Delete selected tweets") {

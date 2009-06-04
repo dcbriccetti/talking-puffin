@@ -121,6 +121,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel,
                                             showFollowErr(_,"unfollowing",_))
   private def block = processScreenNames(getSelectedScreenNames,
                                             session.twitterSession.blockUser,
+                                            showFollowErr(_,"block",_))
   
   private def viewSelected {
     getSelectedUsers.foreach(user => {
