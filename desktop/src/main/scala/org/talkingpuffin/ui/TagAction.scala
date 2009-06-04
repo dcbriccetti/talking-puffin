@@ -9,8 +9,7 @@ import util.TableUtil
 /**
  * Selecting the tags to apply to users.
  */
-class TagAction(table: JTable, taggingSupport: TaggingSupport)
-    extends Action("Tag With…") {
+class TagAction(table: JTable, taggingSupport: TaggingSupport) extends Action("Tag With…") {
   def apply {
     val selectedModelIndexes = TableUtil.getSelectedModelIndexes(table)
     if (selectedModelIndexes.length > 0) {

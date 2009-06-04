@@ -14,6 +14,7 @@ import javax.swing.KeyStroke
  */
 
 class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOption: Option[String],
+>>>>>>> b74a96a8e79bfd7a5fd8dc3d95ff5377abdb8926:desktop/src/main/scala/org/talkingpuffin/ui/SendMsgDialog.scala
     replyToId: Option[String], retweetMsgOption: Option[String]) extends Frame {
   
   class CustomTextArea extends TextArea { 

@@ -54,7 +54,7 @@ object Main {
   }
 }
 
-class Session(val twitterSession: AuthenticatedSession) {
+class Session {
   val windows = new Windows
   val status = new Label(" ")
 }
