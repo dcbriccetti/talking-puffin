@@ -4,6 +4,7 @@ import java.net.{URLConnection,URL,HttpURLConnection,URLEncoder}
 import scala.xml._
 import org.apache.commons.codec.binary.Base64
 import java.io.{DataOutputStream,DataInputStream,IOException,BufferedReader,InputStreamReader}
+import org.apache.log4j.Logger;
 
 // end session http://twitter.com/account/end_session
 // help http://twitter.com/help/test.format 
@@ -15,7 +16,8 @@ import java.io.{DataOutputStream,DataInputStream,IOException,BufferedReader,Inpu
 * This class currently does no error checking, but in the future will also check against valid Twitter error codes
 */
 class XMLFetcher(user: String, password: String){
-  
+  private val log = Logger.getLogger("XMLFetcher")
+
   /** the encoded authentication string.  This is null if user or password is null. */
   val encoding = if(user != null && password != null) new String(Base64.encodeBase64((user + ":" + password).getBytes())) else null
   
@@ -24,6 +26,7 @@ class XMLFetcher(user: String, password: String){
   */
   def doGet(url: URL) :Node = {
     val conn: HttpURLConnection = (url.openConnection).asInstanceOf[HttpURLConnection]
+    log.debug("GETing data from " + url)
     if(encoding != null){
       conn.setRequestProperty ("Authorization", "Basic " + encoding);
     }
@@ -32,6 +35,8 @@ class XMLFetcher(user: String, password: String){
 
   def doDelete(url: URL) = {
     val conn: HttpURLConnection = (url.openConnection).asInstanceOf[HttpURLConnection]
+    log.debug("DELETEing data at " + url)
+
     if(encoding != null){
       conn.setRequestProperty ("Authorization", "Basic " + encoding);
     }
@@ -45,6 +50,7 @@ class XMLFetcher(user: String, password: String){
   */
   def doPost(url: URL, params: List[(String,String)]) :Node = {
     val conn: HttpURLConnection = (url.openConnection).asInstanceOf[HttpURLConnection]
+    log.debug("POSTing data to " + url)
     if(encoding != null){
       conn.setRequestProperty ("Authorization", "Basic " + encoding);
     }

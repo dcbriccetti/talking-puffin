@@ -33,7 +33,7 @@ class TweetsProvider(session: AuthenticatedSession, startingId: Option[Int], pro
   //def getUrlFile = "statuses/friends_timeline.xml"
   //def getUrl = urlHost + getUrlFile + "?count=200" + buildSinceParm
   
-  protected def buildSinceParm(args: TwitterArgs) = highestId match {
+  protected def   buildSinceParm(args: TwitterArgs) = highestId match {
     case None => args
     case Some(i) => args.since(i)
   }
@@ -60,21 +60,37 @@ class TweetsProvider(session: AuthenticatedSession, startingId: Option[Int], pro
     })
     timer.start
   }
-  
+
+  private def computeHighestId(tweets: List[TwitterStatus], maxId: Option[Int]):Option[Int] = tweets match {
+    case tweet :: rest => maxId match {
+        case Some(id) => computeHighestId(rest,
+                                           if(tweet.id > id) Some(tweet.id) else Some(id))
+        case None => computeHighestId(rest,Some(tweet.id))
+    }
+    case Nil => maxId
+  }
+
   def loadNewData = {
-    loadData(session.user,buildSinceParm(TwitterArgs.maxResults(200)),false)
+    val args = buildSinceParm(TwitterArgs.maxResults(200))
+    log.info("loading new data with args " + args)
+    loadData(session.user,args,false)
   }
   
   def loadLastBlockOfTweets = {
     loadData(session.user,TwitterArgs.maxResults(200),true)
   }
-  
+
   private def loadData(username: String, args: TwitterArgs, clear: Boolean): Unit = {
     new SwingWorker[Option[List[TwitterStatus]], Object] {
       val sendClear = clear
       override def doInBackground: Option[List[TwitterStatus]] = {
         try{
-          Some(updateFunc(args))
+          val statuses = Some(updateFunc(args))
+          statuses match {
+            case Some(tweets) => highestId = computeHighestId(tweets,getHighestId)
+          }
+          log.info("highest tweet id is now " + getHighestId)
+          statuses
         } catch {
           case e => log.error(e); None
         }
