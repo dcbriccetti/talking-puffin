@@ -45,5 +45,6 @@
     <modules>
       <module>twitter-api</module>
       <module>desktop</module>
+      <module>web-mvn</module>
     </modules>
 </project>

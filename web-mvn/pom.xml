@@ -1,0 +1,25 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.talkingpuffin</groupId>
+    <artifactId>talking-puffin-web</artifactId>
+    <parent>
+      <groupId>org.talkingpuffin</groupId>
+      <artifactId>talking-puffin-base</artifactId>
+      <version>0.65</version>
+    </parent>
+    <packaging>war</packaging>
+    <name>TalkingPuffin Web Client</name>
+    <url>http://TalkingPuffin.org/</url>
+	
+    <description>TalkingPuffin web Twitter client</description>
+
+    <dependencies>
+        <dependency>
+          <groupId>org.talkingpuffin</groupId>
+          <artifactId>talking-puffin</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -25,24 +25,21 @@ class UserRow(val picUrl: String, val arrows: String, val screenName: String, va
 class Users extends Serializable {
   var session: AuthenticatedSession = _
   def setSession(session: AuthenticatedSession) = this.session = session
+  var following:List[TwitterUser] = _
+  var followers:List[TwitterUser] = _
 
-  private def nodeToNum(node: NodeSeq, name: String): Int = {
-    val s = (node \ name).text
-    var num = 0
-    try {
-      num = Integer.parseInt(s)
-    } catch {
-      case e: NumberFormatException =>
-    }
-    num
+  def getArrows(user:TwitterUser) = {
+    val friend = following.contains(user)
+    val follower = followers.contains(user)
+    if (friend && follower) "↔" else if (friend) "→" else "←"
   }
-  
+
   def getUsers: Array[TwitterUser] = {
     //TODO: make sure we get more than 20 here
-    val following = session.getFriends(TwitterArgs.maxResults(200))
-    val followers = session.getFollowers(TwitterArgs.maxResults(200))
+    following = session.getFriends(TwitterArgs.maxResults(200))
+    followers = session.getFollowers(TwitterArgs.maxResults(200))
     val usersModel = new UsersModel(following, followers)
     usersModel.build(UserSelection(true, true, None))
-    usersModel.users.reverse.toArray
+    usersModel.users.toArray
   }
 }
