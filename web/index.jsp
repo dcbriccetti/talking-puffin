@@ -80,11 +80,7 @@ will be shown.</p>
     <td class="number rightmostNumber"><%= user.followersCount() %></td>
     <td><%= user.location() %></td>
     <td><%= user.description() %></td>
-    <% if(user.status() != null){ %>
-        <td><%= user.status().text()%></td>
-    <% } else { %>
-        <td>N/A</td>
-    <% } %>
+    <td><%= user.status().isDefined() ? user.status().get().text() : ""%></td>
 </tr>
 <%
     }

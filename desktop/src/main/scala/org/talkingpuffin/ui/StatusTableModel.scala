@@ -149,7 +149,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy", Locale.ENGLISH)
   
   private def dateToAgeSeconds(date: Long): Long = {
-    date / 1000
+    (new Date().getTime() - date) / 1000
   }
   
   def getUsers(rows: List[Int]): List[User] = 

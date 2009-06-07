@@ -10,12 +10,12 @@ import org.joda.time.format._
 */
 
 class TwitterMessage() extends Validated{
-  var text: String = null
-  var senderScreenName: String = null
+  var text: String = ""
+  var senderScreenName: String = ""
   var id: Int = 0
   var senderId: Int = 0
   var recipientId: Int = 0
-  var recipientScreenName: String = null
+  var recipientScreenName: String = ""
   var createdAt: DateTime = null
   var sender: TwitterUser = null
   var recipient: TwitterUser = null

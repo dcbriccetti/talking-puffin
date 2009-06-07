@@ -90,7 +90,10 @@ class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], va
         pcell.request(picUrl, rowIndex)
       }
       case UserColumns.SCREEN_NAME => new EmphasizedString(Some(user.screenName), followers.contains(user))
-      case UserColumns.STATUS if user.status != null => user.status.text
+      case UserColumns.STATUS => user.status match {
+              case Some(status) => status.text
+              case None => ""
+      }
       case UserColumns.TAGS => tagUsers.tagsForUser(user.id.toString()).mkString(", ")
       case _ => null
     }

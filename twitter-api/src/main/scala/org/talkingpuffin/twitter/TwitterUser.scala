@@ -10,19 +10,19 @@ import org.apache.log4j._
 */
 class TwitterUser() extends Validated{
   /** the screen name of this user */
-  var screenName: String = null
+  var screenName: String = ""
   /** the twitter user id of this user */
   var id: Int = 0
   /** the natural name of this user */
-  var name: String = null
+  var name: String = ""
   /** the location of this user (if specified) */
-  var location: String = null
+  var location: String = ""
   /** the user's description (if specified) */
-  var description: String = null
+  var description: String = ""
   /** the user's profile image URL (if specified) */
-  var profileImageURL: String = null
+  var profileImageURL: String = ""
   /** the user's personal site URL (if specified) */
-  var url: String = null
+  var url: String = ""
   /** a flag indicating whether or not updates from this user are protected */
   var isProtected: Boolean = false
   /** the number of people who follow this user */
@@ -30,7 +30,7 @@ class TwitterUser() extends Validated{
   /** the number of people this user follows */
   var friendsCount: Int = 0
   /** this user's last status, if available */
-  var status: TwitterStatus = null
+  var status: Option[TwitterStatus] = None
   
   def isValid() = {
     screenName != null
@@ -79,7 +79,7 @@ object TwitterUser{
         case <protected>{Text(text)}</protected> => user.isProtected = java.lang.Boolean.valueOf(text).booleanValue
         case <followers_count>{Text(text)}</followers_count> => user.followersCount = Integer.parseInt(text)
         case <friends_count>{Text(text)}</friends_count> => user.friendsCount = Integer.parseInt(text)
-        case <status>{ _* }</status> => user.status = TwitterStatus(sub)
+        case <status>{ _* }</status> => user.status = Some(TwitterStatus(sub))
         case _ => Nil
       }
     }
