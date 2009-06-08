@@ -51,7 +51,17 @@ abstract class TwitterSession
 * <a href="http://groups.google.com/group/twitter-development-talk/web/api-documentation">Twitter API Doc</a>
 */
 class UnauthenticatedSession() extends TwitterSession{
-  
+
+  def loadAll[T](f:(Int) => List[T]):List[T] = {
+    loadAll(1,f,List[T]())
+  }
+
+  private def loadAll[T](page: Int, f:(Int) => List[T], listIn: List[T]):List[T] = {
+      f(page) match {
+          case Nil => listIn
+          case l => loadAll(page+1,f,listIn ::: l)
+      }
+  }
   /** utility class to connect to a URL and fetch XML. */
   val fetcher = new XMLFetcher(null,null)
   

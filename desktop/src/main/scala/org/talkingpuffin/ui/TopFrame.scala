@@ -68,9 +68,9 @@ class TopFrame(username: String, password: String, user: AuthenticatedSession) e
   peer.setLocationRelativeTo(null)
 
   SwingInvoke.execSwingWorker({
-    (user.getFriends(TwitterArgs.maxResults(200)),
-      user.getFollowers(TwitterArgs.maxResults(200)))
-    }, 
+    (user.loadAll(user.getFriends),
+      user.loadAll(user.getFollowers))
+    },
     { (result: Tuple2[List[TwitterUser],List[TwitterUser]]) =>
     val (following, followers) = result 
               
