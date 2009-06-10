@@ -272,12 +272,12 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
   }
   
   def updateStatus(status: String) :TwitterStatus = {
-    val resp = authFetcher.doPost(new URL("http://twitter.com/statuses/update.xml"),List(("status",status)))
+    val resp = authFetcher.doPost(new URL("http://twitter.com/statuses/update.xml?source=talkingpuffin"),List(("status",status)))
     TwitterStatus(resp)
   }
 
   def updateStatus(status: String, statusId: Int) :TwitterStatus = {
-    val resp = authFetcher.doPost(new URL("http://twitter.com/statuses/update.xml"),List(("status",status),("in_reply_to_status_id",statusId.toString())))
+    val resp = authFetcher.doPost(new URL("http://twitter.com/statuses/update.xml?source=talkingpuffin"),List(("status",status),("in_reply_to_status_id",statusId.toString())))
     TwitterStatus(resp)
   }
   def destroyStatus(statusId: Int) :TwitterStatus = {
