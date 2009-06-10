@@ -54,6 +54,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
         case TweetsProvider.NEW_TWEETS_EVENT => {
           val newTweets = evt.getNewValue.asInstanceOf[List[TwitterStatus]]
           log.info("Tweets Arrived: " + newTweets.length)
+          newTweets.foreach(tweet => log.debug("received tweet " + tweet.id))
           processStatuses(newTweets)
         }
       }
@@ -164,8 +165,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     rows.map(filteredStatuses.get(_))
 
   private def processStatuses(newStatuses: List[TwitterStatus]) {
-    for (st <- newStatuses.reverse) {
-      statuses = statuses ::: List(st)
+    for (st <- newStatuses) {
+      statuses = st :: statuses
     }
     filterAndNotify
   }
