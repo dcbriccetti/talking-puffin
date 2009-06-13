@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Scala" name="Scala">
+      <configuration />
+    </facet>
+  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
@@ -22,6 +27,7 @@
     <orderEntry type="library" exported="" name="Maven: log4j:log4j:1.2.14" level="project" />
     <orderEntry type="library" exported="" name="Maven: joda-time:joda-time:1.6" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.swinglabs:swingx:0.9.5-2" level="project" />
+    <orderEntry type="library" name="scala-2.7.4.final" level="application" />
   </component>
 </module>
 

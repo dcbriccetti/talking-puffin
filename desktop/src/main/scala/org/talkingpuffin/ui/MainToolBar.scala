@@ -1,33 +1,52 @@
 package org.talkingpuffin.ui
 
-import _root_.org.talkingpuffin.twitter.{TweetsProvider}
-import _root_.scala.swing.{Label, ComboBox, Action}
+import java.awt.Dimension
 import java.awt.event.{ActionEvent, ActionListener}
 
+import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JToolBar
+import swing.{ProgressBar, Label, ComboBox, Action}
 import time.TimeFormatter
+import twitter.{LongOpListener, TweetsProvider}
 
 /**
  * The main ToolBar
  */
-class MainToolBar(streams: Streams) extends JToolBar {
+class MainToolBar extends JToolBar with LongOpListener {
+  val progressBar = new ProgressBar {
+    val s = new Dimension(50, 0)
+    preferredSize = s
+    minimumSize = s
+  }
+  val operationsInProgress = new AtomicInteger
   val remaining = new Label
+
   setFloatable(false)
+
+  def init(streams: Streams) = {
+    add(new Label("Following: ").peer)
+    addSourceControls(streams.tweetsProvider, streams.createFollowingView)
+
+    addSeparator
+
+    add(new Label("Mentions: ").peer)
+    addSourceControls(streams.mentionsProvider, streams.createRepliesView)
+
+    /*  TODO finish adding rate limiting status. How often and from where to invoke?
+    addSeparator
   
-  add(new Label("Following: ").peer)
-  addSourceControls(streams.tweetsProvider, streams.createFollowingView)
+    add(new Label("Rem: ") {tooltip = "The number of requests remaining"}.peer)
+    add(remaining.peer)
+    */
 
-  addSeparator
+    addSeparator
 
-  add(new Label("Mentions: ").peer)
-  addSourceControls(streams.mentionsProvider, streams.createRepliesView)
-
-  /*  TODO finish adding rate limiting status. How often and from where to invoke?
-  addSeparator
-
-  add(new Label("Rem: ") {tooltip = "The number of requests remaining"}.peer)
-  add(remaining.peer)
-  */
+    add(progressBar.peer)
+  }
+  
+  def startOperation = if (operationsInProgress.incrementAndGet == 1) progressBar.indeterminate = true;
+  
+  def stopOperation = if (operationsInProgress.decrementAndGet == 0) progressBar.indeterminate = false;
   
   private def addSourceControls(provider: TweetsProvider, createStream: => Unit) {
     val newViewAction = new Action("New View") {

@@ -33,9 +33,11 @@ class TopFrame(username: String, password: String, user: AuthenticatedSession) e
   }
   session.windows.tabbedPane = tabbedPane
 
+  val mainToolBar = new MainToolBar
+  session.progress = mainToolBar
   val streams = new Streams(user, session, tagUsers, username, password)
   session.windows.streams = streams
-  val mainToolBar = new MainToolBar(streams)
+  mainToolBar.init(streams)
     
   title = Main.title + " - " + username
   menuBar = new MainMenuBar
@@ -66,6 +68,7 @@ class TopFrame(username: String, password: String, user: AuthenticatedSession) e
   }
 
   peer.setLocationRelativeTo(null)
+  mainToolBar.startOperation
 
   SwingInvoke.execSwingWorker({
     (user.loadAll(user.getFriends),
@@ -83,6 +86,7 @@ class TopFrame(username: String, password: String, user: AuthenticatedSession) e
     val paneTitle = "People (" + following.length + ", " + followers.length + ")"
     val pane = new PeoplePane(session, streams.usersTableModel, following, followers)
     tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
+    mainToolBar.stopOperation
   })
 
   def saveState {

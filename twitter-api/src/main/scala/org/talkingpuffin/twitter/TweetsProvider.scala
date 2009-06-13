@@ -17,7 +17,8 @@ object TweetsProvider {
  * Provides tweets
  */
 
-class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], providerName: String) {
+class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], providerName: String,
+      longOpListener: LongOpListener) {
   private val log = Logger.getLogger("TweetsProvider " + providerName)
   val propChg = new PropertyChangeSupport(this)
   protected var highestId:Option[Long] = startingId
@@ -78,6 +79,7 @@ class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], pr
   }
 
   private def loadData(username: String, args: TwitterArgs, clear: Boolean): Unit = {
+    longOpListener.startOperation
     new SwingWorker[Option[List[TwitterStatus]], Object] {
       val sendClear = clear
       override def doInBackground: Option[List[TwitterStatus]] = {
@@ -93,6 +95,7 @@ class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], pr
         }
       }
       override def done = {
+        longOpListener.stopOperation
         get match {
           case Some(statuses) => {
             if (statuses.length > 0) {
@@ -111,8 +114,9 @@ class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], pr
   
 }
 
-class MentionsProvider(session: AuthenticatedSession, startingId: Option[Long])
-    extends TweetsProvider(session, startingId, "Mentions") {
+class MentionsProvider(session: AuthenticatedSession, startingId: Option[Long], 
+    longOpListener: LongOpListener)
+    extends TweetsProvider(session, startingId, "Mentions", longOpListener) {
     override def updateFunc = session.getReplies
 }
 

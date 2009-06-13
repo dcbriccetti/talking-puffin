@@ -8,6 +8,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="talking-puffin" />
+    <orderEntry type="module" module-name="talking-puffin-web" />
+    <orderEntry type="module" module-name="twitter-api" />
   </component>
 </module>
 

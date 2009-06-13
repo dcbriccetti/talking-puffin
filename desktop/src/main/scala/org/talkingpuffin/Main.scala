@@ -57,6 +57,10 @@ object Main {
 class Session(val twitterSession:AuthenticatedSession) {
   val windows = new Windows
   val status = new Label(" ")
+  var progress = new LongOpListener {  // Will be rebound to real listener
+    def stopOperation = null
+    def startOperation = null
+  }
 }
 
 object Globals {
