@@ -7,17 +7,17 @@
 
 package org.talkingpuffin.twitter
 
-class TwitterArgs(val sinceId:Option[Int], val maxId:Option[Int], val count:Option[Int], val page:Option[Int]) {
-  def since(since:Int):TwitterArgs = {
-    if(since > 0){
+class TwitterArgs(val sinceId:Option[Long], val maxId:Option[Long], val count:Option[Int], val page:Option[Int]) {
+  def since(since:Long):TwitterArgs = {
+    if(since > 0L){
       new TwitterArgs(Some(since),maxId,count,page)
     }else{
       this
     }
   }
 
-  def upToId(maxId:Int):TwitterArgs = {
-    if(maxId > 0){
+  def upToId(maxId:Long):TwitterArgs = {
+    if(maxId > 0L){
       new TwitterArgs(sinceId,Some(maxId),count,page)
     }else{
       this
@@ -50,11 +50,11 @@ class TwitterArgs(val sinceId:Option[Int], val maxId:Option[Int], val count:Opti
 
 object TwitterArgs{
   def apply():TwitterArgs = new TwitterArgs(None,None,None,None)
-  def since(since:Int):TwitterArgs = {
+  def since(since:Long):TwitterArgs = {
     new TwitterArgs(Some(since),None,None,None)
   }
 
-  def upToId(maxId:Int):TwitterArgs = {
+  def upToId(maxId:Long):TwitterArgs = {
     new TwitterArgs(None,Some(maxId),None,None)
   }
 

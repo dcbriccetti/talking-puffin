@@ -60,7 +60,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
   
   private def send {
     replyToId match {
-      case Some(idStr) => session.twitterSession.updateStatus(message.text, Integer.parseInt(idStr))
+      case Some(idStr) => session.twitterSession.updateStatus(message.text, java.lang.Long.parseLong(idStr))
       case _ => session.twitterSession.updateStatus(message.text)
     }
     

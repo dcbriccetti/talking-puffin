@@ -73,7 +73,7 @@ class UnauthenticatedSession() extends TwitterSession{
     new Parser[TwitterStatus](new URL("http://twitter.com/statuses/public_timeline.xml?page=" + page),fetcher,TwitterStatus.apply).parseXMLList("status")
   }
 
-  def getStatus(id: Int) :TwitterStatus = {
+  def getStatus(id: Long) :TwitterStatus = {
     new Parser[TwitterStatus](new URL("http://twitter.com/statuses/show/" + id.toString() + ".xml"),fetcher,TwitterStatus.apply).parseXMLElement()
   }
   
@@ -276,11 +276,11 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
     TwitterStatus(resp)
   }
 
-  def updateStatus(status: String, statusId: Int) :TwitterStatus = {
+  def updateStatus(status: String, statusId: Long) :TwitterStatus = {
     val resp = authFetcher.doPost(new URL("http://twitter.com/statuses/update.xml?source=talkingpuffin"),List(("status",status),("in_reply_to_status_id",statusId.toString())))
     TwitterStatus(resp)
   }
-  def destroyStatus(statusId: Int) :TwitterStatus = {
+  def destroyStatus(statusId: Long) :TwitterStatus = {
     val resp = authFetcher.doDelete(new URL("http://twitter.com/statuses/destroy/" + statusId.toString() + ".xml"))
     TwitterStatus(resp)
   }
@@ -294,7 +294,7 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
     TwitterMessage(resp)
   }
   
-  def destroyDirectMessage(messageId: Int) :TwitterMessage = {
+  def destroyDirectMessage(messageId: Long) :TwitterMessage = {
     val resp = authFetcher.doDelete(new URL("http://twitter.com/direct_messages/destroy/" + messageId.toString() + ".xml"))
     TwitterMessage(resp)
   }
@@ -325,12 +325,12 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
     TwitterUser(resp)
   }
   
-  def createFavorite(statusId: Int) :TwitterStatus = {
+  def createFavorite(statusId: Long) :TwitterStatus = {
     val resp = authFetcher.doPost(new URL("http://twitter.com/favorites/create/" + statusId.toString() + ".xml"),Nil)
     TwitterStatus(resp)
   }
 
-  def destroyFavorite(statusId: Int) :TwitterStatus = {
+  def destroyFavorite(statusId: Long) :TwitterStatus = {
     val resp = authFetcher.doDelete(new URL("http://twitter.com/favorites/destroy/" + statusId.toString() + ".xml"))
     TwitterStatus(resp)
   }

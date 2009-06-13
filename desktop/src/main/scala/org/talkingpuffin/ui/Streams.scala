@@ -18,9 +18,9 @@ class Streams(user: AuthenticatedSession, session: Session, val tagUsers: TagUse
   val prefs = PreferencesFactory.prefsForUser(username)
   
   val tweetsProvider = new TweetsProvider(user,
-    prefs.get("highestId", null) match {case null => None; case v => Some(Integer.parseInt(v))}, "Following")
+    prefs.get("highestId", null) match {case null => None; case v => Some(java.lang.Long.parseLong(v))}, "Following")
   val mentionsProvider = new MentionsProvider(user,
-    prefs.get("highestMentionId", null) match {case null => None; case v => Some(Integer.parseInt(v))})
+    prefs.get("highestMentionId", null) match {case null => None; case v => Some(java.lang.Long.parseLong(v))})
   val usersTableModel = new UsersTableModel(tagUsers, List[TwitterUser](), List[TwitterUser]())
   
   var streamInfoList = List[StreamInfo]()

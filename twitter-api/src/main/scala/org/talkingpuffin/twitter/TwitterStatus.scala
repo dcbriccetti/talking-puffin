@@ -13,12 +13,12 @@ import org.joda.time.format._
 class TwitterStatus() extends Validated{
   var text: String = null
   var user: TwitterUser = null
-  var id: Int = 0
+  var id: Long = 0L
   var createdAt: DateTime = null
   var source: String = null
   var truncated: Boolean = false
-  var inReplyToStatusId: Int = 0
-  var inReplyToUserId: Int = 0
+  var inReplyToStatusId: Long = 0L
+  var inReplyToUserId: Long = 0L
   var favorited: Boolean = false
 
   def isValid() = {
@@ -33,7 +33,7 @@ class TwitterStatus() extends Validated{
     }
   }
 
-  override def hashCode() = id
+  override def hashCode() = id.hashCode
 
 }
 
@@ -57,15 +57,15 @@ object TwitterStatus{
     val status = new TwitterStatus
     n.child foreach {(sub) => 
       sub match {
-        case <id>{Text(text)}</id> => status.id = Integer.parseInt(text)
+        case <id>{Text(text)}</id> => status.id = java.lang.Long.parseLong(text)
         case <created_at>{Text(text)}</created_at> => status.createdAt = fmt.parseDateTime(text)
         case <text>{Text(text)}</text> => status.text = text
         case <source>{Text(text)}</source> => status.source = text
         case <truncated>{Text(text)}</truncated> => status.truncated = java.lang.Boolean.valueOf(text).booleanValue
         case <in_reply_to_status_id/> => Nil
-        case <in_reply_to_status_id>{Text(text)}</in_reply_to_status_id> => status.inReplyToStatusId = Integer.parseInt(text)
+        case <in_reply_to_status_id>{Text(text)}</in_reply_to_status_id> => status.inReplyToStatusId = java.lang.Long.parseLong(text)
         case <in_reply_to_user_id/> => Nil
-        case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => status.inReplyToUserId = Integer.parseInt(text)
+        case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => status.inReplyToUserId = java.lang.Long.parseLong(text)
         case <favorited>{Text(text)}</favorited> => status.favorited = java.lang.Boolean.valueOf(text).booleanValue
         case <user>{ _* }</user> => status.user = TwitterUser(sub)
         case _ => Nil

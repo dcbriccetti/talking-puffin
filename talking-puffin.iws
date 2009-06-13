@@ -1,11 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project relativePaths="false" version="4">
+  <component name="BookmarkManager">
+    <editor_bookmark url="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/Main.scala" line="23" description="object Main {" />
+    <editor_bookmark url="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/TweetDetailPanel.scala" line="155" description="private def processFinishedGeocodes(resourceReady:..." />
+    <editor_bookmark url="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/util/BackgroundResourceFetcher.scala" line="19" description="val cache: java.util.Map[K,V] = new MapMaker().sof..." />
+    <editor_bookmark url="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/util/BackgroundResourceFetcher.scala" line="16" description="abstract class BackgroundResourceFetcher[K,V](proc..." />
+    <editor_bookmark url="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/PictureFetcher.scala" line="36" description="class PictureFetcher(scaleTo: Option[Int], process..." />
+    <editor_bookmark url="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/state/PreferencesFactory.scala" line="8" description="object PreferencesFactory {" />
+    <editor_bookmark url="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/filter/FilterSet.scala" line="15" description="class FilterSet(session: Session) extends Publishe..." />
+    <editor_bookmark url="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/geo/GeoCoder.scala" line="10" description="object GeoCoder {" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web/WEB-INF/appengine-web.xml" afterPath="$PROJECT_DIR$/web/WEB-INF/appengine-web.xml" />
+    <list default="true" name="Default" comment="&#10;# Brief commit desciption here&#10;&#10;# Full commit description here (comment lines starting with '#' will not be included)&#10;&#10;">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/twitter-api/pom.xml" afterPath="$PROJECT_DIR$/twitter-api/pom.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterMessage.scala" afterPath="$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterMessage.scala" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/talking-puffin-base.iml" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/Twitter.scala" afterPath="$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/Twitter.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/talking-puffin.iws" afterPath="$PROJECT_DIR$/talking-puffin.iws" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/website/jws/TalkingPuffin.png" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/talking-puffin-base.iml" afterPath="$PROJECT_DIR$/talking-puffin-base.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterStatus.scala" afterPath="$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterStatus.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/Streams.scala" afterPath="$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/Streams.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterAPIArgs.scala" afterPath="$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterAPIArgs.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/web-mvn/pom.xml" afterPath="$PROJECT_DIR$/web-mvn/pom.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/website/jws/talking-puffin.jnlp" afterPath="$PROJECT_DIR$/website/jws/talking-puffin.jnlp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/desktop/talking-puffin.iml" afterPath="$PROJECT_DIR$/desktop/talking-puffin.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/desktop/deploy.sh" afterPath="$PROJECT_DIR$/desktop/deploy.sh" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/talking-puffin.ipr" afterPath="$PROJECT_DIR$/talking-puffin.ipr" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/twitter-api/twitter-api.iml" afterPath="$PROJECT_DIR$/twitter-api/twitter-api.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/desktop/pom.xml" afterPath="$PROJECT_DIR$/desktop/pom.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/SendMsgDialog.scala" afterPath="$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/SendMsgDialog.scala" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TweetsProvider.scala" afterPath="$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TweetsProvider.scala" />
     </list>
     <ignored path="talking-puffin.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -64,136 +88,136 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="TagsRepository.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/filter/TagsRepository.scala">
+      <file leaf-file-name="TwitterStatus.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterStatus.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="20" column="27" selection-start="1463" selection-end="1477" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GeoCoder.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/geo/GeoCoder.scala">
+      <file leaf-file-name="SendMsgDialog.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/SendMsgDialog.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="62" column="54" selection-start="2078" selection-end="2078" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PreferencesFactory.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/state/PreferencesFactory.scala">
+      <file leaf-file-name="Twitter.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/Twitter.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="332" column="36" selection-start="12644" selection-end="12648" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TimeFormatter.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/time/TimeFormatter.scala">
+      <file leaf-file-name="Streams.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/Streams.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="20" column="0" selection-start="889" selection-end="889" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="BackgroundResourceFetcher.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/util/BackgroundResourceFetcher.scala">
+      <file leaf-file-name="HttpHandler.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/HttpHandler.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="47" column="8" selection-start="1784" selection-end="1784" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DesktopUtil.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/util/DesktopUtil.scala">
+      <file leaf-file-name="TwitterMessage.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterMessage.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="34" column="39" selection-start="797" selection-end="797" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PopupListener.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/util/PopupListener.scala">
+      <file leaf-file-name="TwitterRateLimitStatus.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterRateLimitStatus.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="51" column="104" selection-start="1477" selection-end="1477" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Login.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/web/Login.scala">
+      <file leaf-file-name="TwitterUser.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterUser.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="80" column="80" selection-start="2741" selection-end="2741" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Users.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/web/Users.scala">
+      <file leaf-file-name="TweetsProvider.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TweetsProvider.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="78" column="47" selection-start="2474" selection-end="2474" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Actions.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/Actions.scala">
+      <file leaf-file-name="pom.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="5" column="13" selection-start="353" selection-end="353" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FiltersDialog.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/FiltersDialog.scala">
+      <file leaf-file-name="pom.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/twitter-api/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="8" column="15" selection-start="454" selection-end="454" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="HtmlFormatter.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/HtmlFormatter.scala">
+      <file leaf-file-name="pom.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web-mvn/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="8" column="15" selection-start="461" selection-end="461" vertical-scroll-proportion="-4.137931">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LargeTweet.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/LargeTweet.scala">
+      <file leaf-file-name="deploy.sh" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/desktop/deploy.sh">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="14" column="21" selection-start="311" selection-end="311" vertical-scroll-proportion="0.20211741">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LinkExtractor.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/LinkExtractor.scala">
+      <file leaf-file-name="pom.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/desktop/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="8" column="15" selection-start="457" selection-end="457" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LoginDialog.scala" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/LoginDialog.scala">
+      <file leaf-file-name="TwitterAPIArgs.scala" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterAPIArgs.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+            <state line="9" column="6" selection-start="176" selection-end="176" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -220,6 +244,11 @@
       <MavenGeneralSettings>
         <option name="mavenHome" value="/usr/local/tools/apache-maven-2.0.9" />
       </MavenGeneralSettings>
+    </option>
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="lookForNested" value="true" />
+      </MavenImportingSettings>
     </option>
   </component>
   <component name="ModuleEditorState">
@@ -266,32 +295,32 @@
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder2" value="2" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder2" value="2" />
     <property name="options.splitter.main.proportions" value="0.3" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="1009" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="1022" />
     <property name="GoToFile.includeJavaFiles" value="false" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="198" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth2" value="214" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="218" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="212" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth2" value="228" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="232" />
     <property name="GoToClass.includeLibraries" value="false" />
     <property name="options.splitter.details.proportions" value="0.2" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
     <property name="MemberChooser.showClasses" value="true" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder3" value="3" />
     <property name="project.structure.side.proportion" value="0.25218776" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="209" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth0" value="223" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder3" value="3" />
-    <property name="options.lastSelected" value="org.jetbrains.plugins.scala.compiler.ScalacConfigurable" />
+    <property name="options.lastSelected" value="reference.settingsdialog.IDE.editor.colors.Font" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
     <property name="RunManagerConfig.showSettingsBeforeRunnig" value="true" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder0" value="0" />
-    <property name="project.structure.last.edited" value="Facets" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="options.searchVisible" value="true" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder1" value="1" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Documents/tb" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth1" value="239" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="1012" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth1" value="253" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="1025" />
     <property name="dynamic.classpath" value="false" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="243" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth1" value="257" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder1" value="1" />
   </component>
   <component name="RecentsManager">
@@ -299,7 +328,7 @@
       <recent name="com.davebsoft.sctw.ui.table" />
     </key>
   </component>
-  <component name="RunManager" selected="Tomcat Server.Web application">
+  <component name="RunManager" selected="Application.Main">
     <configuration default="true" type="Remote" factoryName="Remote">
       <option name="USE_SOCKET_TRANSPORT" value="true" />
       <option name="SERVER_MODE" value="false" />
@@ -308,11 +337,7 @@
       <option name="PORT" value="5005" />
     </configuration>
     <configuration default="true" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local">
-      <JAVAEE_FACET FACET_ID="talking-puffin-base/web/Web" DEPLOYMENT_SOURCE_NAME="exploded">
-        <option name="CONTEXT_PATH" value="/" />
-        <option name="DEPLOY" value="false" />
-      </JAVAEE_FACET>
-      <JAVAEE_FACET FACET_ID="talking-puffin-base/web/Web Redirect" DEPLOYMENT_SOURCE_NAME="exploded">
+      <JAVAEE_FACET FACET_ID="talking-puffin-web/web/Web" DEPLOYMENT_SOURCE_NAME="exploded">
         <option name="CONTEXT_PATH" value="/" />
         <option name="DEPLOY" value="false" />
       </JAVAEE_FACET>
@@ -442,13 +467,9 @@
     <configuration default="false" name="Web application" type="#com.intellij.j2ee.web.tomcat.TomcatRunConfigurationFactory" factoryName="Local" APPLICATION_SERVER_NAME="Tomcat 6">
       <option name="OPEN_IN_BROWSER_URL" value="http://localhost:8080/" />
       <option name="BROWSER_ID" value="system" />
-      <JAVAEE_FACET FACET_ID="talking-puffin-base/web/Web" DEPLOYMENT_SOURCE_NAME="exploded">
+      <JAVAEE_FACET FACET_ID="talking-puffin-web/web/Web" DEPLOYMENT_SOURCE_NAME="jar">
         <option name="CONTEXT_PATH" value="/" />
         <option name="DEPLOY" value="true" />
-      </JAVAEE_FACET>
-      <JAVAEE_FACET FACET_ID="talking-puffin-base/web/Web Redirect" DEPLOYMENT_SOURCE_NAME="exploded">
-        <option name="CONTEXT_PATH" value="/" />
-        <option name="DEPLOY" value="false" />
       </JAVAEE_FACET>
       <server-settings>
         <option name="DEPLOY_TOMCAT_MANAGER" value="false" />
@@ -569,11 +590,35 @@
           <option name="myItemId" value="" />
           <option name="myItemType" value="" />
         </PATH_ELEMENT>
-        <PATH_ELEMENT USER_OBJECT="twitter-api">
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT USER_OBJECT="Root">
           <option name="myItemId" value="" />
           <option name="myItemType" value="" />
         </PATH_ELEMENT>
-        <PATH_ELEMENT USER_OBJECT="twitter-api">
+        <PATH_ELEMENT USER_OBJECT="talking-puffin-web">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT USER_OBJECT="web-mvn">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT USER_OBJECT="Root">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT USER_OBJECT="talking-puffin-web">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT USER_OBJECT="web-mvn">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT USER_OBJECT="src/main/webapp">
           <option name="myItemId" value="" />
           <option name="myItemType" value="" />
         </PATH_ELEMENT>
@@ -594,6 +639,28 @@
       </PATH>
       <PATH>
         <PATH_ELEMENT USER_OBJECT="Root">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT USER_OBJECT="talking-puffin-base">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT USER_OBJECT="talking-puffin">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT USER_OBJECT="web">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+      </PATH>
+      <PATH>
+        <PATH_ELEMENT USER_OBJECT="Root">
+          <option name="myItemId" value="" />
+          <option name="myItemType" value="" />
+        </PATH_ELEMENT>
+        <PATH_ELEMENT USER_OBJECT="talking-puffin">
           <option name="myItemId" value="" />
           <option name="myItemType" value="" />
         </PATH_ELEMENT>
@@ -639,7 +706,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="288" y="22" width="1967" height="1559" extended-state="0" />
+    <frame x="0" y="22" width="2560" height="1574" extended-state="6" />
     <editor active="false" />
     <layout>
       <window_info id="Web Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.21594878" sideWeight="0.8102493" order="1" side_tool="false" />
@@ -648,20 +715,20 @@
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" />
       <window_info id="IDEtalk" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18978103" sideWeight="0.7339833" order="0" side_tool="false" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29387188" sideWeight="0.5" order="1" side_tool="false" />
-      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24296142" sideWeight="0.7339833" order="0" side_tool="false" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21385902" sideWeight="0.7353549" order="0" side_tool="false" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29359064" sideWeight="0.5" order="1" side_tool="false" />
+      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.19194824" sideWeight="0.6671105" order="0" side_tool="false" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32381615" sideWeight="0.0" order="8" side_tool="false" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32" sideWeight="0.0" order="8" side_tool="false" />
       <window_info id="Dependency Viewer" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="3" side_tool="false" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26114208" sideWeight="0.5" order="2" side_tool="false" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25982082" sideWeight="0.5" order="2" side_tool="false" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.8236915" order="2" side_tool="false" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.26878014" sideWeight="0.5" order="3" side_tool="false" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.424767" sideWeight="0.5" order="3" side_tool="false" />
       <window_info id="IDEtalk Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.329428" sideWeight="0.5" order="12" side_tool="false" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287388" sideWeight="0.5" order="12" side_tool="false" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" />
@@ -725,114 +792,114 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/filter/FilterSet.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/filter/TagsRepository.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/geo/GeoCoder.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="31" column="66" selection-start="1007" selection-end="1007" vertical-scroll-proportion="0.3448276">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/state/PreferencesFactory.scala">
+    <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterAPIArgs.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="9" column="6" selection-start="176" selection-end="176" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/time/TimeFormatter.scala">
+    <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterStatus.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="20" column="27" selection-start="1463" selection-end="1477" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/util/BackgroundResourceFetcher.scala">
+    <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/HttpHandler.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="47" column="8" selection-start="1784" selection-end="1784" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/util/DesktopUtil.scala">
+    <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterRateLimitStatus.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="51" column="104" selection-start="1477" selection-end="1477" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/util/PopupListener.scala">
+    <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterUser.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="80" column="80" selection-start="2741" selection-end="2741" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/web/Login.scala">
+    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/Streams.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="20" column="0" selection-start="889" selection-end="889" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/web/Users.scala">
+    <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TwitterMessage.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="34" column="39" selection-start="797" selection-end="797" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/Actions.scala">
+    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/SendMsgDialog.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="62" column="54" selection-start="2078" selection-end="2078" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/FiltersDialog.scala">
+    <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/Twitter.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="332" column="36" selection-start="12644" selection-end="12648" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/HtmlFormatter.scala">
+    <entry file="file://$PROJECT_DIR$/twitter-api/src/main/scala/org/talkingpuffin/twitter/TweetsProvider.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="78" column="47" selection-start="2474" selection-end="2474" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/LargeTweet.scala">
+    <entry file="file://$PROJECT_DIR$/desktop/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="8" column="15" selection-start="457" selection-end="457" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/LinkExtractor.scala">
+    <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="5" column="13" selection-start="353" selection-end="353" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desktop/src/main/scala/org/talkingpuffin/ui/LoginDialog.scala">
+    <entry file="file://$PROJECT_DIR$/twitter-api/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
+        <state line="8" column="15" selection-start="454" selection-end="454" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web-mvn/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="8" column="15" selection-start="461" selection-end="461" vertical-scroll-proportion="-4.137931">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/desktop/deploy.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="14" column="21" selection-start="311" selection-end="311" vertical-scroll-proportion="0.20211741">
           <folding />
         </state>
       </provider>

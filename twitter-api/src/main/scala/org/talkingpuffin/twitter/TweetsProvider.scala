@@ -17,10 +17,10 @@ object TweetsProvider {
  * Provides tweets
  */
 
-class TweetsProvider(session: AuthenticatedSession, startingId: Option[Int], providerName: String) {
+class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], providerName: String) {
   private val log = Logger.getLogger("TweetsProvider " + providerName)
   val propChg = new PropertyChangeSupport(this)
-  protected var highestId:Option[Int] = startingId
+  protected var highestId:Option[Long] = startingId
 
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
@@ -30,10 +30,7 @@ class TweetsProvider(session: AuthenticatedSession, startingId: Option[Int], pro
   def addPropertyChangeListener   (l: PropertyChangeListener) = propChg.addPropertyChangeListener(l)
   def removePropertyChangeListener(l: PropertyChangeListener) = propChg.removePropertyChangeListener(l)
   
-  //def getUrlFile = "statuses/friends_timeline.xml"
-  //def getUrl = urlHost + getUrlFile + "?count=200" + buildSinceParm
-  
-  protected def   buildSinceParm(args: TwitterArgs) = highestId match {
+  protected def buildSinceParm(args: TwitterArgs) = highestId match {
     case None => args
     case Some(i) => args.since(i)
   }
@@ -61,7 +58,7 @@ class TweetsProvider(session: AuthenticatedSession, startingId: Option[Int], pro
     timer.start
   }
 
-  private def computeHighestId(tweets: List[TwitterStatus], maxId: Option[Int]):Option[Int] = tweets match {
+  private def computeHighestId(tweets: List[TwitterStatus], maxId: Option[Long]):Option[Long] = tweets match {
     case tweet :: rest => maxId match {
         case Some(id) => computeHighestId(rest,
                                            if(tweet.id > id) Some(tweet.id) else Some(id))
@@ -114,7 +111,7 @@ class TweetsProvider(session: AuthenticatedSession, startingId: Option[Int], pro
   
 }
 
-class MentionsProvider(session: AuthenticatedSession, startingId: Option[Int])
+class MentionsProvider(session: AuthenticatedSession, startingId: Option[Long])
     extends TweetsProvider(session, startingId, "Mentions") {
     override def updateFunc = session.getReplies
 }
