@@ -11,7 +11,7 @@ import ui.util.{ResourceReady, BackgroundResourceFetcher}
 object GeoCoder {
   private val locationCache: java.util.Map[String, String] = new MapMaker().softValues().makeMap()
   private val num = """(-?\d+\.\d*)"""
-  private val latLongRegex = ("""\D*""" + num + """,\s*""" + num).r
+  private val latLongRegex = ("""[^-\d]*""" + num + """,\s*""" + num).r
 
   def extractLatLong(location: String): Option[String] = {
     try {
