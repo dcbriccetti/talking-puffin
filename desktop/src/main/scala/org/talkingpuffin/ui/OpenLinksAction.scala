@@ -9,12 +9,13 @@ import org.talkingpuffin.twitter.{TwitterStatus}
 /**
  * Shows a menu of links, or launches the browser on the link if there is only one. 
  */
-class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
-    browse: (String) => Unit) extends Action("Open Links…") {
+abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
+    browse: (String) => Unit, title: String) extends Action(title) {
+  
   def apply {
     getSelectedStatus match {
       case Some(status) =>
-        val urls = LinkExtractor.getAllLinks(status)
+        val urls = LinkExtractor.getLinks(status, users, pages)
   
         if (urls.length == 1) {
           browse(urls(0))
@@ -34,4 +35,21 @@ class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable
       case None =>
     }
   }
+  
+  def users: Boolean
+  def pages: Boolean
+}
+
+class OpenPageLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
+    browse: (String) => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,
+    "Open Links…") {
+  def users = false
+  def pages = true
+}
+
+class OpenTwitterUserLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
+    browse: (String) => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,  
+    "Open User Links…") {
+  def users = true
+  def pages = false
 }

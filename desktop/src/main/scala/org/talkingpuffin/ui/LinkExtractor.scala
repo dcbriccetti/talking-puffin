@@ -25,23 +25,27 @@ object LinkExtractor {
    * <li>Hyperlinks
    * </ol> 
    */
-  def getAllLinks(status: TwitterStatus): List[String] = {
+  def getLinks(status: TwitterStatus, users: Boolean, pages: Boolean): List[String] = {
     var urls: List[String] = List()
     
-    val replyTo = status.inReplyToStatusId.toString
-    getReplyToUser(status.text) match {
-      case Some(user) => if (replyTo.length > 0) urls = getStatusUrl(replyTo, user) :: urls; 
-      case None =>        
-    }
-
-    var m = usernamePattern.matcher(status.text)
-    while (m.find) {
-      urls = "http://twitter.com/" + m.group(1) :: urls
+    if (users) {
+      val replyTo = status.inReplyToStatusId.toString
+      getReplyToUser(status.text) match {
+        case Some(user) => if (replyTo.length > 0) urls = getStatusUrl(replyTo, user) :: urls; 
+        case None =>        
+      }
+  
+      val m = usernamePattern.matcher(status.text)
+      while (m.find) {
+        urls = "http://twitter.com/" + m.group(1) :: urls
+      }
     }
     
-    m = hyperlinkPattern.matcher(status.text)
-    while (m.find) {
-      urls = m.group(1) :: urls
+    if (pages) {
+      val m = hyperlinkPattern.matcher(status.text)
+      while (m.find) {
+        urls = m.group(1) :: urls
+      }
     }
     
     urls reverse

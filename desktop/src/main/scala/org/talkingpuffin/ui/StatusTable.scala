@@ -144,7 +144,8 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigP
   
   protected def buildActions = {
     ap add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
-    ap add(new OpenLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
+    ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
+    ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_U))
     ap add(Action("Mute") {statusTableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
       Actions.ks(KeyEvent.VK_M))
     ap add new NextTAction(this)
