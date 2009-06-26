@@ -18,13 +18,13 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], tabl
         val urls = LinkExtractor.getLinks(status, users, pages)
   
         if (urls.length == 1) {
-          browse(urls(0))
+          browse(urls(0)._2)
         } else if (urls.length > 1) {
           val menu = new JPopupMenu
           var index = 0
     
           for (url <- urls) {
-            val a1 = Action(url) {browse(url)}
+            val a1 = Action(url._1) {browse(url._2)}
             a1.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_1 + index, 0)) 
             index += 1
             menu.add(new MenuItem(a1).peer)

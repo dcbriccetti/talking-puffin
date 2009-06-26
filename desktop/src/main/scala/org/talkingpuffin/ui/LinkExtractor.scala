@@ -18,33 +18,38 @@ object LinkExtractor {
   val usernamePattern = Pattern.compile(usernameRegex)
 
   /**
-   * Returns a list of hyperlink strings built from:
+   * Returns a list of tuples of (title, hyperlink) built from:
    * <ol>
    * <li>The in_reply_to_status_id
    * <li>@usernames
    * <li>Hyperlinks
    * </ol> 
    */
-  def getLinks(status: TwitterStatus, users: Boolean, pages: Boolean): List[String] = {
-    var urls: List[String] = List()
+  def getLinks(status: TwitterStatus, users: Boolean, pages: Boolean): List[(String,String)] = {
+    var urls: List[(String,String)] = List()
     
     if (users) {
       val replyTo = status.inReplyToStatusId.toString
       getReplyToUser(status.text) match {
-        case Some(user) => if (replyTo.length > 0) urls = getStatusUrl(replyTo, user) :: urls; 
+        case Some(user) => if (replyTo.length > 0) {
+          val url = getStatusUrl(replyTo, user)
+          urls = ("Status " + replyTo + " of " + user, url) :: urls
+        }; 
         case None =>        
       }
   
       val m = usernamePattern.matcher(status.text)
       while (m.find) {
-        urls = "http://twitter.com/" + m.group(1) :: urls
+        val userName = m.group(1)
+        urls = (userName, "http://twitter.com/" + userName) :: urls
       }
     }
     
     if (pages) {
       val m = hyperlinkPattern.matcher(status.text)
       while (m.find) {
-        urls = m.group(1) :: urls
+        val url = m.group(1)
+        urls = (url, url) :: urls
       }
     }
     
