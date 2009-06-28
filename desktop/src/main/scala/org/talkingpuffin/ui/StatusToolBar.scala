@@ -9,7 +9,7 @@ import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
  * Status pane tool bar
  */
 class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDialog: FiltersDialog, 
-    statusPane: Component, clearTweets: => Unit) extends JToolBar {
+    statusPane: Component, clearTweets: => Unit, showMaxColumns: (Boolean) => Unit) extends JToolBar {
   var tweetDetailPanel: TweetDetailPanel = _
   
   val showFiltersAction = new Action("Filter…") {
@@ -52,6 +52,18 @@ class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDia
     def apply = tweetsProvider.loadLastBlockOfTweets
   }
 
+  val showMinColsAction = new Action("Min Cols") {
+    toolTip = "Show the minimum number of columns"
+    mnemonic = KeyEvent.VK_M
+    def apply = showMaxColumns(false)
+  }
+
+  val showMaxColsAction = new Action("Max Cols") {
+    toolTip = "Show the maximum number of columns"
+    mnemonic = KeyEvent.VK_X
+    def apply = showMaxColumns(true)
+  }
+
   var detailsButton: JToggleButton = _ 
   val showDetailsAction = new Action("Details") {
     toolTip = "Shows or hides the details panel"
@@ -85,6 +97,9 @@ class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDia
     aa(clearAction.peer)
     aa(loadNewAction.peer)
     aa(last200Action.peer)
+    addSeparator
+    aa(showMinColsAction.peer)
+    aa(showMaxColsAction.peer)
     addSeparator
     ac(dockedButton)
     ac(detailsButton)

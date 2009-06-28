@@ -32,7 +32,7 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
   statusTableModel.setPreChangeListener(this)
   
   val statusToolBar = new StatusToolBar(session, statusTableModel.tweetsProvider, 
-    filtersDialog, this, clearTweets)
+    filtersDialog, this, clearTweets, showMaxColumns)
   peer.add(statusToolBar, new Constraints{grid=(0,0); gridwidth=3}.peer)
   
   add(new ScrollPane {
@@ -101,13 +101,18 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
     }
   }
   
-  def clearTweets {
+  private def clearTweets {
     clearSelection
     statusTableModel.clear
     tweetDetailPanel.clearStatusDetails
   }
   
-  def clearSelection {
+  private def showMaxColumns(showMax: Boolean) {
+    for (i <- List("Age","From","To"))
+      table.getColumnExt(i).setVisible(showMax);
+  }
+  
+  private def clearSelection {
     table.getSelectionModel.clearSelection
     lastSelectedRows = Nil
   }
