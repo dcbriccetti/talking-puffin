@@ -3,9 +3,10 @@ import _root_.scala.swing.event.{ButtonClicked, WindowClosing}
 import filter.{FilterSet, TextFilter, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Toolkit, Dimension, BorderLayout, Insets}
+import java.util.concurrent.{Callable, Executors, Executor}
 import java.util.prefs.Preferences
+import javax.swing._
 import javax.swing.border.{BevelBorder, EmptyBorder}
-import javax.swing.{JToolBar, KeyStroke, ImageIcon, UIManager, JFrame}
 import org.apache.log4j.Logger
 import org.talkingpuffin.mac.QuitHandler
 import scala.swing._
@@ -20,11 +21,11 @@ import ui.util.FetchRequest
 /**
  * The top-level application Swing frame window. There is one per user session.
  */
-class TopFrame(username: String, password: String, user: AuthenticatedSession) extends Frame{
+class TopFrame(username: String, password: String, twitterSession: AuthenticatedSession) extends Frame{
   val log = Logger getLogger "TopFrame"
   val tagUsers = new TagUsers(username)
   TopFrames.addFrame(this)
-  val session = new Session(user)
+  val session = new Session(twitterSession)
   Globals.sessions ::= session
   iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
     
@@ -35,7 +36,7 @@ class TopFrame(username: String, password: String, user: AuthenticatedSession) e
 
   val mainToolBar = new MainToolBar
   session.progress = mainToolBar
-  val streams = new Streams(user, session, tagUsers, username, password)
+  val streams = new Streams(twitterSession, session, tagUsers, username, password)
   session.windows.streams = streams
   mainToolBar.init(streams)
     
@@ -49,7 +50,7 @@ class TopFrame(username: String, password: String, user: AuthenticatedSession) e
         userPic.icon = imageReady.resource.image 
       }
     })
-    picFetcher.requestItem(new FetchRequest(user.getUserDetail().profileImageURL, null))
+    picFetcher.requestItem(new FetchRequest(twitterSession.getUserDetail().profileImageURL, null))
     add(userPic, new Constraints { grid = (0,0); gridheight=2})
     add(session.status, new Constraints {
       grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
@@ -68,26 +69,7 @@ class TopFrame(username: String, password: String, user: AuthenticatedSession) e
   }
 
   peer.setLocationRelativeTo(null)
-  mainToolBar.startOperation
-
-  SwingInvoke.execSwingWorker({
-    (user.loadAll(user.getFriends),
-      user.loadAll(user.getFollowers))
-    },
-    { (result: Tuple2[List[TwitterUser],List[TwitterUser]]) =>
-    val (following, followers) = result 
-              
-    streams.usersTableModel.friends = following
-    streams.usersTableModel.followers = followers
-    streams.usersTableModel.usersChanged
- 
-    streams setFollowerIds (followers map (u => u.id.toString()))
-              
-    val paneTitle = "People (" + following.length + ", " + followers.length + ")"
-    val pane = new PeoplePane(session, streams.usersTableModel, following, followers)
-    tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
-    mainToolBar.stopOperation
-  })
+  createPeoplePane
 
   def saveState {
     val highFol = streams.tweetsProvider.getHighestId
@@ -103,6 +85,36 @@ class TopFrame(username: String, password: String, user: AuthenticatedSession) e
       case _ => //noop
     }
     tagUsers.save
+  }
+  
+  private def createPeoplePane: Unit = {
+    mainToolBar.startOperation
+    val pool = Executors.newFixedThreadPool(2)
+    val friendsFuture = pool.submit(new Callable[List[TwitterUser]] {
+      def call = twitterSession.loadAll(twitterSession.getFriends)
+    })
+    val followersFuture = pool.submit(new Callable[List[TwitterUser]] {
+      def call = twitterSession.loadAll(twitterSession.getFollowers)
+    })
+
+    new SwingWorker[Tuple2[List[TwitterUser],List[TwitterUser]], Object] {
+      def doInBackground = (friendsFuture.get, followersFuture.get)
+
+      override def done = {
+        val (friends, followers) = get 
+              
+        streams.usersTableModel.friends = friends
+        streams.usersTableModel.followers = followers
+        streams.usersTableModel.usersChanged
+ 
+        streams setFollowerIds (followers map (u => u.id.toString()))
+              
+        val paneTitle = "People (" + friends.length + ", " + followers.length + ")"
+        val pane = new PeoplePane(session, streams.usersTableModel, friends, followers)
+        tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
+        mainToolBar.stopOperation
+      }
+    }.execute
   }
 }
   
