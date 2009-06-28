@@ -4,7 +4,6 @@ import apache.log4j.Logger
 import com.google.common.collect.{Multimap, HashMultimap}
 import java.io.{File, PrintWriter, FileNotFoundException, FileWriter}
 import java.util.ArrayList
-import scala.collection.mutable.Set
 import scala.io.Source
 import state.PreferencesFactory
 

@@ -3,7 +3,6 @@ package org.talkingpuffin.ui
 import _root_.org.talkingpuffin.util.PopupListener
 import _root_.scala.swing.event.EditDone
 import _root_.scala.xml.{NodeSeq, Node}
-import filter.TagUsers
 import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
 import java.awt.{Toolkit, Dimension, Font}
 import java.util.Comparator

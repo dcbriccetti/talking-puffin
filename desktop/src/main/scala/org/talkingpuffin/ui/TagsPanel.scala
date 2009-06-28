@@ -9,8 +9,8 @@ import javax.swing.{KeyStroke, JCheckBox}
 /**
  * A panel displaying and allowing selection of tags.
  */
-class TagsPanel(showTitle: Boolean) extends BorderPanel {
-  val checkBoxView = new CheckBoxView(TagsRepository.get)
+class TagsPanel(showTitle: Boolean, checkedValues: List[String]) extends BorderPanel {
+  val checkBoxView = new CheckBoxView(TagsRepository.get, checkedValues)
   if (showTitle) add(new Label("Tags"), BorderPanel.Position.North)
   
   add(new ScrollPane {
@@ -30,13 +30,14 @@ object CheckBoxView {
   val mnemonicSep = ": "
 }
 
-class CheckBoxView(values: List[String]) extends BoxPanel(Orientation.Vertical) {
+class CheckBoxView(values: List[String], checkedValues: List[String]) extends BoxPanel(Orientation.Vertical) {
   var i = 0
   for (value <- values) {
     val keyVal = KeyEvent.VK_A + i
       contents += new CheckBox("" + keyVal.toChar + CheckBoxView.mnemonicSep + value) {
       peer.setMnemonic(keyVal)
       i += 1
+      selected = checkedValues contains value
     }
   }
   

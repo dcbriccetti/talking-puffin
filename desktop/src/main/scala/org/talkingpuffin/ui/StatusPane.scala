@@ -4,7 +4,7 @@ import _root_.scala.swing.event.{ComponentResized, ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.org.talkingpuffin.util.PopupListener
 
-import filter.{TagsRepository, FilterSet}
+import filter.{FilterSet}
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
 import java.awt.image.BufferedImage
 import java.awt.{Color, Desktop, Dimension, Insets, Font}

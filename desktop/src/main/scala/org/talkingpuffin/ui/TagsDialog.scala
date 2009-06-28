@@ -9,10 +9,10 @@ import java.awt.Dimension
  * A dialog from which tags can be selected.
  */
 
-class TagsDialog(owner: java.awt.Frame) extends JDialog(owner, "Tags", true) {
+class TagsDialog(owner: java.awt.Frame, checkedValues: List[String]) extends JDialog(owner, "Tags", true) {
   var ok = false
   val panel = new BorderPanel {
-    val tagsPanel = new TagsPanel(false) 
+    val tagsPanel = new TagsPanel(false, checkedValues) 
     add(tagsPanel, BorderPanel.Position.Center)
   
     add(new FlowPanel {

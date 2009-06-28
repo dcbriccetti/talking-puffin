@@ -1,7 +1,7 @@
 package org.talkingpuffin
 
 import _root_.scala.swing.event.{ButtonClicked, WindowClosing}
-import filter.{FilterSet, TextFilter, TagUsers}
+import filter.{FilterSet, TextFilter}
 import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
 import java.awt.{Toolkit, Dimension, BorderLayout, Insets}
 import java.util.prefs.Preferences

@@ -15,7 +15,6 @@ import java.net.{URI, URL}
 import java.util.Comparator
 import java.util.regex.Pattern
 import javax.swing.event._
-import filter.TagsRepository
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableColumnModel, TableCellRenderer, DefaultTableColumnModel}
 import javax.swing.{JTable, KeyStroke, JMenu, JMenuItem, JPopupMenu, JComponent}
 import org.jdesktop.swingx.decorator.HighlighterFactory

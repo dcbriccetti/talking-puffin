@@ -2,7 +2,7 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.GridBagPanel._
 import _root_.scala.swing.{ListView, Frame, GridBagPanel, UIElement, FlowPanel, Button, CheckBox, Label, ScrollPane, Action}
-import filter.{TagsRepository, FilterSet, TextFilter, FilterSetChanged}
+import filter.{FilterSet, TextFilter, FilterSetChanged}
 import java.awt.event.KeyEvent
 import java.awt.{Dimension, Insets}
 import javax.swing.border.EmptyBorder
@@ -17,7 +17,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
   title = (paneTitle + " Filters")
   val panel = new GridBagPanel {
     border = new EmptyBorder(5, 5, 0, 5)
-    val tagsPanel = new TagsPanel(true) {
+    val tagsPanel = new TagsPanel(true, List[String]()) {
       minimumSize = new Dimension(180, 100)
     }
   
