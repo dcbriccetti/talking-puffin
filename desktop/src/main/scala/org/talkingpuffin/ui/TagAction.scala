@@ -14,8 +14,9 @@ class TagAction(table: JTable, taggingSupport: TaggingSupport) extends Action("T
     val modelIndexes = TableUtil.getSelectedModelIndexes(table)
     
     if (modelIndexes.length > 0) {
-      val tagsDialog = new TagsDialog(SwingUtilities.getAncestorOfClass(classOf[java.awt.Frame], 
-        table).asInstanceOf[java.awt.Frame], taggingSupport.tagsForSelectedUsers(modelIndexes))
+      val tagsDialog = new TagsDialog(SwingUtilities.getAncestorOfClass(classOf[java.awt.Frame],
+        table).asInstanceOf[java.awt.Frame], taggingSupport.tagUsers,
+        taggingSupport.tagsForSelectedUsers(modelIndexes))
       tagsDialog.setVisible(true)
       
       if (tagsDialog.ok) {

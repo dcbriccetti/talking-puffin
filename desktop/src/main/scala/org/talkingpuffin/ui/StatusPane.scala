@@ -26,7 +26,7 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
     extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
   private var lastSelectedRows: List[TwitterStatus] = Nil
-  private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet)
+  private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet, streams.tagUsers)
 
   statusTableModel.addTableModelListener(this)
   statusTableModel.setPreChangeListener(this)

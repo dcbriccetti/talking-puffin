@@ -36,6 +36,15 @@ class TagUsers(username: String) {
     }
   }
   
+  def getTags: List[String] = {
+    var tags = List[String]()
+    val keys = tagUsers.keySet.iterator
+    while(keys.hasNext) {
+      tags = keys.next :: tags
+    }
+    tags.sort((a,b) => (a compareTo b) < 0)
+  }
+  
   def tagsForUser(userId: String): List[String] = {
     var tags = List[String]()
     val el = getEntriesAsList
