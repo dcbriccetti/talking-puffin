@@ -98,17 +98,17 @@ class PeoplePane(session: Session, tableModel: UsersTableModel,
     getSelectedUsers.map(user => user.screenName)
   }
 
-  private def processScreenNames(screenNames:List[String],action:((String) => Unit),errHandler:((Exception,String) => Unit)) = {
+  private def processScreenNames(screenNames:List[String],action:((String) => Unit),errHandler:((Throwable,String) => Unit)) = {
     screenNames foreach{screenName =>
       try{
         action(screenName)
       }catch{
-        case e:Exception => errHandler(e,screenName)
+        case e:Throwable => errHandler(e,screenName)
       }
     }
   }
 
-  private def showFollowErr(e:Exception,action:String,screenName:String){
+  private def showFollowErr(e:Throwable,action:String,screenName:String){
     JOptionPane.showMessageDialog(null, "Error " + action + " " + screenName)
   }
 
