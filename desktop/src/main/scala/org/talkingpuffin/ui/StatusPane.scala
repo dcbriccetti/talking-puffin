@@ -29,7 +29,6 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
   var table: StatusTable = _
   private var lastSelectedRows: List[TwitterStatus] = Nil
   private var lastRowSelected: Boolean = _
-  /** IDs of statuses following the cursored status, for choosing cursored status after filtering */
   private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet, streams.tagUsers)
 
   statusTableModel.addTableModelListener(this)
