@@ -21,7 +21,7 @@
         <dependency>
             <groupId>org.swinglabs</groupId>
             <artifactId>swingx</artifactId>
-            <version>0.9.5-2</version>
+            <version>1.0</version>
         </dependency>
     </dependencies>
 

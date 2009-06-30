@@ -15,6 +15,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="scala-2.7.4.final" level="application" />
     <orderEntry type="module" module-name="twitter-api" exported="" />
     <orderEntry type="library" exported="" name="Maven: org.scala-lang:scala-library:2.7.4" level="project" />
     <orderEntry type="library" exported="" name="Maven: commons-httpclient:commons-httpclient:3.1" level="project" />
@@ -26,8 +27,7 @@
     <orderEntry type="library" exported="" name="Maven: com.google.collections:google-collections:1.0-rc1" level="project" />
     <orderEntry type="library" exported="" name="Maven: log4j:log4j:1.2.14" level="project" />
     <orderEntry type="library" exported="" name="Maven: joda-time:joda-time:1.6" level="project" />
-    <orderEntry type="library" exported="" name="Maven: org.swinglabs:swingx:0.9.5-2" level="project" />
-    <orderEntry type="library" name="scala-2.7.4.final" level="application" />
+    <orderEntry type="library" exported="" name="Maven: org.swinglabs:swingx:1.0" level="project" />
   </component>
 </module>
 

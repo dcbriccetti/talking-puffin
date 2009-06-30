@@ -127,6 +127,15 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
       case 4 => classOf[StatusCell] 
     }
   }
+  
+  def getIndexOfStatus(statusId: Long): Option[Int] = {
+    var i = 0
+    while (i < filteredStatuses.size) {
+      if (filteredStatuses.get(i).id == statusId) return Some(i)
+      i += 1
+    }
+    return None
+  }
 
   def muteSelectedUsers(rows: List[Int]) {
     muteUsers(getUsers(rows))

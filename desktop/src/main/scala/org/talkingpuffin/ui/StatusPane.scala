@@ -4,6 +4,7 @@ import _root_.scala.swing.event.{ComponentResized, ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.org.talkingpuffin.util.PopupListener
 
+import apache.log4j.Logger
 import filter.{FilterSet}
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
 import java.awt.image.BufferedImage
@@ -24,8 +25,11 @@ import util.TableUtil
 class StatusPane(session: Session, title: String, statusTableModel: StatusTableModel, 
     filterSet: FilterSet, streams: Streams) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
+  private val log = Logger.getLogger("StatusPane " + hashCode)
   var table: StatusTable = _
   private var lastSelectedRows: List[TwitterStatus] = Nil
+  private var lastRowSelected: Boolean = _
+  /** IDs of statuses following the cursored status, for choosing cursored status after filtering */
   private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet, streams.tagUsers)
 
   statusTableModel.addTableModelListener(this)
@@ -41,6 +45,8 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
   }, new Constraints{
     grid = (0,1); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; 
   })
+  
+  private val cursorSetter = new AfterFilteringCursorSetter(table)
   
   private val tweetDetailPanel = new TweetDetailPanel(session, table, filtersDialog, streams)
   add(tweetDetailPanel, new Constraints{
@@ -83,19 +89,41 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
   def showBigPicture = tweetDetailPanel.showBigPicture
   
   def tableChanging = {
-    if (table != null) {
-      lastSelectedRows = table.getSelectedStatuses
+    lastRowSelected = false
+    cursorSetter.discardCandidates
+    lastSelectedRows = table.getSelectedStatuses
+    if (lastSelectedRows.length > 0) {
+      val lastStatus = statusTableModel.getStatusAt(table.convertRowIndexToModel(table.getRowCount-1))
+      if (lastSelectedRows contains lastStatus) {
+        lastRowSelected = true
+      }
+      cursorSetter.captureTableState
     }
+    log.debug("Before table change. Selected rows: " + lastSelectedRows.size + 
+        ", last selected? " + lastRowSelected)
   }
 
   def tableChanged(e: TableModelEvent) = {
     if (table != null && e.getFirstRow != e.getLastRow) {
       val selectionModel = table.getSelectionModel
       selectionModel.clearSelection
+      var numRestoredFromPrevSel = 0
       
-      for (i <- 0 until table.getRowCount) {
-        if (lastSelectedRows.contains(statusTableModel.getStatusAt(table.convertRowIndexToModel(i)))) {
+      for (rowIndex <- 0 until table.getRowCount) {
+        val status = statusTableModel.getStatusAt(table.convertRowIndexToModel(rowIndex))
+        if (lastSelectedRows.contains(status)) {
+          selectionModel.addSelectionInterval(rowIndex, rowIndex)
+          numRestoredFromPrevSel += 1
+        }
+      }
+      
+      if (numRestoredFromPrevSel == 0 && table.getRowCount > 0) {
+        if (lastRowSelected) {
+          val i = table.getRowCount - 1
+          log.debug("Selecting last row, " + i)
           selectionModel.addSelectionInterval(i, i)
+        } else {
+          cursorSetter.setCursor
         }
       }
     }
@@ -116,7 +144,8 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
     table.getSelectionModel.clearSelection
     lastSelectedRows = Nil
   }
-
+  
   def requestFocusForTable = table.requestFocusInWindow
 }
+
 

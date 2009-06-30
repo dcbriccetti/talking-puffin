@@ -5,7 +5,6 @@ import _root_.org.talkingpuffin.util.PopupListener
 import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.swing.{MenuItem, Action}
 import java.awt.{Desktop, Toolkit, Component, Font}
-//import _root_.scala.xml.{NodeSeq, Node}
 
 import _root_.scala.{Option}
 import java.awt.event.{KeyEvent, ActionEvent, ActionListener, MouseEvent, MouseAdapter}
@@ -17,19 +16,19 @@ import java.util.regex.Pattern
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableColumnModel, TableCellRenderer, DefaultTableColumnModel}
 import javax.swing.{JTable, KeyStroke, JMenu, JMenuItem, JPopupMenu, JComponent}
-import org.jdesktop.swingx.decorator.HighlighterFactory
+import jdesktop.swingx.decorator.{SortOrder, HighlighterFactory}
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
 import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
 import twitter.{TwitterStatus}
 import util.{TableUtil, DesktopUtil}
+
 /**
  * Table of statuses.
  */
-
-class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigPicture: => Unit)
-    extends JXTable(statusTableModel) {
+class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture: => Unit)
+    extends JXTable(tableModel) {
 
   setColumnControlVisible(true)
   setHighlighters(HighlighterFactory.createSimpleStriping)
@@ -82,11 +81,11 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigP
   private def unblock = getSelectedScreenNames foreach session.twitterSession.unblockUser
 
   def getSelectedScreenNames = getSelectedStatuses.map(s => s.user.screenName)
-  def getSelectedStatuses = statusTableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
+  def getSelectedStatuses = tableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
 
   def getSelectedStatus: Option[TwitterStatus] = {
     val row = getSelectedRow
-    if (row == -1) None else Some(statusTableModel.getStatusAt(convertRowIndexToModel(row)))
+    if (row == -1) None else Some(tableModel.getStatusAt(convertRowIndexToModel(row)))
   }
 
   class PopupMenu extends JPopupMenu {
@@ -102,8 +101,9 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigP
     ageCol.setMaxWidth(100)
     ageCol.setCellRenderer(new AgeCellRenderer)
     
-    val picCol = colModel.getColumn(1)
+    val picCol = colModel.getColumn(1).asInstanceOf[TableColumnExt]
     picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
+    picCol.setSortable(false)
     
     nameCol = colModel.getColumn(2).asInstanceOf[TableColumnExt]
     nameCol.setPreferredWidth(100)
@@ -117,16 +117,18 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigP
     toCol.setCellRenderer(new EmphasizedStringCellRenderer)
     toCol.setComparator(EmphasizedStringComparator)
     
-    val statusCol = colModel.getColumn(4)
+    val statusCol = colModel.getColumn(4).asInstanceOf[TableColumnExt]
     statusCol.setPreferredWidth(600)
     statusCol.setCellRenderer(new StatusCellRenderer)
+    statusCol.setSortable(false)
 
     colModel.addColumnModelListener(new TableColumnModelExtListener {
       def columnPropertyChange(event: PropertyChangeEvent) = 
         if (event.getPropertyName.equals("visible")) {
-          if (event.getSource == ageCol)  statusTableModel.options.showAgeColumn  = ageCol.isVisible
-          if (event.getSource == nameCol) statusTableModel.options.showNameColumn = nameCol.isVisible
-          if (event.getSource == toCol)   statusTableModel.options.showToColumn   = toCol.isVisible
+          /* Table model needs to know if cols are hidden, to put their contents in the status if so */
+          if (event.getSource == ageCol)  tableModel.options.showAgeColumn  = ageCol.isVisible
+          if (event.getSource == nameCol) tableModel.options.showNameColumn = nameCol.isVisible
+          if (event.getSource == toCol)   tableModel.options.showToColumn   = toCol.isVisible
         }
 
       def columnSelectionChanged(e: ListSelectionEvent) = {}
@@ -145,11 +147,11 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigP
     ap add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
     ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_U))
-    ap add(Action("Mute") {statusTableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
+    ap add(Action("Mute") {tableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
       Actions.ks(KeyEvent.VK_M))
     ap add new NextTAction(this)
     ap add new PrevTAction(this)
-    ap add(new TagAction(this, statusTableModel), Actions.ks(KeyEvent.VK_T))
+    ap add(new TagAction(this, tableModel), Actions.ks(KeyEvent.VK_T))
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
@@ -159,15 +161,14 @@ class StatusTable(session: Session, statusTableModel: StatusTableModel, showBigP
       Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
     
     ap add(Action("Delete selected tweets") {
-      statusTableModel removeStatuses TableUtil.getSelectedModelIndexes(this) 
+      tableModel removeStatuses TableUtil.getSelectedModelIndexes(this) 
     }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask),
       Actions.ks(KeyEvent.VK_DELETE), Actions.ks(KeyEvent.VK_BACK_SPACE))
 
     ap add(Action("Delete all tweets from all selected users") {
-      statusTableModel removeStatusesFrom getSelectedScreenNames 
+      tableModel removeStatusesFrom getSelectedScreenNames 
     }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask | 
       java.awt.event.InputEvent.SHIFT_DOWN_MASK))  
   }
-
 }
 
