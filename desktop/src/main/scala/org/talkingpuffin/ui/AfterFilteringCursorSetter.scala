@@ -15,17 +15,11 @@ class AfterFilteringCursorSetter(table: JTable) {
   private val model = table.getModel.asInstanceOf[StatusTableModel] 
 
   def captureTableState {
-    var candidates = List[Long]()
-    val selectedRow = table.getSelectedRow
-    if (selectedRow != -1) {
-      var i = selectedRow + 1
-      val numRows = table.getRowCount
-      while(i < numRows) {
-        candidates = model.getStatusAt(table.convertRowIndexToModel(i)).id :: candidates
-        i += 1
-      }
+    cursorCandidates = table.getSelectedRow match {
+      case -1 => List[Long]()
+      case selectedRow => (for(row <- selectedRow + 1 until table.getRowCount)  
+        yield model.getStatusAt(table.convertRowIndexToModel(row)).id).toList 
     }
-    cursorCandidates = candidates.reverse
     log.debug("Collected " + cursorCandidates.size + " candidates")
   }
   
