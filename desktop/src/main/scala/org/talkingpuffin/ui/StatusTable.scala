@@ -20,6 +20,7 @@ import jdesktop.swingx.decorator.{SortOrder, HighlighterFactory}
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
+import state.{PrefKeys, GlobalPrefs}
 import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
 import twitter.{TwitterStatus}
 import util.{TableUtil, DesktopUtil}
@@ -36,9 +37,10 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
 
-  var ageCol:  TableColumnExt = _
-  var nameCol: TableColumnExt = _
-  var toCol:   TableColumnExt = _
+  var ageCol:   TableColumnExt = _
+  var imageCol: TableColumnExt = _
+  var nameCol:  TableColumnExt = _
+  var toCol:    TableColumnExt = _
   configureColumns
 
   val ap = new ActionPrep(this)
@@ -101,9 +103,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ageCol.setMaxWidth(100)
     ageCol.setCellRenderer(new AgeCellRenderer)
     
-    val picCol = colModel.getColumn(1).asInstanceOf[TableColumnExt]
-    picCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
-    picCol.setSortable(false)
+    imageCol = colModel.getColumn(1).asInstanceOf[TableColumnExt]
+    imageCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
+    imageCol.setSortable(false)
     
     nameCol = colModel.getColumn(2).asInstanceOf[TableColumnExt]
     nameCol.setPreferredWidth(100)
@@ -122,13 +124,27 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     statusCol.setCellRenderer(new StatusCellRenderer)
     statusCol.setSortable(false)
 
+    val gp = GlobalPrefs
+    
+    // Set column visibility from preferences
+    for ((col, key) <- List(ageCol, imageCol, nameCol, toCol) zip 
+        List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)) {
+      col.setVisible(gp.isColumnShowing(key))
+      updateTableModelOptions(col)
+    }
+
     colModel.addColumnModelListener(new TableColumnModelExtListener {
       def columnPropertyChange(event: PropertyChangeEvent) = 
         if (event.getPropertyName.equals("visible")) {
-          /* Table model needs to know if cols are hidden, to put their contents in the status if so */
-          if (event.getSource == ageCol)  tableModel.options.showAgeColumn  = ageCol.isVisible
-          if (event.getSource == nameCol) tableModel.options.showNameColumn = nameCol.isVisible
-          if (event.getSource == toCol)   tableModel.options.showToColumn   = toCol.isVisible
+          // Save changes into preferences.
+          val source = event.getSource
+          
+          if      (source == ageCol)   gp.showColumn(PrefKeys.AGE,   ageCol  .isVisible)
+          else if (source == imageCol) gp.showColumn(PrefKeys.IMAGE, imageCol.isVisible)
+          else if (source == nameCol)  gp.showColumn(PrefKeys.FROM,  nameCol .isVisible)
+          else if (source == toCol)    gp.showColumn(PrefKeys.TO,    toCol   .isVisible)
+
+          updateTableModelOptions(source)
         }
 
       def columnSelectionChanged(e: ListSelectionEvent) = {}
@@ -137,6 +153,22 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
       def columnMarginChanged(e: ChangeEvent) = {}
       def columnAdded(e: TableColumnModelEvent) = {}
     })
+  }
+
+  /**
+   * Table model needs to know if certain cols are hidden, to put their contents in the status if so.
+   */
+  private def updateTableModelOptions(source: Object) {
+    val op = tableModel.options
+    if (source == ageCol) {
+      op.showAgeColumn = ageCol.isVisible
+    }
+    if (source == nameCol) {
+      op.showNameColumn = nameCol.isVisible
+    }
+    if (source == toCol) {
+      op.showToColumn = toCol.isVisible
+    }
   }
   
   def showColumn(index: Int, show: Boolean) {
