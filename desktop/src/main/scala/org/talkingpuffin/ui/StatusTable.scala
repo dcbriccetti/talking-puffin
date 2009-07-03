@@ -160,15 +160,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
    */
   private def updateTableModelOptions(source: Object) {
     val op = tableModel.options
-    if (source == ageCol) {
-      op.showAgeColumn = ageCol.isVisible
-    }
-    if (source == nameCol) {
-      op.showNameColumn = nameCol.isVisible
-    }
-    if (source == toCol) {
-      op.showToColumn = toCol.isVisible
-    }
+    if      (source == ageCol)  op.showAgeColumn  = ageCol .isVisible
+    else if (source == nameCol) op.showNameColumn = nameCol.isVisible
+    else if (source == toCol)   op.showToColumn   = toCol  .isVisible
   }
   
   def showColumn(index: Int, show: Boolean) {
