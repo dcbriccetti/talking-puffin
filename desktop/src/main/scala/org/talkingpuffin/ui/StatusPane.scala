@@ -73,6 +73,8 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
     }
   })
 
+  def saveState = table.saveState
+  
   private def prefetchAdjacentRows {        
     List(-1, 1).foreach(offset => {
       val adjacentRowIndex = table.getSelectedRow + offset

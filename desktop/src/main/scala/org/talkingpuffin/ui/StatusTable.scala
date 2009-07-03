@@ -4,6 +4,8 @@ import _root_.scala.swing.GridBagPanel._
 import _root_.org.talkingpuffin.util.PopupListener
 import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.swing.{MenuItem, Action}
+import apache.log4j.Logger
+import com.google.common.collect.Lists
 import java.awt.{Desktop, Toolkit, Component, Font}
 
 import _root_.scala.{Option}
@@ -16,7 +18,7 @@ import java.util.regex.Pattern
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableColumnModel, TableCellRenderer, DefaultTableColumnModel}
 import javax.swing.{JTable, KeyStroke, JMenu, JMenuItem, JPopupMenu, JComponent}
-import jdesktop.swingx.decorator.{SortOrder, HighlighterFactory}
+import jdesktop.swingx.decorator.{SortKey, SortOrder, HighlighterFactory}
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
@@ -31,16 +33,19 @@ import util.{TableUtil, DesktopUtil}
 class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture: => Unit)
     extends JXTable(tableModel) {
 
+  private val log = Logger.getLogger("StatusTable")
   setColumnControlVisible(true)
   setHighlighters(HighlighterFactory.createSimpleStriping)
   setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
 
-  var ageCol:   TableColumnExt = _
-  var imageCol: TableColumnExt = _
-  var nameCol:  TableColumnExt = _
-  var toCol:    TableColumnExt = _
+  val ageCol   = getColumnExt(0)
+  val imageCol = getColumnExt(1)
+  val nameCol  = getColumnExt(2)
+  val toCol    = getColumnExt(3)
+  val colAndKeys = List(ageCol, imageCol, nameCol, toCol) zip
+    List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)
   configureColumns
 
   val ap = new ActionPrep(this)
@@ -50,6 +55,18 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = if (e.getClickCount == 2) reply
   })
+  
+  def saveState {
+    val sortKeys = getSortController.getSortKeys
+    if (sortKeys.size > 0) {
+      val sortKey = sortKeys.get(0)
+      val sortCol = getColumns(true).get(sortKey.getColumn)
+      for ((col, key) <- colAndKeys; if (col == sortCol)) {
+        GlobalPrefs.sortBy(key, if (sortKey.getSortOrder == SortOrder.DESCENDING) 
+          PrefKeys.SORT_DIRECTION_DESC else PrefKeys.SORT_DIRECTION_ASC)
+      }
+    }
+  }
   
   private def viewSelected {
     getSelectedStatuses.foreach(status => {
@@ -96,45 +113,43 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   }
   
   private def configureColumns {
-    val colModel = getColumnModel
-    
-    ageCol = colModel.getColumn(0).asInstanceOf[TableColumnExt]
     ageCol.setPreferredWidth(60)
     ageCol.setMaxWidth(100)
     ageCol.setCellRenderer(new AgeCellRenderer)
     
-    imageCol = colModel.getColumn(1).asInstanceOf[TableColumnExt]
     imageCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
     imageCol.setSortable(false)
     
-    nameCol = colModel.getColumn(2).asInstanceOf[TableColumnExt]
     nameCol.setPreferredWidth(100)
     nameCol.setMaxWidth(200)
     nameCol.setCellRenderer(new EmphasizedStringCellRenderer)
     nameCol.setComparator(EmphasizedStringComparator)
     
-    toCol = colModel.getColumn(3).asInstanceOf[TableColumnExt]
     toCol.setPreferredWidth(100)
     toCol.setMaxWidth(200)
     toCol.setCellRenderer(new EmphasizedStringCellRenderer)
     toCol.setComparator(EmphasizedStringComparator)
     
-    val statusCol = colModel.getColumn(4).asInstanceOf[TableColumnExt]
+    val statusCol = getColumnExt(4)
     statusCol.setPreferredWidth(600)
     statusCol.setCellRenderer(new StatusCellRenderer)
     statusCol.setSortable(false)
 
-    // Set column visibility from preferences
-    val colAndKeys = List(ageCol, imageCol, nameCol, toCol) zip
-        List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)
+    // Set from preferences
     
     for ((col, key) <- colAndKeys) {
       col.setVisible(GlobalPrefs.isColumnShowing(key))
       updateTableModelOptions(col)
     }
 
-    colModel.addColumnModelListener(new TableColumnModelExtListener {
-      def columnPropertyChange(event: PropertyChangeEvent) = 
+    val sortDir = if (GlobalPrefs.prefs.get(PrefKeys.SORT_DIRECTION, PrefKeys.SORT_DIRECTION_DESC) == 
+            PrefKeys.SORT_DIRECTION_DESC) SortOrder.DESCENDING else SortOrder.ASCENDING
+    val modelIndex = colAndKeys.find(ck => ck._2 ==
+            GlobalPrefs.prefs.get(PrefKeys.SORT_BY, PrefKeys.AGE)).get._1.getModelIndex
+    getSortController.setSortKeys(Lists.newArrayList(new SortKey(sortDir, modelIndex)))
+
+    getColumnModel.addColumnModelListener(new TableColumnModelExtListener {
+      def columnPropertyChange(event: PropertyChangeEvent) = {
         if (event.getPropertyName.equals("visible")) {
           // Save changes into preferences.
           val source = event.getSource
@@ -142,6 +157,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
 
           for ((col, key) <- colAndKeys; if (source == col)) GlobalPrefs.showColumn(key, col.isVisible)
         }
+      }
 
       def columnSelectionChanged(e: ListSelectionEvent) = {}
       def columnRemoved(e: TableColumnModelEvent) = {}

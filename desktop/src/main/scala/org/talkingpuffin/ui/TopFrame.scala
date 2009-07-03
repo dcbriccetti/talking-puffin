@@ -62,7 +62,7 @@ class TopFrame(username: String, password: String, twitterSession: Authenticated
 
   reactions += {
     case WindowClosing(_) => {
-      Globals.sessions = Globals.sessions remove(s => s == session) // TODO is this best way?
+      Globals.sessions = Globals.sessions remove(s => s == session)
       saveState
       TopFrames.removeFrame(this)
     }
@@ -78,13 +78,14 @@ class TopFrame(username: String, password: String, twitterSession: Authenticated
     val prefs = PreferencesFactory.prefsForUser(username)
     highFol match {
       case Some(i) => prefs.put("highestId", i.toString())
-      case _ => // noop
+      case _ =>
     }
     highMen match {
       case Some(i) => prefs.put("highestMentionId", i.toString())
-      case _ => //noop
+      case _ =>
     }
     tagUsers.save
+    streams.streamInfoList.last.pane.saveState // TODO instead save the order of the last status pane changed
   }
   
   private def createPeoplePane: Unit = {
