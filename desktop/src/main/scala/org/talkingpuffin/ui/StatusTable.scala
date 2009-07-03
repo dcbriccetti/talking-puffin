@@ -127,8 +127,10 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     val gp = GlobalPrefs
     
     // Set column visibility from preferences
-    for ((col, key) <- List(ageCol, imageCol, nameCol, toCol) zip 
-        List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)) {
+    val colAndKeys = List(ageCol, imageCol, nameCol, toCol) zip
+        List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)
+    
+    for ((col, key) <- colAndKeys) {
       col.setVisible(gp.isColumnShowing(key))
       updateTableModelOptions(col)
     }
@@ -139,11 +141,11 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
           // Save changes into preferences.
           val source = event.getSource
           
-          if      (source == ageCol)   gp.showColumn(PrefKeys.AGE,   ageCol  .isVisible)
-          else if (source == imageCol) gp.showColumn(PrefKeys.IMAGE, imageCol.isVisible)
-          else if (source == nameCol)  gp.showColumn(PrefKeys.FROM,  nameCol .isVisible)
-          else if (source == toCol)    gp.showColumn(PrefKeys.TO,    toCol   .isVisible)
-
+          colAndKeys.find(ck => source == ck._1) match {
+            case Some((col, key)) => gp.showColumn(key, col.isVisible)
+            case _ =>
+          }
+          
           updateTableModelOptions(source)
         }
 
