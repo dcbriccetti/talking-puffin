@@ -124,14 +124,12 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     statusCol.setCellRenderer(new StatusCellRenderer)
     statusCol.setSortable(false)
 
-    val gp = GlobalPrefs
-    
     // Set column visibility from preferences
     val colAndKeys = List(ageCol, imageCol, nameCol, toCol) zip
         List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)
     
     for ((col, key) <- colAndKeys) {
-      col.setVisible(gp.isColumnShowing(key))
+      col.setVisible(GlobalPrefs.isColumnShowing(key))
       updateTableModelOptions(col)
     }
 
@@ -140,13 +138,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
         if (event.getPropertyName.equals("visible")) {
           // Save changes into preferences.
           val source = event.getSource
-          
-          colAndKeys.find(ck => source == ck._1) match {
-            case Some((col, key)) => gp.showColumn(key, col.isVisible)
-            case _ =>
-          }
-          
           updateTableModelOptions(source)
+
+          for ((col, key) <- colAndKeys; if (source == col)) GlobalPrefs.showColumn(key, col.isVisible)
         }
 
       def columnSelectionChanged(e: ListSelectionEvent) = {}
