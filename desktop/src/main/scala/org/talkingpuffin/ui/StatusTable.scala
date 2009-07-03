@@ -161,10 +161,6 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     else if (source == toCol)   op.showToColumn   = toCol  .isVisible
   }
   
-  def showColumn(index: Int, show: Boolean) {
-    getColumnModel.getColumn(index).asInstanceOf[TableColumnExt].setVisible(show)
-  }
-  
   protected def buildActions = {
     ap add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
