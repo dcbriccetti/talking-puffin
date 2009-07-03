@@ -15,8 +15,14 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
   val checkBoxView = new CheckBoxView(tagUsers.getTags, checkedValues)
   if (showTitle) add(new Label("Tags"), BorderPanel.Position.North)
   
-  add(new ScrollPane {
-    contents = checkBoxView
+  add(new BoxPanel(Orientation.Vertical) {
+    contents += new FlowPanel {
+      contents += new Button(Action("All" ) {checkBoxView.selectAll(true)})
+      contents += new Button(Action("None") {checkBoxView.selectAll(false)})
+    }
+    contents += new ScrollPane {
+      contents = checkBoxView
+    }
   }, BorderPanel.Position.Center)
 
   var newTag: TextField = _
@@ -47,15 +53,18 @@ object CheckBoxView {
 }
 
 class CheckBoxView(values: List[String], checkedValues: List[String]) extends BoxPanel(Orientation.Vertical) {
-  var i = 0
-  for (value <- values) {
+  private var checkBoxes = List[CheckBox]()
+  for ((i, value) <- List.range(0, values.length) zip values) {
     val keyVal = KeyEvent.VK_A + i
-    contents += new CheckBox("" + keyVal.toChar + CheckBoxView.mnemonicSep + value) {
+    val checkBox = new CheckBox("" + keyVal.toChar + CheckBoxView.mnemonicSep + value) {
       peer.setMnemonic(keyVal)
-      i += 1
       selected = checkedValues contains value
     }
+    checkBoxes ::= checkBox
+    contents += checkBox
   }
+  
+  def selectAll(select: Boolean) = for (b <- checkBoxes) b.selected = select
   
   def getSelectedValues: Seq[String] = {
     var values = List[String]()
