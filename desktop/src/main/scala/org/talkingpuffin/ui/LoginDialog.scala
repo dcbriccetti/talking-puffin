@@ -32,7 +32,7 @@ class LoginDialog(cancelPressed: => Unit,
   
   private val loginButton = new Button("Log In")
   private val cancelButton = new Button("Cancel")
-  private val saveUserInfoCheckBox = new CheckBox("Remember me")
+  private val saveUserInfoCheckBox = new CheckBox("Remember me (saves password unencrypted)")
   private val infoLabel = new Label(" ")
 
   private val usernameTextField = new TextField(storedUser) {columns=20}
