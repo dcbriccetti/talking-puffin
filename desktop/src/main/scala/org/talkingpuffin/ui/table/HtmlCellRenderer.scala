@@ -1,5 +1,6 @@
 package org.talkingpuffin.ui
 
+import apache.log4j.Logger
 import java.awt.{Component, Insets, Color}
 import java.util.Comparator
 import javax.swing.border.EmptyBorder
@@ -11,6 +12,7 @@ import javax.swing.{JTextArea, JTextPane, JTable}
  * HTML cell renderer.
  */
 class HtmlCellRenderer extends TableCellRenderer {
+  private val log = Logger.getLogger(classOf[HtmlCellRenderer])
   val renderer = new DefaultTableCellRenderer
   val border = new EmptyBorder(2, 2, 2, 2)
   
@@ -21,7 +23,8 @@ class HtmlCellRenderer extends TableCellRenderer {
     setForeground(renderer.getForeground) 
     setBackground(renderer.getBackground) 
     setBorder(border)
-    setFormattedText(this, value)
+    if (value == null) log.error("Value is null") 
+    else setFormattedText(this, value)
   }
   
   protected def setFormattedText(component: JTextComponent, value: Any) = component.setText(
