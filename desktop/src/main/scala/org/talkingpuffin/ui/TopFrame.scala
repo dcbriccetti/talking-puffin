@@ -76,14 +76,8 @@ class TopFrame(username: String, password: String, twitterSession: Authenticated
     val highMen = streams.mentionsProvider.getHighestId
     log info("Saving last seen IDs for " + username + ". Following: " + highFol + ", mentions: " + highMen)
     val prefs = PreferencesFactory.prefsForUser(username)
-    highFol match {
-      case Some(i) => prefs.put("highestId", i.toString())
-      case _ =>
-    }
-    highMen match {
-      case Some(i) => prefs.put("highestMentionId", i.toString())
-      case _ =>
-    }
+    if (highFol.isDefined) prefs.put("highestId"       , highFol.get.toString())
+    if (highMen.isDefined) prefs.put("highestMentionId", highMen.get.toString())
     tagUsers.save
     streams.streamInfoList.last.pane.saveState // TODO instead save the order of the last status pane changed
   }
