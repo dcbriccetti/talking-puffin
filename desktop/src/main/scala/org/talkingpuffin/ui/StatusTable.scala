@@ -41,6 +41,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
   val statusCellRenderer = new StatusCellRenderer
+  statusCellRenderer.textSizePct = GlobalPrefs.prefs.getInt(PrefKeys.STATUS_TABLE_STATUS_FONT_SIZE, 100)
 
   val ageCol   = getColumnExt(0)
   val imageCol = getColumnExt(1)
@@ -79,7 +80,10 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   }
  
   def statusTextSize = statusCellRenderer.textSizePct
-  def statusTextSize_=(sizePct: Int) = statusCellRenderer.textSizePct = sizePct
+  def statusTextSize_=(sizePct: Int) = {
+    statusCellRenderer.textSizePct = sizePct
+    GlobalPrefs.prefs.putInt(PrefKeys.STATUS_TABLE_STATUS_FONT_SIZE, sizePct)
+  }
   
   def reply {
     val statuses = getSelectedStatuses
@@ -183,6 +187,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   }
 
   protected def buildActions = {
+    val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
+
     ap add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
     ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_U))
@@ -192,26 +198,26 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ap add new PrevTAction(this)
     ap add(new TagAction(this, tableModel), Actions.ks(KeyEvent.VK_T))
     ap add(Action("Increase Font Size") { changeFontSize(5) }, 
-        KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask))
     ap add(Action("Decrease Font Size") { changeFontSize(-5) }, 
-        KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask | 
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask | 
       java.awt.event.InputEvent.SHIFT_DOWN_MASK))
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
     ap add(Action("Unfollow") { unfollow}, KeyStroke.getKeyStroke(KeyEvent.VK_U,
-      Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+      shortcutKeyMask))
     ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
-      Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+      shortcutKeyMask))
     
     ap add(Action("Delete selected tweets") {
       tableModel removeStatuses TableUtil.getSelectedModelIndexes(this) 
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask),
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, shortcutKeyMask),
       Actions.ks(KeyEvent.VK_DELETE), Actions.ks(KeyEvent.VK_BACK_SPACE))
 
     ap add(Action("Delete all tweets from all selected users") {
       tableModel removeStatusesFrom getSelectedScreenNames 
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask | 
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, shortcutKeyMask | 
       java.awt.event.InputEvent.SHIFT_DOWN_MASK))  
   }
 

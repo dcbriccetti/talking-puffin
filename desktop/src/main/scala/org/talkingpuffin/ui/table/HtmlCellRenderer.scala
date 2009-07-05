@@ -7,12 +7,12 @@ import javax.swing.border.EmptyBorder
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.text.JTextComponent
 import javax.swing.{JTextArea, JTextPane, JTable}
+import talkingpuffin.util.Loggable
 
 /**
  * HTML cell renderer.
  */
-class HtmlCellRenderer extends TableCellRenderer {
-  private val log = Logger.getLogger(classOf[HtmlCellRenderer])
+class HtmlCellRenderer extends TableCellRenderer with Loggable {
   val renderer = new DefaultTableCellRenderer
   val border = new EmptyBorder(2, 2, 2, 2)
   
@@ -23,8 +23,10 @@ class HtmlCellRenderer extends TableCellRenderer {
     setForeground(renderer.getForeground) 
     setBackground(renderer.getBackground) 
     setBorder(border)
-    if (value == null) log.error("Value is null") 
-    else setFormattedText(this, value)
+    if (value == null) 
+      error("Row " + row + ", col " + column + " is null") 
+    else 
+      setFormattedText(this, value)
   }
   
   protected def setFormattedText(component: JTextComponent, value: Any) = component.setText(
