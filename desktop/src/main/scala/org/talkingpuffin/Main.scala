@@ -22,7 +22,6 @@ import ui.util.FetchRequest
  * TalkingPuffin main object
  */
 object Main {
-  val log = Logger getLogger "Main"
   val title = "TalkingPuffin" 
   private var username: String = ""
   private var password: String = ""
