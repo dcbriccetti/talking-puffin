@@ -72,6 +72,8 @@ class TopFrame(username: String, password: String, twitterSession: Authenticated
   peer.setLocationRelativeTo(null)
   createPeoplePane
 
+  def setFocus = streams.streamInfoList.last.pane.requestFocusForTable
+  
   def saveState {
     val highFol = streams.tweetsProvider.getHighestId
     val highMen = streams.mentionsProvider.getHighestId

@@ -83,7 +83,6 @@ class Streams(user: AuthenticatedSession, session: Session, val tagUsers: TagUse
       new StatusTableModel(sto, source, usersTableModel, fs, username, tagUsers)
     }
     val pane = new StatusPane(session, title, model, fs, this)
-    pane.requestFocusForTable
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
     listenTo(model)
     val streamInfo = new StreamInfo(title, model, pane)

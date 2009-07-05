@@ -46,6 +46,7 @@ object Main {
       new TopFrame(username, password, user) {
         pack
         visible = true
+        setFocus
       }
     }
 
