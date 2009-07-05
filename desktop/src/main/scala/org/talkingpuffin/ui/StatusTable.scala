@@ -1,7 +1,6 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.GridBagPanel._
-import _root_.org.talkingpuffin.util.PopupListener
 import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.swing.{MenuItem, Action}
 import apache.log4j.Logger
@@ -24,6 +23,7 @@ import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
 import state.{PrefKeys, GlobalPrefs}
 import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
+import talkingpuffin.util.{Loggable, PopupListener}
 import twitter.{TwitterStatus}
 import util.{TableUtil, DesktopUtil}
 
@@ -31,14 +31,16 @@ import util.{TableUtil, DesktopUtil}
  * Table of statuses.
  */
 class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture: => Unit)
-    extends JXTable(tableModel) {
+    extends JXTable(tableModel) with Loggable {
 
-  private val log = Logger.getLogger("StatusTable")
   setColumnControlVisible(true)
+  val rowMarginVal = 3
+  setRowMargin(rowMarginVal)
   setHighlighters(HighlighterFactory.createSimpleStriping)
-  setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
+  setRowHeight(Thumbnail.THUMBNAIL_SIZE + rowMarginVal + 2)
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
+  val statusCellRenderer = new StatusCellRenderer
 
   val ageCol   = getColumnExt(0)
   val imageCol = getColumnExt(1)
@@ -75,6 +77,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
       DesktopUtil.browse(uri)
     })
   }
+ 
+  def statusTextSize = statusCellRenderer.textSizePct
+  def statusTextSize_=(sizePct: Int) = statusCellRenderer.textSizePct = sizePct
   
   def reply {
     val statuses = getSelectedStatuses
@@ -132,7 +137,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     
     val statusCol = getColumnExt(4)
     statusCol.setPreferredWidth(600)
-    statusCol.setCellRenderer(new StatusCellRenderer)
+    statusCol.setCellRenderer(statusCellRenderer)
     statusCol.setSortable(false)
 
     // Set from preferences
@@ -176,7 +181,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     else if (source == nameCol) op.showNameColumn = nameCol.isVisible
     else if (source == toCol)   op.showToColumn   = toCol  .isVisible
   }
-  
+
   protected def buildActions = {
     ap add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
@@ -186,6 +191,11 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ap add new NextTAction(this)
     ap add new PrevTAction(this)
     ap add(new TagAction(this, tableModel), Actions.ks(KeyEvent.VK_T))
+    ap add(Action("Increase Font Size") { changeFontSize(5) }, 
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+    ap add(Action("Decrease Font Size") { changeFontSize(-5) }, 
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask | 
+      java.awt.event.InputEvent.SHIFT_DOWN_MASK))
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
@@ -204,5 +214,11 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask | 
       java.awt.event.InputEvent.SHIFT_DOWN_MASK))  
   }
+
+  private def changeFontSize(change: Int) {
+    statusTextSize += change
+    tableModel.fireTableDataChanged  
+  }
+  
 }
 

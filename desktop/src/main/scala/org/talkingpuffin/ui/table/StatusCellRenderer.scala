@@ -10,11 +10,14 @@ import util.ShortUrl
  * Status cell renderer.
  */
 class StatusCellRenderer extends HtmlCellRenderer {
+  var textSizePct = 100
+  
   override def setFormattedText(component: JTextComponent, value: Any) = component.setText(
     HtmlFormatter.htmlAround(formatValue(value.asInstanceOf[StatusCell], renderer.getForeground))) 
   
   private def formatValue(cell: StatusCell, color: Color): String = 
-    "<font face='helvetica' color='#" + Integer.toHexString(color.getRGB & 0x00ffffff) + "'>" + 
+      "<font style='font-size: " + textSizePct + "%;' face='helvetica' color='#" + 
+      Integer.toHexString(color.getRGB & 0x00ffffff) + "'>" + 
     (cell.name match {
       case Some(string) => string.name match {
         case Some(name) => EmphasizedStringCellRenderer.decorate(name, string.nameEmphasized) + ": "
