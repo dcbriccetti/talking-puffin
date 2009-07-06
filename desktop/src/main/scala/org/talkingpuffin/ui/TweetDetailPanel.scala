@@ -153,7 +153,7 @@ class TweetDetailPanel(session: Session, table: JTable,
     addFreshUserDescription
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
     val tags = streams.tagUsers.tagsForUser(user.id.toString()).mkString(", ")
-    userDescription.text = user.name + " • " +
+    userDescription.text = user.name + " (" + user.screenName + ") • " +
         location + " • " + user.description  + " • " +
         fmt(user.followersCount) + " followers, following " +
         fmt(user.friendsCount) +
