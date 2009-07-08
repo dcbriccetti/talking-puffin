@@ -13,6 +13,22 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], tabl
     browse: (String) => Unit, title: String) extends Action(title) {
   
   def apply {
+    def addMenuItem(menu: JPopupMenu, title: String, accelIndex: Int, action: => Unit) = {
+      val a1 = Action(title) {action}
+      a1.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_1 + accelIndex, 0)) 
+      menu.add(new MenuItem(a1).peer)
+    }
+    
+    def browseUrls(urls: List[String]) {
+      for (url <- urls) 
+        browse(url)
+    }
+    
+    def stripHttpProtocolString(url: String): String = {
+      val prefix = "http://"
+      if (url startsWith prefix) url substring prefix.length else url
+    }
+
     getSelectedStatus match {
       case Some(status) =>
         val urls = LinkExtractor.getLinks(status, users, pages)
@@ -24,10 +40,12 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], tabl
           var index = 0
     
           for (url <- urls) {
-            val a1 = Action(url._1) {browse(url._2)}
-            a1.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_1 + index, 0)) 
+            addMenuItem(menu, stripHttpProtocolString(url._1), index, browse(url._2))
             index += 1
-            menu.add(new MenuItem(a1).peer)
+          }
+          
+          if (urls.length > 1) {
+            addMenuItem(menu, "All of the above", index, browseUrls(urls.map(url => url._2)))
           }
           val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
           menu.show(table, menuLoc.getX().asInstanceOf[Int], menuLoc.getY().asInstanceOf[Int])

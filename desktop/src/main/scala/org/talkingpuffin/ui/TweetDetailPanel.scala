@@ -3,22 +3,21 @@ package org.talkingpuffin.ui
 import _root_.org.talkingpuffin.twitter.StreamUtil
 import _root_.scala.swing.event.{ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
-import _root_.org.talkingpuffin.util.PopupListener
 import _root_.scala.swing.{Frame, Label, GridBagPanel, ScrollPane, TextArea, BorderPanel}
-//import _root_.scala.xml.{XML, NodeSeq, Node}
 import geo.GeoCoder
 import java.awt.event.{MouseEvent, KeyAdapter, MouseAdapter, KeyEvent}
 import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Image, Font}
 import java.net.{HttpURLConnection, URI, URL}
 import java.text.NumberFormat
+import javax.swing._
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import javax.swing.text.JTextComponent
-import javax.swing.{ScrollPaneConstants, JTable, JTextPane, SwingWorker, ImageIcon, JScrollPane}
-import org.apache.log4j.Logger
 import state.{GlobalPrefs, PrefKeys}
+import talkingpuffin.util.{PopupListener}
 import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
+
 /**
  * Details of the currently-selected tweet.
  */
@@ -32,19 +31,25 @@ object Thumbnail {
     BufferedImage.TYPE_INT_ARGB))
 }
 
-class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDialog, streams: Streams) 
+class TweetDetailPanel(session: Session, table: JTable, 
+    filtersDialog: FiltersDialog, streams: Streams) 
     extends GridBagPanel {
-  private val log = Logger.getLogger("TweetDetailPanel")  
   private val geoCoder = new GeoCoder(processFinishedGeocodes)
   private val animator = new TextChangingAnimator
-  
+
   private var picLabel: Label = new Label {
     icon = Thumbnail.transparentMedium
   }
+  val picFetcher = new PictureFetcher(Some(Thumbnail.MEDIUM_SIZE), (imageReady: PictureFetcher.ImageReady) => {
+    if (imageReady.key.equals(showingUrl)) {
+      setPicLabelIconAndBigPic(imageReady.resource) 
+    }
+  })
+
+  private val bigPic = new BigPictureDisplayer(picFetcher)
+
   private var userDescription: TextArea = _
   private var largeTweet: JTextPane = _
-  private var bigPicFrame: Frame = _
-  private var bigPicLabel: Label = _
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
           
@@ -67,7 +72,7 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
   }.peer)
 
   picLabel.peer.addMouseListener(new MouseAdapter {
-    override def mouseClicked(e: MouseEvent) = if (showingUrl != null) showBigPicture
+    override def mouseClicked(e: MouseEvent) = if (showingUrl != null) bigPic.showBigPicture(showingUrl, peer)
   })
   add(new BorderPanel {
     val s = new Dimension(Thumbnail.MEDIUM_SIZE + 6, Thumbnail.MEDIUM_SIZE + 6)
@@ -120,6 +125,8 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
     userDescription.text = null
     largeTweet.setText(null)
   }
+  
+  def showBigPicture = bigPic.showBigPicture(showingUrl, peer)
 
   private def setText(user: TwitterUser) {
     animator.stop
@@ -146,7 +153,7 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
     addFreshUserDescription
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
     val tags = streams.tagUsers.tagsForUser(user.id.toString()).mkString(", ")
-    userDescription.text = user.name + " • " +
+    userDescription.text = user.name + " (" + user.screenName + ") • " +
         location + " • " + user.description  + " • " +
         fmt(user.followersCount) + " followers, following " +
         fmt(user.friendsCount) +
@@ -175,12 +182,6 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
     List(smallUrl, mediumUrl).foreach(url => picFetcher.requestItem(picFetcher.FetchImageRequest(url, null)))
   }
 
-  val picFetcher = new PictureFetcher(Some(Thumbnail.MEDIUM_SIZE), (imageReady: PictureFetcher.ImageReady) => {
-    if (imageReady.key.equals(showingUrl)) {
-      setPicLabelIconAndBigPic(imageReady.resource) 
-    }
-  })
-  
   private def showMediumPicture(picUrl: String) {
     val fullSizeUrl = PictureFetcher.getFullSizeUrl(picUrl)
     if (! fullSizeUrl.equals(showingUrl)) {
@@ -196,48 +197,8 @@ class TweetDetailPanel(session: Session, table: JTable, filtersDialog: FiltersDi
   
   private def setPicLabelIconAndBigPic(imageWithScaled: ImageWithScaled) {
     picLabel.icon = imageWithScaled.scaledImage match { case Some(icon) => icon case None => null} 
-    setBigPicLabelIcon(Some(imageWithScaled.image))
+    bigPic.setBigPicLabelIcon(Some(imageWithScaled.image), showingUrl, peer)
   }
 
-  def showBigPicture {
-    bigPicLabel = new Label
-    if (bigPicFrame != null) {
-      bigPicFrame.dispose
-    }
-    bigPicFrame = new Frame {
-      contents = bigPicLabel
-      peer.setLocationRelativeTo(picLabel.peer)
-      visible = true
-    }
-    setBigPicLabelIcon(None)
-
-    def closePicture {
-      bigPicFrame.dispose
-      bigPicFrame = null
-      bigPicLabel = null
-    }
-
-    bigPicLabel.peer.addMouseListener(new MouseAdapter {
-      override def mouseClicked(e: MouseEvent) = closePicture
-    })
-    
-    bigPicFrame.peer.addKeyListener(new KeyAdapter {
-      override def keyPressed(e: KeyEvent) = closePicture
-    })
-  }
-
-  private def setBigPicLabelIcon(image: Option[ImageIcon]) {
-    if (bigPicFrame != null && bigPicLabel != null) { 
-      bigPicLabel.icon = image match {
-        case Some(icon) => icon
-        case None => 
-          picFetcher.getCachedObject(PictureFetcher.getFullSizeUrl(showingUrl)) match {
-            case Some(imageWithScaledImage) => imageWithScaledImage.image
-            case None => null
-          }
-      }
-      bigPicFrame.pack
-    }
-  }
 }
 

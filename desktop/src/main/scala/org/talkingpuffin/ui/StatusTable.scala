@@ -1,9 +1,10 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.GridBagPanel._
-import _root_.org.talkingpuffin.util.PopupListener
 import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.swing.{MenuItem, Action}
+import apache.log4j.Logger
+import com.google.common.collect.Lists
 import java.awt.{Desktop, Toolkit, Component, Font}
 
 import _root_.scala.{Option}
@@ -16,12 +17,13 @@ import java.util.regex.Pattern
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableColumnModel, TableCellRenderer, DefaultTableColumnModel}
 import javax.swing.{JTable, KeyStroke, JMenu, JMenuItem, JPopupMenu, JComponent}
-import jdesktop.swingx.decorator.{SortOrder, HighlighterFactory}
+import jdesktop.swingx.decorator.{SortKey, SortOrder, HighlighterFactory}
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
 import state.{PrefKeys, GlobalPrefs}
 import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
+import talkingpuffin.util.{Loggable, PopupListener}
 import twitter.{TwitterStatus}
 import util.{TableUtil, DesktopUtil}
 
@@ -29,18 +31,24 @@ import util.{TableUtil, DesktopUtil}
  * Table of statuses.
  */
 class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture: => Unit)
-    extends JXTable(tableModel) {
+    extends JXTable(tableModel) with Loggable {
 
   setColumnControlVisible(true)
+  val rowMarginVal = 3
+  setRowMargin(rowMarginVal)
   setHighlighters(HighlighterFactory.createSimpleStriping)
-  setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)
+  setRowHeight(Thumbnail.THUMBNAIL_SIZE + rowMarginVal + 2)
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
+  val statusCellRenderer = new StatusCellRenderer
+  statusCellRenderer.textSizePct = GlobalPrefs.prefs.getInt(PrefKeys.STATUS_TABLE_STATUS_FONT_SIZE, 100)
 
-  var ageCol:   TableColumnExt = _
-  var imageCol: TableColumnExt = _
-  var nameCol:  TableColumnExt = _
-  var toCol:    TableColumnExt = _
+  val ageCol   = getColumnExt(0)
+  val imageCol = getColumnExt(1)
+  val nameCol  = getColumnExt(2)
+  val toCol    = getColumnExt(3)
+  val colAndKeys = List(ageCol, imageCol, nameCol, toCol) zip
+    List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)
   configureColumns
 
   val ap = new ActionPrep(this)
@@ -51,12 +59,30 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     override def mouseClicked(e: MouseEvent) = if (e.getClickCount == 2) reply
   })
   
+  def saveState {
+    val sortKeys = getSortController.getSortKeys
+    if (sortKeys.size > 0) {
+      val sortKey = sortKeys.get(0)
+      val sortCol = getColumns(true).get(sortKey.getColumn)
+      for ((col, key) <- colAndKeys; if (col == sortCol)) {
+        GlobalPrefs.sortBy(key, if (sortKey.getSortOrder == SortOrder.DESCENDING) 
+          PrefKeys.SORT_DIRECTION_DESC else PrefKeys.SORT_DIRECTION_ASC)
+      }
+    }
+  }
+  
   private def viewSelected {
     getSelectedStatuses.foreach(status => {
       var uri = "http://twitter.com/" +
           status.user.screenName + "/statuses/" + status.id
       DesktopUtil.browse(uri)
     })
+  }
+ 
+  def statusTextSize = statusCellRenderer.textSizePct
+  def statusTextSize_=(sizePct: Int) = {
+    statusCellRenderer.textSizePct = sizePct
+    GlobalPrefs.prefs.putInt(PrefKeys.STATUS_TABLE_STATUS_FONT_SIZE, sizePct)
   }
   
   def reply {
@@ -96,45 +122,43 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   }
   
   private def configureColumns {
-    val colModel = getColumnModel
-    
-    ageCol = colModel.getColumn(0).asInstanceOf[TableColumnExt]
     ageCol.setPreferredWidth(60)
     ageCol.setMaxWidth(100)
     ageCol.setCellRenderer(new AgeCellRenderer)
     
-    imageCol = colModel.getColumn(1).asInstanceOf[TableColumnExt]
     imageCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
     imageCol.setSortable(false)
     
-    nameCol = colModel.getColumn(2).asInstanceOf[TableColumnExt]
     nameCol.setPreferredWidth(100)
     nameCol.setMaxWidth(200)
     nameCol.setCellRenderer(new EmphasizedStringCellRenderer)
     nameCol.setComparator(EmphasizedStringComparator)
     
-    toCol = colModel.getColumn(3).asInstanceOf[TableColumnExt]
     toCol.setPreferredWidth(100)
     toCol.setMaxWidth(200)
     toCol.setCellRenderer(new EmphasizedStringCellRenderer)
     toCol.setComparator(EmphasizedStringComparator)
     
-    val statusCol = colModel.getColumn(4).asInstanceOf[TableColumnExt]
+    val statusCol = getColumnExt(4)
     statusCol.setPreferredWidth(600)
-    statusCol.setCellRenderer(new StatusCellRenderer)
+    statusCol.setCellRenderer(statusCellRenderer)
     statusCol.setSortable(false)
 
-    // Set column visibility from preferences
-    val colAndKeys = List(ageCol, imageCol, nameCol, toCol) zip
-        List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)
+    // Set from preferences
     
     for ((col, key) <- colAndKeys) {
       col.setVisible(GlobalPrefs.isColumnShowing(key))
       updateTableModelOptions(col)
     }
 
-    colModel.addColumnModelListener(new TableColumnModelExtListener {
-      def columnPropertyChange(event: PropertyChangeEvent) = 
+    val sortDir = if (GlobalPrefs.prefs.get(PrefKeys.SORT_DIRECTION, PrefKeys.SORT_DIRECTION_DESC) == 
+            PrefKeys.SORT_DIRECTION_DESC) SortOrder.DESCENDING else SortOrder.ASCENDING
+    val modelIndex = colAndKeys.find(ck => ck._2 ==
+            GlobalPrefs.prefs.get(PrefKeys.SORT_BY, PrefKeys.AGE)).get._1.getModelIndex
+    getSortController.setSortKeys(Lists.newArrayList(new SortKey(sortDir, modelIndex)))
+
+    getColumnModel.addColumnModelListener(new TableColumnModelExtListener {
+      def columnPropertyChange(event: PropertyChangeEvent) = {
         if (event.getPropertyName.equals("visible")) {
           // Save changes into preferences.
           val source = event.getSource
@@ -142,6 +166,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
 
           for ((col, key) <- colAndKeys; if (source == col)) GlobalPrefs.showColumn(key, col.isVisible)
         }
+      }
 
       def columnSelectionChanged(e: ListSelectionEvent) = {}
       def columnRemoved(e: TableColumnModelEvent) = {}
@@ -160,8 +185,10 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     else if (source == nameCol) op.showNameColumn = nameCol.isVisible
     else if (source == toCol)   op.showToColumn   = toCol  .isVisible
   }
-  
+
   protected def buildActions = {
+    val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
+
     ap add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
     ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_U))
@@ -170,23 +197,34 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ap add new NextTAction(this)
     ap add new PrevTAction(this)
     ap add(new TagAction(this, tableModel), Actions.ks(KeyEvent.VK_T))
+    ap add(Action("Increase Font Size") { changeFontSize(5) }, 
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask))
+    ap add(Action("Decrease Font Size") { changeFontSize(-5) }, 
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask | 
+      java.awt.event.InputEvent.SHIFT_DOWN_MASK))
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
     ap add(Action("Unfollow") { unfollow}, KeyStroke.getKeyStroke(KeyEvent.VK_U,
-      Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+      shortcutKeyMask))
     ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
-      Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+      shortcutKeyMask))
     
     ap add(Action("Delete selected tweets") {
       tableModel removeStatuses TableUtil.getSelectedModelIndexes(this) 
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask),
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, shortcutKeyMask),
       Actions.ks(KeyEvent.VK_DELETE), Actions.ks(KeyEvent.VK_BACK_SPACE))
 
     ap add(Action("Delete all tweets from all selected users") {
       tableModel removeStatusesFrom getSelectedScreenNames 
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask | 
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, shortcutKeyMask | 
       java.awt.event.InputEvent.SHIFT_DOWN_MASK))  
   }
+
+  private def changeFontSize(change: Int) {
+    statusTextSize += change
+    tableModel.fireTableDataChanged  
+  }
+  
 }
 

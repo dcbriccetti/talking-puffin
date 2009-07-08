@@ -7,12 +7,11 @@ import org.talkingpuffin.twitter.{TwitterStatus}
 /**
  * Extracts links from Twitter status
  */
-
 object LinkExtractor {
   
   val urlCharClass = """[^'"()\[\]\s]"""
   val hyperlinkRegex = "(https?://" + urlCharClass + "+)"
-  val usernameRegex = """@([^\s:.,()]+)"""
+  val usernameRegex = """@(\w+)"""
   val usernameUrl = "http://twitter.com/$1"
   val hyperlinkPattern = Pattern.compile(hyperlinkRegex)
   val usernamePattern = Pattern.compile(usernameRegex)
@@ -34,7 +33,7 @@ object LinkExtractor {
         case Some(user) => if (replyTo.length > 0) {
           val url = getStatusUrl(replyTo, user)
           urls = ("Status " + replyTo + " of " + user, url) :: urls
-        }; 
+        } 
         case None =>        
       }
   
@@ -56,9 +55,8 @@ object LinkExtractor {
     urls reverse
   }
   
-  def getStatusUrl(replyTo: String, replyToUser: String): String = {
+  def getStatusUrl(replyTo: String, replyToUser: String): String = 
     "http://twitter.com/" + replyToUser + "/statuses/" + replyTo
-  }
 
   val replyToUserPattern = Pattern.compile("^@(\\S+)")
   

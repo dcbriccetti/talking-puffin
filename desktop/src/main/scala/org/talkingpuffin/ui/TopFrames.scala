@@ -3,11 +3,12 @@ package org.talkingpuffin.ui
 import apache.log4j.Logger
 import mac.QuitHandler
 import java.awt.Frame
+import talkingpuffin.util.Loggable
+
 /**
  * Keeps track of top-level frames.
  */
-object TopFrames {
-  val log = Logger getLogger "TopFrames"
+object TopFrames extends Loggable {
   private var frames = List[TopFrame]()
 
   QuitHandler register TopFrames.closeAll
@@ -28,18 +29,18 @@ object TopFrames {
   }
   def addFrame(f: TopFrame){
     frames = f :: frames
-    log debug "Frame added. Number of frames is " + frames.size + "."
+    debug("Frame added. Number of frames is " + frames.size + ".")
   }
 
   def removeFrame(f: TopFrame){
     frames = frames.remove {f == _}
-    log debug "Frame removed. Number of frames is " + frames.size + "."
+    debug ("Frame removed. Number of frames is " + frames.size + ".")
     exitIfNoFrames
   }
 
   def exitIfNoFrames =
     if(frames.size == 0){
-      log debug "No more frames. Exiting."
+      debug("No more frames. Exiting.")
       // it's kinda ugly to put the exit logic here, but not sure where
       // else to put it.'
       System.exit(0)

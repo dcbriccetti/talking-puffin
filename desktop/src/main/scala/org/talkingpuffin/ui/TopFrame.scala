@@ -14,6 +14,7 @@ import scala.xml._
 
 import TabbedPane._
 import state.PreferencesFactory
+import talkingpuffin.util.Loggable
 import twitter._
 import ui._
 import ui.util.FetchRequest
@@ -21,8 +22,8 @@ import ui.util.FetchRequest
 /**
  * The top-level application Swing frame window. There is one per user session.
  */
-class TopFrame(username: String, password: String, twitterSession: AuthenticatedSession) extends Frame{
-  val log = Logger getLogger "TopFrame"
+class TopFrame(username: String, password: String, twitterSession: AuthenticatedSession) 
+      extends Frame with Loggable {
   val tagUsers = new TagUsers(username)
   TopFrames.addFrame(this)
   val session = new Session(twitterSession)
@@ -62,7 +63,7 @@ class TopFrame(username: String, password: String, twitterSession: Authenticated
 
   reactions += {
     case WindowClosing(_) => {
-      Globals.sessions = Globals.sessions remove(s => s == session) // TODO is this best way?
+      Globals.sessions = Globals.sessions remove(s => s == session)
       saveState
       TopFrames.removeFrame(this)
     }
@@ -71,20 +72,17 @@ class TopFrame(username: String, password: String, twitterSession: Authenticated
   peer.setLocationRelativeTo(null)
   createPeoplePane
 
+  def setFocus = streams.streamInfoList.last.pane.requestFocusForTable
+  
   def saveState {
     val highFol = streams.tweetsProvider.getHighestId
     val highMen = streams.mentionsProvider.getHighestId
-    log info("Saving last seen IDs for " + username + ". Following: " + highFol + ", mentions: " + highMen)
+    info("Saving last seen IDs for " + username + ". Following: " + highFol + ", mentions: " + highMen)
     val prefs = PreferencesFactory.prefsForUser(username)
-    highFol match {
-      case Some(i) => prefs.put("highestId", i.toString())
-      case _ => // noop
-    }
-    highMen match {
-      case Some(i) => prefs.put("highestMentionId", i.toString())
-      case _ => //noop
-    }
+    if (highFol.isDefined) prefs.put("highestId"       , highFol.get.toString())
+    if (highMen.isDefined) prefs.put("highestMentionId", highMen.get.toString())
     tagUsers.save
+    streams.streamInfoList.last.pane.saveState // TODO instead save the order of the last status pane changed
   }
   
   private def createPeoplePane: Unit = {

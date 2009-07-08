@@ -18,6 +18,11 @@ object GlobalPrefs {
     prefs.putBoolean(PrefKeys.SHOW_COL + col, showing)
   }
   
+  def sortBy(col: String, direction: String) {
+    prefs.put(PrefKeys.SORT_BY, col)
+    prefs.put(PrefKeys.SORT_DIRECTION, direction)
+  }
+  
   def isColumnShowing(col: String): Boolean = prefs.getBoolean(PrefKeys.SHOW_COL + col, true)
 }
 
@@ -34,6 +39,7 @@ object PrefKeys {
   val SORT_DIRECTION    = "sortDirection"
   val SORT_DIRECTION_ASC   = "asc"
   val SORT_DIRECTION_DESC  = "desc"
+  val STATUS_TABLE_STATUS_FONT_SIZE = "statusTableStatusFontSize"
 
   val gprefs = GlobalPrefs.prefs
   val keys = gprefs.keys
