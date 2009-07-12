@@ -8,11 +8,11 @@ import java.util.regex.Pattern
 
 object HtmlFormatter {
 
-  def createTweetHtml(text: String, replyTo: String, source: String): String = {
+  def createTweetHtml(text: String, replyTo: Long, source: String): String = {
     val arrowLinkToParent = LinkExtractor.getReplyToUser(text) match {
       case Some(user) => {
-        if (replyTo.length > 0) {
-          "<a href='" + LinkExtractor.getStatusUrl(replyTo, user) + "'>↑</a> " 
+        if (replyTo != 0) {
+          "<a href='" + LinkExtractor.getStatusUrl(replyTo.toString, user) + "'>↑</a> " 
         } else ""
       }
       case None => ""

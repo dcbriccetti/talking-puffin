@@ -106,7 +106,7 @@ class TweetDetailPanel(session: Session, table: JTable,
     val user = status.user
     setText(user)
     largeTweet.setText(HtmlFormatter.createTweetHtml(status.text,
-                                                     status.inReplyToStatusId.toString,
+                                                     status.inReplyToStatusId,
                                                      status.source))
     largeTweet setCaretPosition 0
 
