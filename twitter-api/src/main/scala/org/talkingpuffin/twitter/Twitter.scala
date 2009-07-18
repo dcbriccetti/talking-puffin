@@ -85,7 +85,7 @@ class UnauthenticatedSession() extends TwitterSession{
   * @param id the user id <i>or</i> user name to get favorites for
   */
   def getFavorites(id: String) :List[TwitterStatus] = {
-    new Parser[TwitterStatus](new URL("http://twitter.com/favorites/" + URLEncoder.encode(id) + ".xml"),fetcher,TwitterStatus.apply).parseXMLList("status")
+    new Parser[TwitterStatus](new URL("http://twitter.com/favorites/" + urlEncode(id) + ".xml"),fetcher,TwitterStatus.apply).parseXMLList("status")
   }
   
   /**
@@ -93,7 +93,7 @@ class UnauthenticatedSession() extends TwitterSession{
   * @param page the results page to fetch.
   */
   def getFavorites(id: String, page: Int) :List[TwitterStatus] = {
-    new Parser[TwitterStatus](new URL("http://twitter.com/favorites/" + URLEncoder.encode(id) + ".xml?page=" + page.toString()),fetcher,TwitterStatus.apply).parseXMLList("status")
+    new Parser[TwitterStatus](new URL("http://twitter.com/favorites/" + urlEncode(id) + ".xml?page=" + page.toString()),fetcher,TwitterStatus.apply).parseXMLList("status")
   }
 
   /**
@@ -112,8 +112,10 @@ class UnauthenticatedSession() extends TwitterSession{
   }
 
   def getFriends(id: String, args: TwitterArgs): List[TwitterUser] = {
-    new Parser[TwitterUser](new URL("http://twitter.com/statuses/friends/" + URLEncoder.encode(id) + ".xml" + args),fetcher,TwitterUser.apply).parseXMLList("user")
+    new Parser[TwitterUser](new URL("http://twitter.com/statuses/friends/" + urlEncode(id) + ".xml" + args),fetcher,TwitterUser.apply).parseXMLList("user")
   }
+  
+  protected def urlEncode(value: String) = URLEncoder.encode(value, "UTF-8")
 }
 
 /**
@@ -137,7 +139,7 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
   }
 
   def getFriendsTimeline(id: String, args:TwitterArgs): List[TwitterStatus] = {
-    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/friends_timeline/" + URLEncoder.encode(id) + ".xml" + args),authFetcher,TwitterStatus.apply).parseXMLList("status")
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/friends_timeline/" + urlEncode(id) + ".xml" + args),authFetcher,TwitterStatus.apply).parseXMLList("status")
   }
 
   def getFriendsTimeline() :List[TwitterStatus] = {
@@ -163,22 +165,22 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
   }
 
   def getUserTimeline(id: String, args: TwitterArgs): List[TwitterStatus] = {
-    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/user_timeline/" + URLEncoder.encode(id) + ".xml" + args),authFetcher,TwitterStatus.apply).parseXMLList("status")
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/user_timeline/" + urlEncode(id) + ".xml" + args),authFetcher,TwitterStatus.apply).parseXMLList("status")
   }
   /**
   * @param id the user id <i>or</i> user name who was mentioned
   */
   def getMentions(id: String) :List[TwitterStatus] = {
-    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/mentions/" + URLEncoder.encode(id) + ".xml"),authFetcher,TwitterStatus.apply).parseXMLList("status")
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/mentions/" + urlEncode(id) + ".xml"),authFetcher,TwitterStatus.apply).parseXMLList("status")
   }
   def getMentions(id: String, page: Int) :List[TwitterStatus] = {
-    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/mentions/" + URLEncoder.encode(id) + ".xml?page=" + page),authFetcher,TwitterStatus.apply).parseXMLList("status")
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/mentions/" + urlEncode(id) + ".xml?page=" + page),authFetcher,TwitterStatus.apply).parseXMLList("status")
   }
   /**
   * @param id the user id <i>or</i> user name to get details for
   */
   def getUserDetail(id: String) :TwitterUser = {
-    new Parser[TwitterUser](new URL("http://twitter.com/users/show/" + URLEncoder.encode(id) + ".xml"),authFetcher,TwitterUser.apply).parseXMLElement()
+    new Parser[TwitterUser](new URL("http://twitter.com/users/show/" + urlEncode(id) + ".xml"),authFetcher,TwitterUser.apply).parseXMLElement()
   }
 
   def getUserDetail(): TwitterUser = {
@@ -246,7 +248,7 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
   }
 
   def getFriendshipExists(id1: String, id2: String): Boolean = {
-    val xml = authFetcher.doGet(new URL("http://twitter.com/friendships/exists.xml?user_a=" + URLEncoder.encode(id1) + "&user_b=" + URLEncoder.encode(id2)))
+    val xml = authFetcher.doGet(new URL("http://twitter.com/friendships/exists.xml?user_a=" + urlEncode(id1) + "&user_b=" + urlEncode(id2)))
     xml match {
       case <friends>true</friends> => true
       case _ => false

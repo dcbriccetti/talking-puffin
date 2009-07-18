@@ -6,7 +6,6 @@ import _root_.scala.swing.event.{CaretUpdate, EditDone}
 import _root_.scala.xml.NodeSeq
 import java.awt.event.{KeyAdapter, KeyEvent}
 import java.awt.{Dimension, Font}
-import java.net.URLEncoder
 import javax.swing.KeyStroke
 
 /**
