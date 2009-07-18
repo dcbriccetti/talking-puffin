@@ -27,6 +27,7 @@ class TagAction(table: JTable, taggingSupport: TaggingSupport) extends Action("T
         }
       }
     }
+    TableUtil.invalidateModelIndexes(table, modelIndexes)
   }
 }
 

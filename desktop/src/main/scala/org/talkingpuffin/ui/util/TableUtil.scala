@@ -1,6 +1,7 @@
 package org.talkingpuffin.ui.util
 
 import javax.swing.JTable
+import javax.swing.table.AbstractTableModel
 
 /**
  * Table utilities.
@@ -13,6 +14,11 @@ object TableUtil {
       smi ::= table.convertRowIndexToModel(tableRows(i))
     }
     smi
+  }
+  
+  def invalidateModelIndexes(table: JTable, indexes: List[Int]) {
+    val model = table.getModel.asInstanceOf[AbstractTableModel]
+    indexes foreach {index => model.fireTableRowsUpdated(index, index)}
   }
 
 }
