@@ -358,6 +358,14 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
   def getUserRateLimitStatus(): TwitterRateLimitStatus = {
     new Parser[TwitterRateLimitStatus](new URL("http://twitter.com/account/rate_limit_status.xml"),authFetcher,TwitterRateLimitStatus.apply).parseXMLElement()
   }
+
+  def getFriendIds(id:String) = {
+    new Parser[Int](new URL("http://twitter.com/friends/ids/" + id + ".xml"),authFetcher,(node:Node) => Integer.parseInt(node.text)).parseXMLList("id")
+  }
+
+  def getFollowerIds(id:String) = {
+    new Parser[Int](new URL("http://twitter.com/followers/ids/" + id + ".xml"),authFetcher,(node:Node) => Integer.parseInt(node.text)).parseXMLList("id")
+  }
 }
 
 // end session http://twitter.com/account/end_session
