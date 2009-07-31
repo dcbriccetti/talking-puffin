@@ -13,6 +13,8 @@ import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
 import org.apache.log4j.Logger
 import _root_.org.talkingpuffin
+import state.{GlobalPrefs, PrefKeys}
+
 import ui.table.{EmphasizedString, StatusCell}
 import time.TimeFormatter
 import twitter.{TweetsArrived, TweetsProvider, TwitterStatus}
@@ -79,14 +81,29 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     val status = filteredStatuses.get(rowIndex)
     
     def age(status: TwitterStatus):java.lang.Long = dateToAgeSeconds(status.createdAt.toDate().getTime())
-    def senderName(status: TwitterStatus) = status.user.name
+
+    def senderName(status: TwitterStatus) = {
+      if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) {
+        status.user.name
+        } else {
+        status.user.screenName
+      }
+    }
+
     def senderNameEs(status: TwitterStatus): EmphasizedString = {
       val name = senderName(status)
       val id = status.user.id.toString()
       new EmphasizedString(Some(name), followerIdsx.contains(id))
     }
+
     def toName(status: TwitterStatus) = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
-      case Some(u) => Some(usersModel.usersModel.screenNameToUserNameMap.getOrElse(u, u))
+      case Some(u) => {
+         if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) {
+           Some(usersModel.usersModel.screenNameToUserNameMap.getOrElse(u, u))
+         } else {
+           Some(u)
+         }
+      }
       case None => None 
     }
     
