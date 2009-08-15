@@ -101,10 +101,7 @@ class XMLFetcher(user: String, password: String){
       case Nil => null
       case (param,value) :: rest => {
         val end = buildParams(rest)
-        if(end != null)
-          return param + "=" + URLEncoder.encode(value) + "&" + end
-        else
-          return param + "=" + URLEncoder.encode(value)
+        param + "=" + URLEncoder.encode(value, "UTF-8") + (if (end == null) "" else "&" + end)
       }
     }
   }
