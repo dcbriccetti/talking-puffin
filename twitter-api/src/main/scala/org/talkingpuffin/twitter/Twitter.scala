@@ -165,6 +165,20 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
   def getUserTimeline(id: String, args: TwitterArgs): List[TwitterStatus] = {
     new Parser[TwitterStatus](new URL("http://twitter.com/statuses/user_timeline/" + URLEncoder.encode(id) + ".xml" + args),authFetcher,TwitterStatus.apply).parseXMLList("status")
   }
+
+  /**
+  * @param id the user id <i>or</i> user name of the desired user's timeline with retweets
+  */
+  def getHomeTimeline(id: String) :List[TwitterStatus] = {
+    getHomeTimeline(id,TwitterArgs())
+  }
+  def getHomeTimeline(id: String, page: Int) :List[TwitterStatus] = {
+    getHomeTimeline(id,TwitterArgs.page(page))
+  }
+
+  def getHomeTimeline(id: String, args: TwitterArgs): List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/home_timeline/" + URLEncoder.encode(id) + ".xml" + args),authFetcher,TwitterStatus.apply).parseXMLList("status")
+  }
   /**
   * @param id the user id <i>or</i> user name who was mentioned
   */
@@ -174,6 +188,40 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
   def getMentions(id: String, page: Int) :List[TwitterStatus] = {
     new Parser[TwitterStatus](new URL("http://twitter.com/statuses/mentions/" + URLEncoder.encode(id) + ".xml?page=" + page),authFetcher,TwitterStatus.apply).parseXMLList("status")
   }
+
+  def getRetweetedByMe() :List[TwitterStatus] = {
+    getRetweetedByMe(TwitterArgs())
+  }
+  def getRetweetedByMe(page: Int) :List[TwitterStatus] = {
+    getRetweetedByMe(TwitterArgs.page(page))
+  }
+
+  def getRetweetedByMe(args: TwitterArgs): List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/retweeted_by_me.xml" + args),authFetcher,TwitterStatus.apply).parseXMLList("status")
+  }
+
+  def getRetweetedToMe() :List[TwitterStatus] = {
+    getRetweetedToMe(TwitterArgs())
+  }
+  def getRetweetedToMe(page: Int) :List[TwitterStatus] = {
+    getRetweetedToMe(TwitterArgs.page(page))
+  }
+
+  def getRetweetedToMe(args: TwitterArgs): List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/retweeted_to_me.xml" + args),authFetcher,TwitterStatus.apply).parseXMLList("status")
+  }
+
+  def getRetweetsOfMe() :List[TwitterStatus] = {
+    getRetweetsOfMe(TwitterArgs())
+  }
+  def getRetweetsOfMe(page: Int) :List[TwitterStatus] = {
+    getRetweetsOfMe(TwitterArgs.page(page))
+  }
+
+  def getRetweetsOfMe(args: TwitterArgs): List[TwitterStatus] = {
+    new Parser[TwitterStatus](new URL("http://twitter.com/statuses/retweets_of_me.xml" + args),authFetcher,TwitterStatus.apply).parseXMLList("status")
+  }
+
   /**
   * @param id the user id <i>or</i> user name to get details for
   */
@@ -360,11 +408,16 @@ class AuthenticatedSession(val user: String, password: String) extends Unauthent
   }
 
   def getFriendIds(id:String) = {
-    new Parser[Int](new URL("http://twitter.com/friends/ids/" + id + ".xml"),authFetcher,(node:Node) => Integer.parseInt(node.text)).parseXMLList("id")
+    new Parser[Long](new URL("http://twitter.com/friends/ids/" + id + ".xml"),authFetcher,(node:Node) => java.lang.Long.parseLong(node.text)).parseXMLList("id")
   }
 
   def getFollowerIds(id:String) = {
-    new Parser[Int](new URL("http://twitter.com/followers/ids/" + id + ".xml"),authFetcher,(node:Node) => Integer.parseInt(node.text)).parseXMLList("id")
+    new Parser[Long](new URL("http://twitter.com/followers/ids/" + id + ".xml"),authFetcher,(node:Node) => java.lang.Long.parseLong(node.text)).parseXMLList("id")
+  }
+
+  def retweet(id:String) = {
+    val resp = authFetcher.doPost(new URL("http://twitter.com/statuses/retweet" + id + ".xml?source=talkingpuffin"),Nil)
+    TwitterStatus(resp)
   }
 }
 
