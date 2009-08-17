@@ -13,7 +13,14 @@ import state.{GlobalPrefs, PrefKeys}
  */
 class MainMenuBar extends MenuBar {
   val prefs = GlobalPrefs.prefs
-  
+
+  contents += new Menu("File") {
+    contents += new MenuItem(new Action("Close Window") {
+        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+                                                  Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+        def apply = TopFrames.closeCurrentWindow()
+    })
+  }
   contents += new Menu("Session") {
     contents += new MenuItem(new Action("New...") {
       accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, 

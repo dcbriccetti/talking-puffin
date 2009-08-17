@@ -87,8 +87,10 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   
   def reply {
     val statuses = getSelectedStatuses
-    val recipients = statuses.map(status => ("@" + status.user.screenName)).mkString(" ")
-    createSendMsgDialog(statuses(0), Some(recipients), None).visible = true
+    if (statuses.length > 0) {
+      val recipients = statuses.map(status => ("@" + status.user.screenName)).mkString(" ")
+      createSendMsgDialog(statuses(0), Some(recipients), None).visible = true
+    }
   }
   
   def retweet {

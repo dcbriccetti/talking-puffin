@@ -6,8 +6,8 @@ import _root_.scala.swing.event.{CaretUpdate, EditDone}
 import _root_.scala.xml.NodeSeq
 import java.awt.event.{KeyAdapter, KeyEvent}
 import java.awt.{Dimension, Font}
-import javax.swing.KeyStroke
-
+import javax.swing.{SwingWorker, KeyStroke}
+import twitter.TwitterStatus
 /**
  * A dialog for sending messages
  */
@@ -58,12 +58,21 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
   peer.setLocationRelativeTo(parent)
   
   private def send {
-    replyToId match {
-      case Some(idStr) => session.twitterSession.updateStatus(message.text, java.lang.Long.parseLong(idStr))
-      case _ => session.twitterSession.updateStatus(message.text)
-    }
-    
+    session.status.text = "Sending message"
+    new SwingWorker[TwitterStatus, Object] {
+      override def doInBackground: TwitterStatus = {
+        val twses = session.twitterSession
+        replyToId match {
+          case Some(idStr) => twses.updateStatus(message.text, java.lang.Long.parseLong(idStr))
+          case _ => twses.updateStatus(message.text)
+        }
+      }
+      override def done = {
+        val twitterStatus = get
+        session.status.text = "Message sent"
+      }
+    }.execute
+
     visible = false
-    session.status.text = "Message sent"    
   }
 }
