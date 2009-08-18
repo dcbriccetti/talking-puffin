@@ -1,6 +1,8 @@
 package org.talkingpuffin.twitter
 
 import java.net.{URLConnection,URL,HttpURLConnection,URLEncoder}
+import java.util.Locale
+import joda.time.format.DateTimeFormat
 import scala.xml._
 import org.apache.commons.codec.binary.Base64
 import java.io.{DataOutputStream,DataInputStream,IOException,BufferedReader,InputStreamReader}
@@ -134,4 +136,8 @@ class Parser[T](url: URL, fetcher :XMLFetcher, factory: (Node) => T){
 
 trait Validated{
   def isValid(): Boolean
+}
+
+object DateTimeFormats {
+  val fmt1 = DateTimeFormat.forPattern("EE MMM dd HH:mm:ss Z yyyy").withLocale(Locale.US)
 }
