@@ -1,3 +1,4 @@
+
 package org.talkingpuffin.twitter
 
 import java.util.Date
@@ -5,6 +6,7 @@ import scala.xml._
 import org.apache.log4j._
 import org.joda.time._
 import org.joda.time.format._
+import java.util.Locale
 /**
 * Represents a twitter direct message.
 */
@@ -48,7 +50,7 @@ class TwitterMessage() extends Validated{
 
 object TwitterMessage{
   val logger = Logger.getLogger("twitter")
-  val fmt = DateTimeFormat.forPattern("EE MMM dd HH:mm:ss Z yyyy")
+  val fmt = DateTimeFormats.fmt1
 
   /**
   * construct a TwitterMessage object from an XML node

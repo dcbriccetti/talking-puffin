@@ -53,7 +53,7 @@ class Retweet extends TwitterUser{
 */ 
 object TwitterStatus{
   val logger = Logger.getLogger("twitter")
-  val fmt = DateTimeFormat.forPattern("EE MMM dd HH:mm:ss Z yyyy")
+  val fmt = DateTimeFormats.fmt1
 
   /**
   * construct a TwitterStatus object from an XML node
@@ -92,7 +92,7 @@ object TwitterStatus{
 */
 object Retweet{
   val logger = Logger.getLogger("twitter")
-  val fmt = DateTimeFormat.forPattern("EE MMM dd HH:mm:ss Z yyyy")
+  val fmt = DateTimeFormats.fmt1
 
   /**
   * construct a TwitterStatus object from an XML node

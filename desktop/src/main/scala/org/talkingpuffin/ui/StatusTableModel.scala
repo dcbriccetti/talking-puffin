@@ -15,9 +15,8 @@ import org.apache.log4j.Logger
 import _root_.org.talkingpuffin
 import state.{GlobalPrefs, PrefKeys}
 
-import ui.table.{EmphasizedString, StatusCell}
-import time.TimeFormatter
 import twitter.{TweetsArrived, TweetsProvider, TwitterStatus}
+import ui.table.{EmphasizedString, StatusCell}
 
 /**
  * Model providing status data to the JTable
@@ -173,8 +172,6 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filterAndNotify
   }
 
-  val df = new java.text.SimpleDateFormat("EEE MMM d HH:mm:ss Z yyyy", Locale.ENGLISH)
-  
   private def dateToAgeSeconds(date: Long): Long = {
     (new Date().getTime() - date) / 1000
   }
