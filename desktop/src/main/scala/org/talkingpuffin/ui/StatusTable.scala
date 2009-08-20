@@ -79,13 +79,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     })
   }
  
-  private def viewUser {
-    getSelectedStatuses.map(_.user.screenName).removeDuplicates.foreach(screenName => {
-      var uri = "http://twitter.com/" + screenName
-      DesktopUtil.browse(uri)
-    })
-  }
- 
+  private def viewUser = getSelectedScreenNames.foreach(screenName => 
+      DesktopUtil.browse("http://twitter.com/" + screenName))
+
   def statusTextSize = statusCellRenderer.textSizePct
   def statusTextSize_=(sizePct: Int) = {
     statusCellRenderer.textSizePct = sizePct
@@ -117,7 +113,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   private def block = getSelectedScreenNames foreach session.twitterSession.blockUser
   private def unblock = getSelectedScreenNames foreach session.twitterSession.unblockUser
 
-  def getSelectedScreenNames = getSelectedStatuses.map(s => s.user.screenName)
+  def getSelectedScreenNames = getSelectedStatuses.map(_.user.screenName).removeDuplicates
   def getSelectedStatuses = tableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
 
   def getSelectedStatus: Option[TwitterStatus] = {
