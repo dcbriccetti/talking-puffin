@@ -172,7 +172,6 @@ class UsersPasswords extends Loggable {
   
   def save() {
     val ser = data.map(_.serialized).mkString("\t")
-    info("Saving " + ser)
     prefs.put(usersKey, ser)
   }
   def save(username: String, password: String) {
@@ -189,7 +188,6 @@ class UsersPasswords extends Loggable {
   def passwordFor(username: String): Option[String] = 
     data.find(_.user == username) match {
       case Some(userPassword) =>
-        info("Found " + userPassword.password)
         Some(userPassword.password)
       case _ => None
     }
