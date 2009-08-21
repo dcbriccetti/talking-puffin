@@ -108,16 +108,12 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     
     columnIndex match {
       case 0 => age(status)
-      case 1 => {
-          val picUrl = status.user.profileImageURL
-        pcell.request(picUrl, rowIndex)
-      }
+      case 1 => pcell.request(status.user.profileImageURL, rowIndex)
       case 2 => senderNameEs(status)
       case 3 => {
         val name = status.user.name
         val id = status.user.id
-        val user = toName(status)
-        new EmphasizedString(user, false)
+        new EmphasizedString(toName(status), false)
       }
       case 4 => {
         var st = getStatusText(status, username)

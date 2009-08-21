@@ -79,6 +79,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     })
   }
  
+  private def viewUser = getSelectedScreenNames.foreach(screenName => 
+      DesktopUtil.browse("http://twitter.com/" + screenName))
+
   def statusTextSize = statusCellRenderer.textSizePct
   def statusTextSize_=(sizePct: Int) = {
     statusCellRenderer.textSizePct = sizePct
@@ -110,7 +113,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   private def block = getSelectedScreenNames foreach session.twitterSession.blockUser
   private def unblock = getSelectedScreenNames foreach session.twitterSession.unblockUser
 
-  def getSelectedScreenNames = getSelectedStatuses.map(s => s.user.screenName)
+  def getSelectedScreenNames = getSelectedStatuses.map(_.user.screenName).removeDuplicates
   def getSelectedStatuses = tableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
 
   def getSelectedStatus: Option[TwitterStatus] = {
@@ -191,7 +194,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   protected def buildActions = {
     val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
 
-    ap add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
+    ap add(Action("View status in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
+    ap add(Action("View user in Browser") {viewUser}, KeyStroke.getKeyStroke(KeyEvent.VK_V,  
+      java.awt.event.InputEvent.SHIFT_DOWN_MASK))
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
     ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_U))
     ap add(Action("Mute") {tableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
