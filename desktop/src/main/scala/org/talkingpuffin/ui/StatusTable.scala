@@ -82,6 +82,11 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   private def viewUser = getSelectedScreenNames.foreach(screenName => 
       DesktopUtil.browse("http://twitter.com/" + screenName))
 
+  private def editUser = getSelectedStatuses.foreach(status => { 
+    val userProperties = new UserPropertiesDialog(session.windows.streams.prefs, status)
+    userProperties.visible = true  
+  })
+
   def statusTextSize = statusCellRenderer.textSizePct
   def statusTextSize_=(sizePct: Int) = {
     statusCellRenderer.textSizePct = sizePct
@@ -195,8 +200,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
 
     ap add(Action("View status in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
-    ap add(Action("View user in Browser") {viewUser}, KeyStroke.getKeyStroke(KeyEvent.VK_V,  
-      java.awt.event.InputEvent.SHIFT_DOWN_MASK))
+    ap add(Action("View user in Browser") {viewUser}, KeyStroke.getKeyStroke(KeyEvent.VK_V, 
+      java.awt.event.InputEvent.SHIFT_DOWN_MASK))  
+    ap add(Action("Edit user properties…") {editUser}, KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask))
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
     ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_U))
     ap add(Action("Mute") {tableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
@@ -212,10 +218,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
-    ap add(Action("Unfollow") { unfollow}, KeyStroke.getKeyStroke(KeyEvent.VK_U,
-      shortcutKeyMask))
-    ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B,
-      shortcutKeyMask))
+    ap add(Action("Unfollow") { unfollow}, KeyStroke.getKeyStroke(KeyEvent.VK_U, shortcutKeyMask))
+    ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B, shortcutKeyMask))
     
     ap add(Action("Delete selected tweets") {
       tableModel removeStatuses TableUtil.getSelectedModelIndexes(this) 

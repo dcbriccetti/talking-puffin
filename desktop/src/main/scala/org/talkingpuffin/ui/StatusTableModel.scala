@@ -13,8 +13,7 @@ import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
 import org.apache.log4j.Logger
 import _root_.org.talkingpuffin
-import state.{GlobalPrefs, PrefKeys}
-
+import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
 import twitter.{TweetsArrived, TweetsProvider, TwitterStatus}
 import ui.table.{EmphasizedString, StatusCell}
 
@@ -27,6 +26,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   
   private val log = Logger.getLogger("StatusTableModel " + hashCode)
   log.info("Created")
+
+  private val userPrefs = PreferencesFactory.prefsForUser(username)
 
   /** All loaded statuses */
   private var statuses = List[TwitterStatus]()
@@ -83,7 +84,10 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
 
     def senderName(status: TwitterStatus) = {
       if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) {
-        status.user.name
+        if (UserProperties.exists(userPrefs, status.user.screenName)) {
+          val props = new UserProperties(userPrefs, status.user.screenName)
+          props.getName(status.user.name)
+        } else status.user.name
         } else {
         status.user.screenName
       }
