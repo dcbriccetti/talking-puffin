@@ -15,7 +15,7 @@ object GlobalPrefs {
   val prefs = Preferences.userRoot.node("/org/talkingpuffin/all")
   
   def showColumn(col: String, showing: Boolean) {
-    prefs.putBoolean(PrefKeys.SHOW_COL + col, showing)
+    prefs.putBoolean(PrefKeys.SHOW_COL_PREFIX + col, showing)
   }
   
   def sortBy(col: String, direction: String) {
@@ -23,7 +23,7 @@ object GlobalPrefs {
     prefs.put(PrefKeys.SORT_DIRECTION, direction)
   }
   
-  def isColumnShowing(col: String): Boolean = prefs.getBoolean(PrefKeys.SHOW_COL + col, true)
+  def isColumnShowing(col: String): Boolean = prefs.getBoolean(PrefKeys.SHOW_COL_PREFIX + col, true)
 }
 
 object PrefKeys {
@@ -32,11 +32,13 @@ object PrefKeys {
   val LOOK_UP_LOCATIONS = "lookUpLocations"
   val EXPAND_URLS       = "expandUrls"
   val SORT_BY           = "sortBy"
-  val SHOW_COL          = "showCol"
+  
+  val SHOW_COL_PREFIX   = "showCol"
   val AGE               = "Age"
   val IMAGE             = "Image"
   val FROM              = "From"
   val TO                = "To"
+  
   val SORT_DIRECTION    = "sortDirection"
   val SORT_DIRECTION_ASC   = "asc"
   val SORT_DIRECTION_DESC  = "desc"
@@ -45,7 +47,7 @@ object PrefKeys {
   val gprefs = GlobalPrefs.prefs
   val keys = gprefs.keys
   // Set options that default to true
-  for (k <- List(LOOK_UP_LOCATIONS, SHOW_COL + AGE, SHOW_COL + IMAGE, SHOW_COL + FROM, SHOW_COL + TO)) 
+  for (k <- List(LOOK_UP_LOCATIONS) ::: List(AGE, IMAGE, FROM, TO).map(SHOW_COL_PREFIX + _)) 
     if (! keys.contains(k))
       gprefs.putBoolean(k, true)
   
