@@ -139,8 +139,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     classOf[Icon], 
     classOf[String],
     classOf[String], 
-    classOf[StatusCell])
-    (col) 
+    classOf[StatusCell])(col) 
   
   def getIndexOfStatus(statusId: Long): Option[Int] = {
     var i = 0
