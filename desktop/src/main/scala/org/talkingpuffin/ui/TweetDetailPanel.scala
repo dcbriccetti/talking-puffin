@@ -114,8 +114,7 @@ class TweetDetailPanel(session: Session, table: JTable,
     if (GlobalPrefs.prefs.getBoolean(PrefKeys.EXPAND_URLS, false)) 
       ShortUrl.substituteExpandedUrls(status.text, largeTweet)
     
-    val picUrl = urlFromUser(user)
-    showMediumPicture(picUrl)
+    showMediumPicture(user.profileImageURL)
   }
   
   def clearStatusDetails {
@@ -132,7 +131,7 @@ class TweetDetailPanel(session: Session, table: JTable,
   private def setText(user: TwitterUser) {
     animator.stop
     showingUser = user
-    val rawLocationOfShowingItem = userLoc(user)
+    val rawLocationOfShowingItem = user.location
 
     if (GlobalPrefs.prefs.getBoolean(PrefKeys.LOOK_UP_LOCATIONS, false)) { 
       GeoCoder.extractLatLong(rawLocationOfShowingItem) match {
@@ -162,24 +161,14 @@ class TweetDetailPanel(session: Session, table: JTable,
         (tags.length match { case 0 => "" case _ => " • Tags: " + tags})
   }
 
-  private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
+  private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = 
     if (resourceReady.userData.equals(showingUser)) {
       animator.stop
-      var origText = userLoc(showingUser)
-      val newText = resourceReady.resource
-      def callBack(text: String) {
-        setText(showingUser, text)
-      }
-      animator.run(origText, newText, callBack)
+      animator.run(showingUser.location, resourceReady.resource, (text: String) => setText(showingUser, text))
     }
-  }
-  
-  private def userLoc(user: TwitterUser) = user.location
-  
-  private def urlFromUser(user: TwitterUser): String = user.profileImageURL
   
   def prefetch(status: TwitterStatus) {
-    val smallUrl = urlFromUser(status.user)
+    val smallUrl = status.user.profileImageURL
     val mediumUrl = PictureFetcher.getFullSizeUrl(smallUrl)
     List(smallUrl, mediumUrl).foreach(url => picFetcher.requestItem(picFetcher.FetchImageRequest(url, null)))
   }
