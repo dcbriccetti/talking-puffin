@@ -134,15 +134,13 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filteredStatuses.get(rowIndex)
   }
 
-  override def getColumnClass(columnIndex: Int) = {
-    columnIndex match {
-      case 0 => classOf[java.lang.Long]
-      case 1 => classOf[Icon]
-      case 2 => classOf[String]
-      case 3 => classOf[String] 
-      case 4 => classOf[StatusCell] 
-    }
-  }
+  override def getColumnClass(col: Int) = List(
+    classOf[java.lang.Long], 
+    classOf[Icon], 
+    classOf[String],
+    classOf[String], 
+    classOf[StatusCell])
+    (col) 
   
   def getIndexOfStatus(statusId: Long): Option[Int] = {
     var i = 0
