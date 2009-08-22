@@ -12,8 +12,8 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
  */
-
-class Streams(user: AuthenticatedSession, session: Session, val tagUsers: TagUsers, username: String, password: String) extends Reactor {
+class Streams(user: AuthenticatedSession, session: Session, val tagUsers: TagUsers, 
+      val username: String, password: String) extends Reactor {
   val rateLimitStatusProvider = new RateLimitStatusProvider(username, password)
   val prefs = PreferencesFactory.prefsForUser(username)
   
