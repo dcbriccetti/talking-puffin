@@ -23,8 +23,8 @@ object Main {
   }
   
   def launchSession {
-    def startUp(username: String, password: String, user: AuthenticatedSession) =
-      new TopFrame(username, password, user) {
+    def startUp(service: String, username: String, password: String, user: AuthenticatedSession) =
+      new TopFrame(service, username, password, user) {
         pack
         visible = true
         setFocus

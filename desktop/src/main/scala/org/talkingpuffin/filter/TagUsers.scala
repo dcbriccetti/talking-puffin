@@ -10,9 +10,9 @@ import state.PreferencesFactory
 /**
  * Repository of tag -> user mappings
  */
-class TagUsers(username: String) {
+class TagUsers(service: String, username: String) {
   private val log = Logger getLogger "TagUsers"
-  private val prefs = PreferencesFactory.prefsForUser(username).node("tags")
+  private val prefs = PreferencesFactory.prefsForUser(service, username).node("tags")
   private val tagUsers: Multimap[String,String] = HashMultimap.create()
   prefs.keys.foreach(tag => {
     prefs.get(tag, null).split("\t").foreach(userId => add(tag, userId))

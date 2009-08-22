@@ -52,7 +52,7 @@ class TweetDetailPanel(session: Session, table: JTable,
   private var largeTweet: JTextPane = _
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
-  private val userPrefs = PreferencesFactory.prefsForUser(streams.username)
+  private val userPrefs = PreferencesFactory.prefsForUser(streams.service, streams.username)
           
   private class CustomConstraints extends Constraints {
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)

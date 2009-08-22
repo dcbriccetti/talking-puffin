@@ -22,13 +22,13 @@ import ui.table.{EmphasizedString, StatusCell}
  * Model providing status data to the JTable
  */
 class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: TweetsProvider, 
-    usersModel: UsersTableModel, filterSet: FilterSet, username: String, val tagUsers: TagUsers) 
+    usersModel: UsersTableModel, filterSet: FilterSet, service: String, username: String, val tagUsers: TagUsers) 
     extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
   
   private val log = Logger.getLogger("StatusTableModel " + hashCode)
   log.info("Created")
 
-  private val userPrefs = PreferencesFactory.prefsForUser(username)
+  private val userPrefs = PreferencesFactory.prefsForUser(service, username)
 
   /** All loaded statuses */
   private var statuses = List[TwitterStatus]()
