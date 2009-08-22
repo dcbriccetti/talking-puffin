@@ -5,7 +5,7 @@ import _root_.scala.xml.Node
 import filter.{FilterSet, TextFilter, TagUsers}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
 import state.PreferencesFactory
-import twitter.{AuthenticatedSession, RateLimitStatusProvider, TweetsProvider, MentionsProvider, TwitterUser}
+import twitter.{AuthenticatedSession, TweetsProvider, MentionsProvider, TwitterUser}
 
 case class StreamInfo(val title: String, val model: StatusTableModel, val pane: StatusPane)
 
@@ -14,7 +14,6 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
  */
 class Streams(user: AuthenticatedSession, session: Session, val tagUsers: TagUsers, 
       val username: String, password: String) extends Reactor {
-  val rateLimitStatusProvider = new RateLimitStatusProvider(username, password)
   val prefs = PreferencesFactory.prefsForUser(username)
   
   val tweetsProvider = new TweetsProvider(user,
