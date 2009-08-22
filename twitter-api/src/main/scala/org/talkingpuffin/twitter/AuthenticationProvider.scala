@@ -6,9 +6,13 @@ import java.io.IOException
 class AuthenticationProvider extends HttpHandler {
 
   def userAuthenticates(userName: String, password: String): Option[Node] = {
+    userAuthenticates(userName,password,API.defaultURL)
+  }
+
+  def userAuthenticates(userName: String, password: String, apiURL: String): Option[Node] = {
     setCredentials(userName, password)
     try {
-      doGet("http://twitter.com/account/verify_credentials.xml") match {
+      doGet(apiURL + "/account/verify_credentials.xml") match {
         case HttpSuccess(_,response) => Some(XML.loadString(response))
         case HttpException(e) => {
             println(e)
