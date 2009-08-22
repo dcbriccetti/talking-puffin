@@ -7,7 +7,7 @@ import javax.swing.border.EmptyBorder
 import _root_.scala.swing.GridBagPanel._
 import state.PreferencesFactory
 import swing._
-import twitter.TwitterStatus
+import twitter.{TwitterUser, TwitterStatus}
 import util.Cancelable
 
 class UserPropertiesDialog(userPrefs: Preferences, status: TwitterStatus) extends Frame with Cancelable {
@@ -59,4 +59,10 @@ class UserProperties(userPrefs: Preferences, screenName: String) {
 
 object UserProperties {
   def exists(userPrefs: Preferences, screenName: String) = userPrefs.node("userNotes").nodeExists(screenName)
+
+  def overriddenUserName(userPrefs: Preferences, user: TwitterUser) =
+    if (UserProperties.exists(userPrefs, user.screenName)) 
+      new UserProperties(userPrefs, user.screenName).getName(user.name)
+    else user.name
+
 }

@@ -13,7 +13,7 @@ import java.text.NumberFormat
 import javax.swing._
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import javax.swing.text.JTextComponent
-import state.{GlobalPrefs, PrefKeys}
+import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
 import talkingpuffin.util.{PopupListener}
 import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
@@ -52,6 +52,7 @@ class TweetDetailPanel(session: Session, table: JTable,
   private var largeTweet: JTextPane = _
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
+  private val userPrefs = PreferencesFactory.prefsForUser(streams.username)
           
   private class CustomConstraints extends Constraints {
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
@@ -153,7 +154,8 @@ class TweetDetailPanel(session: Session, table: JTable,
     addFreshUserDescription
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
     val tags = streams.tagUsers.tagsForUser(user.id.toString()).mkString(", ")
-    userDescription.text = user.name + " (" + user.screenName + ") • " +
+    userDescription.text = UserProperties.overriddenUserName(userPrefs, user) + 
+        " (" + user.screenName + ") • " +
         location + " • " + user.description  + " • " +
         fmt(user.followersCount) + " followers, following " +
         fmt(user.friendsCount) +

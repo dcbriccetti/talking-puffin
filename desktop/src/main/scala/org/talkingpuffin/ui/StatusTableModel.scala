@@ -7,6 +7,7 @@ import java.awt.event.{ActionEvent, ActionListener}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
 import java.net.URL
+import java.util.prefs.Preferences
 import java.util.{Locale, Collections, Date, ArrayList}
 import javax.swing._
 import javax.swing.event.TableModelEvent
@@ -82,16 +83,10 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     
     def age(status: TwitterStatus):java.lang.Long = dateToAgeSeconds(status.createdAt.toDate().getTime())
 
-    def senderName(status: TwitterStatus) = {
-      if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) {
-        if (UserProperties.exists(userPrefs, status.user.screenName)) {
-          val props = new UserProperties(userPrefs, status.user.screenName)
-          props.getName(status.user.name)
-        } else status.user.name
-        } else {
-        status.user.screenName
-      }
-    }
+    def senderName(status: TwitterStatus) = 
+      if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) 
+        UserProperties.overriddenUserName(userPrefs, status.user) 
+      else status.user.screenName
 
     def senderNameEs(status: TwitterStatus): EmphasizedString = {
       val name = senderName(status)
