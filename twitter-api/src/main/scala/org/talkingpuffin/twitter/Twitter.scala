@@ -133,7 +133,7 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
 * Like UnauthenticatedSession, this class is thread safe, and more or less directly mirrors the
 * <a href="http://groups.google.com/group/twitter-development-talk/web/api-documentation">Twitter API Doc</a>
 */
-class AuthenticatedSession(val user: String, password: String, apiURL: String) extends UnauthenticatedSession(apiURL){
+class AuthenticatedSession(val user: String, val password: String, val apiURL: String) extends UnauthenticatedSession(apiURL){
 
   val authFetcher = new XMLFetcher(user,password)
 
