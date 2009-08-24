@@ -7,14 +7,14 @@ import java.awt.event.{ActionEvent, ActionListener}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
 import java.net.URL
+import java.util.prefs.Preferences
 import java.util.{Locale, Collections, Date, ArrayList}
 import javax.swing._
 import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
 import org.apache.log4j.Logger
 import _root_.org.talkingpuffin
-import state.{GlobalPrefs, PrefKeys}
-
+import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
 import twitter.{TweetsArrived, TweetsProvider, TwitterStatus}
 import ui.table.{EmphasizedString, StatusCell}
 
@@ -22,11 +22,13 @@ import ui.table.{EmphasizedString, StatusCell}
  * Model providing status data to the JTable
  */
 class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: TweetsProvider, 
-    usersModel: UsersTableModel, filterSet: FilterSet, username: String, val tagUsers: TagUsers) 
+    usersModel: UsersTableModel, filterSet: FilterSet, service: String, username: String, val tagUsers: TagUsers) 
     extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
   
   private val log = Logger.getLogger("StatusTableModel " + hashCode)
   log.info("Created")
+
+  private val userPrefs = PreferencesFactory.prefsForUser(service, username)
 
   /** All loaded statuses */
   private var statuses = List[TwitterStatus]()
@@ -81,13 +83,10 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     
     def age(status: TwitterStatus):java.lang.Long = dateToAgeSeconds(status.createdAt.toDate().getTime())
 
-    def senderName(status: TwitterStatus) = {
-      if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) {
-        status.user.name
-        } else {
-        status.user.screenName
-      }
-    }
+    def senderName(status: TwitterStatus) = 
+      if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) 
+        UserProperties.overriddenUserName(userPrefs, status.user) 
+      else status.user.screenName
 
     def senderNameEs(status: TwitterStatus): EmphasizedString = {
       val name = senderName(status)
@@ -130,15 +129,12 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filteredStatuses.get(rowIndex)
   }
 
-  override def getColumnClass(columnIndex: Int) = {
-    columnIndex match {
-      case 0 => classOf[java.lang.Long]
-      case 1 => classOf[Icon]
-      case 2 => classOf[String]
-      case 3 => classOf[String] 
-      case 4 => classOf[StatusCell] 
-    }
-  }
+  override def getColumnClass(col: Int) = List(
+    classOf[java.lang.Long], 
+    classOf[Icon], 
+    classOf[String],
+    classOf[String], 
+    classOf[StatusCell])(col) 
   
   def getIndexOfStatus(statusId: Long): Option[Int] = {
     var i = 0

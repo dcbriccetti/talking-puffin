@@ -7,8 +7,8 @@ import java.util.prefs.Preferences
  */
 
 object PreferencesFactory {
-  def prefsForUser(username: String) = 
-    Preferences.userRoot.node("/org/talkingpuffin/streams/twitter/" + username)
+  def prefsForUser(service: String, username: String) =
+    Preferences.userRoot.node("/org/talkingpuffin/streams/" + service.toLowerCase + "/" + username)
 }
 
 object GlobalPrefs {

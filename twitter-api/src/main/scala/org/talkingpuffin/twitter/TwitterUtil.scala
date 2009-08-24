@@ -8,10 +8,6 @@ import org.apache.commons.codec.binary.Base64
 import java.io.{DataOutputStream,DataInputStream,IOException,BufferedReader,InputStreamReader}
 import org.apache.log4j.Logger;
 
-// end session http://twitter.com/account/end_session
-// help http://twitter.com/help/test.format 
-// downtime http://twitter.com/help/downtime_schedule.format
-
 /**
 * Utility class that connects to a URL and returns an XML object.
 * If both a user and password are specified, HTTP Basic authentication is used in the connection.

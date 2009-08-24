@@ -5,17 +5,16 @@ import _root_.scala.xml.Node
 import filter.{FilterSet, TextFilter, TagUsers}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
 import state.PreferencesFactory
-import twitter.{AuthenticatedSession, RateLimitStatusProvider, TweetsProvider, MentionsProvider, TwitterUser}
+import twitter.{AuthenticatedSession, TweetsProvider, MentionsProvider, TwitterUser}
 
 case class StreamInfo(val title: String, val model: StatusTableModel, val pane: StatusPane)
 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
  */
-
-class Streams(user: AuthenticatedSession, session: Session, val tagUsers: TagUsers, username: String, password: String) extends Reactor {
-  val rateLimitStatusProvider = new RateLimitStatusProvider(username, password)
-  val prefs = PreferencesFactory.prefsForUser(username)
+class Streams(val service: String, user: AuthenticatedSession, session: Session, val tagUsers: TagUsers, 
+      val username: String, password: String) extends Reactor {
+  val prefs = PreferencesFactory.prefsForUser(service, username)
   
   val tweetsProvider = new TweetsProvider(user,
     prefs.get("highestId", null) match {case null => None; case v => Some(java.lang.Long.parseLong(v))}, 
@@ -78,9 +77,9 @@ class Streams(user: AuthenticatedSession, session: Session, val tagUsers: TagUse
     val sto = new StatusTableOptions(true, true, true)
     val isMentions = source.isInstanceOf[MentionsProvider] // TODO do without this test
     val model = if (isMentions) {
-      new StatusTableModel(sto, source, usersTableModel, fs, username, tagUsers) with Mentions
+      new StatusTableModel(sto, source, usersTableModel, fs, service, username, tagUsers) with Mentions
     } else {
-      new StatusTableModel(sto, source, usersTableModel, fs, username, tagUsers)
+      new StatusTableModel(sto, source, usersTableModel, fs, service, username, tagUsers)
     }
     val pane = new StatusPane(session, title, model, fs, this)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)

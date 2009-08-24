@@ -13,7 +13,7 @@ import java.text.NumberFormat
 import javax.swing._
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import javax.swing.text.JTextComponent
-import state.{GlobalPrefs, PrefKeys}
+import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
 import talkingpuffin.util.{PopupListener}
 import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
@@ -52,6 +52,7 @@ class TweetDetailPanel(session: Session, table: JTable,
   private var largeTweet: JTextPane = _
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
+  private val userPrefs = PreferencesFactory.prefsForUser(streams.service, streams.username)
           
   private class CustomConstraints extends Constraints {
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
@@ -113,8 +114,7 @@ class TweetDetailPanel(session: Session, table: JTable,
     if (GlobalPrefs.prefs.getBoolean(PrefKeys.EXPAND_URLS, false)) 
       ShortUrl.substituteExpandedUrls(status.text, largeTweet)
     
-    val picUrl = urlFromUser(user)
-    showMediumPicture(picUrl)
+    showMediumPicture(user.profileImageURL)
   }
   
   def clearStatusDetails {
@@ -131,7 +131,7 @@ class TweetDetailPanel(session: Session, table: JTable,
   private def setText(user: TwitterUser) {
     animator.stop
     showingUser = user
-    val rawLocationOfShowingItem = userLoc(user)
+    val rawLocationOfShowingItem = user.location
 
     if (GlobalPrefs.prefs.getBoolean(PrefKeys.LOOK_UP_LOCATIONS, false)) { 
       GeoCoder.extractLatLong(rawLocationOfShowingItem) match {
@@ -153,31 +153,22 @@ class TweetDetailPanel(session: Session, table: JTable,
     addFreshUserDescription
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
     val tags = streams.tagUsers.tagsForUser(user.id.toString()).mkString(", ")
-    userDescription.text = user.name + " (" + user.screenName + ") • " +
+    userDescription.text = UserProperties.overriddenUserName(userPrefs, user) + 
+        " (" + user.screenName + ") • " +
         location + " • " + user.description  + " • " +
         fmt(user.followersCount) + " followers, following " +
         fmt(user.friendsCount) +
         (tags.length match { case 0 => "" case _ => " • Tags: " + tags})
   }
 
-  private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
+  private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = 
     if (resourceReady.userData.equals(showingUser)) {
       animator.stop
-      var origText = userLoc(showingUser)
-      val newText = resourceReady.resource
-      def callBack(text: String) {
-        setText(showingUser, text)
-      }
-      animator.run(origText, newText, callBack)
+      animator.run(showingUser.location, resourceReady.resource, (text: String) => setText(showingUser, text))
     }
-  }
-  
-  private def userLoc(user: TwitterUser) = user.location
-  
-  private def urlFromUser(user: TwitterUser): String = user.profileImageURL
   
   def prefetch(status: TwitterStatus) {
-    val smallUrl = urlFromUser(status.user)
+    val smallUrl = status.user.profileImageURL
     val mediumUrl = PictureFetcher.getFullSizeUrl(smallUrl)
     List(smallUrl, mediumUrl).foreach(url => picFetcher.requestItem(picFetcher.FetchImageRequest(url, null)))
   }

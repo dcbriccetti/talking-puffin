@@ -10,10 +10,8 @@ import org.apache.commons.httpclient.methods.GetMethod
 /**
  * A provider of Twitter data
  */
-abstract class DataProvider extends HttpHandler {
+abstract class DataProvider() extends HttpHandler {
   private val log = Logger.getLogger("DataProvider")
-  var urlHost = "http://twitter.com/" 
-  
   def getUrl: String
 
   /**
