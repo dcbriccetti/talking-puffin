@@ -30,7 +30,7 @@ object Actions {
 class ActionPrep(comp: JComponent) {
   var actions = List[Action]()
   def add(action: Action, keys: KeyStroke*) {
-    action.accelerator = Some(keys(0))
+    if (keys.length > 0) action.accelerator = Some(keys(0))
     comp.getActionMap.put(action.title, action.peer)
     keys foreach(comp.getInputMap.put(_, action.title))
     actions ::= action
