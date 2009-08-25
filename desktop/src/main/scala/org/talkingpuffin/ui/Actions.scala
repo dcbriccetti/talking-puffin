@@ -9,10 +9,8 @@ import javax.swing.{KeyStroke, JComponent}
  * Reusable actions with associated accelerators
  */
 class EventGeneratingAction(title: String, comp: java.awt.Component, resultKey: Int) extends Action(title) {
-  def apply {
-    comp.dispatchEvent(new KeyEvent(comp, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
+  def apply = comp.dispatchEvent(new KeyEvent(comp, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
       0, resultKey, KeyEvent.CHAR_UNDEFINED))
-  }
 }
     
 class NextAction(comp: java.awt.Component) extends EventGeneratingAction("Next"    , comp, KeyEvent.VK_DOWN)
@@ -34,13 +32,10 @@ class ActionPrep(comp: JComponent) {
   def add(action: Action, keys: KeyStroke*) {
     action.accelerator = Some(keys(0))
     comp.getActionMap.put(action.title, action.peer)
-    for (key <- keys) 
-      comp.getInputMap.put(key, action.title)
+    keys foreach(comp.getInputMap.put(_, action.title))
     actions ::= action
   }
 
-  def add(kta: KeyTriggeredAction) {
-    add(kta.action, kta.keyStroke: _*)
-  }
+  def add(kta: KeyTriggeredAction): Unit = add(kta.action, kta.keyStroke: _*)
 }
   
