@@ -37,7 +37,15 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   val rowMarginVal = 3
   setRowMargin(rowMarginVal)
   setHighlighters(HighlighterFactory.createSimpleStriping)
-  setRowHeight(Thumbnail.THUMBNAIL_SIZE + rowMarginVal + 2)
+  
+  private var customRowHeight_ = 0
+  private def customRowHeight = customRowHeight_
+  private def customRowHeight_=(value: Int) = {
+    customRowHeight_ = value
+    setRowHeight(customRowHeight_)
+    GlobalPrefs.prefs.putInt(PrefKeys.STATUS_TABLE_ROW_HEIGHT, value)
+  }
+  customRowHeight = GlobalPrefs.prefs.getInt(PrefKeys.STATUS_TABLE_ROW_HEIGHT, thumbnailHeight) 
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
   val statusCellRenderer = new StatusCellRenderer
@@ -87,8 +95,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     userProperties.visible = true  
   })
 
-  def statusTextSize = statusCellRenderer.textSizePct
-  def statusTextSize_=(sizePct: Int) = {
+  private def statusTextSize = statusCellRenderer.textSizePct
+  private def statusTextSize_=(sizePct: Int) = {
     statusCellRenderer.textSizePct = sizePct
     GlobalPrefs.prefs.putInt(PrefKeys.STATUS_TABLE_STATUS_FONT_SIZE, sizePct)
   }
@@ -127,8 +135,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   }
 
   class PopupMenu extends JPopupMenu {
-    for (action <- ap.actions.reverse) 
-      add(new MenuItem(action).peer)
+    ap.actions.reverse.foreach(a => add(new MenuItem(a).peer))
   }
   
   private def configureColumns {
@@ -196,7 +203,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     else if (source == toCol)   op.showToColumn   = toCol  .isVisible
   }
 
-  protected def buildActions = {
+  protected def buildActions {
     val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
 
     ap add(Action("View status in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
@@ -215,6 +222,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ap add(Action("Decrease Font Size") { changeFontSize(-5) }, 
         KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask | 
       java.awt.event.InputEvent.SHIFT_DOWN_MASK))
+    ap add(Action("Increase Row Height") { changeRowHeight(8) })
+    ap add(Action("Decrease Row Height") { changeRowHeight(-8) })
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     ap add(Action("Retweet") { retweet }, Actions.ks(KeyEvent.VK_E))
@@ -237,5 +246,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     tableModel.fireTableDataChanged  
   }
   
+  private def changeRowHeight(change: Int) = customRowHeight += change
+  
+  private def thumbnailHeight = Thumbnail.THUMBNAIL_SIZE + rowMarginVal + 2
 }
 
