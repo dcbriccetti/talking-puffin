@@ -6,10 +6,10 @@ import java.awt.Dimension
 import java.awt.event.KeyEvent
 import javax.swing.{JDialog}
 import util.Cancelable
+
 /**
  * A dialog from which tags can be selected.
  */
-
 class TagsDialog(owner: java.awt.Frame, tagUsers: TagUsers, checkedValues: List[String]) 
     extends JDialog(owner, "Tags", true) with Cancelable {
   var ok = false
