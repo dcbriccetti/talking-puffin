@@ -1,6 +1,5 @@
 package org.talkingpuffin.filter
 
-import _root_.scala.xml.Node
 import ui.LinkExtractor
 import org.talkingpuffin.twitter.{TwitterStatus}
 
@@ -9,15 +8,9 @@ import org.talkingpuffin.twitter.{TwitterStatus}
  * filtered statuses.
  */
 
-class FilterLogic(username: String, tagUsers: TagUsers, filterSet: FilterSet, 
-  filteredStatuses: java.util.List[TwitterStatus]) {
+class FilterLogic(username: String, tagUsers: TagUsers, filterSet: FilterSet) {
   
-  def filter(statuses: List[TwitterStatus]) {
-    filteredStatuses.clear
-    for (st <- statuses if filterStatus(st)) {
-      filteredStatuses.add(st)
-    }
-  }
+  def filter(statuses: List[TwitterStatus]) = statuses.filter(filterStatus)
 
   private def filterStatus(st: TwitterStatus): Boolean = {
     val userId = st.user.id.toString()

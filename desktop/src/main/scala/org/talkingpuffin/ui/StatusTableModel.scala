@@ -8,7 +8,7 @@ import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
 import java.net.URL
 import java.util.prefs.Preferences
-import java.util.{Locale, Collections, Date, ArrayList}
+import java.util.{Locale, Date}
 import javax.swing._
 import javax.swing.event.TableModelEvent
 import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
@@ -33,14 +33,14 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   /** All loaded statuses */
   private var statuses = List[TwitterStatus]()
   
-  def statusCount = statuses.size
+  def statusCount = statuses.length
   
   /** Statuses, after filtering */
-  private val filteredStatuses = Collections.synchronizedList(new ArrayList[TwitterStatus]())
+  private var filteredStatuses = List[TwitterStatus]()
   
-  def filteredStatusCount = filteredStatuses.size
+  def filteredStatusCount = filteredStatuses.length
 
-  val filterLogic = new FilterLogic(username, tagUsers, filterSet, filteredStatuses)
+  val filterLogic = new FilterLogic(username, tagUsers, filterSet)
   
   private val colNames = List("Age", "Image", "From", "To", "Status")
   private var preChangeListener: PreChangeListener = _;
@@ -73,13 +73,13 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   def setPreChangeListener(preChangeListener: PreChangeListener) = this.preChangeListener = preChangeListener
   
   def getColumnCount = 5
-  def getRowCount = filteredStatuses.size
+  def getRowCount = filteredStatuses.length
   override def getColumnName(column: Int) = colNames(column)
 
   val pcell = new PictureCell(this, 0)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
-    val status = filteredStatuses.get(rowIndex)
+    val status = filteredStatuses(rowIndex)
     
     def age(status: TwitterStatus):java.lang.Long = dateToAgeSeconds(status.createdAt.toDate().getTime())
 
@@ -116,7 +116,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
       }
       case 4 => {
         var st = getStatusText(status, username)
-        st = if (options.showToColumn) LinkExtractor.getWithoutUser(st) else st
+        if (options.showToColumn) st = LinkExtractor.getWithoutUser(st)
         StatusCell(if (options.showAgeColumn) None else Some(age(status)),
           if (options.showNameColumn) None else Some(senderNameEs(status)), st)
       }
@@ -126,7 +126,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   def getStatusText(status: TwitterStatus, username: String): String = status.text
 
   def getStatusAt(rowIndex: Int): TwitterStatus = {
-    filteredStatuses.get(rowIndex)
+    filteredStatuses(rowIndex)
   }
 
   override def getColumnClass(col: Int) = List(
@@ -136,18 +136,13 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     classOf[String], 
     classOf[StatusCell])(col) 
   
-  def getIndexOfStatus(statusId: Long): Option[Int] = {
-    var i = 0
-    while (i < filteredStatuses.size) {
-      if (filteredStatuses.get(i).id == statusId) return Some(i)
-      i += 1
+  def getIndexOfStatus(statusId: Long): Option[Int] = 
+    filteredStatuses.zipWithIndex.find(si => si._1.id == statusId) match {
+      case Some((_, i)) => Some(i)
+      case None => None
     }
-    return None
-  }
 
-  def muteSelectedUsers(rows: List[Int]) {
-    muteUsers(getUsers(rows))
-  }
+  def muteSelectedUsers(rows: List[Int]) = muteUsers(getUsers(rows))
 
   private def muteUsers(users: List[User]) {
     filterSet.mutedUsers ++= users.map(user => (user.id, user))
@@ -164,25 +159,17 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filterAndNotify
   }
 
-  private def dateToAgeSeconds(date: Long): Long = {
-    (new Date().getTime() - date) / 1000
-  }
+  private def dateToAgeSeconds(date: Long): Long = (new Date().getTime() - date) / 1000
   
-  def getUsers(rows: List[Int]): List[User] = 
-    rows.map(i => {
-      val node = filteredStatuses.get(i)
-      val id = node.user.id.toString
-      val name = node.user.name
-      new User(id, name)
-    })
+  def getUsers(rows: List[Int]) = rows.map(i => {
+    val user = filteredStatuses(i).user
+    new User(user.id.toString, user.name)
+  })
   
-  def getStatuses(rows: List[Int]): List[TwitterStatus] =
-    rows.map(filteredStatuses.get(_))
+  def getStatuses(rows: List[Int]): List[TwitterStatus] = rows.map(filteredStatuses)
 
   private def processStatuses(newStatuses: List[TwitterStatus]) {
-    for (st <- newStatuses) {
-      statuses = st :: statuses
-    }
+    newStatuses.foreach(statuses ::= _) // Add each one to the top, so oldest are at bottom
     filterAndNotify
   }
   
@@ -209,8 +196,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     if (preChangeListener != null) {
       preChangeListener.tableChanging
     }
-    filterLogic.filter(statuses)
-    publish(new TableContentsChanged(this, filteredStatuses.size, statuses.size))
+    filteredStatuses = filterLogic.filter(statuses)
+    publish(new TableContentsChanged(this, filteredStatuses.length, statuses.length))
     fireTableDataChanged
   }
 }
