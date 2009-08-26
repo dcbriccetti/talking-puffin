@@ -47,9 +47,8 @@ class TweetDetailPanel(session: Session, table: JTable,
   })
 
   private val bigPic = new BigPictureDisplayer(picFetcher)
-
   private var userDescription: TextArea = _
-  private var largeTweet: JTextPane = _
+  private var largeTweet = new LargeTweet(filtersDialog, streams, table, background)
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
   private val userPrefs = PreferencesFactory.prefsForUser(streams.service, streams.username)
@@ -58,14 +57,13 @@ class TweetDetailPanel(session: Session, table: JTable,
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
   }
   
-  largeTweet = new LargeTweet(filtersDialog, streams, table, background)
-  
   val largeTweetScrollPane = new JScrollPane {
     val dim = new Dimension(500, 100)
     setMinimumSize(dim)
     setPreferredSize(dim)
     setViewportView(largeTweet)
-    setBorder(null)
+    setBorder(BorderFactory.createEtchedBorder)
+    setVisible(false)
   }
   peer.add(largeTweetScrollPane, new Constraints {
     insets = new Insets(5,1,5,1)
@@ -106,9 +104,9 @@ class TweetDetailPanel(session: Session, table: JTable,
     session.status.text = " "
     val user = status.user
     setText(user)
+    largeTweetScrollPane.setVisible(true)
     largeTweet.setText(HtmlFormatter.createTweetHtml(status.text,
-                                                     status.inReplyToStatusId,
-                                                     status.source))
+        status.inReplyToStatusId, status.source))
     largeTweet setCaretPosition 0
 
     if (GlobalPrefs.prefs.getBoolean(PrefKeys.EXPAND_URLS, false)) 
@@ -124,6 +122,7 @@ class TweetDetailPanel(session: Session, table: JTable,
     picLabel.icon = Thumbnail.transparentMedium
     userDescription.text = null
     largeTweet.setText(null)
+    largeTweetScrollPane.setVisible(false)
   }
   
   def showBigPicture = bigPic.showBigPicture(showingUrl, peer)
