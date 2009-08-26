@@ -53,7 +53,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   tweetsProvider.addPropertyChangeListener(new PropertyChangeListener {
     def propertyChange(evt: PropertyChangeEvent) = {
       evt.getPropertyName match {
-        case TweetsProvider.CLEAR_EVENT => clear
+        case TweetsProvider.CLEAR_EVENT => clear(true)
         case TweetsProvider.NEW_TWEETS_EVENT => {
           val newTweets = evt.getNewValue.asInstanceOf[List[TwitterStatus]]
           log.info("Tweets Arrived: " + newTweets.length)
@@ -187,10 +187,10 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   }
   
   /**
-   * Clear (remove) all statuses
+   * Clear (remove) statuses
    */
-  def clear {
-    statuses = List[TwitterStatus]()
+  def clear(all: Boolean) {
+    statuses = if (all) List[TwitterStatus]() else statuses.filter(! filteredStatuses.contains(_))
     filterAndNotify
   }
   

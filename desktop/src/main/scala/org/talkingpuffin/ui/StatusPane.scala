@@ -130,9 +130,9 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
     }
   }
   
-  private def clearTweets {
+  private def clearTweets(all: Boolean) {
     clearSelection
-    statusTableModel.clear
+    statusTableModel.clear(all)
     tweetDetailPanel.clearStatusDetails
   }
   
