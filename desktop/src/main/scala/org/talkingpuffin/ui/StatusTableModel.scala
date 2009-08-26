@@ -33,22 +33,16 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   /** All loaded statuses */
   private var statuses = List[TwitterStatus]()
   
-  def statusCount = statuses.length
-  
   /** Statuses, after filtering */
   private var filteredStatuses = List[TwitterStatus]()
   
-  def filteredStatusCount = filteredStatuses.length
-
-  val filterLogic = new FilterLogic(username, tagUsers, filterSet)
+  private val filterLogic = new FilterLogic(username, tagUsers, filterSet)
   
   private val colNames = List("Age", "Image", "From", "To", "Status")
-  private var preChangeListener: PreChangeListener = _;
+  var preChangeListener: PreChangeListener = _;
   
   listenTo(filterSet)
-  reactions += {
-    case FilterSetChanged(s) => filterAndNotify
-  }
+  reactions += { case FilterSetChanged(s) => filterAndNotify }
 
   tweetsProvider.addPropertyChangeListener(new PropertyChangeListener {
     def propertyChange(evt: PropertyChangeEvent) = {
@@ -57,26 +51,19 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
         case TweetsProvider.NEW_TWEETS_EVENT => {
           val newTweets = evt.getNewValue.asInstanceOf[List[TwitterStatus]]
           log.info("Tweets Arrived: " + newTweets.length)
-          newTweets.foreach(tweet => log.debug("received tweet " + tweet.id))
           processStatuses(newTweets)
         }
       }
     }
   })
   
-  private var followerIdsx = List[String]()
-  def followerIds = followerIdsx
-  def followerIds_=(followerIds: List[String]) = {
-    followerIdsx = followerIds
-  }
-  
-  def setPreChangeListener(preChangeListener: PreChangeListener) = this.preChangeListener = preChangeListener
+  var followerIds = List[String]()
   
   def getColumnCount = 5
   def getRowCount = filteredStatuses.length
   override def getColumnName(column: Int) = colNames(column)
 
-  val pcell = new PictureCell(this, 0)
+  private val pictureCell = new PictureCell(this, 0)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val status = filteredStatuses(rowIndex)
@@ -91,7 +78,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     def senderNameEs(status: TwitterStatus): EmphasizedString = {
       val name = senderName(status)
       val id = status.user.id.toString()
-      new EmphasizedString(Some(name), followerIdsx.contains(id))
+      new EmphasizedString(Some(name), followerIds.contains(id))
     }
 
     def toName(status: TwitterStatus) = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
@@ -107,7 +94,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     
     columnIndex match {
       case 0 => age(status)
-      case 1 => pcell.request(status.user.profileImageURL, rowIndex)
+      case 1 => pictureCell.request(status.user.profileImageURL, rowIndex)
       case 2 => senderNameEs(status)
       case 3 => {
         val name = status.user.name
@@ -125,9 +112,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   
   def getStatusText(status: TwitterStatus, username: String): String = status.text
 
-  def getStatusAt(rowIndex: Int): TwitterStatus = {
-    filteredStatuses(rowIndex)
-  }
+  def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses(rowIndex)
 
   override def getColumnClass(col: Int) = List(
     classOf[java.lang.Long], 
@@ -169,7 +154,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   def getStatuses(rows: List[Int]): List[TwitterStatus] = rows.map(filteredStatuses)
 
   private def processStatuses(newStatuses: List[TwitterStatus]) {
-    newStatuses.foreach(statuses ::= _) // Add each one to the top, so oldest are at bottom
+    statuses :::= newStatuses.reverse
     filterAndNotify
   }
   
