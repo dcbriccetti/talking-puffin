@@ -9,7 +9,7 @@ import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
  * Status pane tool bar
  */
 class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDialog: FiltersDialog, 
-    statusPane: Component, clearTweets: => Unit, showMaxColumns: (Boolean) => Unit) extends JToolBar {
+    statusPane: Component, clearTweets: (Boolean) => Unit, showMaxColumns: (Boolean) => Unit) extends JToolBar {
   var tweetDetailPanel: TweetDetailPanel = _
   
   val showFiltersAction = new Action("Filter…") {
@@ -23,9 +23,14 @@ class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDia
   }
 
   val clearAction = new Action("Clear") {
-    toolTip = "Removes all tweets (including filtered-out ones)"
+    toolTip = "Removes all tweets (except filtered-out ones)"
     mnemonic = KeyEvent.VK_C
-    def apply = clearTweets
+    def apply = clearTweets(false)
+  }
+
+  val clearAllAction = new Action("Clear All") {
+    toolTip = "Removes all tweets (including filtered-out ones)"
+    def apply = clearTweets(true)
   }
 
   val sendAction = new Action("Send…") {
@@ -95,6 +100,7 @@ class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDia
     aa(sendAction.peer)
     aa(showFiltersAction.peer)
     aa(clearAction.peer)
+    aa(clearAllAction.peer)
     aa(loadNewAction.peer)
     aa(last200Action.peer)
     addSeparator

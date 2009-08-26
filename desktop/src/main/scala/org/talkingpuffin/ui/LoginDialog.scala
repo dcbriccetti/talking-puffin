@@ -2,6 +2,7 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.{ComboBox, CheckBox, Label, Button, Frame, PasswordField, Publisher, 
 FlowPanel, GridBagPanel, TextField}
+import _root_.scala.swing.GridBagPanel.Anchor.West
 import ComboBox._
 import _root_.scala.xml.Node
 import collection.mutable.Subscriber
@@ -24,7 +25,7 @@ class LoginDialog(cancelPressed: => Unit,
   title = "TalkingPuffin - Log In"
   def username = usernameTextField.text
   def password = new String(passwordTextField.password)
-  def service = serviceTextField.text
+  def accountName = accountNameTextField.text
   def apiUrl = apiUrlTextField.text
   private var ok = false
 
@@ -38,7 +39,8 @@ class LoginDialog(cancelPressed: => Unit,
   private val comboBox = if (up.users.length > 0) new ComboBox(up.users) else null
   private val usernameTextField = new TextField() {columns=20}
   private val passwordTextField = new PasswordField() {columns=20}
-  private val serviceTextField = new TextField(API.defaultService) {columns=20}
+  private val accountNameTextField = new TextField(API.defaultService) {
+    columns=20; tooltip="A short name you associate with this account"}
   private val apiUrlTextField = new TextField(API.defaultURL) {columns=40}
   
   private val enterReaction: PartialFunction[Event, Unit] = { case EditDone(f) => logInButton.peer.doClick() }
@@ -46,7 +48,7 @@ class LoginDialog(cancelPressed: => Unit,
   setUpEnterClick(true)
   
   def storeUserInfoIfSet() {
-    if(saveUserInfoCheckBox.peer.isSelected) up.save(service, apiUrl, username, password)
+    if(saveUserInfoCheckBox.peer.isSelected) up.save(accountName, apiUrl, username, password)
     else up.remove(apiUrl, username)
     up.save()
   }
@@ -54,7 +56,7 @@ class LoginDialog(cancelPressed: => Unit,
   saveUserInfoCheckBox.peer.setSelected(true)
   
   private def setUpEnterClick(enable: Boolean) {
-    var fields = List[Publisher](usernameTextField, passwordTextField, serviceTextField, apiUrlTextField)
+    var fields = List[Publisher](usernameTextField, passwordTextField, accountNameTextField, apiUrlTextField)
     if (comboBox != null) fields ::= comboBox
     fields foreach(t => if (enable) t.reactions += enterReaction else t.reactions -= enterReaction)
   }
@@ -62,15 +64,16 @@ class LoginDialog(cancelPressed: => Unit,
   contents = new GridBagPanel {
     border = scala.swing.Swing.EmptyBorder(5, 5, 5, 5)
     add(if (comboBox != null) comboBox else usernameTextField, 
-      new Constraints {grid = (0, 0); gridwidth=2; anchor=GridBagPanel.Anchor.West})
-    add(new Label("User name"), new Constraints {grid=(0,1)})
-    add(usernameTextField,      new Constraints {grid = (1, 1); anchor=GridBagPanel.Anchor.West})
-    add(new Label("Password"),  new Constraints {grid=(0,2); anchor=GridBagPanel.Anchor.West})
-    add(passwordTextField,      new Constraints {grid=(1,2); anchor=GridBagPanel.Anchor.West})
-    add(new Label("Service"),   new Constraints {grid=(0,3); anchor=GridBagPanel.Anchor.West})
-    add(serviceTextField,       new Constraints {grid=(1,3); anchor=GridBagPanel.Anchor.West})
-    add(new Label("URL"),       new Constraints {grid=(0,4); anchor=GridBagPanel.Anchor.West})
-    add(apiUrlTextField,        new Constraints {grid=(1,4); anchor=GridBagPanel.Anchor.West})
+      new Constraints {grid = (0, 0); gridwidth=2; anchor=West})
+    add(new Label("Account Name"),
+                                new Constraints {grid=(0,1); anchor=West})
+    add(accountNameTextField,   new Constraints {grid=(1,1); anchor=West})
+    add(new Label("User Name"), new Constraints {grid=(0,2); anchor=West})
+    add(usernameTextField,      new Constraints {grid=(1,2); anchor=West})
+    add(new Label("Password"),  new Constraints {grid=(0,3); anchor=West})
+    add(passwordTextField,      new Constraints {grid=(1,3); anchor=West})
+    add(new Label("URL"),       new Constraints {grid=(0,4); anchor=West})
+    add(apiUrlTextField,        new Constraints {grid=(1,4); anchor=West})
     
     add(new FlowPanel {
       contents += logInButton
@@ -79,7 +82,7 @@ class LoginDialog(cancelPressed: => Unit,
       contents += saveUserInfoCheckBox
     }, new Constraints {grid=(0,5); gridwidth=2})
     
-    add(infoLabel, new Constraints {grid=(0,6); gridwidth=2; anchor=GridBagPanel.Anchor.West})
+    add(infoLabel, new Constraints {grid=(0,6); gridwidth=2; anchor=West})
 
     reactions += {
       case ButtonClicked(`logInButton`) => {storeUserInfoIfSet(); handleLogin}
@@ -99,7 +102,7 @@ class LoginDialog(cancelPressed: => Unit,
     if (comboBox != null) {
       val item = comboBox.selection.item
       val parts = item.split(" ")
-      serviceTextField.text = parts(0)
+      accountNameTextField.text = parts(0)
       usernameTextField.text = parts(1) 
       up.userFor(parts(0), parts(1)) match {
         case Some(u) =>
@@ -135,7 +138,7 @@ class LoginDialog(cancelPressed: => Unit,
         () =>
         infoLabel.foreground = Color.BLACK
         infoLabel.text = "Login successful. Initializing…"
-        startup(service, username, password, loggedInUser)
+        startup(accountName, username, password, loggedInUser)
         visible = false
         true
       }

@@ -43,6 +43,7 @@ object PrefKeys {
   val SORT_DIRECTION_ASC   = "asc"
   val SORT_DIRECTION_DESC  = "desc"
   val STATUS_TABLE_STATUS_FONT_SIZE = "statusTableStatusFontSize"
+  val STATUS_TABLE_ROW_HEIGHT = "statusTableRowHeight"
 
   val gprefs = GlobalPrefs.prefs
   val keys = gprefs.keys
