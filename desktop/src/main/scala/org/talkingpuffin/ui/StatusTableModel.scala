@@ -53,8 +53,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
           val newTweets = evt.getNewValue.asInstanceOf[List[TwitterStatus]]
           log.info("Tweets Arrived: " + newTweets.length)
           processStatuses(newTweets)
-	      doNotify(newTweets)
-  }
+          doNotify(newTweets)
+        }
       }
     }
   })
@@ -204,12 +204,11 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     publish(new TableContentsChanged(this, filteredStatuses.length, statuses.length))
     fireTableDataChanged
   }
-      def doNotify(newTweets : List[TwitterStatus]) {
-        newTweets.length match{
-            case 1 => DesktopUtil.notify(newTweets.first.user.screenName+": "+newTweets.first.text,"New tweet")
-            case _ => DesktopUtil.notify(newTweets.length +"new tweets arrived","New tweets")
-        }
-    }
+
+  def doNotify(newTweets: List[TwitterStatus]) = newTweets.length match {
+    case 1 => DesktopUtil.notify(newTweets.first.user.screenName+": "+newTweets.first.text,"New tweet")
+    case _ => DesktopUtil.notify(newTweets.length +" new tweets arrived","New tweets")
+  }
 }
 
 /**
