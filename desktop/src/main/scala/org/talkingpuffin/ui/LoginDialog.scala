@@ -18,8 +18,7 @@ import swing.event.{SelectionChanged, ButtonClicked, EditDone, Event}
 import talkingpuffin.util.Loggable
 import util.Cancelable
 
-class LoginDialog(cancelPressed: => Unit, 
-    startup: (String, String, String, AuthenticatedSession) => Unit)
+class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession) => Unit)
     extends Frame with Cancelable with Loggable {
   
   title = "TalkingPuffin - Log In"
@@ -138,7 +137,7 @@ class LoginDialog(cancelPressed: => Unit,
         () =>
         infoLabel.foreground = Color.BLACK
         infoLabel.text = "Login successful. Initializing…"
-        startup(accountName, username, password, loggedInUser)
+        startup(accountName, loggedInUser)
         visible = false
         true
       }

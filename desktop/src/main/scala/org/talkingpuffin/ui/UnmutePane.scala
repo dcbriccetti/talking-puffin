@@ -12,30 +12,25 @@ import _root_.scala.swing.GridBagPanel._
 /**
  * A panel for unmuting any muted users
  */
+class UnmutePane(title: String, tableModel: StatusTableModel, filterSet: FilterSet, 
+    mutedList: scala.collection.mutable.Map[String,User], unMute: (List[String]) => Unit) 
+    extends GridBagPanel with TableModelListener {
+  border = BorderFactory.createTitledBorder(title)
 
-class UnmutePane(tableModel: StatusTableModel, filterSet: FilterSet) extends GridBagPanel with TableModelListener {
-  border = BorderFactory.createTitledBorder("Muted users")
-
-  val mutedUsersList = new ListView(filterSet.mutedUsers.values.toList)
-  add(new ScrollPane {
-    val dim = new Dimension(150,130)
-    contents = mutedUsersList; preferredSize=dim; minimumSize=dim
+  val view = new ListView(mutedList.values.toList)
+  add(new ScrollPane(view) {
+    val dim = new Dimension(150,130); preferredSize=dim; minimumSize=dim
   }, new Constraints {grid=(0,0); anchor=Anchor.West})
 
   tableModel.addTableModelListener(this)
   
-  def tableChanged(e: TableModelEvent) {
-    mutedUsersList.listData = filterSet.mutedUsers.values.toList
-  }
+  def tableChanged(e: TableModelEvent) = view.listData = mutedList.values.toList
 
-  val unmuteButton = new Button("Unmute")
-  add(unmuteButton, new Constraints {grid=(0,1)})
+  val removeButton = new Button("Remove")
+  add(removeButton, new Constraints {grid=(0,1)})
   
-  listenTo(unmuteButton)
+  listenTo(removeButton)
   reactions += {
-    case ButtonClicked(b) => {
-      val selected = mutedUsersList.selection.items.toList
-      tableModel.unmuteUsers(selected.map(_.id))
-    }
+    case ButtonClicked(b) => unMute(view.selection.items.toList.map(_.id))
   }
 }

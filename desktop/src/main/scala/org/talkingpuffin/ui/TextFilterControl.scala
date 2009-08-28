@@ -2,18 +2,18 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing._
 import _root_.scala.swing.event.ButtonClicked
-import filter.TextFilter
+import filter.{TextFilters, TextFilter}
 import java.awt.Dimension
 import java.awt.event.KeyEvent
 import javax.swing.SpringLayout.Constraints
 import javax.swing.{KeyStroke, BorderFactory}
 import scala.swing._
 
-/**
+/**         
  * A control for maintaining a list of TextFilters.
  */
 
-class TextFilterControl(label: String, textFilters: java.util.List[TextFilter]) extends BoxPanel(Orientation.Vertical) {
+class TextFilterControl(label: String, textFilters: TextFilters) extends BoxPanel(Orientation.Vertical) {
   border = BorderFactory.createTitledBorder(label)
 
   val tableModel = new TextFilterModel(textFilters)
@@ -26,9 +26,7 @@ class TextFilterControl(label: String, textFilters: java.util.List[TextFilter]) 
 
       def addDelete {
         val delAction = Action("Delete") {
-          for (i <- peer.getSelectedRows reverse) {
-            textFilters.remove(textFilters.get(i))
-          }
+          textFilters.list --= List.fromArray(for (i <- peer.getSelectedRows) yield textFilters.list(i))
           dataChanged
         }
         peer.getActionMap.put(delAction.title, delAction.peer)
@@ -71,7 +69,7 @@ class TextFilterControl(label: String, textFilters: java.util.List[TextFilter]) 
   }
   
   def addTextFilter(text: String, regex: Boolean) {
-    textFilters.add(new TextFilter(text, regex))
+    textFilters.list ::= new TextFilter(text, regex)
     dataChanged
   }
   

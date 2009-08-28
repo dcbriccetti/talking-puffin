@@ -12,9 +12,9 @@ case class StreamInfo(val title: String, val model: StatusTableModel, val pane: 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
  */
-class Streams(val service: String, user: AuthenticatedSession, session: Session, val tagUsers: TagUsers, 
-      val username: String, password: String) extends Reactor {
-  val prefs = PreferencesFactory.prefsForUser(service, username)
+class Streams(val service: String, val user: AuthenticatedSession, session: Session, val tagUsers: TagUsers) 
+    extends Reactor {
+  val prefs = PreferencesFactory.prefsForUser(service, user.user)
   
   val tweetsProvider = new TweetsProvider(user,
     prefs.get("highestId", null) match {case null => None; case v => Some(java.lang.Long.parseLong(v))}, 
@@ -68,18 +68,18 @@ class Streams(val service: String, user: AuthenticatedSession, session: Session,
     paneTitle + " (" + filtered + "/" + total + ")"
   }
 
-  private def createStream(source: TweetsProvider, title: String, include: Option[String]): StreamInfo = {
+  private def createView(source: TweetsProvider, title: String, include: Option[String]): StreamInfo = {
     val fs = new FilterSet(session)
     include match {
-      case Some(s) => fs.includeTextFilters.add(new TextFilter(s, false)) 
+      case Some(s) => fs.includeTextFilters.list ::= new TextFilter(s, false) 
       case None =>
     }
     val sto = new StatusTableOptions(true, true, true)
     val isMentions = source.isInstanceOf[MentionsProvider] // TODO do without this test
     val model = if (isMentions) {
-      new StatusTableModel(sto, source, usersTableModel, fs, service, username, tagUsers) with Mentions
+      new StatusTableModel(sto, source, usersTableModel, fs, service, user.user, tagUsers) with Mentions
     } else {
-      new StatusTableModel(sto, source, usersTableModel, fs, service, username, tagUsers)
+      new StatusTableModel(sto, source, usersTableModel, fs, service, user.user, tagUsers)
     }
     val pane = new StatusPane(session, title, model, fs, this)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
@@ -98,13 +98,13 @@ class Streams(val service: String, user: AuthenticatedSession, session: Session,
     }
   }
   
-  def createFollowingViewFor(include: String) = createStream(tweetsProvider, folTitle.create, Some(include))
+  def createFollowingViewFor(include: String) = createView(tweetsProvider, folTitle.create, Some(include))
 
-  def createFollowingView: StreamInfo = createStream(tweetsProvider, folTitle.create, None)
+  def createFollowingView: StreamInfo = createView(tweetsProvider, folTitle.create, None)
   
-  def createRepliesViewFor(include: String) = createStream(mentionsProvider, repTitle.create, Some(include))
+  def createRepliesViewFor(include: String) = createView(mentionsProvider, repTitle.create, Some(include))
 
-  def createRepliesView: StreamInfo = createStream(mentionsProvider, repTitle.create, None)
+  def createRepliesView: StreamInfo = createView(mentionsProvider, repTitle.create, None)
   
   def componentTitle(comp: Component) = streamInfoList.filter(s => s.pane == comp)(0).title
   

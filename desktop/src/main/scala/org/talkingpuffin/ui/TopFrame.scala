@@ -22,9 +22,8 @@ import ui.util.FetchRequest
 /**
  * The top-level application Swing frame window. There is one per user session.
  */
-class TopFrame(service: String, username: String, password: String, twitterSession: AuthenticatedSession) 
-      extends Frame with Loggable {
-  val tagUsers = new TagUsers(service, username)
+class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable {
+  val tagUsers = new TagUsers(service, twitterSession.user)
   TopFrames.addFrame(this)
   val session = new Session(twitterSession)
   Globals.sessions ::= session
@@ -37,7 +36,7 @@ class TopFrame(service: String, username: String, password: String, twitterSessi
 
   val mainToolBar = new MainToolBar
   session.progress = mainToolBar
-  val streams = new Streams(service, twitterSession, session, tagUsers, username, password)
+  val streams = new Streams(service, twitterSession, session, tagUsers)
   session.windows.streams = streams
   mainToolBar.init(streams)
     
@@ -77,8 +76,8 @@ class TopFrame(service: String, username: String, password: String, twitterSessi
   def saveState {
     val highFol = streams.tweetsProvider.getHighestId
     val highMen = streams.mentionsProvider.getHighestId
-    info("Saving last seen IDs for " + username + ". Following: " + highFol + ", mentions: " + highMen)
-    val prefs = PreferencesFactory.prefsForUser(service, username)
+    info("Saving last seen IDs for " + twitterSession.user + ". Following: " + highFol + ", mentions: " + highMen)
+    val prefs = PreferencesFactory.prefsForUser(service, twitterSession.user)
     if (highFol.isDefined) prefs.put("highestId"       , highFol.get.toString())
     if (highMen.isDefined) prefs.put("highestMentionId", highMen.get.toString())
     tagUsers.save

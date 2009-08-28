@@ -144,6 +144,23 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filterAndNotify
   }
 
+  def muteSelectedUsersRetweets(rows: List[Int]) = muteRetweetUsers(getUsers(rows))
+
+  private def muteRetweetUsers(users: List[User]) {
+    filterSet.retweetMutedUsers ++= users.map(user => (user.id, user))
+    filterAndNotify
+  }
+
+  def unmuteRetweetUsers(userIds: List[String]) {
+    filterSet.retweetMutedUsers --= userIds
+    filterAndNotify
+  }
+  
+  def unMuteRetweetAll {
+    filterSet.retweetMutedUsers.clear
+    filterAndNotify
+  }
+
   private def dateToAgeSeconds(date: Long): Long = (new Date().getTime() - date) / 1000
   
   def getUsers(rows: List[Int]) = rows.map(i => {
