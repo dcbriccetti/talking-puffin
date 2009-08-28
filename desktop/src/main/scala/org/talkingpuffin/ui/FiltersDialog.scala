@@ -27,10 +27,8 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
       new Constraints {grid=(1,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
     add(new Label(" "), new Constraints {grid=(2,0); fill=Fill.Horizontal; weightx=1})
   
-    val excludeNotToFollowingReplies = new CheckBox("No replies not to following")
     val excludeOverlapping = new CheckBox("No Tweets appearing in other sessions")
     add(new FlowPanel(FlowPanel.Alignment.Left) {
-      contents += excludeNotToFollowingReplies
       contents += excludeOverlapping
     }, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
   
@@ -72,7 +70,6 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
 
   def applyChanges {
     filterSet.selectedTags = panel.tagsPanel.selectedTags
-    filterSet.excludeNotToFollowingReplies = panel.excludeNotToFollowingReplies.selected
     filterSet.excludeOverlapping = panel.excludeOverlapping.selected
     filterSet.publish
   }

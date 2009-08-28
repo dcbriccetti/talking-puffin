@@ -32,7 +32,7 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
   private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet, streams.tagUsers)
 
   statusTableModel.addTableModelListener(this)
-  statusTableModel.setPreChangeListener(this)
+  statusTableModel.preChangeListener = this
   
   val statusToolBar = new StatusToolBar(session, statusTableModel.tweetsProvider, 
     filtersDialog, this, clearTweets, showMaxColumns)

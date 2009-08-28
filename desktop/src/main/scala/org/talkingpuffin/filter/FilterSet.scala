@@ -10,13 +10,9 @@ import ui.User
 /**
  * A set of all filters
  */
-
-class TextFilter (var text: String, var isRegEx: Boolean)
-
 class FilterSet(session: Session) extends Publisher {
   val mutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
   var selectedTags = List[String]()
-  var excludeNotToFollowingReplies: Boolean = _
   var excludeOverlapping: Boolean = _
   val includeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
   val excludeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
@@ -51,12 +47,12 @@ class FilterSet(session: Session) extends Publisher {
     false
   }
   
-  def friendScreenNames = session.windows.streams.usersTableModel.usersModel.friendScreenNames // TODO simplify
-
   private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
     Pattern.matches(search.text, text) else text.toUpperCase.contains(search.text.toUpperCase)
 
   def publish: Unit = publish(new FilterSetChanged(this))
 }
+
+class TextFilter (var text: String, var isRegEx: Boolean)
 
 case class FilterSetChanged(filterSet: FilterSet) extends Event

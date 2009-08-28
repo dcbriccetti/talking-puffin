@@ -20,9 +20,7 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
       contents += new Button(Action("All" ) {checkBoxView.selectAll(true)})
       contents += new Button(Action("None") {checkBoxView.selectAll(false)})
     }
-    contents += new ScrollPane {
-      contents = checkBoxView
-    }
+    contents += new ScrollPane(checkBoxView)
   }, BorderPanel.Position.Center)
 
   var newTag: TextField = _
@@ -54,7 +52,7 @@ object CheckBoxView {
 
 class CheckBoxView(values: List[String], checkedValues: List[String]) extends BoxPanel(Orientation.Vertical) {
   private var checkBoxes = List[CheckBox]()
-  for ((i, value) <- List.range(0, values.length) zip values) {
+  for ((value, i) <- values.zipWithIndex) {
     val keyVal = KeyEvent.VK_A + i
     val checkBox = new CheckBox("" + keyVal.toChar + CheckBoxView.mnemonicSep + value) {
       peer.setMnemonic(keyVal)
