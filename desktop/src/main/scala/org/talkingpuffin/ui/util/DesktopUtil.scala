@@ -5,7 +5,7 @@ import java.net.URI
 import java.awt._
 import javax.swing.ImageIcon
 object DesktopUtil {
-    val trayIcon = new TrayIcon(new ImageIcon(getClass.getResource("/TalkingPuffin_16.png")).getImage ,"test")
+    val trayIcon = new TrayIcon(new ImageIcon(getClass.getResource("/TalkingPuffin_16.png")).getImage ,"Talking Puffin")
     if(SystemTray.isSupported){
         val tray = SystemTray.getSystemTray();
         tray.add(trayIcon)
