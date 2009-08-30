@@ -21,9 +21,9 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
     font = new Font("Serif", Font.PLAIN, 18)
   }
   
-  case class NameAndScreenName(val name: String, val screenName: String) {
+  case class NameAndScreenName(val name: String, val screenName: String) extends Ordered[NameAndScreenName] {
     override def toString = name + " (" + screenName + ")"
-    def compareTo(other: NameAndScreenName) = screenName compareToIgnoreCase other.screenName
+    def compare(other: NameAndScreenName) = screenName compareToIgnoreCase other.screenName
     def matches(search: String) = {
       val slc = search.toLowerCase
       search.length == 0 || name.toLowerCase.contains(slc) || screenName.toLowerCase.contains(slc)
@@ -33,13 +33,8 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
   title = "Send Message"
   def users = {
     val utm = session.windows.streams.usersTableModel
-    val matches = (
-      for {
-        u <- utm.friends ::: utm.followers
-        nsn = NameAndScreenName(u.name, u.screenName)
-        if nsn.matches(searchText.text)
-      } yield nsn).
-      sort((e1, e2) => (e1 compareTo e2) < 0).removeDuplicates
+    val matches = ((utm.friends ::: utm.followers).map(u => NameAndScreenName(u.name, u.screenName)).
+        filter(_.matches(searchText.text))).sort(_ < _).removeDuplicates
     (matches.length match {
       case 0 => "No matches were found"
       case 1 => "Select the following item to insert a @screenname"
@@ -47,7 +42,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
     }) :: matches
   }
   private val searchText = new TextField {columns = 15}
-  private val usersCombo = if (users.length == 0) None else Some(new ComboBox(users))
+  private val usersCombo = new ComboBox(users)
   private val message = new CustomTextArea
   private val total = new Label(remainingMsg)
   listenTo(message.caret)
@@ -59,7 +54,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
   })
   listenTo(searchText)
   reactions += {
-    case EditDone(`searchText`) => usersCombo.get.peer.setModel(ComboBox.newConstantModel(users))
+    case EditDone(`searchText`) => usersCombo.peer.setModel(ComboBox.newConstantModel(users))
   }
 
   private var userNames = ""
@@ -78,24 +73,20 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
       case Some(retweetMsg) => message.text = "RT " + userNames + " " + retweetMsg
       case None =>
     }
-    usersCombo match {
-      case Some(uc) =>
-        add(new FlowPanel(FlowPanel.Alignment.Left) {
-          val searchLabel = new Label("Search: ")
-          searchLabel.peer.setLabelFor(searchText.peer)
-          contents += searchLabel
-          contents += searchText
-        }, new Constr {grid=(0,0); anchor=GridBagPanel.Anchor.West})
-        add(uc, new Constr {grid=(0,1); anchor=GridBagPanel.Anchor.West})
-        listenTo(uc.selection)
-        reactions += {
-          case SelectionChanged(`uc`) => uc.selection.item match {
-            case nsn: NameAndScreenName => message.peer.insert("@" + nsn.screenName + " ", 
-                message.peer.getCaretPosition)
-            case _ =>
-          }
-        }
-      case _ =>
+    add(new FlowPanel(FlowPanel.Alignment.Left) {
+      val searchLabel = new Label("Search: ")
+      searchLabel.peer.setLabelFor(searchText.peer)
+      contents += searchLabel
+      contents += searchText
+    }, new Constr {grid=(0,0); anchor=GridBagPanel.Anchor.West})
+    add(usersCombo, new Constr {grid=(0,1); anchor=GridBagPanel.Anchor.West})
+    listenTo(usersCombo.selection)
+    reactions += {
+      case SelectionChanged(`usersCombo`) => usersCombo.selection.item match {
+        case nsn: NameAndScreenName => message.peer.insert("@" + nsn.screenName + " ", 
+            message.peer.getCaretPosition)
+        case _ =>
+      }
     }
     add(message,    new Constr {grid=(0,2); fill=GridBagPanel.Fill.Both; weightx=1; weighty=1})
     add(total,      new Constr {grid=(0,3); anchor=GridBagPanel.Anchor.West})
