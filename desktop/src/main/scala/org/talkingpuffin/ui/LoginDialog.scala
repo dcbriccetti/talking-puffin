@@ -119,18 +119,30 @@ class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession
   private def handleLogin {
     enableButtons(false)
     var loggedInUser: AuthenticatedSession = null
+    
+    def showFailure(msg: String) {
+      infoLabel.foreground = Color.RED
+      infoLabel.text = msg
+      enableButtons(true)
+    }
+    
     LongRunningSpinner.run(this, null, 
       { 
         () =>
-        val sess = TwitterSession(username,password,apiUrl)
-        if(sess.verifyCredentials){
+        try {
+          val sess = TwitterSession(username,password,apiUrl)
+          if(sess.verifyCredentials){
             loggedInUser = sess
             true
-        }else{
-            infoLabel.foreground = Color.RED
-            infoLabel.text = "Login failed"
-            enableButtons(true)
+          }else{
+            showFailure("Login failed")
             false
+          }
+        } catch {
+          case e: Exception => {
+            showFailure(e.getMessage)
+            false
+          }
         }
       }, 
       { 

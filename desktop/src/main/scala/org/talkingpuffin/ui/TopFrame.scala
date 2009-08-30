@@ -71,7 +71,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   peer.setLocationRelativeTo(null)
   createPeoplePane
 
-  def setFocus = streams.streamInfoList.last.pane.requestFocusForTable
+  def setFocus = streams.views.last.pane.requestFocusForTable
   
   def saveState {
     val highFol = streams.tweetsProvider.getHighestId
@@ -81,7 +81,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     if (highFol.isDefined) prefs.put("highestId"       , highFol.get.toString())
     if (highMen.isDefined) prefs.put("highestMentionId", highMen.get.toString())
     tagUsers.save
-    streams.streamInfoList.last.pane.saveState // TODO instead save the order of the last status pane changed
+    streams.views.last.pane.saveState // TODO instead save the order of the last status pane changed
   }
   
   private def createPeoplePane: Unit = {

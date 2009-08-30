@@ -7,7 +7,7 @@ import javax.swing.{JFrame, JComponent, SwingUtilities}
 import state.PreferencesFactory
 import twitter.{AuthenticatedSession, TweetsProvider, MentionsProvider, TwitterUser}
 
-case class StreamInfo(val title: String, val model: StatusTableModel, val pane: StatusPane)
+case class View(val title: String, val model: StatusTableModel, val pane: StatusPane)
 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
@@ -24,7 +24,7 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
     session.progress)
   val usersTableModel = new UsersTableModel(tagUsers, List[TwitterUser](), List[TwitterUser]())
   
-  var streamInfoList = List[StreamInfo]()
+  var views = List[View]()
   
   val folTitle = new TitleCreator("Following")
   val repTitle = new TitleCreator("Mentions")
@@ -33,9 +33,9 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
   
   reactions += {
     case TableContentsChanged(model, filtered, total) => {
-      if (streamInfoList.length == 0) println("streamInfoList is empty. Ignoring table contents changed.")
+      if (views.length == 0) println("streamInfoList is empty. Ignoring table contents changed.")
       else {
-        val filteredList = streamInfoList.filter(_.model == model)
+        val filteredList = views.filter(_.model == model)
         if (filteredList.length == 0) println("No matches in streamInfoList for model " + model)
         else {
           val si = filteredList(0)
@@ -68,7 +68,7 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
     paneTitle + " (" + filtered + "/" + total + ")"
   }
 
-  private def createView(source: TweetsProvider, title: String, include: Option[String]): StreamInfo = {
+  private def createView(source: TweetsProvider, title: String, include: Option[String]): View = {
     val fs = new FilterSet(session)
     include match {
       case Some(s) => fs.includeTextFilters.list ::= new TextFilter(s, false) 
@@ -84,9 +84,9 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
     val pane = new StatusPane(session, title, model, fs, this)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
     listenTo(model)
-    val streamInfo = new StreamInfo(title, model, pane)
+    val streamInfo = new View(title, model, pane)
     streamInfo.model.followerIds = followerIds
-    streamInfoList ::= streamInfo
+    views ::= streamInfo
     streamInfo
   }
 
@@ -100,17 +100,17 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
   
   def createFollowingViewFor(include: String) = createView(tweetsProvider, folTitle.create, Some(include))
 
-  def createFollowingView: StreamInfo = createView(tweetsProvider, folTitle.create, None)
+  def createFollowingView: View = createView(tweetsProvider, folTitle.create, None)
   
   def createRepliesViewFor(include: String) = createView(mentionsProvider, repTitle.create, Some(include))
 
-  def createRepliesView: StreamInfo = createView(mentionsProvider, repTitle.create, None)
+  def createRepliesView: View = createView(mentionsProvider, repTitle.create, None)
   
-  def componentTitle(comp: Component) = streamInfoList.filter(s => s.pane == comp)(0).title
+  def componentTitle(comp: Component) = views.filter(s => s.pane == comp)(0).title
   
   def setFollowerIds(followerIds: List[String]) {
     this.followerIds = followerIds
-    streamInfoList.foreach(si => si.model.followerIds = followerIds)
+    views.foreach(si => si.model.followerIds = followerIds)
   }
 }
 
