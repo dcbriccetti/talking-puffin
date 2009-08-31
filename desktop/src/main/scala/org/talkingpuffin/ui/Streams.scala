@@ -5,6 +5,7 @@ import _root_.scala.xml.Node
 import filter.{FilterSet, TextFilter, TagUsers}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
 import state.PreferencesFactory
+import talkingpuffin.util.Loggable
 import twitter.{AuthenticatedSession, TweetsProvider, MentionsProvider, TwitterUser}
 
 case class View(val title: String, val model: StatusTableModel, val pane: StatusPane)
@@ -13,7 +14,7 @@ case class View(val title: String, val model: StatusTableModel, val pane: Status
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
  */
 class Streams(val service: String, val user: AuthenticatedSession, session: Session, val tagUsers: TagUsers) 
-    extends Reactor {
+    extends Reactor with Loggable {
   val prefs = PreferencesFactory.prefsForUser(service, user.user)
   
   val tweetsProvider = new TweetsProvider(user,
@@ -33,60 +34,49 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
   
   reactions += {
     case TableContentsChanged(model, filtered, total) => {
-      if (views.length == 0) println("streamInfoList is empty. Ignoring table contents changed.")
-      else {
-        val filteredList = views.filter(_.model == model)
-        if (filteredList.length == 0) println("No matches in streamInfoList for model " + model)
-        else {
-          val si = filteredList(0)
-          setTitleInParent(si.pane.peer, createTweetsTitle(si.title, filtered, total))
-        }
+      views.find(_.model == model) match {
+        case Some(view) => setTitleInParent(view.pane.peer, view.title + " (" + 
+            (if (total == filtered) total else filtered + "/" + total) + ")")
+        case _ => info("No view found for model " + model) 
       }
     }
   }
 
   createFollowingView
-  createRepliesView
+  createMentionsView
   
   // Now that views, models and listeners are in place, get data
   tweetsProvider.loadNewData
   mentionsProvider.loadNewData
 
-  private def setTitleInParent(pane: JComponent, title: String) {
+  private def setTitleInParent(pane: JComponent, title: String) =
     session.windows.tabbedPane.peer.indexOfComponent(pane) match {
-      case -1 => {
+      case -1 => 
         SwingUtilities.getAncestorOfClass(classOf[JFrame], pane) match {
           case null =>
-          case parent => parent.asInstanceOf[JFrame].setTitle(title)
+          case jf => jf.asInstanceOf[JFrame].setTitle(title) 
         }
-      }
-      case tabbedPaneIndex => session.windows.tabbedPane.peer.setTitleAt(tabbedPaneIndex, title)
+      case i => session.windows.tabbedPane.peer.setTitleAt(i, title)
     }
-  }
-
-  private def createTweetsTitle(paneTitle: String, filtered: Int, total: Int): String = 
-    paneTitle + " (" + (if (total == filtered) total else filtered + "/" + total) + ")"
 
   private def createView(source: TweetsProvider, title: String, include: Option[String]): View = {
     val fs = new FilterSet(session)
-    include match {
-      case Some(s) => fs.includeTextFilters.list ::= new TextFilter(s, false) 
-      case None =>
+    if (include.isDefined) {
+      fs.includeTextFilters.list ::= new TextFilter(include.get, false) 
     }
     val sto = new StatusTableOptions(true, true, true)
     val isMentions = source.isInstanceOf[MentionsProvider] // TODO do without this test
-    val model = if (isMentions) {
+    val model = if (isMentions) 
       new StatusTableModel(sto, source, usersTableModel, fs, service, user.user, tagUsers) with Mentions
-    } else {
+    else 
       new StatusTableModel(sto, source, usersTableModel, fs, service, user.user, tagUsers)
-    }
     val pane = new StatusPane(session, title, model, fs, this)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
     listenTo(model)
-    val streamInfo = new View(title, model, pane)
-    streamInfo.model.followerIds = followerIds
-    views ::= streamInfo
-    streamInfo
+    val view = new View(title, model, pane)
+    view.model.followerIds = followerIds
+    views ::= view
+    view
   }
 
   class TitleCreator(baseName: String) {
@@ -103,7 +93,7 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
   
   def createRepliesViewFor(include: String) = createView(mentionsProvider, repTitle.create, Some(include))
 
-  def createRepliesView: View = createView(mentionsProvider, repTitle.create, None)
+  def createMentionsView: View = createView(mentionsProvider, repTitle.create, None)
   
   def componentTitle(comp: Component) = views.filter(s => s.pane == comp)(0).title
   
