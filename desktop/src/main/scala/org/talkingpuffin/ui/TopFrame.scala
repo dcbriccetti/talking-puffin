@@ -86,6 +86,12 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   private def createPeoplePane: Unit = {
     mainToolBar.startOperation
+    
+    new SwingWorker[List[TwitterUserId], Object] {
+      def doInBackground = twitterSession.loadAll(twitterSession.getFollowersIds)
+      override def done = streams setFollowerIds (get map (_.id.toString()))
+    }.execute
+
     val pool = Executors.newFixedThreadPool(2)
     val friendsFuture = pool.submit(new Callable[List[TwitterUser]] {
       def call = twitterSession.loadAll(twitterSession.getFriends)
@@ -104,8 +110,6 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
         streams.usersTableModel.followers = followers
         streams.usersTableModel.usersChanged
  
-        streams setFollowerIds (followers map (u => u.id.toString()))
-              
         val paneTitle = "People (" + friends.length + ", " + followers.length + ")"
         val pane = new PeoplePane(session, streams.usersTableModel, friends, followers)
         tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)

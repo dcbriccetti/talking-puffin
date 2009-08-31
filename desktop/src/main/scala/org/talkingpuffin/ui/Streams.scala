@@ -112,7 +112,7 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
   
   def setFollowerIds(followerIds: List[String]) {
     this.followerIds = followerIds
-    views.foreach(si => si.model.followerIds = followerIds)
+    views.foreach(_.model.followerIds = followerIds)
   }
 }
 
