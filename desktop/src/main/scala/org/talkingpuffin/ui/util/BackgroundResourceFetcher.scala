@@ -64,13 +64,10 @@ abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceRea
    * Requests that an item be fetched in a background thread. If the key is already in the 
    * cache, the request is ignored. 
    */
-  def requestItem(request: FetchRequest[K]) {
-    if (! cache.containsKey(request.key)) {
-      if (! requestQueue.contains(request) && ! inProgress.contains(request.key)) {
-        requestQueue.put(request)
-      }
-    }
-  }
+  def requestItem(request: FetchRequest[K]) = 
+    if (! cache.containsKey(request.key) && 
+        ! requestQueue.contains(request) && ! inProgress.contains(request.key)) 
+      requestQueue.put(request)
   
   protected def getResourceFromSource(key: K): V
 }

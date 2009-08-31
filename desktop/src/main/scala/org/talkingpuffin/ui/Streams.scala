@@ -59,17 +59,17 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
       case i => session.windows.tabbedPane.peer.setTitleAt(i, title)
     }
 
-  private def createView(source: TweetsProvider, title: String, include: Option[String]): View = {
+  private def createView(tweetsProvider: TweetsProvider, title: String, include: Option[String]): View = {
     val fs = new FilterSet(session)
     if (include.isDefined) {
       fs.includeTextFilters.list ::= new TextFilter(include.get, false) 
     }
     val sto = new StatusTableOptions(true, true, true)
-    val isMentions = source.isInstanceOf[MentionsProvider] // TODO do without this test
+    val isMentions = tweetsProvider.isInstanceOf[MentionsProvider] // TODO do without this test
     val model = if (isMentions) 
-      new StatusTableModel(sto, source, usersTableModel, fs, service, user.user, tagUsers) with Mentions
+      new StatusTableModel(sto, tweetsProvider, usersTableModel, fs, service, user.user, tagUsers) with Mentions
     else 
-      new StatusTableModel(sto, source, usersTableModel, fs, service, user.user, tagUsers)
+      new StatusTableModel(sto, tweetsProvider, usersTableModel, fs, service, user.user, tagUsers)
     val pane = new StatusPane(session, title, model, fs, this)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
     listenTo(model)

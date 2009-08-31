@@ -11,7 +11,7 @@ class EmphasizedStringCellRenderer extends HtmlCellRenderer {
   override def setFormattedText(component: JTextComponent, value: Any) = component.setText(
     HtmlFormatter.htmlAround(formatValue(value.asInstanceOf[EmphasizedString], renderer.getForeground))) 
   
-  private def formatValue(string: EmphasizedString, color: Color): String = {
+  private def formatValue(string: EmphasizedString, color: Color): String = 
     string.name match {
       case Some(name) => 
         "<font face='helvetica' color='#" +  
@@ -20,14 +20,11 @@ class EmphasizedStringCellRenderer extends HtmlCellRenderer {
         "</font>"
       case None => ""    
     }
-  }
-  
 }
 
 object EmphasizedStringCellRenderer {
-  def decorate(text: String, embolden: Boolean): String = {
+  def decorate(text: String, embolden: Boolean): String = 
     (if (embolden) "<b>" else "") + text + (if (embolden) "</b>" else "")
-  }
 }
 
 class EmphasizedString(val name: Option[String], val nameEmphasized: Boolean)

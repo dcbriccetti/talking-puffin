@@ -9,11 +9,11 @@ import javax.swing.{Icon, ImageIcon}
 import scala.actors.Actor._
 import java.net.URL
 import util.{FetchRequest, ResourceReady, BackgroundResourceFetcher}
+
 /**
  * Fetches pictures in the background, and calls a method in the event
  * dispatching thread when done.
  */
-
 object PictureFetcher {
   type ImageReady = ResourceReady[String,ImageWithScaled]
 

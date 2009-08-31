@@ -32,10 +32,7 @@ class HtmlCellRenderer extends TableCellRenderer with Loggable {
   protected def setFormattedText(component: JTextComponent, value: Any) = component.setText(
     HtmlFormatter.htmlAround(formatValue(value.asInstanceOf[String], renderer.getForeground))) 
   
-  private def formatValue(string: String, color: Color): String = {
-    "<font face='helvetica' color='#" +  
-    Integer.toHexString(color.getRGB & 0x00ffffff) + "'>" + 
-    string + "</font>"
-  }
+  private def formatValue(string: String, color: Color): String = "<font face='helvetica' color='#" +  
+    Integer.toHexString(color.getRGB & 0x00ffffff) + "'>" + string + "</font>"
 }
 
