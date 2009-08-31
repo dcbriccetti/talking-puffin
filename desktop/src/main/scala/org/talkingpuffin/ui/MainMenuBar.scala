@@ -48,6 +48,7 @@ class MainMenuBar extends MenuBar {
     contents += ItemFactory("Use animations", "Enables simple, useful animations", 
       PrefKeys.USE_ANIMATIONS, false)
     contents += ItemFactory("Use real names", "Display real names", PrefKeys.USE_REAL_NAMES, true)
+    contents += ItemFactory("Notify tweets", "Notify tweets", PrefKeys.NOTIFY_TWEETS, true)
     contents += ItemFactory("Look up locations", "Enables lookup of locations from latitude and longitude",
       PrefKeys.LOOK_UP_LOCATIONS, false)
     contents += ItemFactory("Expand URLs", "Enables fetching original URL from shortened form", 

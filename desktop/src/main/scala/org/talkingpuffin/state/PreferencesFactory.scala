@@ -29,6 +29,7 @@ object GlobalPrefs {
 object PrefKeys {
   val USE_ANIMATIONS    = "useAnimations"
   val USE_REAL_NAMES    = "useRealNames"
+  val NOTIFY_TWEETS     = "notifyTweets"
   val LOOK_UP_LOCATIONS = "lookUpLocations"
   val EXPAND_URLS       = "expandUrls"
   val SORT_BY           = "sortBy"
