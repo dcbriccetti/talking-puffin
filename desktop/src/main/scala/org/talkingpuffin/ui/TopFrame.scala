@@ -65,7 +65,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   def setFocus = streams.views.last.pane.requestFocusForTable
   
   def saveState {
-    val highFol = streams.tweetsProvider.getHighestId
+    val highFol = streams.followingProvider.getHighestId
     val highMen = streams.mentionsProvider.getHighestId
     info("Saving last seen IDs for " + twitterSession.user + ". Following: " + highFol + ", mentions: " + highMen)
     val prefs = session.userPrefs

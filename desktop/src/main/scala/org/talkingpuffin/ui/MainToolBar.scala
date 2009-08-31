@@ -24,16 +24,10 @@ class MainToolBar extends JToolBar with LongOpListener {
   setFloatable(false)
 
   def init(streams: Streams) = {
-    add(new Label("Following: ").peer)
-    addSourceControls(streams.tweetsProvider, streams.createFollowingView)
-
+    addSourceControls(streams.followingProvider, streams.createFollowingView)
     addSeparator
-
-    add(new Label("Mentions: ").peer)
     addSourceControls(streams.mentionsProvider, streams.createMentionsView)
-
     addSeparator
-
     add(progressBar.peer)
   }
   
@@ -42,6 +36,7 @@ class MainToolBar extends JToolBar with LongOpListener {
   def stopOperation = if (operationsInProgress.decrementAndGet == 0) progressBar.indeterminate = false;
   
   private def addSourceControls(provider: TweetsProvider, createView: => Unit) {
+    add(new Label(provider.providerName + ": ").peer)
     val newViewAction = new Action("New View") {
       toolTip = "Creates a new view"
       def apply = createView

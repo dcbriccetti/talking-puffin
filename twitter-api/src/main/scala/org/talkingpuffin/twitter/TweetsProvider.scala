@@ -16,9 +16,8 @@ object TweetsProvider {
 /**
  * Provides tweets
  */
-
-class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], providerName: String,
-      longOpListener: LongOpListener) {
+abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], 
+    val providerName: String, longOpListener: LongOpListener) {
   private val log = Logger.getLogger("TweetsProvider " + providerName)
   val propChg = new PropertyChangeSupport(this)
   protected var highestId:Option[Long] = startingId
@@ -41,22 +40,18 @@ class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], pr
   /**
    * Sets the update frequency, in seconds.
    */
-  def setUpdateFrequency(updateFrequency: Int) {
-    this.updateFrequency = updateFrequency * 1000
+  def setUpdateFrequency(updateFrequencySecs: Int) {
+    this.updateFrequency = updateFrequencySecs * 1000
     if (timer != null && timer.isRunning) {
       timer.stop
     }
 
     if (updateFrequency > 0) {
-      createLoadTimer
+      timer = new Timer(updateFrequency, new ActionListener() {
+        def actionPerformed(event: ActionEvent) = loadNewData
+      })
+      timer.start
     }
-  }
-
-  private def createLoadTimer {
-    timer = new Timer(updateFrequency, new ActionListener() {
-      def actionPerformed(event: ActionEvent) = loadNewData
-    })
-    timer.start
   }
 
   private def computeHighestId(tweets: List[TwitterStatus], maxId: Option[Long]):Option[Long] = tweets match {
@@ -112,6 +107,11 @@ class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], pr
     }.execute
   }
   
+}
+
+class FollowingProvider(session: AuthenticatedSession, startingId: Option[Long], 
+    longOpListener: LongOpListener)
+    extends TweetsProvider(session, startingId, "Following", longOpListener) {
 }
 
 class MentionsProvider(session: AuthenticatedSession, startingId: Option[Long], 
