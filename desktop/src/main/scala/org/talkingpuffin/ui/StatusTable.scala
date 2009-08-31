@@ -207,21 +207,22 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
 
     ap add(Action("View status in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
-    ap add(Action("View user in Browser") {viewUser}, KeyStroke.getKeyStroke(KeyEvent.VK_V, 
-      java.awt.event.InputEvent.SHIFT_DOWN_MASK))  
+    val SHIFT = java.awt.event.InputEvent.SHIFT_DOWN_MASK
+    ap add(Action("View user in Browser") {viewUser}, KeyStroke.getKeyStroke(KeyEvent.VK_V, SHIFT))  
     ap add(Action("Edit user properties…") {editUser}, KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask))
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
     ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_U))
     ap add(Action("Mute") {tableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
-      Actions.ks(KeyEvent.VK_M))
+      KeyStroke.getKeyStroke(KeyEvent.VK_M, shortcutKeyMask))
+    ap add(Action("Mute Retweets") {tableModel.muteSelectedUsersRetweets(TableUtil.getSelectedModelIndexes(this))}, 
+      KeyStroke.getKeyStroke(KeyEvent.VK_M, shortcutKeyMask | SHIFT))
     ap add new NextTAction(this)
     ap add new PrevTAction(this)
     ap add(new TagAction(this, tableModel), Actions.ks(KeyEvent.VK_T))
     ap add(Action("Increase Font Size") { changeFontSize(5) }, 
         KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask))
     ap add(Action("Decrease Font Size") { changeFontSize(-5) }, 
-        KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask | 
-      java.awt.event.InputEvent.SHIFT_DOWN_MASK))
+        KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask | SHIFT))
     ap add(Action("Increase Row Height") { changeRowHeight(8) })
     ap add(Action("Decrease Row Height") { changeRowHeight(-8) })
     ap add(Action("Show Larger Image") { showBigPicture }, Actions.ks(KeyEvent.VK_I))
@@ -237,8 +238,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
 
     ap add(Action("Delete all tweets from all selected users") {
       tableModel removeStatusesFrom getSelectedScreenNames 
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, shortcutKeyMask | 
-      java.awt.event.InputEvent.SHIFT_DOWN_MASK))  
+    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, shortcutKeyMask | SHIFT))  
   }
 
   private def changeFontSize(change: Int) {

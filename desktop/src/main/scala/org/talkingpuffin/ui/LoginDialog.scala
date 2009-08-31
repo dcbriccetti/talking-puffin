@@ -18,8 +18,7 @@ import swing.event.{SelectionChanged, ButtonClicked, EditDone, Event}
 import talkingpuffin.util.Loggable
 import util.Cancelable
 
-class LoginDialog(cancelPressed: => Unit, 
-    startup: (String, String, String, AuthenticatedSession) => Unit)
+class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession) => Unit)
     extends Frame with Cancelable with Loggable {
   
   title = "TalkingPuffin - Log In"
@@ -120,25 +119,37 @@ class LoginDialog(cancelPressed: => Unit,
   private def handleLogin {
     enableButtons(false)
     var loggedInUser: AuthenticatedSession = null
+    
+    def showFailure(msg: String) {
+      infoLabel.foreground = Color.RED
+      infoLabel.text = msg
+      enableButtons(true)
+    }
+    
     LongRunningSpinner.run(this, null, 
       { 
         () =>
-        val sess = TwitterSession(username,password,apiUrl)
-        if(sess.verifyCredentials){
+        try {
+          val sess = TwitterSession(username,password,apiUrl)
+          if(sess.verifyCredentials){
             loggedInUser = sess
             true
-        }else{
-            infoLabel.foreground = Color.RED
-            infoLabel.text = "Login failed"
-            enableButtons(true)
+          }else{
+            showFailure("Login failed")
             false
+          }
+        } catch {
+          case e: Exception => {
+            showFailure(e.getMessage)
+            false
+          }
         }
       }, 
       { 
         () =>
         infoLabel.foreground = Color.BLACK
         infoLabel.text = "Login successful. Initializing…"
-        startup(accountName, username, password, loggedInUser)
+        startup(accountName, loggedInUser)
         visible = false
         true
       }

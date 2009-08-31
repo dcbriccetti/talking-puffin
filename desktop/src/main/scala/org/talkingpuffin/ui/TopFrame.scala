@@ -22,9 +22,8 @@ import ui.util.FetchRequest
 /**
  * The top-level application Swing frame window. There is one per user session.
  */
-class TopFrame(service: String, username: String, password: String, twitterSession: AuthenticatedSession) 
-      extends Frame with Loggable {
-  val tagUsers = new TagUsers(service, username)
+class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable {
+  val tagUsers = new TagUsers(service, twitterSession.user)
   TopFrames.addFrame(this)
   val session = new Session(twitterSession)
   Globals.sessions ::= session
@@ -37,7 +36,7 @@ class TopFrame(service: String, username: String, password: String, twitterSessi
 
   val mainToolBar = new MainToolBar
   session.progress = mainToolBar
-  val streams = new Streams(service, twitterSession, session, tagUsers, username, password)
+  val streams = new Streams(service, twitterSession, session, tagUsers)
   session.windows.streams = streams
   mainToolBar.init(streams)
     
@@ -72,21 +71,27 @@ class TopFrame(service: String, username: String, password: String, twitterSessi
   peer.setLocationRelativeTo(null)
   createPeoplePane
 
-  def setFocus = streams.streamInfoList.last.pane.requestFocusForTable
+  def setFocus = streams.views.last.pane.requestFocusForTable
   
   def saveState {
     val highFol = streams.tweetsProvider.getHighestId
     val highMen = streams.mentionsProvider.getHighestId
-    info("Saving last seen IDs for " + username + ". Following: " + highFol + ", mentions: " + highMen)
-    val prefs = PreferencesFactory.prefsForUser(service, username)
+    info("Saving last seen IDs for " + twitterSession.user + ". Following: " + highFol + ", mentions: " + highMen)
+    val prefs = PreferencesFactory.prefsForUser(service, twitterSession.user)
     if (highFol.isDefined) prefs.put("highestId"       , highFol.get.toString())
     if (highMen.isDefined) prefs.put("highestMentionId", highMen.get.toString())
     tagUsers.save
-    streams.streamInfoList.last.pane.saveState // TODO instead save the order of the last status pane changed
+    streams.views.last.pane.saveState // TODO instead save the order of the last status pane changed
   }
   
   private def createPeoplePane: Unit = {
     mainToolBar.startOperation
+    
+    new SwingWorker[List[TwitterUserId], Object] {
+      def doInBackground = twitterSession.loadAll(twitterSession.getFollowersIds)
+      override def done = streams setFollowerIds (get map (_.id.toString()))
+    }.execute
+
     val pool = Executors.newFixedThreadPool(2)
     val friendsFuture = pool.submit(new Callable[List[TwitterUser]] {
       def call = twitterSession.loadAll(twitterSession.getFriends)
@@ -105,8 +110,6 @@ class TopFrame(service: String, username: String, password: String, twitterSessi
         streams.usersTableModel.followers = followers
         streams.usersTableModel.usersChanged
  
-        streams setFollowerIds (followers map (u => u.id.toString()))
-              
         val paneTitle = "People (" + friends.length + ", " + followers.length + ")"
         val pane = new PeoplePane(session, streams.usersTableModel, friends, followers)
         tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)

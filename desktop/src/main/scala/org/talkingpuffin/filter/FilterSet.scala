@@ -3,8 +3,6 @@ package org.talkingpuffin.filter
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.Publisher
 import java.util.regex.Pattern
-import java.util.{ArrayList,Collections}
-import org.talkingpuffin.twitter.{AuthenticatedSession}
 import ui.User
 
 /**
@@ -12,40 +10,14 @@ import ui.User
  */
 class FilterSet(session: Session) extends Publisher {
   val mutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
+  val retweetMutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
   var selectedTags = List[String]()
-  var excludeOverlapping: Boolean = _
-  val includeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
-  val excludeTextFilters = Collections.synchronizedList(new ArrayList[TextFilter]())
+  var includeTextFilters = new TextFilters()
+  var excludeTextFilters = new TextFilters()
   
-  def excludedByStringMatches(text: String): Boolean = {
-    if (includeTextFilters.size() == 0 && excludeTextFilters.size() == 0) return false
-    
-    if (includeTextFilters.size > 0) {
-      var numMatches = 0
-      for (i <- 0 until includeTextFilters.size) {
-        if (matches(text, includeTextFilters.get(i))) numMatches += 1
-      }
-      if (numMatches == 0) return true
-    }
-
-    for (i <- 0 until excludeTextFilters.size) {
-      if (matches(text, excludeTextFilters.get(i))) return true
-    }
-    
-    false
-  }
-  
-  def excludedByOverlap(userId: String): Boolean = {
-    if (! excludeOverlapping) return false
-    for (aSession <- Globals.sessions if aSession != session) {
-      aSession.windows.streams.usersTableModel.friends.foreach(friend => {
-        val friendId = friend.id.toString()
-        if (friendId == userId) 
-          return true
-      })
-    }
-    false
-  }
+  def excludedByStringMatches(text: String): Boolean = 
+    (includeTextFilters.list.length > 0 && ! includeTextFilters.list.exists(matches(text, _))) ||
+        excludeTextFilters.list.exists(matches(text, _))
   
   private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
     Pattern.matches(search.text, text) else text.toUpperCase.contains(search.text.toUpperCase)
@@ -56,3 +28,8 @@ class FilterSet(session: Session) extends Publisher {
 class TextFilter (var text: String, var isRegEx: Boolean)
 
 case class FilterSetChanged(filterSet: FilterSet) extends Event
+
+class TextFilters {
+  var list = List[TextFilter]()
+  def clear = list = List[TextFilter]() 
+}

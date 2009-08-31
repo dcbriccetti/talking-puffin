@@ -15,7 +15,7 @@ import javax.swing.{JTable, BorderFactory}
 
 class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: FilterSet, 
     tagUsers: TagUsers) extends Frame {
-  title = (paneTitle + " Filters")
+  title = paneTitle + " Filters"
   val panel = new GridBagPanel {
     border = new EmptyBorder(5, 5, 0, 5)
     val tagsPanel = new TagsPanel(true, false, tagUsers, List[String]()) {
@@ -23,14 +23,12 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     }
   
     add(tagsPanel, new Constraints {grid=(0,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
-    add(new UnmutePane(tableModel, filterSet),
+    add(new UnmutePane("Muted users", tableModel, filterSet, filterSet.mutedUsers, tableModel.unmuteUsers),
       new Constraints {grid=(1,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
-    add(new Label(" "), new Constraints {grid=(2,0); fill=Fill.Horizontal; weightx=1})
-  
-    val excludeOverlapping = new CheckBox("No Tweets appearing in other sessions")
-    add(new FlowPanel(FlowPanel.Alignment.Left) {
-      contents += excludeOverlapping
-    }, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
+    add(new UnmutePane("Retweet-Muted users", tableModel, filterSet, filterSet.retweetMutedUsers, 
+      tableModel.unmuteRetweetUsers),
+      new Constraints {grid=(2,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
+    add(new Label(" "), new Constraints {grid=(3,0); fill=Fill.Horizontal; weightx=1})
   
     class TextFilterTableConstraints(y: Int) extends Constraints {
       grid=(0,y); gridwidth=3; anchor=Anchor.West; fill=Fill.Both; weightx=1
@@ -70,7 +68,6 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
 
   def applyChanges {
     filterSet.selectedTags = panel.tagsPanel.selectedTags
-    filterSet.excludeOverlapping = panel.excludeOverlapping.selected
     filterSet.publish
   }
 }

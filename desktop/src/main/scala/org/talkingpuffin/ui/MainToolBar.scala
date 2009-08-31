@@ -32,13 +32,6 @@ class MainToolBar extends JToolBar with LongOpListener {
     add(new Label("Mentions: ").peer)
     addSourceControls(streams.mentionsProvider, streams.createRepliesView)
 
-    /*  TODO finish adding rate limiting status. How often and from where to invoke?
-    addSeparator
-  
-    add(new Label("Rem: ") {tooltip = "The number of requests remaining"}.peer)
-    add(remaining.peer)
-    */
-
     addSeparator
 
     add(progressBar.peer)
@@ -48,10 +41,10 @@ class MainToolBar extends JToolBar with LongOpListener {
   
   def stopOperation = if (operationsInProgress.decrementAndGet == 0) progressBar.indeterminate = false;
   
-  private def addSourceControls(provider: TweetsProvider, createStream: => Unit) {
+  private def addSourceControls(provider: TweetsProvider, createView: => Unit) {
     val newViewAction = new Action("New View") {
       toolTip = "Creates a new view"
-      def apply = createStream
+      def apply = createView
     }
     add(newViewAction.peer)
 

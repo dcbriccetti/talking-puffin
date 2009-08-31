@@ -136,10 +136,8 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
     tweetDetailPanel.clearStatusDetails
   }
   
-  private def showMaxColumns(showMax: Boolean) {
-    for (i <- List("Age","From","To"))
-      table.getColumnExt(i).setVisible(showMax);
-  }
+  private def showMaxColumns(showMax: Boolean) =
+    List("Age","Image","From","To").foreach(table.getColumnExt(_).setVisible(showMax))
   
   private def clearSelection {
     table.getSelectionModel.clearSelection

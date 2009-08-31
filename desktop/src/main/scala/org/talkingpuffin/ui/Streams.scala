@@ -7,14 +7,14 @@ import javax.swing.{JFrame, JComponent, SwingUtilities}
 import state.PreferencesFactory
 import twitter.{AuthenticatedSession, TweetsProvider, MentionsProvider, TwitterUser}
 
-case class StreamInfo(val title: String, val model: StatusTableModel, val pane: StatusPane)
+case class View(val title: String, val model: StatusTableModel, val pane: StatusPane)
 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
  */
-class Streams(val service: String, user: AuthenticatedSession, session: Session, val tagUsers: TagUsers, 
-      val username: String, password: String) extends Reactor {
-  val prefs = PreferencesFactory.prefsForUser(service, username)
+class Streams(val service: String, val user: AuthenticatedSession, session: Session, val tagUsers: TagUsers) 
+    extends Reactor {
+  val prefs = PreferencesFactory.prefsForUser(service, user.user)
   
   val tweetsProvider = new TweetsProvider(user,
     prefs.get("highestId", null) match {case null => None; case v => Some(java.lang.Long.parseLong(v))}, 
@@ -24,7 +24,7 @@ class Streams(val service: String, user: AuthenticatedSession, session: Session,
     session.progress)
   val usersTableModel = new UsersTableModel(tagUsers, List[TwitterUser](), List[TwitterUser]())
   
-  var streamInfoList = List[StreamInfo]()
+  var views = List[View]()
   
   val folTitle = new TitleCreator("Following")
   val repTitle = new TitleCreator("Mentions")
@@ -33,9 +33,9 @@ class Streams(val service: String, user: AuthenticatedSession, session: Session,
   
   reactions += {
     case TableContentsChanged(model, filtered, total) => {
-      if (streamInfoList.length == 0) println("streamInfoList is empty. Ignoring table contents changed.")
+      if (views.length == 0) println("streamInfoList is empty. Ignoring table contents changed.")
       else {
-        val filteredList = streamInfoList.filter(_.model == model)
+        val filteredList = views.filter(_.model == model)
         if (filteredList.length == 0) println("No matches in streamInfoList for model " + model)
         else {
           val si = filteredList(0)
@@ -64,29 +64,28 @@ class Streams(val service: String, user: AuthenticatedSession, session: Session,
     }
   }
 
-  private def createTweetsTitle(paneTitle: String, filtered: Int, total: Int): String = {
-    paneTitle + " (" + filtered + "/" + total + ")"
-  }
+  private def createTweetsTitle(paneTitle: String, filtered: Int, total: Int): String = 
+    paneTitle + " (" + (if (total == filtered) total else filtered + "/" + total) + ")"
 
-  private def createStream(source: TweetsProvider, title: String, include: Option[String]): StreamInfo = {
+  private def createView(source: TweetsProvider, title: String, include: Option[String]): View = {
     val fs = new FilterSet(session)
     include match {
-      case Some(s) => fs.includeTextFilters.add(new TextFilter(s, false)) 
+      case Some(s) => fs.includeTextFilters.list ::= new TextFilter(s, false) 
       case None =>
     }
     val sto = new StatusTableOptions(true, true, true)
     val isMentions = source.isInstanceOf[MentionsProvider] // TODO do without this test
     val model = if (isMentions) {
-      new StatusTableModel(sto, source, usersTableModel, fs, service, username, tagUsers) with Mentions
+      new StatusTableModel(sto, source, usersTableModel, fs, service, user.user, tagUsers) with Mentions
     } else {
-      new StatusTableModel(sto, source, usersTableModel, fs, service, username, tagUsers)
+      new StatusTableModel(sto, source, usersTableModel, fs, service, user.user, tagUsers)
     }
     val pane = new StatusPane(session, title, model, fs, this)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
     listenTo(model)
-    val streamInfo = new StreamInfo(title, model, pane)
+    val streamInfo = new View(title, model, pane)
     streamInfo.model.followerIds = followerIds
-    streamInfoList ::= streamInfo
+    views ::= streamInfo
     streamInfo
   }
 
@@ -98,19 +97,19 @@ class Streams(val service: String, user: AuthenticatedSession, session: Session,
     }
   }
   
-  def createFollowingViewFor(include: String) = createStream(tweetsProvider, folTitle.create, Some(include))
+  def createFollowingViewFor(include: String) = createView(tweetsProvider, folTitle.create, Some(include))
 
-  def createFollowingView: StreamInfo = createStream(tweetsProvider, folTitle.create, None)
+  def createFollowingView: View = createView(tweetsProvider, folTitle.create, None)
   
-  def createRepliesViewFor(include: String) = createStream(mentionsProvider, repTitle.create, Some(include))
+  def createRepliesViewFor(include: String) = createView(mentionsProvider, repTitle.create, Some(include))
 
-  def createRepliesView: StreamInfo = createStream(mentionsProvider, repTitle.create, None)
+  def createRepliesView: View = createView(mentionsProvider, repTitle.create, None)
   
-  def componentTitle(comp: Component) = streamInfoList.filter(s => s.pane == comp)(0).title
+  def componentTitle(comp: Component) = views.filter(s => s.pane == comp)(0).title
   
   def setFollowerIds(followerIds: List[String]) {
     this.followerIds = followerIds
-    streamInfoList.foreach(si => si.model.followerIds = followerIds)
+    views.foreach(_.model.followerIds = followerIds)
   }
 }
 

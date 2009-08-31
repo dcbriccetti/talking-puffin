@@ -17,6 +17,7 @@ import _root_.org.talkingpuffin
 import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
 import twitter.{TweetsArrived, TweetsProvider, TwitterStatus}
 import ui.table.{EmphasizedString, StatusCell}
+import util.DesktopUtil
 
 /**
  * Model providing status data to the JTable
@@ -52,6 +53,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
           val newTweets = evt.getNewValue.asInstanceOf[List[TwitterStatus]]
           log.info("Tweets Arrived: " + newTweets.length)
           processStatuses(newTweets)
+          doNotify(newTweets)
         }
       }
     }
@@ -144,6 +146,23 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filterAndNotify
   }
 
+  def muteSelectedUsersRetweets(rows: List[Int]) = muteRetweetUsers(getUsers(rows))
+
+  private def muteRetweetUsers(users: List[User]) {
+    filterSet.retweetMutedUsers ++= users.map(user => (user.id, user))
+    filterAndNotify
+  }
+
+  def unmuteRetweetUsers(userIds: List[String]) {
+    filterSet.retweetMutedUsers --= userIds
+    filterAndNotify
+  }
+  
+  def unMuteRetweetAll {
+    filterSet.retweetMutedUsers.clear
+    filterAndNotify
+  }
+
   private def dateToAgeSeconds(date: Long): Long = (new Date().getTime() - date) / 1000
   
   def getUsers(rows: List[Int]) = rows.map(i => {
@@ -184,6 +203,11 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filteredStatuses = filterLogic.filter(statuses)
     publish(new TableContentsChanged(this, filteredStatuses.length, statuses.length))
     fireTableDataChanged
+  }
+
+  def doNotify(newTweets: List[TwitterStatus]) = newTweets.length match {
+    case 1 => DesktopUtil.notify(newTweets.first.user.screenName+": "+newTweets.first.text,"New tweet")
+    case _ => DesktopUtil.notify(newTweets.length +" new tweets arrived","New tweets")
   }
 }
 
