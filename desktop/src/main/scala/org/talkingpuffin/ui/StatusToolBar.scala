@@ -1,7 +1,6 @@
 package org.talkingpuffin.ui
 
-import _root_.org.talkingpuffin.twitter.TweetsProvider
-import _root_.scala.swing.{Component, Action, Key}
+import _root_.scala.swing.{Component, Action}
 import java.awt.event.KeyEvent
 import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
 

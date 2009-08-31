@@ -1,12 +1,13 @@
-package org.talkingpuffin.twitter
+package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.Event
-import _root_.scala.swing.Publisher
 import _root_.scala.xml.{NodeSeq, Node}
 import java.beans.{PropertyChangeEvent, PropertyChangeSupport, PropertyChangeListener}
 import javax.swing.{SwingWorker, Timer}
 import java.awt.event.{ActionEvent, ActionListener}
-import org.apache.log4j.Logger;
+import org.apache.log4j.Logger
+import twitter.{AuthenticatedSession, TwitterArgs, TwitterStatus}
+
 
 object TweetsProvider {
   val CLEAR_EVENT = "clear"

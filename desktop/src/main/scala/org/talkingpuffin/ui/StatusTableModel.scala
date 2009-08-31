@@ -6,16 +6,12 @@ import filter.{FilterSet, FilterLogic, FilterSetChanged, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
-import java.net.URL
-import java.util.prefs.Preferences
-import java.util.{Locale, Date}
+import java.util.{Date}
 import javax.swing._
-import javax.swing.event.TableModelEvent
-import javax.swing.table.{DefaultTableModel, TableModel, AbstractTableModel}
+import javax.swing.table.{AbstractTableModel}
 import org.apache.log4j.Logger
-import _root_.org.talkingpuffin
 import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
-import twitter.{TweetsArrived, TweetsProvider, TwitterStatus}
+import twitter.{TwitterStatus}
 import ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 

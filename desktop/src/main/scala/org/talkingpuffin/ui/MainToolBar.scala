@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JToolBar
 import swing.{ProgressBar, Label, ComboBox, Action}
 import time.TimeFormatter
-import twitter.{LongOpListener, TweetsProvider}
 
 /**
  * The main ToolBar

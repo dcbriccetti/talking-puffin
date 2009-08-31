@@ -1,4 +1,4 @@
-package org.talkingpuffin.twitter
+package org.talkingpuffin.ui
 
 trait LongOpListener {
   def startOperation
