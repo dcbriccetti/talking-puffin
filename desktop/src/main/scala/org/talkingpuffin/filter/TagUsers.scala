@@ -14,14 +14,9 @@ class TagUsers(service: String, username: String) {
   private val log = Logger getLogger "TagUsers"
   private val prefs = PreferencesFactory.prefsForUser(service, username).node("tags")
   private val tagUsers: Multimap[String,String] = HashMultimap.create()
-  prefs.keys.foreach(tag => {
-    prefs.get(tag, null).split("\t").foreach(userId => add(tag, userId))
-  })
+  prefs.keys.foreach(tag => prefs.get(tag, null).split("\t").foreach(userId => add(tag, userId)))
   
-  def add(tag: String, userId: String) = {        
-    log.debug("Tagging " + tag + ": " + userId)
-    tagUsers.put(tag, userId)
-  }
+  def add(tag: String, userId: String) = tagUsers.put(tag, userId)
   
   def contains(tag: String, userId: String) = tagUsers.get(tag).contains(userId)
   
@@ -42,7 +37,7 @@ class TagUsers(service: String, username: String) {
     while(keys.hasNext) {
       tags = keys.next :: tags
     }
-    tags.sort((a,b) => (a compareTo b) < 0)
+    tags.sort(_ <  _)
   }
   
   def tagsForUser(userId: String): List[String] = {
