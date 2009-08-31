@@ -64,9 +64,11 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
     }
   }
 
-  private def createTweetsTitle(paneTitle: String, filtered: Int, total: Int): String = {
-    paneTitle + " (" + filtered + "/" + total + ")"
-  }
+  private def createTweetsTitle(paneTitle: String, filtered: Int, total: Int): String = 
+    paneTitle + " (" + (total - filtered match {
+      case 0 => total
+      case _ => filtered + "/" + total
+    }) + ")"
 
   private def createView(source: TweetsProvider, title: String, include: Option[String]): View = {
     val fs = new FilterSet(session)
