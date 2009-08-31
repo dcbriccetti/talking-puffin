@@ -29,6 +29,7 @@ object GlobalPrefs {
 object PrefKeys {
   val USE_ANIMATIONS    = "useAnimations"
   val USE_REAL_NAMES    = "useRealNames"
+  val NOTIFY_TWEETS     = "notifyTweets"
   val LOOK_UP_LOCATIONS = "lookUpLocations"
   val EXPAND_URLS       = "expandUrls"
   val SORT_BY           = "sortBy"
@@ -48,7 +49,8 @@ object PrefKeys {
   val gprefs = GlobalPrefs.prefs
   val keys = gprefs.keys
   // Set options that default to true
-  for (k <- List(LOOK_UP_LOCATIONS) ::: List(AGE, IMAGE, FROM, TO).map(SHOW_COL_PREFIX + _)) 
+  for (k <- List(USE_ANIMATIONS, USE_REAL_NAMES, LOOK_UP_LOCATIONS, NOTIFY_TWEETS) ::: 
+      List(AGE, IMAGE, FROM, TO).map(SHOW_COL_PREFIX + _)) 
     if (! keys.contains(k))
       gprefs.putBoolean(k, true)
   

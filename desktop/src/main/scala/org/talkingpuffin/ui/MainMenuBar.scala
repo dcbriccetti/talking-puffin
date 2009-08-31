@@ -15,17 +15,15 @@ class MainMenuBar extends MenuBar {
   val prefs = GlobalPrefs.prefs
 
   contents += new Menu("File") {
+    contents += new MenuItem(new Action("New Session...") {
+      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, 
+        Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+      def apply = Main.launchSession 
+    })
     contents += new MenuItem(new Action("Close Window") {
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_W,
                                                   Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
         def apply = TopFrames.closeCurrentWindow()
-    })
-  }
-  contents += new Menu("Session") {
-    contents += new MenuItem(new Action("New...") {
-      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, 
-        Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
-      def apply = Main.launchSession 
     })
   }
   contents += new Menu("Options") {
@@ -48,6 +46,7 @@ class MainMenuBar extends MenuBar {
     contents += ItemFactory("Use animations", "Enables simple, useful animations", 
       PrefKeys.USE_ANIMATIONS, false)
     contents += ItemFactory("Use real names", "Display real names", PrefKeys.USE_REAL_NAMES, true)
+    contents += ItemFactory("Notify tweets", "Notify when tweets arrive", PrefKeys.NOTIFY_TWEETS, true)
     contents += ItemFactory("Look up locations", "Enables lookup of locations from latitude and longitude",
       PrefKeys.LOOK_UP_LOCATIONS, false)
     contents += ItemFactory("Expand URLs", "Enables fetching original URL from shortened form", 

@@ -53,7 +53,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
           val newTweets = evt.getNewValue.asInstanceOf[List[TwitterStatus]]
           log.info("Tweets Arrived: " + newTweets.length)
           processStatuses(newTweets)
-          doNotify(newTweets)
+          if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
         }
       }
     }
