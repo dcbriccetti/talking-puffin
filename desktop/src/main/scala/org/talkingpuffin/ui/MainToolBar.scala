@@ -30,7 +30,7 @@ class MainToolBar extends JToolBar with LongOpListener {
     addSeparator
 
     add(new Label("Mentions: ").peer)
-    addSourceControls(streams.mentionsProvider, streams.createRepliesView)
+    addSourceControls(streams.mentionsProvider, streams.createMentionsView)
 
     addSeparator
 
