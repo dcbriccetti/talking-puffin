@@ -1,19 +1,10 @@
 package org.talkingpuffin.ui
 import _root_.scala.swing.event.{ButtonClicked, WindowClosing}
-import filter.{FilterSet, TextFilter, TagUsers}
-import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
-import java.awt.{Toolkit, Dimension, BorderLayout, Insets}
-import java.util.concurrent.{Callable, Executors, Executor}
-import java.util.prefs.Preferences
+import filter.{TagUsers}
+import java.awt.{Dimension}
+import java.util.concurrent.{Callable, Executors}
 import javax.swing._
-import javax.swing.border.{BevelBorder, EmptyBorder}
-import org.apache.log4j.Logger
-import org.talkingpuffin.mac.QuitHandler
 import scala.swing._
-import scala.xml._
-
-import TabbedPane._
-import state.PreferencesFactory
 import talkingpuffin.util.Loggable
 import twitter._
 import ui._
@@ -77,7 +68,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     val highFol = streams.tweetsProvider.getHighestId
     val highMen = streams.mentionsProvider.getHighestId
     info("Saving last seen IDs for " + twitterSession.user + ". Following: " + highFol + ", mentions: " + highMen)
-    val prefs = PreferencesFactory.prefsForUser(service, twitterSession.user)
+    val prefs = session.userPrefs
     if (highFol.isDefined) prefs.put("highestId"       , highFol.get.toString())
     if (highMen.isDefined) prefs.put("highestMentionId", highMen.get.toString())
     tagUsers.save

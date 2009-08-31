@@ -1,5 +1,6 @@
 package org.talkingpuffin
 
+import java.util.prefs.Preferences
 import javax.swing.{UIManager, JFrame}
 import mac.{MacInit, QuitHandler}
 import scala.swing.{Label}
@@ -38,6 +39,7 @@ class Session(val twitterSession: AuthenticatedSession) {
   val windows = new Windows
   val status = new Label(" ")
   var progress: LongOpListener = null
+  def userPrefs: Preferences = windows.streams.prefs
 }
 
 object Globals {

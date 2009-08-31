@@ -1,26 +1,17 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.GridBagPanel._
-import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.swing.{MenuItem, Action}
-import apache.log4j.Logger
 import com.google.common.collect.Lists
-import java.awt.{Desktop, Toolkit, Component, Font}
-
+import java.awt.{Toolkit}
 import _root_.scala.{Option}
-import java.awt.event.{KeyEvent, ActionEvent, ActionListener, MouseEvent, MouseAdapter}
-import java.awt.image.BufferedImage
+import java.awt.event.{KeyEvent, MouseEvent, MouseAdapter}
 import java.beans.PropertyChangeEvent
-import java.net.{URI, URL}
-import java.util.Comparator
-import java.util.regex.Pattern
 import javax.swing.event._
-import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableColumnModel, TableCellRenderer, DefaultTableColumnModel}
-import javax.swing.{JTable, KeyStroke, JMenu, JMenuItem, JPopupMenu, JComponent}
+import javax.swing.table.{DefaultTableCellRenderer}
+import javax.swing.{KeyStroke, JPopupMenu}
 import jdesktop.swingx.decorator.{SortKey, SortOrder, HighlighterFactory}
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
-import org.jdesktop.swingx.table.{TableColumnModelExt, TableColumnExt}
 import state.{PrefKeys, GlobalPrefs}
 import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
 import talkingpuffin.util.{Loggable, PopupListener}
@@ -91,7 +82,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
       DesktopUtil.browse("http://twitter.com/" + screenName))
 
   private def editUser = getSelectedStatuses.foreach(status => { 
-    val userProperties = new UserPropertiesDialog(session.windows.streams.prefs, status)
+    val userProperties = new UserPropertiesDialog(session.userPrefs, status)
     userProperties.visible = true  
   })
 
