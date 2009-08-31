@@ -282,6 +282,13 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     new Parser[TwitterUser](new URL(apiURL + "/statuses/followers.xml" + args),authFetcher,TwitterUser.apply).parseXMLList("user")
   }
   
+  def getFollowersIds(): List[TwitterUserId] = getFollowersIds(TwitterArgs())
+
+  def getFollowersIds(page: Int): List[TwitterUserId] = getFollowersIds(TwitterArgs().page(page))
+
+  def getFollowersIds(args: TwitterArgs): List[TwitterUserId] = 
+    new Parser[TwitterUserId](new URL(apiURL + "/followers/ids.xml" + args),authFetcher,TwitterUserId.apply).parseXMLList("id")
+  
   def getDirectMessages() :List[TwitterMessage] = {
     getDirectMessages(TwitterArgs())
   }
