@@ -27,7 +27,6 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     add(new UnmutePane("Retweet-Muted users", tableModel, filterSet, filterSet.retweetMutedUsers, 
       tableModel.unmuteRetweetUsers),
       new Constraints {grid=(2,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
-    add(new Label(" "), new Constraints {grid=(3,0); fill=Fill.Horizontal; weightx=1})
   
     class TextFilterTableConstraints(y: Int) extends Constraints {
       grid=(0,y); gridwidth=3; anchor=Anchor.West; fill=Fill.Both; weightx=1

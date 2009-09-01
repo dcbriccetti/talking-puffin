@@ -56,7 +56,7 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
     }
 
   private def createView(tweetsProvider: TweetsProvider, title: String, include: Option[String]): View = {
-    val fs = new FilterSet(session)
+    val fs = new FilterSet(session, user.user, tagUsers)
     if (include.isDefined) {
       fs.includeTextFilters.list ::= new TextFilter(include.get, false) 
     }

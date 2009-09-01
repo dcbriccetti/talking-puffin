@@ -2,7 +2,7 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
-import filter.{FilterSet, FilterLogic, FilterSetChanged, TagUsers}
+import filter.{FilterSet, FilterSetChanged, TagUsers}
 import java.awt.event.{ActionEvent, ActionListener}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
@@ -32,8 +32,6 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   
   /** Statuses, after filtering */
   private var filteredStatuses = List[TwitterStatus]()
-  
-  private val filterLogic = new FilterLogic(username, tagUsers, filterSet)
   
   private val colNames = List("Age", "Image", "From", "To", "Status")
   var preChangeListener: PreChangeListener = _;
@@ -196,7 +194,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     if (preChangeListener != null) {
       preChangeListener.tableChanging
     }
-    filteredStatuses = filterLogic.filter(statuses)
+    filteredStatuses = filterSet.filter(statuses)
     publish(new TableContentsChanged(this, filteredStatuses.length, statuses.length))
     fireTableDataChanged
   }

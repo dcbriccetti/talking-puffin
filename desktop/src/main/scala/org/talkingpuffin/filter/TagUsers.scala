@@ -8,7 +8,7 @@ import scala.io.Source
 import state.PreferencesFactory
 
 /**
- * Repository of tag -> user mappings
+ * Repository of tag -> user mappings, stored within a service/user
  */
 class TagUsers(service: String, username: String) {
   private val log = Logger getLogger "TagUsers"
