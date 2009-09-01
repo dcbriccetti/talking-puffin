@@ -282,6 +282,13 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     new Parser[TwitterUser](new URL(apiURL + "/statuses/followers.xml" + args),authFetcher,TwitterUser.apply).parseXMLList("user")
   }
   
+  def getFriendsIds(): List[TwitterUserId] = getFriendsIds(TwitterArgs())
+
+  def getFriendsIds(page: Int): List[TwitterUserId] = getFriendsIds(TwitterArgs().page(page))
+
+  def getFriendsIds(args: TwitterArgs): List[TwitterUserId] = 
+    new Parser[TwitterUserId](new URL(apiURL + "/friends/ids.xml" + args),authFetcher,TwitterUserId.apply).parseXMLList("id")
+  
   def getFollowersIds(): List[TwitterUserId] = getFollowersIds(TwitterArgs())
 
   def getFollowersIds(page: Int): List[TwitterUserId] = getFollowersIds(TwitterArgs().page(page))
