@@ -2,7 +2,6 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.swing.{MenuItem, MenuBar, Menu, CheckMenuItem, Action}
-import apache.log4j.Logger
 import javax.swing.KeyStroke
 import java.awt.event.KeyEvent
 import java.awt.Toolkit
@@ -14,18 +13,19 @@ import state.{GlobalPrefs, PrefKeys}
 class MainMenuBar extends MenuBar {
   val prefs = GlobalPrefs.prefs
 
+  val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
+  
   contents += new Menu("File") {
     contents += new MenuItem(new Action("New Session...") {
-      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, 
-        Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
+      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, shortcutKeyMask))
       def apply = Main.launchSession 
     })
     contents += new MenuItem(new Action("Close Window") {
-        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_W,
-                                                  Toolkit.getDefaultToolkit.getMenuShortcutKeyMask))
-        def apply = TopFrames.closeCurrentWindow()
+      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_W, shortcutKeyMask))
+      def apply = TopFrames.closeCurrentWindow()
     })
   }
+  
   contents += new Menu("Options") {
     object ItemFactory {
       def apply(title: String, tooltip: String, prefKey: String, onByDefault: Boolean): MenuItem = {
@@ -35,9 +35,7 @@ class MainMenuBar extends MenuBar {
         }
         listenTo(item)
         reactions += {
-          case r: ButtonClicked => if (r.source == item) {
-            prefs.putBoolean(prefKey, item.selected)
-          }
+          case r: ButtonClicked => if (r.source == item) prefs.putBoolean(prefKey, item.selected)
           case _ =>
         }
         item
