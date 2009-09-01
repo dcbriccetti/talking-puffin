@@ -1,6 +1,7 @@
 package org.talkingpuffin.filter
 
 import _root_.scala.swing.event.Event
+import _root_.scala.collection.mutable.LinkedHashMap
 import _root_.scala.swing.Publisher
 import java.util.regex.Pattern
 import twitter.TwitterStatus
@@ -10,14 +11,18 @@ import ui.User
  * A set of all filters, and logic to apply them
  */
 class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends Publisher {
-  val mutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
-  val retweetMutedUsers = scala.collection.mutable.LinkedHashMap[String,User]()
+  val mutedUsers = LinkedHashMap[String,User]()
+  val retweetMutedUsers = LinkedHashMap[String,User]()
   var selectedTags = List[String]()
   var includeTextFilters = new TextFilters()
   var excludeTextFilters = new TextFilters()
   
   def publish: Unit = publish(new FilterSetChanged(this))
 
+  /**
+   * Filter the given list of statuses, returning a list of only those that pass the filters
+   * in this set.
+   */
   def filter(statuses: List[TwitterStatus]) = statuses.filter(includeStatus)
 
   private def includeStatus(status: TwitterStatus): Boolean = {

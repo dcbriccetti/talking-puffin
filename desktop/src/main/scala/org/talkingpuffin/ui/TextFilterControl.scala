@@ -73,7 +73,7 @@ class TextFilterControl(label: String, textFilters: TextFilters) extends BoxPane
     dataChanged
   }
   
-  def dataChanged = tableModel.fireTableDataChanged 
+  private def dataChanged = tableModel.fireTableDataChanged 
     
 }
   
