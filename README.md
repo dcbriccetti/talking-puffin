@@ -9,4 +9,4 @@ Thanks to the people helping, including:
 
 michaelg, bjartek, vdichev, jorgeortiz85, stevej, crichardson, fredriv, stoyle,
 bvenners, eishay, mccv, billrobertson42, ljantsen, aalmiray, JonathanGiles,
-Don Brown, mikaelsundberg
+Don Brown, mikaelsundberg, gereedy, deanwampler, ShawnSpooner
