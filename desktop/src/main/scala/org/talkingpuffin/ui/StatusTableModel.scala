@@ -54,6 +54,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   })
   
   var followerIds = List[String]()
+  var friendIds = List[String]()
+  var friendUsernames = List[String]()
   
   def getColumnCount = 5
   def getRowCount = filteredStatuses.length
@@ -194,7 +196,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     if (preChangeListener != null) {
       preChangeListener.tableChanging
     }
-    filteredStatuses = filterSet.filter(statuses)
+    filteredStatuses = filterSet.filter(statuses, friendUsernames)
     publish(new TableContentsChanged(this, filteredStatuses.length, statuses.length))
     fireTableDataChanged
   }

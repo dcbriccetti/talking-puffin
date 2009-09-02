@@ -5,7 +5,7 @@ import _root_.scala.collection.mutable.LinkedHashMap
 import _root_.scala.swing.Publisher
 import java.util.regex.Pattern
 import twitter.TwitterStatus
-import ui.User
+import ui.{LinkExtractor, User}
 
 /**
  * A set of all filters, and logic to apply them
@@ -14,6 +14,7 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
   val mutedUsers = LinkedHashMap[String,User]()
   val retweetMutedUsers = LinkedHashMap[String,User]()
   var selectedTags = List[String]()
+  var excludeFriendRetweets: Boolean = false
   var includeTextFilters = new TextFilters()
   var excludeTextFilters = new TextFilters()
   
@@ -23,14 +24,15 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
    * Filter the given list of statuses, returning a list of only those that pass the filters
    * in this set.
    */
-  def filter(statuses: List[TwitterStatus]) = statuses.filter(includeStatus)
+  def filter(statuses: List[TwitterStatus], friendUsernames: List[String]) = statuses.filter(includeStatus(friendUsernames))
 
-  private def includeStatus(status: TwitterStatus): Boolean = {
+  private def includeStatus(friendUsernames: List[String])(status: TwitterStatus): Boolean = {
     val userId = status.user.id.toString()
     ! mutedUsers.contains(userId) &&
         ! (retweetMutedUsers.contains(userId) && 
         status.text.toLowerCase.startsWith("rt @")) &&
         tagFiltersInclude(userId) && 
+        retweetFriendsIncludes(status.text, friendUsernames) && 
         ! excludedByStringMatches(status.text)
   }
   
@@ -43,6 +45,19 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
   
   private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
     Pattern.matches(search.text, text) else text.toUpperCase.contains(search.text.toUpperCase)
+  
+  private val rtUserRegex = ("(rt|RT|♺) " + LinkExtractor.usernameRegex + ".*").r
+
+  private def retweetFriendsIncludes(statusText: String, friendUsernames: List[String]): Boolean = {
+    if (! excludeFriendRetweets) return true
+    
+    try {
+      val rtUserRegex(rtSymbol, username) = statusText
+      return ! friendUsernames.contains(username)
+    } catch {
+      case e: MatchError => return true
+    }
+  }
 }
 
 class TextFilter (var text: String, var isRegEx: Boolean)

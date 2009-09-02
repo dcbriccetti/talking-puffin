@@ -28,6 +28,8 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
   val repTitle = new TitleCreator(mentionsProvider.providerName)
 
   var followerIds = List[String]()
+  var friendIds = List[String]()
+  var friends = List[TwitterUser]()
   
   reactions += {
     case TableContentsChanged(model, filtered, total) => 
@@ -71,6 +73,7 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
     listenTo(model)
     val view = new View(title, model, pane)
     view.model.followerIds = followerIds
+    view.model.friendIds = friendIds
     views ::= view
     view
   }
@@ -96,6 +99,17 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
   def setFollowerIds(followerIds: List[String]) {
     this.followerIds = followerIds
     views.foreach(_.model.followerIds = followerIds)
+  }
+  
+  def setFriendIds(friendIds: List[String]) {
+    this.friendIds = friendIds
+    views.foreach(_.model.friendIds = friendIds)
+  }
+  
+  def setFriends(friends: List[TwitterUser]) {
+    this.friends = friends
+    val usernames = friends map(_.screenName)
+    views.foreach(_.model.friendUsernames = usernames)
   }
 }
 
