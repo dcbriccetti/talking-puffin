@@ -78,15 +78,15 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   private def getUserIds {
     /** Background user fetcher */
-    class BgUserFetcher(getter: Int => List[TwitterUserId], setter: List[String] => Unit) 
-            extends SwingWorker[List[TwitterUserId], Object] {
-      def doInBackground = twitterSession.loadAll(getter)
-      override def done = setter(get.map(_.id.toString))
-      execute
+    def fetchUsersBg(getter: Int => List[TwitterUserId], setter: List[String] => Unit) {
+      new SwingWorker[List[TwitterUserId], Object] {
+        def doInBackground = twitterSession.loadAll(getter)
+        override def done = setter(get.map(_.id.toString))
+      }.execute
     }
    
-    new BgUserFetcher(twitterSession.getFriendsIds  , streams.setFriendIds)
-    new BgUserFetcher(twitterSession.getFollowersIds, streams.setFollowerIds)
+    fetchUsersBg(twitterSession.getFriendsIds  , streams.setFriendIds)
+    fetchUsersBg(twitterSession.getFollowersIds, streams.setFollowerIds)
   }
   
   private def createPeoplePane: Unit = {
