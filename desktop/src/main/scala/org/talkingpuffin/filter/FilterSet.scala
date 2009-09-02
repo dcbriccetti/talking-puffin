@@ -29,8 +29,7 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
   private def includeStatus(friendUsernames: List[String])(status: TwitterStatus): Boolean = {
     val userId = status.user.id.toString()
     ! mutedUsers.contains(userId) &&
-        ! (retweetMutedUsers.contains(userId) && 
-        status.text.toLowerCase.startsWith("rt @")) &&
+        ! (retweetMutedUsers.contains(userId) && status.text.toLowerCase.startsWith("rt @")) &&
         tagFiltersInclude(userId) && 
         retweetFriendsIncludes(status.text, friendUsernames) && 
         ! excludedByStringMatches(status.text)
@@ -46,13 +45,13 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
   private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
     Pattern.matches(search.text, text) else text.toUpperCase.contains(search.text.toUpperCase)
   
-  private val rtUserRegex = ("(rt|RT|♺) " + LinkExtractor.usernameRegex + ".*").r
+  private val rtUserRegex = ("(rt|♺) " + LinkExtractor.usernameRegex + ".*").r
 
   private def retweetFriendsIncludes(statusText: String, friendUsernames: List[String]): Boolean = {
     if (! excludeFriendRetweets) return true
     
     try {
-      val rtUserRegex(rtSymbol, username) = statusText
+      val rtUserRegex(rtSymbol, username) = statusText.toLowerCase
       return ! friendUsernames.contains(username)
     } catch {
       case e: MatchError => return true
