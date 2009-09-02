@@ -60,6 +60,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
 
   peer.setLocationRelativeTo(null)
+  getUserIds
   createPeoplePane
 
   def setFocus = streams.views.last.pane.requestFocusForTable
@@ -75,19 +76,22 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     streams.views.last.pane.saveState // TODO instead save the order of the last status pane changed
   }
   
+  private def getUserIds {
+    /** Background user fetcher */
+    class BgUserFetcher(getter: Int => List[TwitterUserId], setter: List[String] => Unit) 
+            extends SwingWorker[List[TwitterUserId], Object] {
+      def doInBackground = twitterSession.loadAll(getter)
+      override def done = setter(get.map(_.id.toString))
+      execute
+    }
+   
+    new BgUserFetcher(twitterSession.getFriendsIds  , streams.setFriendIds)
+    new BgUserFetcher(twitterSession.getFollowersIds, streams.setFollowerIds)
+  }
+  
   private def createPeoplePane: Unit = {
     mainToolBar.startOperation
 
-    new SwingWorker[List[TwitterUserId], Object] {
-      def doInBackground = twitterSession.loadAll(twitterSession.getFollowersIds)
-      override def done = streams.setFollowerIds(get map (_.id.toString()))
-    }.execute
-
-    new SwingWorker[List[TwitterUserId], Object] {
-      def doInBackground = twitterSession.loadAll(twitterSession.getFriendsIds)
-      override def done = streams.setFriendIds(get map (_.id.toString()))
-    }.execute
-    
     val pool = Executors.newFixedThreadPool(2)
     val friendsFuture = pool.submit(new Callable[List[TwitterUser]] {
       def call = twitterSession.loadAll(twitterSession.getFriends)
