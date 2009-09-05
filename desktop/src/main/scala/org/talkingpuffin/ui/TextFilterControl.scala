@@ -54,8 +54,7 @@ class TextFilterControl(label: String, textFilters: TextFilters) extends BoxPane
     val delAllButton = new Button("Delete All")
     contents += delAllButton
     
-    listenTo(newButton)
-    listenTo(delAllButton)
+    listenTo(newButton, delAllButton)
     
     reactions += {
       case ButtonClicked(`newButton`) => {

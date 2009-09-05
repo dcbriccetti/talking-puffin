@@ -92,9 +92,7 @@ class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession
       case SelectionChanged(`comboBox`) => showSelectedUser
     }
     if (comboBox != null) listenTo(comboBox.selection)
-    listenTo(logInButton)
-    listenTo(logInAllButton)
-    listenTo(cancelButton)
+    listenTo(logInButton, logInAllButton, cancelButton)
   }
 
   private def showSelectedUser {
