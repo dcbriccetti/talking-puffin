@@ -57,9 +57,7 @@ class TextFilterControl(label: String, textFilters: TextFilters) extends BoxPane
     listenTo(newButton, delAllButton)
     
     reactions += {
-      case ButtonClicked(`newButton`) => {
-        addTextFilter(text.text, regex.peer.isSelected)
-      }
+      case ButtonClicked(`newButton`) => addTextFilter(text.text, regex.peer.isSelected)
       case ButtonClicked(`delAllButton`) => { 
         textFilters.clear
         dataChanged
@@ -68,8 +66,9 @@ class TextFilterControl(label: String, textFilters: TextFilters) extends BoxPane
   }
   
   def addTextFilter(text: String, regex: Boolean) {
-    textFilters.list ::= new TextFilter(text, regex)
-    dataChanged
+    textFilters.list = textFilters.list ::: List(new TextFilter(text, regex))
+    val i = textFilters.list.length - 1
+    tableModel.fireTableRowsInserted(i, i)
   }
   
   private def dataChanged = tableModel.fireTableDataChanged 
