@@ -15,6 +15,7 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
   val retweetMutedUsers = LinkedHashMap[String,User]()
   var selectedTags = List[String]()
   var excludeFriendRetweets: Boolean = false
+  var excludeNonFollowers: Boolean = false
   var includeTextFilters = new TextFilters()
   var excludeTextFilters = new TextFilters()
   
@@ -24,20 +25,25 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
    * Filter the given list of statuses, returning a list of only those that pass the filters
    * in this set.
    */
-  def filter(statuses: List[TwitterStatus], friendUsernames: List[String]) = statuses.filter(includeStatus(friendUsernames))
+  def filter(statuses: List[TwitterStatus], friendUsernames: List[String], followerIds: List[String]) = 
+    statuses.filter(includeStatus(friendUsernames, followerIds))
 
-  private def includeStatus(friendUsernames: List[String])(status: TwitterStatus): Boolean = {
+  private def includeStatus(friendUsernames: List[String], followerIds: List[String])(status: TwitterStatus): Boolean = {
     val userId = status.user.id.toString()
     ! mutedUsers.contains(userId) &&
         ! (retweetMutedUsers.contains(userId) && status.text.toLowerCase.startsWith("rt @")) &&
         tagFiltersInclude(userId) && 
-        retweetFriendsIncludes(status.text, friendUsernames) && 
+        retweetFriendsIncludes(status.text, friendUsernames) &&
+        ! excludedByNonFollowers(status, followerIds) &&
         ! excludedByStringMatches(status.text)
   }
   
   private def tagFiltersInclude(userId: String) = if (selectedTags.length == 0) true else
     selectedTags.exists(tagUsers.contains(_, userId)) 
 
+  private def excludedByNonFollowers(status: TwitterStatus, followerIds: List[String]) =
+    excludeNonFollowers && ! followerIds.contains(status.user.id.toString)
+    
   private def excludedByStringMatches(text: String): Boolean = 
     (includeTextFilters.list.length > 0 && ! includeTextFilters.list.exists(matches(text, _))) ||
         excludeTextFilters.list.exists(matches(text, _))

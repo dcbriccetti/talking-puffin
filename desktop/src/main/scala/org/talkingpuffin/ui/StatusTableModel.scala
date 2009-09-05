@@ -196,7 +196,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     if (preChangeListener != null) {
       preChangeListener.tableChanging
     }
-    filteredStatuses = filterSet.filter(statuses, friendUsernames)
+    filteredStatuses = filterSet.filter(statuses, friendUsernames, followerIds)
     publish(new TableContentsChanged(this, filteredStatuses.length, statuses.length))
     fireTableDataChanged
   }

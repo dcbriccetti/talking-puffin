@@ -28,7 +28,9 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
       tableModel.unmuteRetweetUsers),
       new Constraints {grid=(2,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
     val excludeFriendRetweets = new CheckBox("Exclude retweets of statuses of people you follow")
-    add(excludeFriendRetweets, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
+    add(excludeFriendRetweets, new Constraints {grid=(0,1); gridwidth=3; anchor=Anchor.West})
+    val excludeNonFollowers = new CheckBox("Exclude tweets of non-followers")
+    add(excludeNonFollowers, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
     class TextFilterTableConstraints(y: Int) extends Constraints {
       grid=(0,y); gridwidth=3; anchor=Anchor.West; fill=Fill.Both; weightx=1
     }
@@ -68,6 +70,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
   def applyChanges {
     filterSet.selectedTags = panel.tagsPanel.selectedTags
     filterSet.excludeFriendRetweets = panel.excludeFriendRetweets.selected
+    filterSet.excludeNonFollowers = panel.excludeNonFollowers.selected
     filterSet.publish
   }
 }
