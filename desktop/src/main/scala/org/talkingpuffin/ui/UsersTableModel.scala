@@ -61,7 +61,7 @@ class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], va
     fireTableDataChanged
   }
   
-  def usersChanged = {
+  def usersChanged() = {
     usersModel = new UsersModel(friends, followers)
     buildModelData(UserSelection(lastIncludeFollowing, lastIncludeFollowers, lastSearch))
   }

@@ -1,15 +1,12 @@
 package org.talkingpuffin.ui
 
-import _root_.org.talkingpuffin.util.PopupListener
 import _root_.scala.swing.event.EditDone
-import _root_.scala.xml.{NodeSeq, Node}
 import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
-import java.awt.{Toolkit, Dimension, Font}
-import java.util.Comparator
-import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, AbstractTableModel}
-import javax.swing.{JPopupMenu, JToolBar, JTable, JToggleButton, KeyStroke, Icon, JLabel, JOptionPane}
-import scala.swing._
+import java.awt.{Toolkit, Dimension}
+import javax.swing.{JButton, KeyStroke, JPopupMenu, JOptionPane, JTable, JToolBar, JToggleButton, JLabel}
+import swing.{MenuItem, GridBagPanel, ScrollPane, TextField, Action}
 import scala.swing.GridBagPanel._
+import talkingpuffin.util.{Loggable, PopupListener}
 import util.{TableUtil, DesktopUtil}
 import org.talkingpuffin.twitter.{TwitterUser}
 
@@ -28,7 +25,8 @@ object UserColumns {
  * Displays a list of friends or followers
  */
 class PeoplePane(session: Session, tableModel: UsersTableModel, 
-    friends: List[TwitterUser], followers: List[TwitterUser]) extends GridBagPanel {
+    friends: List[TwitterUser], followers: List[TwitterUser], 
+    updateCallback: () => Unit) extends GridBagPanel with Loggable {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
     table = new PeopleTable(tableModel)
@@ -57,7 +55,17 @@ class PeoplePane(session: Session, tableModel: UsersTableModel,
     add(followingButton)
     add(followersButton)
     add(new JLabel(" Overlap: " + (friends.size + followers.size - tableModel.usersModel.users.size)))
+
     addSeparator
+
+    val reloadAction = new Action("Reload") {
+      toolTip = "Reloads this data from Twitter"
+      def apply = updateCallback()
+    }
+    add(new JButton(reloadAction.peer))
+
+    addSeparator
+
     add(new JLabel("Search user name: "))
     add(searchText.peer) 
   }

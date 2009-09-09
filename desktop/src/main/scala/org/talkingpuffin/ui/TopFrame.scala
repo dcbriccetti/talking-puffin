@@ -1,12 +1,13 @@
 package org.talkingpuffin.ui
-import _root_.scala.swing.event.{ButtonClicked, WindowClosing}
+
+import _root_.scala.swing.event.{WindowClosing}
 import filter.{TagUsers}
 import java.awt.{Dimension}
-import java.util.concurrent.{Callable, Executors}
-import javax.swing._
-import scala.swing._
+import javax.swing.{SwingWorker, ImageIcon}
+import swing.TabbedPane.Page
+import swing.{Frame, TabbedPane, Label, GridBagPanel}
 import talkingpuffin.util.Loggable
-import twitter._
+import twitter.{TwitterUserId, TwitterUser, AuthenticatedSession}
 import ui._
 import ui.util.FetchRequest
 
@@ -89,34 +90,36 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     fetchUsersBg(twitterSession.getFollowersIds, streams.setFollowerIds)
   }
   
-  private def createPeoplePane: Unit = {
+  type Users = List[TwitterUser]
+  
+  def updatePeople(): Unit = updatePeopleAndCallBack((friends: Users, followers: Users) => {})
+  
+  private var peoplePage: Page = _
+  def peoplePaneTitle(numFriends: Int, numFollowers: Int) = "People (" + numFriends + ", " + numFollowers + ")"
+  
+  def updatePeopleAndCallBack(edtCallback: (Users, Users) => Unit) = {
     mainToolBar.startOperation
 
-    val pool = Executors.newFixedThreadPool(2)
-    val friendsFuture = pool.submit(new Callable[List[TwitterUser]] {
-      def call = twitterSession.loadAll(twitterSession.getFriends)
-    })
-    val followersFuture = pool.submit(new Callable[List[TwitterUser]] {
-      def call = twitterSession.loadAll(twitterSession.getFollowers)
-    })
+    PeopleProvider.get(twitterSession, (friends: Users, followers: Users) => {
+      streams.usersTableModel.friends = friends
+      streams.usersTableModel.followers = followers
+      streams.usersTableModel.usersChanged()
+      streams.setFriends(friends)
 
-    new SwingWorker[Tuple2[List[TwitterUser],List[TwitterUser]], Object] {
-      def doInBackground = (friendsFuture.get, followersFuture.get)
-
-      override def done = {
-        val (friends, followers) = get 
-              
-        streams.usersTableModel.friends = friends
-        streams.usersTableModel.followers = followers
-        streams.usersTableModel.usersChanged
-        streams.setFriends(friends)
- 
-        val paneTitle = "People (" + friends.length + ", " + followers.length + ")"
-        val pane = new PeoplePane(session, streams.usersTableModel, friends, followers)
-        tabbedPane.pages += new TabbedPane.Page(paneTitle, pane)
-        mainToolBar.stopOperation
-      }
-    }.execute
+      edtCallback(friends, followers)
+      if (peoplePage != null) peoplePage.title = peoplePaneTitle(friends.length, followers.length) 
+      mainToolBar.stopOperation
+    })
+    
+  }
+  
+  private def createPeoplePane: Unit = {
+    updatePeopleAndCallBack((friends: Users, followers: Users) => {
+      val pane = new PeoplePane(session, streams.usersTableModel, friends, followers, updatePeople)
+      peoplePage = new Page(peoplePaneTitle(friends.length, followers.length), pane)
+      tabbedPane.pages += peoplePage
+    })
   }
 }
+
   
