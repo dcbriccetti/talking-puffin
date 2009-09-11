@@ -48,9 +48,13 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
     (includeTextFilters.list.length > 0 && ! includeTextFilters.list.exists(matches(text, _))) ||
         excludeTextFilters.list.exists(matches(text, _))
   
-  private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
-    Pattern.matches(search.text, text) else text.toUpperCase.contains(search.text.toUpperCase)
-  
+  private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) { 
+      val matcher = Pattern.compile(search.text).matcher(text)
+      matcher.find() 
+  } else { 
+      text.toUpperCase.contains(search.text.toUpperCase)
+  } 
+
   private val rtUserRegex = ("(rt|♺) " + LinkExtractor.usernameRegex + ".*").r
 
   private def retweetFriendsIncludes(statusText: String, friendUsernames: List[String]): Boolean = {
