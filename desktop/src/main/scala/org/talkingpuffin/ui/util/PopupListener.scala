@@ -7,7 +7,7 @@ import javax.swing.JPopupMenu
 import javax.swing.JTable
 import javax.swing.ListSelectionModel
 
-class PopupListener(table: JTable, popup: JPopupMenu) extends MouseAdapter {
+class PopupListener(table: JTable, createPopup: () => JPopupMenu) extends MouseAdapter {
 
   override def mousePressed(e: MouseEvent) = maybeShowPopup(e)
   override def mouseReleased(e: MouseEvent) = maybeShowPopup(e)
@@ -15,11 +15,11 @@ class PopupListener(table: JTable, popup: JPopupMenu) extends MouseAdapter {
   private def maybeShowPopup(e: MouseEvent) {
     if (e.isPopupTrigger()) {
       val selectionModel = table.getSelectionModel() 
-      val i = table.rowAtPoint(e.getPoint())
-      if (! selectionModel.isSelectedIndex(i)) {
-        selectionModel.setSelectionInterval(i, i)
+      val mouseRow = table.rowAtPoint(e.getPoint())
+      if (! selectionModel.isSelectedIndex(mouseRow)) {
+        selectionModel.setSelectionInterval(mouseRow, mouseRow)
       }
-      popup.show(e.getComponent(), e.getX(), e.getY())
+      createPopup().show(e.getComponent(), e.getX(), e.getY())
     }
   }
 }

@@ -34,7 +34,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel,
   }
   val ap = new ActionPrep(table)
   buildActions(ap, table)
-  table.addMouseListener(new PopupListener(table, getPopupMenu(ap)))
+  table.addMouseListener(new PopupListener(table, () => {getPopupMenu(ap)}))
   var followingButton: JToggleButton = _
   var followersButton: JToggleButton = _
   val searchText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
