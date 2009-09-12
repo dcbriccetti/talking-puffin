@@ -35,7 +35,13 @@ class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDia
   val sendAction = new Action("Send…") {
     toolTip = "Opens a window from which you can send a tweet"
     mnemonic = KeyEvent.VK_S
-    def apply = (new SendMsgDialog(session, null, None, None, None)).visible = true
+    def apply = (new SendMsgDialog(session, null, None, None, None, false)).visible = true
+  }
+
+  val dmAction = new Action("DM…") {
+    toolTip = "Opens a window from which you can send a direct message"
+    mnemonic = KeyEvent.VK_D
+    def apply = (new SendMsgDialog(session, null, None, None, None, true)).visible = true
   }
 
   val clearRepliesAction = new Action("Clear") {
@@ -97,6 +103,7 @@ class StatusToolBar(session: Session, tweetsProvider: TweetsProvider, filtersDia
     def aa(action: javax.swing.Action) = add(action).setFocusable(false)
     def ac(comp: java.awt.Component)   = add(comp  ).setFocusable(false)
     aa(sendAction.peer)
+    aa(dmAction.peer)
     aa(showFiltersAction.peer)
     aa(clearAction.peer)
     aa(clearAllAction.peer)
