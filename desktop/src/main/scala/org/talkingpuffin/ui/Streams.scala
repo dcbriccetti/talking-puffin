@@ -20,17 +20,19 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
     prefs.get(key, null) match {case null => None; case v => Some(java.lang.Long.parseLong(v))} 
   val followingProvider = new FollowingProvider(user, getHighest("highestId"), session.progress)
   val mentionsProvider  = new MentionsProvider (user, getHighest("highestMentionId"), session.progress)
+// TODO  val dmsProvider       = new DmsProvider      (user, getHighest("highestDmId"), session.progress)
   val usersTableModel   = new UsersTableModel  (tagUsers, List[TwitterUser](), List[TwitterUser]())
   
   var views = List[View]()
   
-  val folTitle = new TitleCreator(followingProvider.providerName)
-  val repTitle = new TitleCreator(mentionsProvider.providerName)
-
   var followerIds = List[String]()
   var friendIds = List[String]()
   var friends = List[TwitterUser]()
   
+  private val folTitle = new TitleCreator(followingProvider.providerName)
+  private val repTitle = new TitleCreator(mentionsProvider.providerName)
+  // private val dmsTitle = new TitleCreator(dmsProvider.providerName)
+
   reactions += {
     case TableContentsChanged(model, filtered, total) => 
       views.find(_.model == model) match {
@@ -57,17 +59,18 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
       case i => session.windows.tabbedPane.peer.setTitleAt(i, title)
     }
 
-  private def createView(tweetsProvider: TweetsProvider, title: String, include: Option[String]): View = {
+  private def createView(dataProvider: DataProvider, title: String, include: Option[String]): View = {
     val fs = new FilterSet(session, user.user, tagUsers)
     if (include.isDefined) {
       fs.includeTextFilters.list ::= new TextFilter(include.get, false) 
     }
     val sto = new StatusTableOptions(true, true, true)
-    val isMentions = tweetsProvider.isInstanceOf[MentionsProvider] // TODO do without this test
-    val model = if (isMentions) 
-      new StatusTableModel(sto, tweetsProvider, usersTableModel, fs, service, user.user, tagUsers) with Mentions
-    else 
-      new StatusTableModel(sto, tweetsProvider, usersTableModel, fs, service, user.user, tagUsers)
+    val model = dataProvider match {
+      case p: FollowingProvider => new StatusTableModel(sto, p, usersTableModel,
+        fs, service, user.user, tagUsers)
+      case p: MentionsProvider => new StatusTableModel(sto, p, usersTableModel,
+        fs, service, user.user, tagUsers) with Mentions
+    }
     val pane = new StatusPane(session, title, model, fs, this)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
     listenTo(model)
@@ -90,9 +93,13 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
 
   def createFollowingView: View = createView(followingProvider, folTitle.create, None)
   
-  def createRepliesViewFor(include: String) = createView(mentionsProvider, repTitle.create, Some(include))
+  def createMentionsViewFor(include: String) = createView(mentionsProvider, repTitle.create, Some(include))
 
   def createMentionsView: View = createView(mentionsProvider, repTitle.create, None)
+  
+  //def createDmsViewFor(include: String) = createView(dmsProvider, dmsTitle.create, Some(include))
+
+  //def createDmsView: View = createView(dmsProvider, dmsTitle.create, None)
   
   def componentTitle(comp: Component) = views.filter(s => s.pane == comp)(0).title
   

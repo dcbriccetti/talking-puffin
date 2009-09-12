@@ -6,6 +6,7 @@ import java.beans.{PropertyChangeEvent, PropertyChangeSupport, PropertyChangeLis
 import javax.swing.{SwingWorker, Timer}
 import java.awt.event.{ActionEvent, ActionListener}
 import org.apache.log4j.Logger
+import talkingpuffin.util.Loggable
 import twitter.{AuthenticatedSession, TwitterArgs, TwitterStatus}
 
 
@@ -17,7 +18,7 @@ object TweetsProvider {
 /**
  * Provides tweets
  */
-abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], 
+abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
     val providerName: String, longOpListener: LongOpListener) {
   private val log = Logger.getLogger("TweetsProvider " + providerName)
   val propChg = new PropertyChangeSupport(this)
@@ -35,7 +36,6 @@ abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[
     case None => args
     case Some(i) => args.since(i)
   }
-  protected def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getFriendsTimeline
   def getHighestId = highestId
 
   /**
@@ -55,15 +55,6 @@ abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[
     }
   }
 
-  private def computeHighestId(tweets: List[TwitterStatus], maxId: Option[Long]):Option[Long] = tweets match {
-    case tweet :: rest => maxId match {
-        case Some(id) => computeHighestId(rest,
-                                           if(tweet.id > id) Some(tweet.id) else Some(id))
-        case None => computeHighestId(rest,Some(tweet.id))
-    }
-    case Nil => maxId
-  }
-
   def loadNewData = {
     val args = buildSinceParm(TwitterArgs.maxResults(200))
     log.info("loading new data with args " + args)
@@ -74,7 +65,16 @@ abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[
     loadData(session.user,TwitterArgs.maxResults(200),true)
   }
 
-  private def loadData(username: String, args: TwitterArgs, clear: Boolean): Unit = {
+  def loadData(username: String, args: TwitterArgs, clear: Boolean): Unit
+  
+}
+
+abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], 
+    providerName: String, longOpListener: LongOpListener) extends
+    DataProvider(session, startingId, providerName, longOpListener) with Loggable {
+  protected def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getFriendsTimeline
+  
+  def loadData(username: String, args: TwitterArgs, clear: Boolean): Unit = {
     longOpListener.startOperation
     new SwingWorker[Option[List[TwitterStatus]], Object] {
       val sendClear = clear
@@ -84,10 +84,10 @@ abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[
           statuses match {
             case Some(tweets) => highestId = computeHighestId(tweets,getHighestId)
           }
-          log.info("highest tweet id is now " + getHighestId)
+          info("highest tweet id is now " + getHighestId)
           statuses
         } catch {
-          case e => log.error(e); None
+          case e => error(e.toString); None
         }
       }
       override def done = {
@@ -107,7 +107,16 @@ abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[
       }
     }.execute
   }
-  
+
+  private def computeHighestId(tweets: List[TwitterStatus], maxId: Option[Long]):Option[Long] = tweets match {
+    case tweet :: rest => maxId match {
+        case Some(id) => computeHighestId(rest,
+                                           if(tweet.id > id) Some(tweet.id) else Some(id))
+        case None => computeHighestId(rest,Some(tweet.id))
+    }
+    case Nil => maxId
+  }
+
 }
 
 class FollowingProvider(session: AuthenticatedSession, startingId: Option[Long], 
@@ -118,7 +127,13 @@ class FollowingProvider(session: AuthenticatedSession, startingId: Option[Long],
 class MentionsProvider(session: AuthenticatedSession, startingId: Option[Long], 
     longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, "Mentions", longOpListener) {
-    override def updateFunc = session.getReplies
+  override def updateFunc = session.getReplies
+}
+
+abstract class DmsProvider(session: AuthenticatedSession, startingId: Option[Long], 
+    longOpListener: LongOpListener)
+    extends DataProvider(session, startingId, "Direct Messages", longOpListener) {
+  def updateFunc = session.getDirectMessages
 }
 
 case class TweetsArrived(tweets: NodeSeq) extends Event
