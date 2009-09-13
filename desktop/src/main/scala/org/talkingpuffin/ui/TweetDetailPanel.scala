@@ -4,17 +4,16 @@ import _root_.org.talkingpuffin.twitter.StreamUtil
 import _root_.scala.swing.event.{ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.scala.swing.{Frame, Label, GridBagPanel, ScrollPane, TextArea, BorderPanel}
+import filter.TagUsers
 import geo.GeoCoder
 import java.awt.event.{MouseEvent, KeyAdapter, MouseAdapter, KeyEvent}
 import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Image, Font}
-import java.net.{HttpURLConnection, URI, URL}
 import java.text.NumberFormat
+import java.util.prefs.Preferences
 import javax.swing._
 import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
-import javax.swing.text.JTextComponent
-import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
-import talkingpuffin.util.{PopupListener}
+import state.{GlobalPrefs, PrefKeys}
 import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
 
@@ -32,7 +31,7 @@ object Thumbnail {
 }
 
 class TweetDetailPanel(session: Session, table: JTable, 
-    filtersDialog: FiltersDialog, streams: Streams) 
+    filtersDialog: FiltersDialog, tagUsers: TagUsers, viewCreator: ViewCreator, userPrefs: Preferences) 
     extends GridBagPanel {
   private val geoCoder = new GeoCoder(processFinishedGeocodes)
   private val animator = new TextChangingAnimator
@@ -48,10 +47,9 @@ class TweetDetailPanel(session: Session, table: JTable,
 
   private val bigPic = new BigPictureDisplayer(picFetcher)
   private var userDescription: TextArea = _
-  private var largeTweet = new LargeTweet(filtersDialog, streams, table, background)
+  private var largeTweet = new LargeTweet(filtersDialog, viewCreator, table, background)
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
-  private val userPrefs = streams.prefs
           
   private class CustomConstraints extends Constraints {
     gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
@@ -151,7 +149,7 @@ class TweetDetailPanel(session: Session, table: JTable,
   private def setText(user: TwitterUser, location: String) {
     addFreshUserDescription
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
-    val tags = streams.tagUsers.tagsForUser(user.id.toString()).mkString(", ")
+    val tags = tagUsers.tagsForUser(user.id.toString()).mkString(", ")
     userDescription.text = UserProperties.overriddenUserName(userPrefs, user) + 
         " (" + user.screenName + ") • " +
         location + " • " + user.description  + " • " +

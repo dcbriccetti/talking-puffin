@@ -23,14 +23,10 @@ class MainToolBar extends JToolBar with LongOpListener {
   setFloatable(false)
 
   def init(streams: Streams) = {
-    addSourceControls(streams.followingProvider, streams.createFollowingView)
-    addSeparator
-    addSourceControls(streams.mentionsProvider, streams.createMentionsView)
-    addSeparator
-    addSourceControls(streams.dmsReceivedProvider, streams.createDmsReceivedView)
-    addSeparator
-    addSourceControls(streams.dmsSentProvider, streams.createDmsSentView)
-    addSeparator
+    streams.providers.providers.foreach(provider => {
+      addSourceControls(provider, streams.createView(provider, None))
+      addSeparator
+    })
     add(progressBar.peer)
   }
   

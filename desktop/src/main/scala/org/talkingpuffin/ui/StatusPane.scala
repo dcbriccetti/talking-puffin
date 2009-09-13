@@ -5,7 +5,7 @@ import _root_.scala.swing.GridBagPanel._
 import _root_.org.talkingpuffin.util.PopupListener
 
 import apache.log4j.Logger
-import filter.{FilterSet}
+import filter.{TagUsers, FilterSet}
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
 import java.awt.image.BufferedImage
 import java.awt.{Color, Desktop, Dimension, Insets, Font}
@@ -23,13 +23,13 @@ import util.TableUtil
  * Displays friend statuses
  */
 class StatusPane(session: Session, title: String, statusTableModel: StatusTableModel, 
-    filterSet: FilterSet, streams: Streams) 
+    filterSet: FilterSet, tagUsers: TagUsers, viewCreator: ViewCreator) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
   private val log = Logger.getLogger("StatusPane " + hashCode)
   var table: StatusTable = _
   private var lastSelectedRows: List[TwitterStatus] = Nil
   private var lastRowSelected: Boolean = _
-  private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet, streams.tagUsers)
+  private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet, tagUsers)
 
   statusTableModel.addTableModelListener(this)
   statusTableModel.preChangeListener = this
@@ -47,7 +47,8 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
   
   private val cursorSetter = new AfterFilteringCursorSetter(table)
   
-  private val tweetDetailPanel = new TweetDetailPanel(session, table, filtersDialog, streams)
+  private val tweetDetailPanel = new TweetDetailPanel(session, table, filtersDialog, tagUsers, 
+    viewCreator, viewCreator.prefs)
   add(tweetDetailPanel, new Constraints{
     grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
   })

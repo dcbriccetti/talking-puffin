@@ -68,10 +68,10 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   def setFocus = streams.views.last.pane.requestFocusForTable
   
   def saveState {
-    val highFol = streams.followingProvider.getHighestId
-    val highMen = streams.mentionsProvider.getHighestId
-    val highDmReceived = streams.dmsReceivedProvider.getHighestId
-    val highDmSent = streams.dmsSentProvider.getHighestId
+    val highFol = streams.providers.followingProvider.getHighestId
+    val highMen = streams.providers.mentionsProvider.getHighestId
+    val highDmReceived = streams.providers.dmsReceivedProvider.getHighestId
+    val highDmSent = streams.providers.dmsSentProvider.getHighestId
     info("Saving last seen IDs for " + twitterSession.user + ". Following: " + highFol + 
         ", mentions: " + highMen + ", DMs rvcd: " + highDmReceived + ", DMs sent: " + highDmSent)
     val prefs = session.userPrefs
@@ -85,10 +85,10 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   private def getUserIds {
     /** Background user fetcher */
-    def fetchUsersBg(getter: Int => List[TwitterUserId], setter: List[String] => Unit) {
+    def fetchUsersBg(getter: Int => List[TwitterUserId], setter: List[Long] => Unit) {
       new SwingWorker[List[TwitterUserId], Object] {
         def doInBackground = twitterSession.loadAll(getter)
-        override def done = setter(get.map(_.id.toString))
+        override def done = setter(get.map(_.id))
       }.execute
     }
    

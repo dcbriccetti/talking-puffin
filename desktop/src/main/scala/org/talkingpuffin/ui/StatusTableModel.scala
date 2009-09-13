@@ -57,8 +57,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     }
   })
   
-  var followerIds = List[String]()
-  var friendIds = List[String]()
+  var followerIds = List[Long]()
+  var friendIds = List[Long]()
   var friendUsernames = List[String]()
   
   def getColumnCount = 5

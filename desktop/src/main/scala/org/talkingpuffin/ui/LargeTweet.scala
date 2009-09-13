@@ -10,7 +10,7 @@ import javax.swing.{JTable, JTextPane, JPopupMenu}
  * A large version of the tweet, that can contain hyperlinks, and from which filters can be created.
  */
 
-class LargeTweet(filtersDialog: FiltersDialog, streams: Streams, table: JTable, 
+class LargeTweet(filtersDialog: FiltersDialog, viewCreator: ViewCreator, table: JTable, 
     backgroundColor: Color) extends JTextPane {
   setBackground(backgroundColor)
   setContentType("text/html");
@@ -41,7 +41,7 @@ class LargeTweet(filtersDialog: FiltersDialog, streams: Streams, table: JTable,
           val filterOut = new MenuItem(Action("Exclude tweets containing “" + text + "”")
             {filtersDialog.addExcludeMatching(text)})
           val newStream = new MenuItem(Action("Create a new stream for “" + text + "”")
-            {streams.createFollowingViewFor(text)})
+            {viewCreator.createView(viewCreator.providers.followingProvider, Some(text))})
           popup.add(filterIn.peer)
           popup.add(filterOut.peer)
           popup.add(newStream.peer)

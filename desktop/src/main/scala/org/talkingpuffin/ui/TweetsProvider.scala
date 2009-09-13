@@ -8,6 +8,7 @@ import java.awt.event.{ActionEvent, ActionListener}
 import org.apache.log4j.Logger
 import talkingpuffin.util.Loggable
 import twitter.{TwitterMessage, AuthenticatedSession, TwitterArgs, TwitterStatus}
+import util.TitleCreator
 object TweetsProvider {
   val CLEAR_EVENT = "clear"
   val NEW_TWEETS_EVENT = "tweets"
@@ -29,6 +30,7 @@ abstract class DataProvider[T](session: AuthenticatedSession, startingId: Option
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName) {
   private val log = Logger.getLogger("TweetsProvider " + providerName)
   protected var highestId:Option[Long] = startingId
+  val titleCreator = new TitleCreator(providerName)
 
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
