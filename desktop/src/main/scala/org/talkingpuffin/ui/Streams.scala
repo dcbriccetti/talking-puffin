@@ -20,7 +20,7 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
     prefs.get(key, null) match {case null => None; case v => Some(java.lang.Long.parseLong(v))} 
   val followingProvider = new FollowingProvider(user, getHighest("highestId"), session.progress)
   val mentionsProvider  = new MentionsProvider (user, getHighest("highestMentionId"), session.progress)
-// TODO  val dmsProvider       = new DmsProvider      (user, getHighest("highestDmId"), session.progress)
+  val dmsProvider       = new DmsProvider      (user, getHighest("highestDmId"), session.progress)
   val usersTableModel   = new UsersTableModel  (tagUsers, List[TwitterUser](), List[TwitterUser]())
   
   var views = List[View]()
@@ -31,7 +31,7 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
   
   private val folTitle = new TitleCreator(followingProvider.providerName)
   private val repTitle = new TitleCreator(mentionsProvider.providerName)
-  // private val dmsTitle = new TitleCreator(dmsProvider.providerName)
+  private val dmsTitle = new TitleCreator(dmsProvider.providerName)
 
   reactions += {
     case TableContentsChanged(model, filtered, total) => 
@@ -44,10 +44,12 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
 
   createFollowingView
   createMentionsView
+  // createDmsView
   
   // Now that views, models and listeners are in place, get data
   followingProvider.loadNewData
   mentionsProvider.loadNewData
+  dmsProvider.loadNewData
 
   private def setTitleInParent(pane: JComponent, title: String) =
     session.windows.tabbedPane.peer.indexOfComponent(pane) match {
@@ -59,7 +61,7 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
       case i => session.windows.tabbedPane.peer.setTitleAt(i, title)
     }
 
-  private def createView(dataProvider: DataProvider, title: String, include: Option[String]): View = {
+  private def createView[T](dataProvider: DataProvider[T], title: String, include: Option[String]): View = {
     val fs = new FilterSet(session, user.user, tagUsers)
     if (include.isDefined) {
       fs.includeTextFilters.list ::= new TextFilter(include.get, false) 
@@ -97,9 +99,9 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
 
   def createMentionsView: View = createView(mentionsProvider, repTitle.create, None)
   
-  //def createDmsViewFor(include: String) = createView(dmsProvider, dmsTitle.create, Some(include))
+  def createDmsViewFor(include: String) = createView(dmsProvider, dmsTitle.create, Some(include))
 
-  //def createDmsView: View = createView(dmsProvider, dmsTitle.create, None)
+  def createDmsView: View = createView(dmsProvider, dmsTitle.create, None)
   
   def componentTitle(comp: Component) = views.filter(s => s.pane == comp)(0).title
   

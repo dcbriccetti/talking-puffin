@@ -22,7 +22,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     usersModel: UsersTableModel, filterSet: FilterSet, service: String, username: String, val tagUsers: TagUsers) 
     extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
   
-  private val log = Logger.getLogger("StatusTableModel " + hashCode)
+  private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName)
   log.info("Created")
 
   private val userPrefs = PreferencesFactory.prefsForUser(service, username)
@@ -94,17 +94,12 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
       case 0 => age(status)
       case 1 => pictureCell.request(status.user.profileImageURL, rowIndex)
       case 2 => senderNameEs(status)
-      case 3 => {
-        val name = status.user.name
-        val id = status.user.id
-        new EmphasizedString(toName(status), false)
-      }
-      case 4 => {
+      case 3 => new EmphasizedString(toName(status), false)
+      case 4 => 
         var st = getStatusText(status, username)
         if (options.showToColumn) st = LinkExtractor.getWithoutUser(st)
         StatusCell(if (options.showAgeColumn) None else Some(age(status)),
           if (options.showNameColumn) None else Some(senderNameEs(status)), st)
-      }
     }
   }
   
