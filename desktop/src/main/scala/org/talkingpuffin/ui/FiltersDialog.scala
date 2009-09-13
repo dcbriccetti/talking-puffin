@@ -29,7 +29,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
       new Constraints {grid=(2,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
     val excludeFriendRetweets = new CheckBox("Exclude retweets of statuses of people you follow")
     add(excludeFriendRetweets, new Constraints {grid=(0,1); gridwidth=3; anchor=Anchor.West})
-    val excludeNonFollowers = new CheckBox("Exclude tweets of non-followers")
+    val excludeNonFollowers = new CheckBox("Exclude non-followers")
     add(excludeNonFollowers, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
     class TextFilterTableConstraints(y: Int) extends Constraints {
       grid=(0,y); gridwidth=3; anchor=Anchor.West; fill=Fill.Both; weightx=1
