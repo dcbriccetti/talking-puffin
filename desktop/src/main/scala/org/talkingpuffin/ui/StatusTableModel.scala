@@ -11,14 +11,14 @@ import javax.swing._
 import javax.swing.table.{AbstractTableModel}
 import org.apache.log4j.Logger
 import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
-import twitter.{TwitterStatus}
+import twitter.{TwitterMessage, TwitterStatus}
 import ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: TweetsProvider, 
+class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: BaseProvider, 
     usersModel: UsersTableModel, filterSet: FilterSet, service: String, username: String, val tagUsers: TagUsers) 
     extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
   
@@ -44,8 +44,12 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
       evt.getPropertyName match {
         case TweetsProvider.CLEAR_EVENT => clear(true)
         case TweetsProvider.NEW_TWEETS_EVENT => {
-          val newTweets = evt.getNewValue.asInstanceOf[List[TwitterStatus]]
-          log.info("Tweets Arrived: " + newTweets.length)
+          val listAny = evt.getNewValue.asInstanceOf[List[AnyRef]]
+          log.info("Tweets Arrived: " + listAny.length)
+          val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
+            evt.getNewValue.asInstanceOf[List[TwitterStatus]]
+          else
+            adaptDmsToTweets(evt.getNewValue.asInstanceOf[List[TwitterMessage]])
           processStatuses(newTweets)
           if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
         }
@@ -191,9 +195,19 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     if (preChangeListener != null) {
       preChangeListener.tableChanging
     }
-    filteredStatuses = filterSet.filter(statuses, friendUsernames, followerIds)
+    
+    filteredStatuses = filterSet.filter(statuses, friendUsernames, followerIds) 
     publish(new TableContentsChanged(this, filteredStatuses.length, statuses.length))
     fireTableDataChanged
+  }
+  
+  private def adaptDmsToTweets(dms: List[TwitterMessage]): List[TwitterStatus] = {
+    dms.map(dm => new TwitterStatus {
+      text = dm.text
+      user = if (dm.sender.screenName == username) dm.recipient else dm.sender
+      id = dm.id
+      createdAt = dm.createdAt
+    })
   }
 
   def doNotify(newTweets: List[TwitterStatus]) = newTweets.length match {

@@ -4,6 +4,7 @@ import _root_.scala.swing.event.{WindowClosing}
 import filter.{TagUsers}
 import java.awt.{Dimension}
 import javax.swing.{SwingWorker, ImageIcon}
+import state.PrefKeys
 import swing.TabbedPane.Page
 import swing.{Frame, TabbedPane, Label, GridBagPanel}
 import talkingpuffin.util.Loggable
@@ -69,10 +70,15 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   def saveState {
     val highFol = streams.followingProvider.getHighestId
     val highMen = streams.mentionsProvider.getHighestId
-    info("Saving last seen IDs for " + twitterSession.user + ". Following: " + highFol + ", mentions: " + highMen)
+    val highDmReceived = streams.dmsReceivedProvider.getHighestId
+    val highDmSent = streams.dmsSentProvider.getHighestId
+    info("Saving last seen IDs for " + twitterSession.user + ". Following: " + highFol + 
+        ", mentions: " + highMen + ", DMs rvcd: " + highDmReceived + ", DMs sent: " + highDmSent)
     val prefs = session.userPrefs
-    if (highFol.isDefined) prefs.put("highestId"       , highFol.get.toString())
-    if (highMen.isDefined) prefs.put("highestMentionId", highMen.get.toString())
+    if (highFol.isDefined) prefs.put(PrefKeys.HIGHEST_ID       , highFol.get.toString())
+    if (highMen.isDefined) prefs.put(PrefKeys.HIGHEST_MENTION_ID, highMen.get.toString())
+    if (highDmReceived.isDefined ) prefs.put(PrefKeys.HIGHEST_RECEIVED_DM_ID, highDmReceived.get.toString())
+    if (highDmSent.isDefined ) prefs.put(PrefKeys.HIGHEST_SENT_DM_ID, highDmSent.get.toString())
     tagUsers.save
     streams.views.last.pane.saveState // TODO instead save the order of the last status pane changed
   }

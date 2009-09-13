@@ -34,6 +34,11 @@ object PrefKeys {
   val EXPAND_URLS       = "expandUrls"
   val SORT_BY           = "sortBy"
   
+  val HIGHEST_ID        = "highestId"
+  val HIGHEST_MENTION_ID= "highestMentionId"
+  val HIGHEST_RECEIVED_DM_ID = "highestReceivedDmId"
+  val HIGHEST_SENT_DM_ID     = "highestSentDmId"
+  
   val SHOW_COL_PREFIX   = "showCol"
   val AGE               = "Age"
   val IMAGE             = "Image"

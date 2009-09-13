@@ -3,7 +3,7 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.{TabbedPane, Component, Reactor}
 import filter.{FilterSet, TextFilter, TagUsers}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
-import state.PreferencesFactory
+import state.{PrefKeys, PreferencesFactory}
 import talkingpuffin.util.Loggable
 import twitter._
 
@@ -18,9 +18,10 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
 
   private def getHighest(key: String) = 
     prefs.get(key, null) match {case null => None; case v => Some(java.lang.Long.parseLong(v))} 
-  val followingProvider = new FollowingProvider(user, getHighest("highestId"), session.progress)
-  val mentionsProvider  = new MentionsProvider (user, getHighest("highestMentionId"), session.progress)
-  val dmsProvider       = new DmsProvider      (user, getHighest("highestDmId"), session.progress)
+  val followingProvider = new FollowingProvider(user, getHighest(PrefKeys.HIGHEST_ID), session.progress)
+  val mentionsProvider  = new MentionsProvider (user, getHighest(PrefKeys.HIGHEST_MENTION_ID), session.progress)
+  val dmsReceivedProvider = new DmsReceivedProvider (user, getHighest(PrefKeys.HIGHEST_RECEIVED_DM_ID), session.progress)
+  val dmsSentProvider = new DmsSentProvider (user, getHighest(PrefKeys.HIGHEST_SENT_DM_ID), session.progress)
   val usersTableModel   = new UsersTableModel  (tagUsers, List[TwitterUser](), List[TwitterUser]())
   
   var views = List[View]()
@@ -31,7 +32,8 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
   
   private val folTitle = new TitleCreator(followingProvider.providerName)
   private val repTitle = new TitleCreator(mentionsProvider.providerName)
-  private val dmsTitle = new TitleCreator(dmsProvider.providerName)
+  private val dmsReceivedTitle = new TitleCreator(dmsReceivedProvider.providerName)
+  private val dmsSentTitle = new TitleCreator(dmsSentProvider.providerName)
 
   reactions += {
     case TableContentsChanged(model, filtered, total) => 
@@ -44,12 +46,14 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
 
   createFollowingView
   createMentionsView
-  // createDmsView
+  createDmsReceivedView
+  createDmsSentView
   
   // Now that views, models and listeners are in place, get data
   followingProvider.loadNewData
   mentionsProvider.loadNewData
-  dmsProvider.loadNewData
+  dmsReceivedProvider.loadNewData
+  dmsSentProvider.loadNewData
 
   private def setTitleInParent(pane: JComponent, title: String) =
     session.windows.tabbedPane.peer.indexOfComponent(pane) match {
@@ -72,6 +76,10 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
         fs, service, user.user, tagUsers)
       case p: MentionsProvider => new StatusTableModel(sto, p, usersTableModel,
         fs, service, user.user, tagUsers) with Mentions
+      case p: DmsReceivedProvider => new StatusTableModel(sto, p, usersTableModel,
+        fs, service, user.user, tagUsers)
+      case p: DmsSentProvider => new StatusTableModel(sto, p, usersTableModel,
+        fs, service, user.user, tagUsers)
     }
     val pane = new StatusPane(session, title, model, fs, this)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
@@ -99,9 +107,13 @@ class Streams(val service: String, val user: AuthenticatedSession, session: Sess
 
   def createMentionsView: View = createView(mentionsProvider, repTitle.create, None)
   
-  def createDmsViewFor(include: String) = createView(dmsProvider, dmsTitle.create, Some(include))
+  def createDmsReceivedViewFor(include: String) = createView(dmsReceivedProvider, dmsReceivedTitle.create, Some(include))
 
-  def createDmsView: View = createView(dmsProvider, dmsTitle.create, None)
+  def createDmsReceivedView: View = createView(dmsReceivedProvider, dmsReceivedTitle.create, None)
+  
+  def createDmsSentViewFor(include: String) = createView(dmsSentProvider, dmsSentTitle.create, Some(include))
+
+  def createDmsSentView: View = createView(dmsSentProvider, dmsSentTitle.create, None)
   
   def componentTitle(comp: Component) = views.filter(s => s.pane == comp)(0).title
   

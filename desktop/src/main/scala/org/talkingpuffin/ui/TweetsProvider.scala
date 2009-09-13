@@ -13,22 +13,27 @@ object TweetsProvider {
   val NEW_TWEETS_EVENT = "tweets"
 }
 
+abstract class BaseProvider(val providerName: String) {
+  val propChg = new PropertyChangeSupport(this)
+  def addPropertyChangeListener   (l: PropertyChangeListener) = propChg.addPropertyChangeListener(l)
+  def removePropertyChangeListener(l: PropertyChangeListener) = propChg.removePropertyChangeListener(l)
+  def loadNewData
+  def loadLastBlockOfTweets
+  def setUpdateFrequency(updateFrequencySecs: Int)
+}
+
 /**
  * Provides tweets
  */
 abstract class DataProvider[T](session: AuthenticatedSession, startingId: Option[Long], 
-    val providerName: String, longOpListener: LongOpListener) extends Loggable {
+    providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName) {
   private val log = Logger.getLogger("TweetsProvider " + providerName)
-  val propChg = new PropertyChangeSupport(this)
   protected var highestId:Option[Long] = startingId
 
   /** How often, in ms, to fetch and load new data */
   private var updateFrequency = 120 * 1000;
   
   private var timer: Timer = _
-  
-  def addPropertyChangeListener   (l: PropertyChangeListener) = propChg.addPropertyChangeListener(l)
-  def removePropertyChangeListener(l: PropertyChangeListener) = propChg.removePropertyChangeListener(l)
   
   protected def buildSinceParm(args: TwitterArgs) = highestId match {
     case None => args
@@ -73,7 +78,7 @@ abstract class DataProvider[T](session: AuthenticatedSession, startingId: Option
           statuses match {
             case Some(tweets) => highestId = computeHighestId(tweets,getHighestId)
           }
-          info("highest tweet id is now " + getHighestId)
+          log.info("highest tweet id is now " + getHighestId)
           statuses
         } catch {
           case e => error(e.toString); None
@@ -129,10 +134,17 @@ class MentionsProvider(session: AuthenticatedSession, startingId: Option[Long],
   override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getReplies
 }
 
-class DmsProvider(session: AuthenticatedSession, startingId: Option[Long], 
+class DmsReceivedProvider(session: AuthenticatedSession, startingId: Option[Long], 
     longOpListener: LongOpListener)
-    extends DataProvider[TwitterMessage](session, startingId, "Direct Messages", longOpListener) {
+    extends DataProvider[TwitterMessage](session, startingId, "DMs Rcvd", longOpListener) {
   def updateFunc:(TwitterArgs) => List[TwitterMessage] = session.getDirectMessages
+  override def getResponseId(response: TwitterMessage): Long = response.id
+}
+
+class DmsSentProvider(session: AuthenticatedSession, startingId: Option[Long], 
+    longOpListener: LongOpListener)
+    extends DataProvider[TwitterMessage](session, startingId, "DMs Sent", longOpListener) {
+  def updateFunc:(TwitterArgs) => List[TwitterMessage] = session.getSentMessages
   override def getResponseId(response: TwitterMessage): Long = response.id
 }
 
