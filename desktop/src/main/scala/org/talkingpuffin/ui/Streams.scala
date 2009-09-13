@@ -33,8 +33,7 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
   }
 
   providers.providers.foreach(provider => {
-    val view = createView(provider, None)
-    listenTo(view.model)
+    createView(provider, None)
     provider.loadNewData
   })
   
@@ -49,8 +48,9 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
     }
 
   def createView[T](dataProvider: DataProvider[T], include: Option[String]): View = {
-    val view = View.create(dataProvider, usersTableModel, service, twitterSession.user, tagUsers, session, include, this,
-      followerIds, friendIds)
+    val view = View.create(dataProvider, usersTableModel, service, twitterSession.user, tagUsers, 
+      session, include, this, followerIds, friendIds)
+    listenTo(view.model)
     views ::= view
     view
   }
