@@ -49,7 +49,7 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
         excludeTextFilters.list.exists(matches(text, _))
   
   private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
-    Pattern.matches(search.text, text) else text.toUpperCase.contains(search.text.toUpperCase)
+    Pattern.compile(search.text).matcher(text).find else text.toUpperCase.contains(search.text.toUpperCase)
   
   private val rtUserRegex = ("""(rt|RT|♺)\:? ?""" + LinkExtractor.usernameRegex + ".*").r
 
