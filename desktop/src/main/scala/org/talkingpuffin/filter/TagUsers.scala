@@ -13,14 +13,15 @@ import state.PreferencesFactory
 class TagUsers(service: String, username: String) {
   private val log = Logger getLogger "TagUsers"
   private val prefs = PreferencesFactory.prefsForUser(service, username).node("tags")
-  private val tagUsers: Multimap[String,String] = HashMultimap.create()
-  prefs.keys.foreach(tag => prefs.get(tag, null).split("\t").foreach(userId => add(tag, userId)))
+  private val tagUsers: Multimap[String,Long] = HashMultimap.create()
+  prefs.keys.foreach(tag => prefs.get(tag, null).split("\t").foreach(userId => 
+      add(tag, java.lang.Long.parseLong(userId))))
   
-  def add(tag: String, userId: String) = tagUsers.put(tag, userId)
+  def add(tag: String, userId: Long) = tagUsers.put(tag, userId)
   
-  def contains(tag: String, userId: String) = tagUsers.get(tag).contains(userId)
+  def contains(tag: String, userId: Long) = tagUsers.get(tag).contains(userId)
   
-  def removeForUser(userId: String) {
+  def removeForUser(userId: Long) {
     val it = tagUsers.entries.iterator
     while (it.hasNext) {
       val item = it.next
@@ -35,12 +36,12 @@ class TagUsers(service: String, username: String) {
     var tags = List[String]()
     val keys = tagUsers.keySet.iterator
     while(keys.hasNext) {
-      tags = keys.next :: tags
+      tags ::= keys.next
     }
-    tags.sort(_ <  _)
+    tags.sort(_ < _)
   }
   
-  def tagsForUser(userId: String): List[String] = {
+  def tagsForUser(userId: Long): List[String] = {
     var tags = List[String]()
     val el = getEntriesAsList
     for (i <- 0 until el.size) {
@@ -55,7 +56,7 @@ class TagUsers(service: String, username: String) {
     val el = getKeysAsList
     for (i <- 0 until el.size) {
       val tag = el.get(i)
-      val users = new ArrayList[String](tagUsers.get(tag))
+      val users = new ArrayList[Long](tagUsers.get(tag))
       val sb = new StringBuilder
       for (j <- 0 until users.size) {
         sb.append(users.get(j)).append("\t")
@@ -64,7 +65,7 @@ class TagUsers(service: String, username: String) {
     }
   }
   
-  private def getEntriesAsList = new ArrayList[java.util.Map.Entry[String,String]](tagUsers.entries) 
+  private def getEntriesAsList = new ArrayList[java.util.Map.Entry[String,Long]](tagUsers.entries) 
   private def getKeysAsList = new ArrayList[String](tagUsers.keys) 
 
 }

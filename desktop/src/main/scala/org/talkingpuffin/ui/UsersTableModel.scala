@@ -57,7 +57,7 @@ class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], va
         case Some(status) => status.text
         case None => ""
       }
-      case UserColumns.TAGS => tagUsers.tagsForUser(user.id.toString()).mkString(", ")
+      case UserColumns.TAGS => tagUsers.tagsForUser(user.id).mkString(", ")
       case _ => null
     }
   }
@@ -68,9 +68,7 @@ class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], va
   def getUsers(rows: List[Int]): List[User] = 
     rows.map(rowIndex => {
       val user = usersModel.users(rowIndex)
-      val id = user.id.toString()
-      val name = user.name
-      new User(id, name)
+      new User(user.id, user.name)
     })
 }
 

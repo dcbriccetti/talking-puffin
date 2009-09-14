@@ -149,7 +149,7 @@ class TweetDetailPanel(session: Session, table: JTable,
   private def setText(user: TwitterUser, location: String) {
     addFreshUserDescription
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
-    val tags = tagUsers.tagsForUser(user.id.toString()).mkString(", ")
+    val tags = tagUsers.tagsForUser(user.id).mkString(", ")
     userDescription.text = UserProperties.overriddenUserName(userPrefs, user) + 
         " (" + user.screenName + ") • " +
         location + " • " + user.description  + " • " +

@@ -68,7 +68,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
         specialMenuItems.oneScreennameSelected.foreach(action => 
             if (getSelectedScreenNames.length != 1) action.enabled = false)
         val anySelectedStatusNotFollowing = getSelectedStatus.exists(status =>
-            ! session.windows.streams.followerIds.contains(status.user.id.toString))
+            ! session.windows.streams.followerIds.contains(status.user.id))
         specialMenuItems.followersOnly.foreach(action => 
             if (anySelectedStatusNotFollowing) action.enabled = false)
       }

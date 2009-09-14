@@ -13,7 +13,7 @@ import _root_.scala.swing.GridBagPanel._
  * A panel for unmuting any muted users
  */
 class UnmutePane(title: String, tableModel: StatusTableModel, filterSet: FilterSet, 
-    mutedList: scala.collection.mutable.Map[String,User], unMute: (List[String]) => Unit) 
+    mutedList: scala.collection.mutable.Map[Long,User], unMute: (List[Long]) => Unit) 
     extends GridBagPanel with TableModelListener {
   border = BorderFactory.createTitledBorder(title)
 

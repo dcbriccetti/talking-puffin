@@ -77,11 +77,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
         UserProperties.overriddenUserName(userPrefs, status.user) 
       else status.user.screenName
 
-    def senderNameEs(status: TwitterStatus): EmphasizedString = {
-      val name = senderName(status)
-      val id = status.user.id.toString()
-      new EmphasizedString(Some(name), followerIds.contains(id))
-    }
+    def senderNameEs(status: TwitterStatus): EmphasizedString = 
+      new EmphasizedString(Some(senderName(status)), followerIds.contains(status.user.id))
 
     def toName(status: TwitterStatus) = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
       case Some(u) => {
@@ -133,7 +130,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     filterAndNotify
   }
 
-  def unmuteUsers(userIds: List[String]) {
+  def unmuteUsers(userIds: List[Long]) {
     filterSet.mutedUsers --= userIds
     filterAndNotify
   }
@@ -150,7 +147,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     filterAndNotify
   }
 
-  def unmuteRetweetUsers(userIds: List[String]) {
+  def unmuteRetweetUsers(userIds: List[Long]) {
     filterSet.retweetMutedUsers --= userIds
     filterAndNotify
   }
@@ -164,7 +161,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   
   def getUsers(rows: List[Int]) = rows.map(i => {
     val user = filteredStatuses(i).user
-    new User(user.id.toString, user.name)
+    new User(user.id, user.name)
   })
   
   def getStatuses(rows: List[Int]): List[TwitterStatus] = rows.map(filteredStatuses)

@@ -11,8 +11,8 @@ import ui.{LinkExtractor, User}
  * A set of all filters, and logic to apply them
  */
 class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends Publisher {
-  val mutedUsers = LinkedHashMap[String,User]()
-  val retweetMutedUsers = LinkedHashMap[String,User]()
+  val mutedUsers = LinkedHashMap[Long,User]()
+  val retweetMutedUsers = LinkedHashMap[Long,User]()
   var selectedTags = List[String]()
   var excludeFriendRetweets: Boolean = false
   var excludeNonFollowers: Boolean = false
@@ -29,7 +29,7 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
     statuses.filter(includeStatus(friendUsernames, followerIds))
 
   private def includeStatus(friendUsernames: List[String], followerIds: List[Long])(status: TwitterStatus): Boolean = {
-    val userId = status.user.id.toString()
+    val userId = status.user.id
     ! mutedUsers.contains(userId) &&
         ! (retweetMutedUsers.contains(userId) && status.text.toLowerCase.startsWith("rt @")) &&
         tagFiltersInclude(userId) && 
@@ -38,7 +38,7 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
         ! excludedByStringMatches(status.text)
   }
   
-  private def tagFiltersInclude(userId: String) = if (selectedTags.length == 0) true else
+  private def tagFiltersInclude(userId: Long) = if (selectedTags == Nil) true else
     selectedTags.exists(tagUsers.contains(_, userId)) 
 
   private def excludedByNonFollowers(status: TwitterStatus, followerIds: List[Long]) =
