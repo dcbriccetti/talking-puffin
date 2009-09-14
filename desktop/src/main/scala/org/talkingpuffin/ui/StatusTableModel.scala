@@ -103,14 +103,16 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
         var st = getStatusText(status, username)
         if (options.showToColumn) st = LinkExtractor.getWithoutUser(st)
         StatusCell(if (options.showAgeColumn) None else Some(age(status)),
-          if (options.showNameColumn) None else Some(senderNameEs(status)), st)
+          if (showNameInStatus) Some(senderNameEs(status)) else None, st)
     }
   }
+  
+  protected def showNameInStatus = ! options.showNameColumn
   
   def getStatusText(status: TwitterStatus, username: String): String = status.text
 
   def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses(rowIndex)
-
+  
   override def getColumnClass(col: Int) = List(
     classOf[java.lang.Long], 
     classOf[Icon], 
@@ -233,5 +235,11 @@ trait Mentions extends StatusTableModel {
     val userTag = "@" + username
     if (text.startsWith(userTag)) text.substring(userTag.length).trim else text
   }
+}
+
+trait DmsSent extends StatusTableModel {
+  override def getValueAt(rowIndex: Int, columnIndex: Int) = super.getValueAt(rowIndex, 
+    List(0,1,2,2,4)(columnIndex))
+  override def showNameInStatus = false
 }
 

@@ -19,6 +19,8 @@ object View {
     val model = dataProvider match {
       case p: MentionsProvider => new StatusTableModel(sto, p, usersTableModel,
         filterSet, service, user, tagUsers) with Mentions
+      case p: DmsSentProvider => new StatusTableModel(sto, p, usersTableModel,
+        filterSet, service, user, tagUsers) with DmsSent
       case p: BaseProvider => new StatusTableModel(sto, p, usersTableModel,
         filterSet, service, user, tagUsers)
     }
