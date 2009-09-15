@@ -48,7 +48,7 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
     }
 
   def createView[T](dataProvider: DataProvider[T], include: Option[String]): View = {
-    val view = View.create(dataProvider, usersTableModel, service, twitterSession.user, tagUsers, 
+    val view = View.create(dataProvider, usersTableModel.usersModel, service, twitterSession.user, tagUsers, 
       session, include, this, followerIds, friendIds)
     listenTo(view.model)
     views ::= view

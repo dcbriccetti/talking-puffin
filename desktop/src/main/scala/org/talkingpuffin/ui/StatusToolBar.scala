@@ -1,17 +1,18 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.{Component, Action}
 import java.awt.event.KeyEvent
 import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
+import swing.{Label, Component, Action}
 
 /**
  * Status pane tool bar
  */
 class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialog: FiltersDialog, 
-    statusPane: Component, clearTweets: (Boolean) => Unit, showMaxColumns: (Boolean) => Unit) extends JToolBar {
+    statusPane: Component, showWordCloud: => Unit, clearTweets: (Boolean) => Unit, 
+    showMaxColumns: (Boolean) => Unit) extends JToolBar {
   var tweetDetailPanel: TweetDetailPanel = _
   
-  val showFiltersAction = new Action("Filter…") {
+  val showFiltersAction = new Action("Filter") {
     toolTip = "Set filters for this stream"
     mnemonic = KeyEvent.VK_F
     def apply = {
@@ -32,13 +33,13 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
     def apply = clearTweets(true)
   }
 
-  val sendAction = new Action("Send…") {
+  val sendAction = new Action("Send") {
     toolTip = "Opens a window from which you can send a tweet"
     mnemonic = KeyEvent.VK_S
     def apply = (new SendMsgDialog(session, null, None, None, None, false)).visible = true
   }
 
-  val dmAction = new Action("DM…") {
+  val dmAction = new Action("DM") {
     toolTip = "Opens a window from which you can send a direct message"
     mnemonic = KeyEvent.VK_D
     def apply = (new SendMsgDialog(session, null, None, None, None, true)).visible = true
@@ -62,13 +63,19 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
     def apply = tweetsProvider.loadLastBlockOfTweets
   }
 
-  val showMinColsAction = new Action("Min Cols") {
+  val wordsAction = new Action("Words") {
+    toolTip = "Shows a word cloud"
+    mnemonic = KeyEvent.VK_W
+    def apply = showWordCloud
+  }
+
+  val showMinColsAction = new Action("Min") {
     toolTip = "Show the minimum number of columns"
     mnemonic = KeyEvent.VK_M
     def apply = showMaxColumns(false)
   }
 
-  val showMaxColsAction = new Action("Max Cols") {
+  val showMaxColsAction = new Action("Max") {
     toolTip = "Show the maximum number of columns"
     mnemonic = KeyEvent.VK_X
     def apply = showMaxColumns(true)
@@ -109,7 +116,9 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
     aa(clearAllAction.peer)
     aa(loadNewAction.peer)
     aa(last200Action.peer)
+    // TODO add when ready   aa(wordsAction.peer)
     addSeparator
+    add(new Label("Cols: ").peer)
     aa(showMinColsAction.peer)
     aa(showMaxColsAction.peer)
     addSeparator

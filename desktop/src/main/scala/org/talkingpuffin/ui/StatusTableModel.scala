@@ -19,7 +19,8 @@ import util.DesktopUtil
  * Model providing status data to the JTable
  */
 class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: BaseProvider, 
-    usersModel: UsersTableModel, filterSet: FilterSet, service: String, username: String, val tagUsers: TagUsers) 
+    usersModel: UsersModel, filterSet: FilterSet, service: String, 
+    username: String, val tagUsers: TagUsers) 
     extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
   
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName)
@@ -31,7 +32,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   private var statuses = List[TwitterStatus]()
   
   /** Statuses, after filtering */
-  private var filteredStatuses = List[TwitterStatus]()
+  private var filteredStatuses_ = List[TwitterStatus]()
+  def filteredStatuses = filteredStatuses_
   
   private val colNames = List("Age", "Image", "From", "To", "Status")
   var preChangeListener: PreChangeListener = _;
@@ -40,19 +42,17 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   reactions += { case FilterSetChanged(s) => filterAndNotify }
 
   tweetsProvider.addPropertyChangeListener(new PropertyChangeListener {
-    def propertyChange(evt: PropertyChangeEvent) = {
-      evt.getPropertyName match {
-        case TweetsProvider.CLEAR_EVENT => clear(true)
-        case TweetsProvider.NEW_TWEETS_EVENT => {
-          val listAny = evt.getNewValue.asInstanceOf[List[AnyRef]]
-          log.info("Tweets Arrived: " + listAny.length)
-          val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
-            evt.getNewValue.asInstanceOf[List[TwitterStatus]]
-          else
-            adaptDmsToTweets(evt.getNewValue.asInstanceOf[List[TwitterMessage]])
-          processStatuses(newTweets)
-          if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
-        }
+    def propertyChange(evt: PropertyChangeEvent) = evt.getPropertyName match {
+      case TweetsProvider.CLEAR_EVENT => clear(true)
+      case TweetsProvider.NEW_TWEETS_EVENT => {
+        val listAny = evt.getNewValue.asInstanceOf[List[AnyRef]]
+        log.info("Tweets Arrived: " + listAny.length)
+        val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
+          evt.getNewValue.asInstanceOf[List[TwitterStatus]]
+        else
+          adaptDmsToTweets(evt.getNewValue.asInstanceOf[List[TwitterMessage]])
+        processStatuses(newTweets)
+        if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
       }
     }
   })
@@ -62,13 +62,13 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   var friendUsernames = List[String]()
   
   def getColumnCount = 5
-  def getRowCount = filteredStatuses.length
+  def getRowCount = filteredStatuses_.length
   override def getColumnName(column: Int) = colNames(column)
 
   private val pictureCell = new PictureCell(this, 0)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
-    val status = filteredStatuses(rowIndex)
+    val status = filteredStatuses_(rowIndex)
     
     def age(status: TwitterStatus):java.lang.Long = dateToAgeSeconds(status.createdAt.toDate().getTime())
 
@@ -83,7 +83,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     def toName(status: TwitterStatus) = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
       case Some(u) => {
          if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) {
-           Some(usersModel.usersModel.screenNameToUserNameMap.getOrElse(u, u))
+           Some(usersModel.screenNameToUserNameMap.getOrElse(u, u))
          } else {
            Some(u)
          }
@@ -108,7 +108,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   
   def getStatusText(status: TwitterStatus, username: String): String = status.text
 
-  def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses(rowIndex)
+  def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses_(rowIndex)
   
   override def getColumnClass(col: Int) = List(
     classOf[java.lang.Long], 
@@ -118,7 +118,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     classOf[StatusCell])(col) 
   
   def getIndexOfStatus(statusId: Long): Option[Int] = 
-    filteredStatuses.zipWithIndex.find(si => si._1.id == statusId) match {
+    filteredStatuses_.zipWithIndex.find(si => si._1.id == statusId) match {
       case Some((_, i)) => Some(i)
       case None => None
     }
@@ -160,11 +160,11 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   private def dateToAgeSeconds(date: Long): Long = (new Date().getTime() - date) / 1000
   
   def getUsers(rows: List[Int]) = rows.map(i => {
-    val user = filteredStatuses(i).user
+    val user = filteredStatuses_(i).user
     new User(user.id, user.name)
   })
   
-  def getStatuses(rows: List[Int]): List[TwitterStatus] = rows.map(filteredStatuses)
+  def getStatuses(rows: List[Int]): List[TwitterStatus] = rows.map(filteredStatuses_)
 
   private def processStatuses(newStatuses: List[TwitterStatus]) {
     statuses :::= newStatuses.reverse
@@ -175,7 +175,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
    * Clear (remove) statuses
    */
   def clear(all: Boolean) {
-    statuses = if (all) List[TwitterStatus]() else statuses.filter(! filteredStatuses.contains(_))
+    statuses = if (all) List[TwitterStatus]() else statuses.filter(! filteredStatuses_.contains(_))
     filterAndNotify
   }
   
@@ -195,8 +195,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       preChangeListener.tableChanging
     }
     
-    filteredStatuses = filterSet.filter(statuses, friendUsernames, followerIds) 
-    publish(new TableContentsChanged(this, filteredStatuses.length, statuses.length))
+    filteredStatuses_ = filterSet.filter(statuses, friendUsernames, followerIds) 
+    publish(new TableContentsChanged(this, filteredStatuses_.length, statuses.length))
     fireTableDataChanged
   }
   

@@ -1,5 +1,6 @@
 package org.talkingpuffin.ui
 
+import _root_.scala.collection.mutable.LinkedHashMap
 import _root_.scala.swing.event.{ComponentResized, ButtonClicked}
 import _root_.scala.swing.GridBagPanel._
 import _root_.org.talkingpuffin.util.PopupListener
@@ -35,7 +36,7 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
   statusTableModel.preChangeListener = this
   
   val statusToolBar = new StatusToolBar(session, statusTableModel.tweetsProvider, 
-    filtersDialog, this, clearTweets, showMaxColumns)
+    filtersDialog, this, showWordCloud, clearTweets, showMaxColumns)
   peer.add(statusToolBar, new Constraints{grid=(0,0); gridwidth=3}.peer)
   
   add(new ScrollPane {
@@ -135,6 +136,20 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
     clearSelection
     statusTableModel.clear(all)
     tweetDetailPanel.clearStatusDetails
+  }
+
+  case class WordCount(word: String, count: Long) {
+    override def toString = word + ": " + count
+    def +(n: Long): WordCount = WordCount(word, count + n)
+  }
+
+  private def showWordCloud {
+    val words = statusTableModel.filteredStatuses.flatMap(_.text.split("""[\s(),.!?]""")) -- 
+      List("of", "a", "an", "the")
+    val emptyMap = collection.immutable.Map.empty[String, WordCount].withDefault(w => WordCount(w, 0))
+    val countsMap = words.foldLeft(emptyMap)((map, word) => map(word) += 1)
+    val countList = countsMap.values.toList.sort(_.count > _.count)
+    log.info(countList)
   }
   
   private def showMaxColumns(showMax: Boolean) =
