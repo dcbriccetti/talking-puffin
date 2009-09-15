@@ -19,7 +19,7 @@ class WordFrequenciesFrame(text: String) extends Frame with Cancelable {
   }
 
   private def calculateCounts(text: String): List[WordCount] = {
-    val words = List.fromArray(text.replaceAll("""["'(),:;.!?/\-+]""", "").toLowerCase.split("""[\s]""")).
+    val words = List.fromArray(text.replaceAll("""["'(),:;.!?/\-+]""", "").toLowerCase.split("\\s")).
         filter(_.trim.length > 0) -- stopList
     val emptyMap = collection.immutable.Map.empty[String, WordCount].withDefault(w => WordCount(w, 0))
     val countsMap = words.foldLeft(emptyMap)((map, word) => map(word.toLowerCase) += 1)
@@ -30,7 +30,8 @@ class WordFrequenciesFrame(text: String) extends Frame with Cancelable {
   
   private def calculateBuckets(wordCounts: List[WordCount]): BucketMap = {
     val emptyMap = collection.immutable.Map.empty[Long,List[String]].withDefault(w => List[String]())
-    wordCounts.foldLeft(emptyMap)((map, wordCount) => map(wordCount.count) = wordCount.word :: map(wordCount.count))
+    wordCounts.foldLeft(emptyMap)((map, wordCount) => 
+        map(wordCount.count) = wordCount.word :: map(wordCount.count))
   }
   
   private def createDisplayText(buckets: BucketMap): String = {
