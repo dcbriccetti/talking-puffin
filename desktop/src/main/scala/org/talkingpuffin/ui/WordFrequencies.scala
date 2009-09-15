@@ -38,8 +38,7 @@ class WordFrequenciesFrame(text: String) extends Frame with Cancelable {
   private def createDisplayText(buckets: BucketMap): String = 
     "<div style='font-family: sans-serif'>" +
     (for (freq <- List.fromArray(buckets.keySet.toArray).sort(_ > _))
-      yield "<b>" + freq + "</b>" + ": " +
-        buckets.get(freq).get.sort(_ < _).mkString(", ") + "<br>"
+      yield "<b>" + freq + "</b>" + ": " + buckets.get(freq).get.sort(_ < _).mkString(", ") + "<br>"
     ).mkString + "</div>"
   
   private def stopList: List[String] = List.fromArray(Source.fromInputStream(
