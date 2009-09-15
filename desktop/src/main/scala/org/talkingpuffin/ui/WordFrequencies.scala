@@ -5,6 +5,7 @@ import java.awt.BorderLayout
 import swing.{Frame, BorderPanel}
 import util.Cancelable
 import javax.swing.{JScrollPane, JTextPane}
+import collection.immutable.Map
 
 class WordFrequenciesFrame(text: String) extends Frame with Cancelable {
   title = "Word Frequencies"
@@ -21,7 +22,7 @@ class WordFrequenciesFrame(text: String) extends Frame with Cancelable {
   private def calculateCounts(text: String): List[WordCount] = {
     val words = List.fromArray(text.replaceAll("""["'(),:;.!?/\-+]""", "").toLowerCase.split("\\s")).
         filter(_.trim.length > 0) -- stopList
-    val emptyMap = collection.immutable.Map.empty[String, WordCount].withDefault(w => WordCount(w, 0))
+    val emptyMap = Map.empty[String, WordCount].withDefault(w => WordCount(w, 0))
     val countsMap = words.foldLeft(emptyMap)((map, word) => map(word.toLowerCase) += 1)
     countsMap.values.toList.sort(_.count > _.count)
   }
@@ -29,21 +30,18 @@ class WordFrequenciesFrame(text: String) extends Frame with Cancelable {
   private type BucketMap = Map[Long,List[String]]
   
   private def calculateBuckets(wordCounts: List[WordCount]): BucketMap = {
-    val emptyMap = collection.immutable.Map.empty[Long,List[String]].withDefault(w => List[String]())
+    val emptyMap = Map.empty[Long,List[String]].withDefaultValue(List[String]())
     wordCounts.foldLeft(emptyMap)((map, wordCount) => 
         map(wordCount.count) = wordCount.word :: map(wordCount.count))
   }
   
-  private def createDisplayText(buckets: BucketMap): String = {
-    val sb = new StringBuilder("<div style='font-family: sans-serif'>")
-    List.fromArray(buckets.keySet.toArray).sort(_ > _).map(occurrences => {
-      sb.append("<b>" + occurrences + "</b>" + ": ")
-      sb.append(buckets.get(occurrences).get.sort(_ < _).mkString(", ")).append("<br>")
-    })
-    sb.append("</div>")
-    sb.toString
-  }
-
+  private def createDisplayText(buckets: BucketMap): String = 
+    "<div style='font-family: sans-serif'>" +
+    (for (freq <- List.fromArray(buckets.keySet.toArray).sort(_ > _))
+      yield "<b>" + freq + "</b>" + ": " +
+        buckets.get(freq).get.sort(_ < _).mkString(", ") + "<br>"
+    ).mkString + "</div>"
+  
   private def stopList: List[String] = List.fromArray(Source.fromInputStream(
       getClass.getResourceAsStream("/stoplist.csv")).getLines.mkString(",").split(","))
 
