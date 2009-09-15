@@ -35,9 +35,9 @@ class WordFrequenciesFrame(text: String) extends Frame with Cancelable {
   
   private def createDisplayText(buckets: BucketMap): String = {
     val sb = new StringBuilder("<div style='font-family: sans-serif'>")
-    List.fromArray(buckets.keySet.toArray).sort(_ > _).map(occurrances => {
-      sb.append("<b>" + occurrances + "</b>" + ": ")
-      sb.append(buckets.get(occurrances).get.sort(_ < _).mkString(", ")).append("<br>")
+    List.fromArray(buckets.keySet.toArray).sort(_ > _).map(occurrences => {
+      sb.append("<b>" + occurrences + "</b>" + ": ")
+      sb.append(buckets.get(occurrences).get.sort(_ < _).mkString(", ")).append("<br>")
     })
     sb.append("</div>")
     sb.toString
