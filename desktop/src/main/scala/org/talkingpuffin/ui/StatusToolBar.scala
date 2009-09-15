@@ -8,7 +8,7 @@ import swing.{Label, Component, Action}
  * Status pane tool bar
  */
 class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialog: FiltersDialog, 
-    statusPane: Component, showWordCloud: => Unit, clearTweets: (Boolean) => Unit, 
+    statusPane: Component, showWordFrequencies: => Unit, clearTweets: (Boolean) => Unit, 
     showMaxColumns: (Boolean) => Unit) extends JToolBar {
   var tweetDetailPanel: TweetDetailPanel = _
   
@@ -64,9 +64,9 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
   }
 
   val wordsAction = new Action("Words") {
-    toolTip = "Shows a word cloud"
+    toolTip = "Shows word frequencies"
     mnemonic = KeyEvent.VK_W
-    def apply = showWordCloud
+    def apply = showWordFrequencies
   }
 
   val showMinColsAction = new Action("Min") {
@@ -107,23 +107,15 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
   addComponentsToToolBar
   
   private def addComponentsToToolBar {
-    def aa(action: javax.swing.Action) = add(action).setFocusable(false)
-    def ac(comp: java.awt.Component)   = add(comp  ).setFocusable(false)
-    aa(sendAction.peer)
-    aa(dmAction.peer)
-    aa(showFiltersAction.peer)
-    aa(clearAction.peer)
-    aa(clearAllAction.peer)
-    aa(loadNewAction.peer)
-    aa(last200Action.peer)
-    // TODO add when ready   aa(wordsAction.peer)
+    def aa(actions: scala.swing.Action*) = actions.foreach(action => add(action.peer).setFocusable(false))
+    def ac(comps: java.awt.Component*) = comps.foreach(comp => add(comp).setFocusable(false))
+    aa(sendAction, dmAction, showFiltersAction, clearAction, clearAllAction, loadNewAction)
+    aa(last200Action, wordsAction)
     addSeparator
     add(new Label("Cols: ").peer)
-    aa(showMinColsAction.peer)
-    aa(showMaxColsAction.peer)
+    aa(showMinColsAction, showMaxColsAction)
     addSeparator
-    ac(dockedButton)
-    ac(detailsButton)
+    ac(dockedButton, detailsButton)
   }
 }
   

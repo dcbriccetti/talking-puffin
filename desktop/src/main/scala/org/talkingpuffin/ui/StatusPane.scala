@@ -9,17 +9,16 @@ import apache.log4j.Logger
 import filter.{TagUsers, FilterSet}
 import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
 import java.awt.image.BufferedImage
-import java.awt.{Color, Desktop, Dimension, Insets, Font}
 import java.awt.event.{KeyEvent, KeyAdapter}
+import java.awt.{BorderLayout, Color, Desktop, Dimension, Insets, Font}
 import java.net.{URI, URL}
 import java.util.Comparator
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
-import javax.swing.{SwingUtilities, JTable, Icon, JMenu, ImageIcon, JLabel, JTextPane, SwingWorker, JPopupMenu, JFrame, JToolBar, JToggleButton, JButton, JMenuItem, JTabbedPane}
+import javax.swing.{JScrollPane, SwingUtilities, JTable, Icon, JMenu, ImageIcon, JLabel, JTextPane, SwingWorker, JPopupMenu, JFrame, JToolBar, JToggleButton, JButton, JMenuItem, JTabbedPane}
 import scala.swing._
 import twitter.{TwitterStatus}
-import util.TableUtil
-
+import util.{Cancelable, TableUtil}
 /**
  * Displays friend statuses
  */
@@ -138,18 +137,12 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
     tweetDetailPanel.clearStatusDetails
   }
 
-  case class WordCount(word: String, count: Long) {
-    override def toString = word + ": " + count
-    def +(n: Long): WordCount = WordCount(word, count + n)
-  }
-
   private def showWordCloud {
-    val words = statusTableModel.filteredStatuses.flatMap(_.text.split("""[\s(),.!?]""")) -- 
-      List("of", "a", "an", "the")
-    val emptyMap = collection.immutable.Map.empty[String, WordCount].withDefault(w => WordCount(w, 0))
-    val countsMap = words.foldLeft(emptyMap)((map, word) => map(word) += 1)
-    val countList = countsMap.values.toList.sort(_.count > _.count)
-    log.info(countList)
+    new WordFrequenciesFrame(statusTableModel.filteredStatuses.map(_.text).mkString(" ")) {
+      size = new Dimension(400, 400)
+      peer.setLocationRelativeTo(null)
+      visible = true
+    }
   }
   
   private def showMaxColumns(showMax: Boolean) =
@@ -162,5 +155,3 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
   
   def requestFocusForTable = table.requestFocusInWindow
 }
-
-
