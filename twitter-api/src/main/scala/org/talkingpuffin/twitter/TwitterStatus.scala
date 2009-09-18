@@ -60,22 +60,26 @@ object TwitterStatus{
   */
   def apply(n: Node):TwitterStatus = {
     val status = new TwitterStatus
-    n.child foreach {(sub) => 
-      sub match {
-        case <id>{Text(text)}</id> => status.id = java.lang.Long.parseLong(text)
-        case <created_at>{Text(text)}</created_at> => status.createdAt = fmt.parseDateTime(text)
-        case <text>{Text(text)}</text> => status.text = text
-        case <source>{Text(text)}</source> => status.source = text
-        case <truncated>{Text(text)}</truncated> => status.truncated = java.lang.Boolean.valueOf(text).booleanValue
-        case <in_reply_to_status_id/> => Nil
-        case <in_reply_to_status_id>{Text(text)}</in_reply_to_status_id> => status.inReplyToStatusId = java.lang.Long.parseLong(text)
-        case <in_reply_to_user_id/> => Nil
-        case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => status.inReplyToUserId = java.lang.Long.parseLong(text)
-        case <favorited>{Text(text)}</favorited> => status.favorited = java.lang.Boolean.valueOf(text).booleanValue
-        case <user>{ _* }</user> => status.user = TwitterUser(sub)
-        case <retweet_details>{ _* }</retweet_details> => status.retweeted = Retweet(sub)
-        case _ => Nil
-      }      
+    n.child foreach {(sub) =>
+      try {
+        sub match {
+          case <id>{Text(text)}</id> => status.id = java.lang.Long.parseLong(text)
+          case <created_at>{Text(text)}</created_at> => status.createdAt = fmt.parseDateTime(text)
+          case <text>{Text(text)}</text> => status.text = text
+          case <source>{Text(text)}</source> => status.source = text
+          case <truncated>{Text(text)}</truncated> => status.truncated = java.lang.Boolean.valueOf(text).booleanValue
+          case <in_reply_to_status_id/> => Nil
+          case <in_reply_to_status_id>{Text(text)}</in_reply_to_status_id> => status.inReplyToStatusId = java.lang.Long.parseLong(text)
+          case <in_reply_to_user_id/> => Nil
+          case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => status.inReplyToUserId = java.lang.Long.parseLong(text)
+          case <favorited>{Text(text)}</favorited> => status.favorited = java.lang.Boolean.valueOf(text).booleanValue
+          case <user>{ _* }</user> => status.user = TwitterUser(sub)
+          case <retweet_details>{ _* }</retweet_details> => status.retweeted = Retweet(sub)
+          case _ => Nil
+        }
+      } catch {
+        case e: NumberFormatException => logger.error(e + " " + sub)
+      }
     }
     return status
   }
