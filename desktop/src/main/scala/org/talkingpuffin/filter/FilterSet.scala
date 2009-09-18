@@ -10,7 +10,7 @@ import ui.User
 /**
  * A set of all filters, and logic to apply them
  */
-class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends Publisher {
+class FilterSet(tagUsers: TagUsers) extends Publisher {
   val mutedUsers = LinkedHashMap[Long,User]()
   val retweetMutedUsers = LinkedHashMap[Long,User]()
   var selectedTags = List[String]()

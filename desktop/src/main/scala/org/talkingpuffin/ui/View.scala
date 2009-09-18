@@ -11,7 +11,7 @@ object View {
                 tagUsers: TagUsers, session: Session, include: Option[String], viewCreator: ViewCreator,
                 followerIds: List[Long], friendIds: List[Long]): View = {
     val title = dataProvider.titleCreator.create
-    val filterSet = new FilterSet(session, user, tagUsers)
+    val filterSet = new FilterSet(tagUsers)
     if (include.isDefined) {
       filterSet.includeTextFilters.list ::= new TextFilter(include.get, false) 
     }
