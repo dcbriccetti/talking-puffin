@@ -5,7 +5,7 @@ import _root_.scala.collection.mutable.LinkedHashMap
 import _root_.scala.swing.Publisher
 import java.util.regex.Pattern
 import twitter.TwitterStatus
-import ui.{LinkExtractor, User}
+import ui.User
 
 /**
  * A set of all filters, and logic to apply them
@@ -33,36 +33,20 @@ class FilterSet(session: Session, username: String, tagUsers: TagUsers) extends 
     ! mutedUsers.contains(userId) &&
         ! (retweetMutedUsers.contains(userId) && status.text.toLowerCase.startsWith("rt @")) &&
         tagFiltersInclude(userId) && 
-        retweetFriendsIncludes(status.text, friendUsernames) &&
-        ! excludedByNonFollowers(status, followerIds) &&
+        ! (excludeFriendRetweets && Retweets.fromFriend_?(status.text, friendUsernames)) &&
+        ! (excludeNonFollowers && ! followerIds.contains(status.user.id)) &&
         ! excludedByStringMatches(status.text)
   }
   
-  private def tagFiltersInclude(userId: Long) = if (selectedTags == Nil) true else
+  private def tagFiltersInclude(userId: Long) = selectedTags == Nil ||
     selectedTags.exists(tagUsers.contains(_, userId)) 
 
-  private def excludedByNonFollowers(status: TwitterStatus, followerIds: List[Long]) =
-    excludeNonFollowers && ! followerIds.contains(status.user.id)
-    
   private def excludedByStringMatches(text: String): Boolean = 
     (includeTextFilters.list.length > 0 && ! includeTextFilters.list.exists(matches(text, _))) ||
         excludeTextFilters.list.exists(matches(text, _))
   
   private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
     Pattern.compile(search.text).matcher(text).find else text.toUpperCase.contains(search.text.toUpperCase)
-  
-  private val rtUserRegex = ("""(rt|RT|♺)\:? ?""" + LinkExtractor.usernameRegex + ".*").r
-
-  private def retweetFriendsIncludes(statusText: String, friendUsernames: List[String]): Boolean = {
-    if (! excludeFriendRetweets) return true
-    
-    try {
-      val rtUserRegex(rtSymbol, username) = statusText
-      return ! friendUsernames.contains(username)
-    } catch {
-      case e: MatchError => return true
-    }
-  }
 }
 
 class TextFilter (var text: String, var isRegEx: Boolean)
