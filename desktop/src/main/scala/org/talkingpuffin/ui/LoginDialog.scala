@@ -64,7 +64,7 @@ class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession
     border = scala.swing.Swing.EmptyBorder(5, 5, 5, 5)
     add(if (comboBox != null) comboBox else usernameTextField, 
       new Constraints {grid = (0, 0); gridwidth=2; anchor=West})
-    add(new Label("Account Name"),
+    add(new Label("Service Name"),
                                 new Constraints {grid=(0,1); anchor=West})
     add(accountNameTextField,   new Constraints {grid=(1,1); anchor=West})
     add(new Label("User Name"), new Constraints {grid=(0,2); anchor=West})

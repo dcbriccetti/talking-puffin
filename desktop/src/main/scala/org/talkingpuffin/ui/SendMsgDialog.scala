@@ -1,20 +1,20 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.actors.Reaction
 import _root_.scala.swing._
-import _root_.scala.xml.NodeSeq
 import event.{SelectionChanged, CaretUpdate, EditDone}
 import java.awt.event.{KeyAdapter, KeyEvent}
 import java.awt.{Dimension, Font}
-import javax.swing.{SwingWorker, KeyStroke}
-import twitter.{TwitterUser, TwitterStatus}
+import javax.swing.{SwingWorker}
+import talkingpuffin.util.Loggable
+import twitter.{TwitterUser}
 import util.Cancelable
 
 /**
  * A dialog for sending messages
  */
 class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Option[String],
-    replyToId: Option[Long], retweetMsg: Option[String], isDm: Boolean) extends Frame with Cancelable {
+    replyToId: Option[Long], retweetMsg: Option[String], isDm: Boolean) 
+    extends Frame with Cancelable with Loggable {
   
   class CustomTextArea extends TextArea { 
     preferredSize = new Dimension(400, 80); wordWrap = true; lineWrap = true
@@ -33,6 +33,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
   title = if (isDm) "Send Direct Message" else "Send Message"
   private def nameAndScreenNames(names: List[TwitterUser]) = names.map(u => 
       NameAndScreenName(u.name, u.screenName))
+  var sendingSession = session
   val utm = session.windows.streams.usersTableModel
   def users = {
     val matches = (nameAndScreenNames(utm.friends ::: utm.followers).
@@ -109,8 +110,24 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
         case _ =>
       }
     }
-    add(message,    new Constr {grid=(0,3); fill=GridBagPanel.Fill.Both; weightx=1; weighty=1})
-    add(total,      new Constr {grid=(0,4); anchor=GridBagPanel.Anchor.West})
+    add(message, new Constr {grid=(0,3); fill=GridBagPanel.Fill.Both; weightx=1; weighty=1})
+    add(total,   new Constr {grid=(0,4); anchor=GridBagPanel.Anchor.West})
+    case class SessionDisplay(val session: Session) {
+      override def toString = session.twitterSession.user + " " + session.serviceName
+    }
+    debug("Sessions: " + Globals.sessions.length)
+    if (Globals.sessions.length > 1)
+      add(new FlowPanel(FlowPanel.Alignment.Left) {
+        contents += new Label("Send from:")
+        val sessionsCB = new ComboBox(Globals.sessions.map(SessionDisplay)) {
+          selection.item = SessionDisplay(session)
+        }
+        reactions += {
+          case SelectionChanged(`sessionsCB`) => sendingSession = sessionsCB.selection.item.session 
+        }
+        listenTo(sessionsCB.selection)
+        contents += sessionsCB
+      }, new Constr {grid=(0,5); anchor=GridBagPanel.Anchor.West})
   }
   pack
   peer.setLocationRelativeTo(parent)
@@ -120,7 +137,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
     session.status.text = "Sending message"
     new SwingWorker[Object, Object] {
       override def doInBackground: Object = {
-        val twses = session.twitterSession
+        val twses = sendingSession.twitterSession
         if (isDm) dmRecipCombo.selection.item match {
           case u: NameAndScreenName => twses.newDirectMessage(u.screenName, message.text)
           case _ =>

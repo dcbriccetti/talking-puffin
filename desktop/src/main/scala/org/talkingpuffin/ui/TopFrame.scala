@@ -18,7 +18,7 @@ import ui.util.FetchRequest
 class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable {
   val tagUsers = new TagUsers(service, twitterSession.user)
   TopFrames.addFrame(this)
-  val session = new Session(twitterSession)
+  val session = new Session(service, twitterSession)
   Globals.sessions ::= session
   iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
     
@@ -54,11 +54,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
 
   reactions += {
-    case WindowClosing(_) => {
-      Globals.sessions -= session
-      saveState
-      TopFrames.removeFrame(this)
-    }
+    case WindowClosing(_) => close
   }
 
   peer.setLocationRelativeTo(null)
@@ -67,7 +63,14 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   def setFocus = streams.views.last.pane.requestFocusForTable
   
-  def saveState {
+  def close {
+    Globals.sessions -= session
+    dispose
+    saveState
+    TopFrames.removeFrame(this)
+  }
+
+  private def saveState {
     val highFol = streams.providers.followingProvider.getHighestId
     val highMen = streams.providers.mentionsProvider.getHighestId
     val highDmReceived = streams.providers.dmsReceivedProvider.getHighestId

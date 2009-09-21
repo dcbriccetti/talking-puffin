@@ -14,7 +14,7 @@ object TopFrames extends Loggable {
 
   def closeCurrentWindow(){
     frames.find(_.peer.isFocused) match{
-      case Some(frame) => close(frame)
+      case Some(frame) => frame.close
       case _ => closeOtherFrame()
     }
   }
@@ -47,20 +47,9 @@ object TopFrames extends Loggable {
   
   def numFrames = frames.size
 
-  def close(frame:TopFrame): Unit = {
-      frame.dispose
-      frame.saveState
-      TopFrames removeFrame frame
-  }
   def closeAll: Unit = closeAll(frames)
 
-  def closeAll(frames: List[TopFrame]): Unit = frames match {
-    case frame :: rest => {
-      close(frame)
-      closeAll(rest)
-    }
-    case Nil =>
-  }
+  def closeAll(frames: List[TopFrame])= frames.foreach(_.close)
 }
   
  
