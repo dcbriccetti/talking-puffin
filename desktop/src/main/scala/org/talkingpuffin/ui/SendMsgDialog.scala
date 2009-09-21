@@ -33,9 +33,10 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
   title = if (isDm) "Send Direct Message" else "Send Message"
   private def nameAndScreenNames(names: List[TwitterUser]) = names.map(u => 
       NameAndScreenName(u.name, u.screenName))
-  var sendingSession = session
-  val utm = session.windows.streams.usersTableModel
-  def users = {
+  private var sendingSession = session
+  private val utm = session.windows.streams.usersTableModel
+  
+  private def users = {
     val matches = (nameAndScreenNames(utm.friends ::: utm.followers).
         filter(_.matches(searchText.text))).sort(_ < _).removeDuplicates
     (matches.length match {
@@ -50,10 +51,9 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
   private val usersCombo = new ComboBox(users)
   private val message = new CustomTextArea
   private val total = new Label(remainingMsg)
+  
   listenTo(message.caret)
-  reactions += {
-    case CaretUpdate(c) => total.text = remainingMsg 
-  }
+  reactions += { case CaretUpdate(c) => total.text = remainingMsg }
   message.peer.addKeyListener(new KeyAdapter() {
     override def keyTyped(e: KeyEvent) = if (e.getKeyChar == '\n') send 
   })

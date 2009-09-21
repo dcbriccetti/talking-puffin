@@ -3,8 +3,9 @@ package org.talkingpuffin.ui.util
 import java.awt.event.KeyEvent
 import javax.swing.{JRootPane, JDialog, JComponent, KeyStroke}
 import swing.{Frame, Action}
+
 /**
- * Make a JDialog cancelable with the Escape key
+ * Make a JDialog or Frame cancelable with the Escape key
  */
 trait Cancelable {
   var cancelAction: Action = null

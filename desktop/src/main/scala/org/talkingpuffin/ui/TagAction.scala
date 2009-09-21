@@ -1,8 +1,7 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.Action
-import twitter.TwitterStatus
 import javax.swing.{JTable, SwingUtilities}
+import swing.Action
 import util.TableUtil
 
 /**

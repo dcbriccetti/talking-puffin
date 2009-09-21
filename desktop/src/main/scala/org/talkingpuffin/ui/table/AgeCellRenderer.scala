@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import java.awt.{Component, Color}
+import java.awt.{Component}
 import javax.swing.border.EmptyBorder
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.{JTextPane, JTable}

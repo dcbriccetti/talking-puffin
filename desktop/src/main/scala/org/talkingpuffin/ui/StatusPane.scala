@@ -1,24 +1,12 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.collection.mutable.LinkedHashMap
-import _root_.scala.swing.event.{ComponentResized, ButtonClicked}
-import _root_.scala.swing.GridBagPanel._
-import _root_.org.talkingpuffin.util.PopupListener
-
 import apache.log4j.Logger
 import filter.{TagUsers, FilterSet}
-import java.awt.event.{MouseEvent, ActionEvent, MouseAdapter, ActionListener}
-import java.awt.image.BufferedImage
-import java.awt.event.{KeyEvent, KeyAdapter}
-import java.awt.{BorderLayout, Color, Desktop, Dimension, Insets, Font}
-import java.net.{URI, URL}
-import java.util.Comparator
+import java.awt.{Dimension}
 import javax.swing.event._
-import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, TableCellRenderer}
-import javax.swing.{JScrollPane, SwingUtilities, JTable, Icon, JMenu, ImageIcon, JLabel, JTextPane, SwingWorker, JPopupMenu, JFrame, JToolBar, JToggleButton, JButton, JMenuItem, JTabbedPane}
-import scala.swing._
-import twitter.{TwitterStatus}
-import util.{Cancelable, TableUtil}
+import twitter.TwitterStatus
+import swing.{ScrollPane, GridBagPanel}
+
 /**
  * Displays friend statuses
  */

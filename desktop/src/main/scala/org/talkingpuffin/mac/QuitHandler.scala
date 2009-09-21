@@ -6,7 +6,6 @@ import java.lang.reflect.{Proxy, InvocationHandler, Method}
 /**
  * Mac OS application quit handler
  */
-
 object QuitHandler {
   def register(callback: => Unit) {
     try {

@@ -6,7 +6,6 @@ import javax.swing.event.{TableModelEvent, TableModelListener}
 import javax.swing.BorderFactory
 import java.awt.Dimension
 import _root_.scala.swing.event.ButtonClicked
-import javax.swing.SpringLayout.Constraints
 import _root_.scala.swing.GridBagPanel._
 
 /**

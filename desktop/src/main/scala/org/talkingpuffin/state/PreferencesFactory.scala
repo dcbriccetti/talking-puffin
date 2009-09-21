@@ -5,7 +5,6 @@ import java.util.prefs.Preferences
 /**
  * Provides Preferences.
  */
-
 object PreferencesFactory {
   def prefsForUser(service: String, username: String) =
     Preferences.userRoot.node("/org/talkingpuffin/streams/" + service.toLowerCase + "/" + username)

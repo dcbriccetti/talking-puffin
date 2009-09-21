@@ -1,9 +1,8 @@
 package org.talkingpuffin.ui
 
 import filter.TagUsers
-import java.awt.Dimension
 import java.awt.event.KeyEvent
-import javax.swing.{BorderFactory, KeyStroke, JCheckBox}
+import javax.swing.{BorderFactory, JCheckBox}
 import swing._
 
 /**

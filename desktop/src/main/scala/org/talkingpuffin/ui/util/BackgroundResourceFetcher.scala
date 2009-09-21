@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui.util
 import cache.Cache
-import java.util.concurrent.{ConcurrentHashMap, Executors, LinkedBlockingQueue}
+import java.util.concurrent.{Executors, LinkedBlockingQueue}
 import com.google.common.collect.MapMaker
 import java.util.{Collections, HashSet}
 import org.apache.log4j.Logger

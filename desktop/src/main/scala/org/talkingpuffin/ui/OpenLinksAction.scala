@@ -1,7 +1,6 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.{Action,MenuItem}
-import java.awt.{Component, Point}
 import java.awt.event.KeyEvent
 import javax.swing.{JTable, KeyStroke, JPopupMenu}
 import org.talkingpuffin.twitter.{TwitterStatus}

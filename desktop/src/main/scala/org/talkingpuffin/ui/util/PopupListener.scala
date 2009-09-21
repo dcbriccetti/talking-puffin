@@ -5,7 +5,6 @@ import java.awt.event.MouseEvent
 
 import javax.swing.JPopupMenu
 import javax.swing.JTable
-import javax.swing.ListSelectionModel
 
 class PopupListener(table: JTable, popup: JPopupMenu) extends MouseAdapter {
 

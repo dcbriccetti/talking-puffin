@@ -1,11 +1,11 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.{Button, FlowPanel, Action, BorderPanel}
 import filter.TagUsers
 import java.awt.Dimension
-import java.awt.event.KeyEvent
-import javax.swing.{JDialog}
+import javax.swing.JDialog
 import util.Cancelable
+import swing.{FlowPanel, Action, Button, BorderPanel}
+import java.awt.event.KeyEvent
 
 /**
  * A dialog from which tags can be selected.

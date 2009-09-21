@@ -2,7 +2,6 @@ package org.talkingpuffin.ui
 
 import java.awt.Dimension
 import java.awt.event.{ActionEvent, ActionListener}
-
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JToolBar
 import swing.{ProgressBar, Label, ComboBox, Action}

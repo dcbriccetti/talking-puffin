@@ -9,6 +9,7 @@ import org.apache.log4j.Logger
 import talkingpuffin.util.Loggable
 import twitter.{TwitterMessage, AuthenticatedSession, TwitterArgs, TwitterStatus}
 import util.TitleCreator
+
 object TweetsProvider {
   val CLEAR_EVENT = "clear"
   val NEW_TWEETS_EVENT = "tweets"

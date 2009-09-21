@@ -9,7 +9,6 @@ import javax.swing.{JTable, JTextPane, JPopupMenu}
 /**
  * A large version of the tweet, that can contain hyperlinks, and from which filters can be created.
  */
-
 class LargeTweet(filtersDialog: FiltersDialog, viewCreator: ViewCreator, table: JTable, 
     backgroundColor: Color) extends JTextPane {
   setBackground(backgroundColor)

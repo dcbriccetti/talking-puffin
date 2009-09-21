@@ -3,9 +3,7 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
 import filter.{FilterSet, FilterSetChanged, TagUsers}
-import java.awt.event.{ActionEvent, ActionListener}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
-
 import java.util.{Date}
 import javax.swing._
 import javax.swing.table.{AbstractTableModel}

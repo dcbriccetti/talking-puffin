@@ -1,25 +1,18 @@
 package org.talkingpuffin.ui
 
-import _root_.org.talkingpuffin.twitter.StreamUtil
-import _root_.scala.swing.event.{ButtonClicked}
+import _root_.scala.swing.{Label, GridBagPanel, TextArea, BorderPanel}
 import _root_.scala.swing.GridBagPanel._
-import _root_.scala.swing.{Frame, Label, GridBagPanel, ScrollPane, TextArea, BorderPanel}
 import filter.TagUsers
 import geo.GeoCoder
-import java.awt.event.{MouseEvent, KeyAdapter, MouseAdapter, KeyEvent}
+import java.awt.event.{MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
-import java.awt.{Dimension, Insets, Image, Font}
+import java.awt.{Dimension, Insets, Font}
 import java.text.NumberFormat
 import java.util.prefs.Preferences
 import javax.swing._
-import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 import state.{GlobalPrefs, PrefKeys}
 import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
-
-/**
- * Details of the currently-selected tweet.
- */
 
 object Thumbnail {
   val THUMBNAIL_SIZE = 48
@@ -30,6 +23,9 @@ object Thumbnail {
     BufferedImage.TYPE_INT_ARGB))
 }
 
+/**
+ * Details of the currently-selected tweet.
+ */
 class TweetDetailPanel(session: Session, table: JTable, 
     filtersDialog: FiltersDialog, tagUsers: TagUsers, viewCreator: ViewCreator, userPrefs: Preferences) 
     extends GridBagPanel {
