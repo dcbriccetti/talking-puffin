@@ -55,7 +55,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   reactions += {
     case WindowClosing(_) => {
-      Globals.sessions = Globals.sessions remove(s => s == session)
+      Globals.sessions -= session
       saveState
       TopFrames.removeFrame(this)
     }

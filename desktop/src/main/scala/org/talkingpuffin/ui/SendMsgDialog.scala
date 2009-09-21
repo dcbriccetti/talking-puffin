@@ -14,7 +14,7 @@ import util.Cancelable
  * A dialog for sending messages
  */
 class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Option[String],
-    replyToId: Option[Long], retweetMsgOption: Option[String], isDm: Boolean) extends Frame with Cancelable {
+    replyToId: Option[Long], retweetMsg: Option[String], isDm: Boolean) extends Frame with Cancelable {
   
   class CustomTextArea extends TextArea { 
     preferredSize = new Dimension(400, 80); wordWrap = true; lineWrap = true
@@ -69,8 +69,8 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
         message.text = userNames + " "
       case None =>
     }
-    retweetMsgOption match {
-      case Some(retweetMsg) => message.text = "RT " + userNames + " " + retweetMsg
+    retweetMsg match {
+      case Some(msg) => message.text = "RT " + userNames + " " + msg
       case None =>
     }
   }

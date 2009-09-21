@@ -1,6 +1,5 @@
 package org.talkingpuffin.ui
 
-import apache.log4j.Logger
 import mac.QuitHandler
 import java.awt.Frame
 import talkingpuffin.util.Loggable
@@ -33,13 +32,13 @@ object TopFrames extends Loggable {
   }
 
   def removeFrame(f: TopFrame){
-    frames = frames.remove {f == _}
+    frames -= f
     debug ("Frame removed. Number of frames is " + frames.size + ".")
     exitIfNoFrames
   }
 
   def exitIfNoFrames =
-    if(frames.size == 0){
+    if(frames == Nil){
       debug("No more frames. Exiting.")
       // it's kinda ugly to put the exit logic here, but not sure where
       // else to put it.'

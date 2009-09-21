@@ -109,9 +109,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     createSendMsgDialog(statuses(0), Some(recipients), None).visible = true
   }
   
-  def dm(screenName: String) {
+  def dm(screenName: String) =
     (new SendMsgDialog(session, null, Some(screenName), None, None, true)).visible = true
-  }
   
   private def retweet {
     val status = getSelectedStatuses(0) 
