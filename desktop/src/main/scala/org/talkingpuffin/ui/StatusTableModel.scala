@@ -68,8 +68,6 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val status = filteredStatuses_(rowIndex)
     
-    def age(status: TwitterStatus):java.lang.Long = dateToAgeSeconds(status.createdAt.toDate().getTime())
-
     def senderName(status: TwitterStatus) = 
       if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) 
         UserProperties.overriddenUserName(userPrefs, status.user) 
@@ -90,14 +88,14 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     }
     
     columnIndex match {
-      case 0 => age(status)
+      case 0 => status.createdAt.toDate
       case 1 => pictureCell.request(status.user.profileImageURL, rowIndex)
       case 2 => senderNameEs(status)
       case 3 => new EmphasizedString(toName(status), false)
       case 4 => 
         var st = getStatusText(status, username)
         if (options.showToColumn) st = LinkExtractor.getWithoutUser(st)
-        StatusCell(if (options.showAgeColumn) None else Some(age(status)),
+        StatusCell(if (options.showAgeColumn) None else Some(status.createdAt.toDate),
           if (showNameInStatus) Some(senderNameEs(status)) else None, st)
     }
   }
@@ -109,7 +107,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses_(rowIndex)
   
   override def getColumnClass(col: Int) = List(
-    classOf[java.lang.Long], 
+    classOf[java.util.Date], 
     classOf[Icon], 
     classOf[String],
     classOf[String], 
@@ -155,8 +153,6 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     filterAndNotify
   }
 
-  private def dateToAgeSeconds(date: Long): Long = (new Date().getTime() - date) / 1000
-  
   def getUsers(rows: List[Int]) = rows.map(i => {
     val user = filteredStatuses_(i).user
     new User(user.id, user.name)

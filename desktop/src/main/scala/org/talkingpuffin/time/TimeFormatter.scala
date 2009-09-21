@@ -36,6 +36,6 @@ case class TimeFormatter(time: Long) {
     sb.toString
   }
   
-  private def twoDigitNum(num: java.lang.Long): String = String.format("%02d", num)
+  private def twoDigitNum(num: java.lang.Long) = String.format("%02d", num)
   
 }
