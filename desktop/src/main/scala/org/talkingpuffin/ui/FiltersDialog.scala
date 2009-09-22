@@ -1,13 +1,11 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.GridBagPanel._
-import filter.{TextFilters, TagUsers, FilterSet, TextFilter, FilterSetChanged}
+import filter.{TextFilters, TagUsers, FilterSet}
 import java.awt.event.KeyEvent
-import java.awt.{Dimension, Insets}
+import java.awt.{Dimension}
 import javax.swing.border.EmptyBorder
-import javax.swing.event.{ListSelectionListener, ListSelectionEvent, TableModelListener, TableModelEvent}
-import javax.swing.{JTable, BorderFactory}
-import swing.{Orientation, BoxPanel, TabbedPane, ListView, Frame, GridBagPanel, UIElement, FlowPanel, Button, CheckBox, Label, ScrollPane, Action}
+import swing.{Orientation, BoxPanel, TabbedPane, Frame, GridBagPanel, FlowPanel, Button, CheckBox, Action}
 
 /**
  * Dialog for setting filters
@@ -15,6 +13,7 @@ import swing.{Orientation, BoxPanel, TabbedPane, ListView, Frame, GridBagPanel, 
 class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: FilterSet, 
     tagUsers: TagUsers) extends Frame {
   title = paneTitle + " Filters"
+  preferredSize = new Dimension(550, 600)
   val generalPane = new GridBagPanel {
     border = new EmptyBorder(5, 5, 0, 5)
     add(new UnmutePane("Muted users", tableModel, filterSet, filterSet.mutedUsers, tableModel.unmuteUsers),
@@ -26,11 +25,9 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     add(excludeFriendRetweets, new Constraints {grid=(0,1); gridwidth=3; anchor=Anchor.West})
     val excludeNonFollowers = new CheckBox("Exclude non-followers")
     add(excludeNonFollowers, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
-  
-    preferredSize = new Dimension(550, 400)
   }
-  val includePane = new InOutPane("Include Only Tweets Containing One of", filterSet.includeSet.textFilters)
-  val excludePane = new InOutPane("Exclude Tweets Containing Any of", filterSet.excludeSet.textFilters)
+  val includePane = new InOutPane("Only Tweets Containing One of", filterSet.includeSet.textFilters)
+  val excludePane = new InOutPane("Tweets Containing Any of", filterSet.excludeSet.textFilters)
   val tabbedPane = new TabbedPane {
     pages += new TabbedPane.Page("General", generalPane)
     pages += new TabbedPane.Page("Include", includePane)
