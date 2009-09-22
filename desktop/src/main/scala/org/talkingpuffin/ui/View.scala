@@ -13,7 +13,7 @@ object View {
     val title = dataProvider.titleCreator.create
     val filterSet = new FilterSet(tagUsers)
     if (include.isDefined) {
-      filterSet.includeTextFilters.list ::= new TextFilter(include.get, false) 
+      filterSet.includeSet.textFilters.list ::= new TextFilter(include.get, false) 
     }
     val sto = new StatusTableOptions(true, true, true)
     val model = dataProvider match {

@@ -19,7 +19,7 @@ class UnmutePane(title: String, tableModel: StatusTableModel, filterSet: FilterS
   val view = new ListView(mutedList.values.toList)
   add(new ScrollPane(view) {
     val dim = new Dimension(150,130); preferredSize=dim; minimumSize=dim
-  }, new Constraints {grid=(0,0); anchor=Anchor.West})
+  }, new Constraints {grid=(0,0); anchor=Anchor.West; fill=Fill.Both; weighty=1})
 
   tableModel.addTableModelListener(this)
   

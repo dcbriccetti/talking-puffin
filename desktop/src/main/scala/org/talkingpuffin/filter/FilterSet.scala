@@ -11,13 +11,16 @@ import ui.User
  * A set of all filters, and logic to apply them
  */
 class FilterSet(tagUsers: TagUsers) extends Publisher {
+  class InOutSet {
+    var textFilters = new TextFilters()
+    var tags = List[String]()
+  }
   val mutedUsers = LinkedHashMap[Long,User]()
   val retweetMutedUsers = LinkedHashMap[Long,User]()
-  var selectedTags = List[String]()
   var excludeFriendRetweets: Boolean = false
   var excludeNonFollowers: Boolean = false
-  var includeTextFilters = new TextFilters()
-  var excludeTextFilters = new TextFilters()
+  val includeSet = new InOutSet
+  val excludeSet = new InOutSet
   
   def publish: Unit = publish(new FilterSetChanged(this))
 
@@ -33,17 +36,20 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
     ! mutedUsers.contains(userId) &&
         ! (retweetMutedUsers.contains(userId) && status.text.toLowerCase.startsWith("rt @")) &&
         tagFiltersInclude(userId) && 
+        ! excludedByTags(userId) && 
         ! (excludeFriendRetweets && Retweets.fromFriend_?(status.text, friendUsernames)) &&
         ! (excludeNonFollowers && ! followerIds.contains(status.user.id)) &&
         ! excludedByStringMatches(status.text)
   }
   
-  private def tagFiltersInclude(userId: Long) = selectedTags == Nil ||
-    selectedTags.exists(tagUsers.contains(_, userId)) 
+  private def tagFiltersInclude(userId: Long) = includeSet.tags == Nil ||
+    includeSet.tags.exists(tagUsers.contains(_, userId)) 
+  
+  private def excludedByTags(userId: Long) = excludeSet.tags.exists(tagUsers.contains(_, userId))
 
-  private def excludedByStringMatches(text: String): Boolean = 
-    (includeTextFilters.list.length > 0 && ! includeTextFilters.list.exists(matches(text, _))) ||
-        excludeTextFilters.list.exists(matches(text, _))
+  private def excludedByStringMatches(text: String) = 
+    (includeSet.textFilters.list != Nil && ! includeSet.textFilters.list.exists(matches(text, _))) ||
+        excludeSet.textFilters.list.exists(matches(text, _))
   
   private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
     Pattern.compile(search.text).matcher(text).find else text.toUpperCase.contains(search.text.toUpperCase)
