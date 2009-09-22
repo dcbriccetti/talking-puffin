@@ -4,10 +4,10 @@ import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
 import filter.{FilterSet, FilterSetChanged, TagUsers}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
-import java.util.{Date}
 import javax.swing._
 import javax.swing.table.{AbstractTableModel}
 import org.apache.log4j.Logger
+import state.GlobalPrefs.PrefChangedEvent
 import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
 import twitter.{TwitterMessage, TwitterStatus}
 import ui.table.{EmphasizedString, StatusCell}
@@ -33,11 +33,14 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   private var filteredStatuses_ = List[TwitterStatus]()
   def filteredStatuses = filteredStatuses_
   
-  private val colNames = List("Age", "Image", "From", "To", "Status")
   var preChangeListener: PreChangeListener = _;
   
   listenTo(filterSet)
   reactions += { case FilterSetChanged(s) => filterAndNotify }
+
+  listenTo(GlobalPrefs.publisher)
+  reactions += { case e: PrefChangedEvent => 
+    if (e.key == PrefKeys.SHOW_TWEET_DATE_AS_AGE) fireTableDataChanged}  
 
   tweetsProvider.addPropertyChangeListener(new PropertyChangeListener {
     def propertyChange(evt: PropertyChangeEvent) = evt.getPropertyName match {
@@ -61,7 +64,9 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   
   def getColumnCount = 5
   def getRowCount = filteredStatuses_.length
-  override def getColumnName(column: Int) = colNames(column)
+  override def getColumnName(column: Int) = 
+    List(if (AgeCellRenderer.showAsAge_?) "When" else "When", "Image", "From", "To", "Status")(column)
+  // TODO get dynamic column title changing working
 
   private val pictureCell = new PictureCell(this, 0)
 

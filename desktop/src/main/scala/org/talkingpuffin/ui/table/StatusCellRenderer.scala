@@ -3,7 +3,6 @@ package org.talkingpuffin.ui.table
 import java.awt.Color
 import java.util.{Date, Comparator}
 import javax.swing.text.JTextComponent
-import time.TimeFormatter
 import util.ShortUrl
 
 /**
@@ -25,7 +24,8 @@ class StatusCellRenderer extends HtmlCellRenderer {
       }
       case None => ""
     }) + cell.status.replaceAll(ShortUrl.regex, "⁕") + (cell.age match {
-      case Some(age) => "<font size='-2'> " + AgeCellRenderer.formatAge(age) + " ago</font>"
+      case Some(age) => "<font size='-2'> " + AgeCellRenderer.formatAge(age) + 
+          (if (AgeCellRenderer.showAsAge_?) " ago" else "") + "</font>"
       case None => ""
     }) + "</font>"
 }

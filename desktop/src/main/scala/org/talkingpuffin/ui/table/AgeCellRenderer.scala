@@ -5,6 +5,9 @@ import java.util.Date
 import javax.swing.border.EmptyBorder
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.{JTextPane, JTable}
+import joda.time.DateTime
+import joda.time.format.{DateTimeFormat}
+import state.{PrefKeys, GlobalPrefs}
 import time.TimeFormatter
 
 /**
@@ -31,7 +34,22 @@ class AgeCellRenderer extends JTextPane with TableCellRenderer {
 }
 
 object AgeCellRenderer {
-  def formatAge(date: Date) = TimeFormatter(dateToAgeSeconds(date.getTime)).colonSeparated 
+  val prefs = GlobalPrefs.prefs
+  val fmt = DateTimeFormat.forPattern("MM/dd HH:mm:ss")
+  val fmtNoDay = DateTimeFormat.forPattern("HH:mm:ss")
+
+  def showAsAge_? = prefs.getBoolean(PrefKeys.SHOW_TWEET_DATE_AS_AGE, false)
+  
+  def formatAge(date: Date): String = {
+    def today(d1: DateTime) = d1.getDayOfYear == new DateTime().getDayOfYear
+
+    val dateTime = new DateTime(date)
+    if (showAsAge_?)
+      TimeFormatter(dateToAgeSeconds(date.getTime)).colonSeparated 
+    else 
+      if (today(dateTime)) fmtNoDay.print(dateTime) else fmt.print(dateTime)
+  }
+  
   private def dateToAgeSeconds(date: Long): Long = (new Date().getTime() - date) / 1000
 }
 

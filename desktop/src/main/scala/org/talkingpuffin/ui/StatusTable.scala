@@ -1,6 +1,5 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.{MenuItem, Action}
 import com.google.common.collect.Lists
 import java.awt.{Toolkit}
 import _root_.scala.{Option}
@@ -12,7 +11,9 @@ import javax.swing.{KeyStroke, JPopupMenu}
 import jdesktop.swingx.decorator.{SortKey, SortOrder, HighlighterFactory}
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
+import state.GlobalPrefs.PrefChangedEvent
 import state.{PrefKeys, GlobalPrefs}
+import swing.{Reactor, MenuItem, Action}
 import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
 import talkingpuffin.util.{Loggable, PopupListener}
 import twitter.{TwitterStatus}
@@ -52,6 +53,15 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
 
   val ap = new ActionPrep(this)
   buildActions
+
+  new Reactor {
+    listenTo(GlobalPrefs.publisher)
+    reactions += { case e: PrefChangedEvent => 
+      if (e.key == PrefKeys.SHOW_TWEET_DATE_AS_AGE) {  
+        // Isn’t working    ageCol.setTitle("hi")
+      }
+    }
+  }
 
   addMouseListener(new PopupListener(this, new PopupMenu))
   addMouseListener(new MouseAdapter {
