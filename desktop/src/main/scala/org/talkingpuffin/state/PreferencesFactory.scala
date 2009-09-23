@@ -1,11 +1,12 @@
 package org.talkingpuffin.state
 
 import java.util.prefs.Preferences
+import swing.event.Event
+import swing.Publisher
 
 /**
  * Provides Preferences.
  */
-
 object PreferencesFactory {
   def prefsForUser(service: String, username: String) =
     Preferences.userRoot.node("/org/talkingpuffin/streams/" + service.toLowerCase + "/" + username)
@@ -13,6 +14,14 @@ object PreferencesFactory {
 
 object GlobalPrefs {
   val prefs = Preferences.userRoot.node("/org/talkingpuffin/all")
+  val publisher = new Publisher {}
+  
+  case class PrefChangedEvent(val key: String, val value: Any) extends Event
+  
+  def put(key: String, value: Boolean) = {
+    prefs.putBoolean(key, value)
+    publisher.publish(new PrefChangedEvent(key, value))
+  }
   
   def showColumn(col: String, showing: Boolean) {
     prefs.putBoolean(PrefKeys.SHOW_COL_PREFIX + col, showing)
@@ -32,7 +41,13 @@ object PrefKeys {
   val NOTIFY_TWEETS     = "notifyTweets"
   val LOOK_UP_LOCATIONS = "lookUpLocations"
   val EXPAND_URLS       = "expandUrls"
+  val SHOW_TWEET_DATE_AS_AGE = "showTweetDateAsAge"
   val SORT_BY           = "sortBy"
+  
+  val HIGHEST_ID        = "highestId"
+  val HIGHEST_MENTION_ID= "highestMentionId"
+  val HIGHEST_RECEIVED_DM_ID = "highestReceivedDmId"
+  val HIGHEST_SENT_DM_ID     = "highestSentDmId"
   
   val SHOW_COL_PREFIX   = "showCol"
   val AGE               = "Age"
@@ -49,7 +64,7 @@ object PrefKeys {
   val gprefs = GlobalPrefs.prefs
   val keys = gprefs.keys
   // Set options that default to true
-  for (k <- List(USE_ANIMATIONS, USE_REAL_NAMES, LOOK_UP_LOCATIONS, NOTIFY_TWEETS) ::: 
+  for (k <- List(USE_ANIMATIONS, USE_REAL_NAMES, LOOK_UP_LOCATIONS, NOTIFY_TWEETS, SHOW_TWEET_DATE_AS_AGE) ::: 
       List(AGE, IMAGE, FROM, TO).map(SHOW_COL_PREFIX + _)) 
     if (! keys.contains(k))
       gprefs.putBoolean(k, true)

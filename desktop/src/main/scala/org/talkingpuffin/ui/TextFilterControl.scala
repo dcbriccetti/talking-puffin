@@ -1,18 +1,15 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing._
 import _root_.scala.swing.event.ButtonClicked
 import filter.{TextFilters, TextFilter}
 import java.awt.Dimension
 import java.awt.event.KeyEvent
-import javax.swing.SpringLayout.Constraints
 import javax.swing.{KeyStroke, BorderFactory}
 import scala.swing._
 
 /**         
  * A control for maintaining a list of TextFilters.
  */
-
 class TextFilterControl(label: String, textFilters: TextFilters) extends BoxPanel(Orientation.Vertical) {
   border = BorderFactory.createTitledBorder(label)
 

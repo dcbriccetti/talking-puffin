@@ -1,7 +1,6 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.{Action,MenuItem}
-import java.awt.{Component, Point}
 import java.awt.event.KeyEvent
 import javax.swing.{JTable, KeyStroke, JPopupMenu}
 import org.talkingpuffin.twitter.{TwitterStatus}
@@ -45,7 +44,8 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], tabl
           }
           
           if (urls.length > 1) {
-            addMenuItem(menu, "All of the above", index, browseUrls(urls.map(url => url._2)))
+            addMenuItem(menu, if (urls.length == 2) "Both" else "All", index, 
+              browseUrls(urls.map(url => url._2)))
           }
           val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
           menu.show(table, menuLoc.getX().asInstanceOf[Int], menuLoc.getY().asInstanceOf[Int])

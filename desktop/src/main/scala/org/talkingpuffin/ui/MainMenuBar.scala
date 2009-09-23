@@ -35,7 +35,7 @@ class MainMenuBar extends MenuBar {
         }
         listenTo(item)
         reactions += {
-          case r: ButtonClicked => if (r.source == item) prefs.putBoolean(prefKey, item.selected)
+          case r: ButtonClicked => if (r.source == item) GlobalPrefs.put(prefKey, item.selected)
           case _ =>
         }
         item
@@ -49,6 +49,8 @@ class MainMenuBar extends MenuBar {
       PrefKeys.LOOK_UP_LOCATIONS, false)
     contents += ItemFactory("Expand URLs", "Enables fetching original URL from shortened form", 
       PrefKeys.EXPAND_URLS, false)
+    contents += ItemFactory("Show tweet date as age", "Shows the tweet date as an age", 
+      PrefKeys.SHOW_TWEET_DATE_AS_AGE, false)
   }
   
 }

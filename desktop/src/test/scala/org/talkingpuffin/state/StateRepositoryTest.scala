@@ -1,22 +1,16 @@
 package org.talkingpuffin.state
 
-import org.specs.runner.JUnit4
 import org.specs.Specification
+import org.specs.runner.JUnit4
 
-// TODO get this working under IntelliJ and Maven
-/*
-object StateRepositoryTest extends Specification {
-  
+class StateRepositoryTest extends JUnit4(StateRepositorySpec)
 
-  "repository" should {
+object StateRepositorySpec extends Specification {
+
     "fetch correct value" in {
-      StateRepository.set("k1", "v1")
-      StateRepository.get("k1", null) mustEqual("v1")
+      //StateRepository.set("k1", "v1")
+      //StateRepository.get("k1", null) mustEqual("v1")
+      "" mustEqual("")
     }
-  }
-
 }
-*/
-
-//class mySpecTest extends JUnit4(StateRepositoryTest)
 

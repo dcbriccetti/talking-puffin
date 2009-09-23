@@ -1,9 +1,8 @@
 package org.talkingpuffin.ui.table
 
 import java.awt.Color
-import java.util.Comparator
+import java.util.{Date, Comparator}
 import javax.swing.text.JTextComponent
-import time.TimeFormatter
 import util.ShortUrl
 
 /**
@@ -25,13 +24,13 @@ class StatusCellRenderer extends HtmlCellRenderer {
       }
       case None => ""
     }) + cell.status.replaceAll(ShortUrl.regex, "⁕") + (cell.age match {
-      case Some(age) => "<font size='-2'> " + 
-              TimeFormatter(age.asInstanceOf[Long]).colonSeparated + " ago</font>"
+      case Some(age) => "<font size='-2'> " + AgeCellRenderer.formatAge(age) + 
+          (if (AgeCellRenderer.showAsAge_?) " ago" else "") + "</font>"
       case None => ""
     }) + "</font>"
 }
 
-case class StatusCell(val age: Option[java.lang.Long], val name: Option[EmphasizedString], val status: String)
+case class StatusCell(val age: Option[Date], val name: Option[EmphasizedString], val status: String)
 
 object StatusComparator extends Comparator[StatusCell] {
   def compare(o1: StatusCell, o2: StatusCell) = o1.status.compareToIgnoreCase(o2.status)

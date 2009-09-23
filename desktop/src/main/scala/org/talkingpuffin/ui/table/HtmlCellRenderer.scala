@@ -1,12 +1,10 @@
 package org.talkingpuffin.ui
 
-import apache.log4j.Logger
-import java.awt.{Component, Insets, Color}
-import java.util.Comparator
+import java.awt.{Color}
 import javax.swing.border.EmptyBorder
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.text.JTextComponent
-import javax.swing.{JTextArea, JTextPane, JTable}
+import javax.swing.{JTextPane, JTable}
 import talkingpuffin.util.Loggable
 
 /**

@@ -3,26 +3,25 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
 import filter.{FilterSet, FilterSetChanged, TagUsers}
-import java.awt.event.{ActionEvent, ActionListener}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
-
-import java.util.{Date}
 import javax.swing._
 import javax.swing.table.{AbstractTableModel}
 import org.apache.log4j.Logger
+import state.GlobalPrefs.PrefChangedEvent
 import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
-import twitter.{TwitterStatus}
+import twitter.{TwitterMessage, TwitterStatus}
 import ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: TweetsProvider, 
-    usersModel: UsersTableModel, filterSet: FilterSet, service: String, username: String, val tagUsers: TagUsers) 
+class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: BaseProvider, 
+    usersModel: UsersModel, filterSet: FilterSet, service: String, 
+    username: String, val tagUsers: TagUsers) 
     extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
   
-  private val log = Logger.getLogger("StatusTableModel " + hashCode)
+  private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName)
   log.info("Created")
 
   private val userPrefs = PreferencesFactory.prefsForUser(service, username)
@@ -31,58 +30,61 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
   private var statuses = List[TwitterStatus]()
   
   /** Statuses, after filtering */
-  private var filteredStatuses = List[TwitterStatus]()
+  private var filteredStatuses_ = List[TwitterStatus]()
+  def filteredStatuses = filteredStatuses_
   
-  private val colNames = List("Age", "Image", "From", "To", "Status")
   var preChangeListener: PreChangeListener = _;
   
   listenTo(filterSet)
   reactions += { case FilterSetChanged(s) => filterAndNotify }
 
+  listenTo(GlobalPrefs.publisher)
+  reactions += { case e: PrefChangedEvent => 
+    if (e.key == PrefKeys.SHOW_TWEET_DATE_AS_AGE) fireTableDataChanged}  
+
   tweetsProvider.addPropertyChangeListener(new PropertyChangeListener {
-    def propertyChange(evt: PropertyChangeEvent) = {
-      evt.getPropertyName match {
-        case TweetsProvider.CLEAR_EVENT => clear(true)
-        case TweetsProvider.NEW_TWEETS_EVENT => {
-          val newTweets = evt.getNewValue.asInstanceOf[List[TwitterStatus]]
-          log.info("Tweets Arrived: " + newTweets.length)
-          processStatuses(newTweets)
-          if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
-        }
+    def propertyChange(evt: PropertyChangeEvent) = evt.getPropertyName match {
+      case TweetsProvider.CLEAR_EVENT => clear(true)
+      case TweetsProvider.NEW_TWEETS_EVENT => {
+        val listAny = evt.getNewValue.asInstanceOf[List[AnyRef]]
+        log.info("Tweets Arrived: " + listAny.length)
+        val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
+          evt.getNewValue.asInstanceOf[List[TwitterStatus]]
+        else
+          adaptDmsToTweets(evt.getNewValue.asInstanceOf[List[TwitterMessage]])
+        processStatuses(newTweets)
+        if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
       }
     }
   })
   
-  var followerIds = List[String]()
-  var friendIds = List[String]()
+  var followerIds = List[Long]()
+  var friendIds = List[Long]()
   var friendUsernames = List[String]()
   
   def getColumnCount = 5
-  def getRowCount = filteredStatuses.length
-  override def getColumnName(column: Int) = colNames(column)
+  def getRowCount = filteredStatuses_.length
+  override def getColumnName(column: Int) = 
+    List(if (AgeCellRenderer.showAsAge_?) "When" else "When", "Image", "From", "To", "Status")(column)
+  // TODO get dynamic column title changing working
 
   private val pictureCell = new PictureCell(this, 0)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
-    val status = filteredStatuses(rowIndex)
+    val status = filteredStatuses_(rowIndex)
     
-    def age(status: TwitterStatus):java.lang.Long = dateToAgeSeconds(status.createdAt.toDate().getTime())
-
     def senderName(status: TwitterStatus) = 
       if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) 
         UserProperties.overriddenUserName(userPrefs, status.user) 
       else status.user.screenName
 
-    def senderNameEs(status: TwitterStatus): EmphasizedString = {
-      val name = senderName(status)
-      val id = status.user.id.toString()
-      new EmphasizedString(Some(name), followerIds.contains(id))
-    }
+    def senderNameEs(status: TwitterStatus): EmphasizedString = 
+      new EmphasizedString(Some(senderName(status)), followerIds.contains(status.user.id))
 
     def toName(status: TwitterStatus) = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
       case Some(u) => {
          if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) {
-           Some(usersModel.usersModel.screenNameToUserNameMap.getOrElse(u, u))
+           Some(usersModel.screenNameToUserNameMap.getOrElse(u, u))
          } else {
            Some(u)
          }
@@ -91,36 +93,33 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     }
     
     columnIndex match {
-      case 0 => age(status)
+      case 0 => status.createdAt.toDate
       case 1 => pictureCell.request(status.user.profileImageURL, rowIndex)
       case 2 => senderNameEs(status)
-      case 3 => {
-        val name = status.user.name
-        val id = status.user.id
-        new EmphasizedString(toName(status), false)
-      }
-      case 4 => {
+      case 3 => new EmphasizedString(toName(status), false)
+      case 4 => 
         var st = getStatusText(status, username)
         if (options.showToColumn) st = LinkExtractor.getWithoutUser(st)
-        StatusCell(if (options.showAgeColumn) None else Some(age(status)),
-          if (options.showNameColumn) None else Some(senderNameEs(status)), st)
-      }
+        StatusCell(if (options.showAgeColumn) None else Some(status.createdAt.toDate),
+          if (showNameInStatus) Some(senderNameEs(status)) else None, st)
     }
   }
   
+  protected def showNameInStatus = ! options.showNameColumn
+  
   def getStatusText(status: TwitterStatus, username: String): String = status.text
 
-  def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses(rowIndex)
-
+  def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses_(rowIndex)
+  
   override def getColumnClass(col: Int) = List(
-    classOf[java.lang.Long], 
+    classOf[java.util.Date], 
     classOf[Icon], 
     classOf[String],
     classOf[String], 
     classOf[StatusCell])(col) 
   
   def getIndexOfStatus(statusId: Long): Option[Int] = 
-    filteredStatuses.zipWithIndex.find(si => si._1.id == statusId) match {
+    filteredStatuses_.zipWithIndex.find(si => si._1.id == statusId) match {
       case Some((_, i)) => Some(i)
       case None => None
     }
@@ -132,7 +131,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filterAndNotify
   }
 
-  def unmuteUsers(userIds: List[String]) {
+  def unmuteUsers(userIds: List[Long]) {
     filterSet.mutedUsers --= userIds
     filterAndNotify
   }
@@ -149,7 +148,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filterAndNotify
   }
 
-  def unmuteRetweetUsers(userIds: List[String]) {
+  def unmuteRetweetUsers(userIds: List[Long]) {
     filterSet.retweetMutedUsers --= userIds
     filterAndNotify
   }
@@ -159,14 +158,12 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     filterAndNotify
   }
 
-  private def dateToAgeSeconds(date: Long): Long = (new Date().getTime() - date) / 1000
-  
   def getUsers(rows: List[Int]) = rows.map(i => {
-    val user = filteredStatuses(i).user
-    new User(user.id.toString, user.name)
+    val user = filteredStatuses_(i).user
+    new User(user.id, user.name)
   })
   
-  def getStatuses(rows: List[Int]): List[TwitterStatus] = rows.map(filteredStatuses)
+  def getStatuses(rows: List[Int]): List[TwitterStatus] = rows.map(filteredStatuses_)
 
   private def processStatuses(newStatuses: List[TwitterStatus]) {
     statuses :::= newStatuses.reverse
@@ -177,7 +174,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
    * Clear (remove) statuses
    */
   def clear(all: Boolean) {
-    statuses = if (all) List[TwitterStatus]() else statuses.filter(! filteredStatuses.contains(_))
+    statuses = if (all) List[TwitterStatus]() else statuses.filter(! filteredStatuses_.contains(_))
     filterAndNotify
   }
   
@@ -196,9 +193,19 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Twee
     if (preChangeListener != null) {
       preChangeListener.tableChanging
     }
-    filteredStatuses = filterSet.filter(statuses, friendUsernames, followerIds)
-    publish(new TableContentsChanged(this, filteredStatuses.length, statuses.length))
+    
+    filteredStatuses_ = filterSet.filter(statuses, friendUsernames, followerIds) 
+    publish(new TableContentsChanged(this, filteredStatuses_.length, statuses.length))
     fireTableDataChanged
+  }
+  
+  private def adaptDmsToTweets(dms: List[TwitterMessage]): List[TwitterStatus] = {
+    dms.map(dm => new TwitterStatus {
+      text = dm.text
+      user = if (dm.sender.screenName == username) dm.recipient else dm.sender
+      id = dm.id
+      createdAt = dm.createdAt
+    })
   }
 
   def doNotify(newTweets: List[TwitterStatus]) = newTweets.length match {
@@ -224,5 +231,11 @@ trait Mentions extends StatusTableModel {
     val userTag = "@" + username
     if (text.startsWith(userTag)) text.substring(userTag.length).trim else text
   }
+}
+
+trait DmsSent extends StatusTableModel {
+  override def getValueAt(rowIndex: Int, columnIndex: Int) = super.getValueAt(rowIndex, 
+    List(0,1,2,2,4)(columnIndex))
+  override def showNameInStatus = false
 }
 

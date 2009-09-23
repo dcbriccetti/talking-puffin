@@ -1,12 +1,8 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.actors.Actor
 import cache.Cache
-import com.google.common.collect.MapMaker
 import java.awt.Image
-import java.util.{Collections, HashSet}
-import javax.swing.{Icon, ImageIcon}
-import scala.actors.Actor._
+import javax.swing.{ImageIcon}
 import java.net.URL
 import util.{FetchRequest, ResourceReady, BackgroundResourceFetcher}
 

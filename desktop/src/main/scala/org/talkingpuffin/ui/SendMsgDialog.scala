@@ -1,20 +1,20 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.actors.Reaction
 import _root_.scala.swing._
-import _root_.scala.xml.NodeSeq
 import event.{SelectionChanged, CaretUpdate, EditDone}
 import java.awt.event.{KeyAdapter, KeyEvent}
 import java.awt.{Dimension, Font}
-import javax.swing.{SwingWorker, KeyStroke}
-import twitter.TwitterStatus
+import javax.swing.{SwingWorker}
+import talkingpuffin.util.Loggable
+import twitter.{TwitterUser}
 import util.Cancelable
 
 /**
  * A dialog for sending messages
  */
-class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOption: Option[String],
-    replyToId: Option[String], retweetMsgOption: Option[String]) extends Frame with Cancelable {
+class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Option[String],
+    replyToId: Option[Long], retweetMsg: Option[String], isDm: Boolean) 
+    extends Frame with Cancelable with Loggable {
   
   class CustomTextArea extends TextArea { 
     preferredSize = new Dimension(400, 80); wordWrap = true; lineWrap = true
@@ -22,7 +22,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
   }
   
   case class NameAndScreenName(val name: String, val screenName: String) extends Ordered[NameAndScreenName] {
-    override def toString = name + " (" + screenName + ")"
+    override def toString = screenName + " (" + name + ")"
     def compare(other: NameAndScreenName) = screenName compareToIgnoreCase other.screenName
     def matches(search: String) = {
       val slc = search.toLowerCase
@@ -30,10 +30,14 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
     }
   }
 
-  title = "Send Message"
-  def users = {
-    val utm = session.windows.streams.usersTableModel
-    val matches = ((utm.friends ::: utm.followers).map(u => NameAndScreenName(u.name, u.screenName)).
+  title = if (isDm) "Send Direct Message" else "Send Message"
+  private def nameAndScreenNames(names: List[TwitterUser]) = names.map(u => 
+      NameAndScreenName(u.name, u.screenName))
+  private var sendingSession = session
+  private val utm = session.windows.streams.usersTableModel
+  
+  private def users = {
+    val matches = (nameAndScreenNames(utm.friends ::: utm.followers).
         filter(_.matches(searchText.text))).sort(_ < _).removeDuplicates
     (matches.length match {
       case 0 => "No matches were found"
@@ -41,14 +45,15 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
       case _ => "Select one of these " + matches.length + " items to insert a @screenname" 
     }) :: matches
   }
+  private val dmRecipCombo = new ComboBox(
+    if (utm.followers == Nil) List("Followers not loaded") else nameAndScreenNames(utm.followers).sort(_ < _))
   private val searchText = new TextField {columns = 15}
   private val usersCombo = new ComboBox(users)
   private val message = new CustomTextArea
   private val total = new Label(remainingMsg)
+  
   listenTo(message.caret)
-  reactions += {
-    case CaretUpdate(c) => total.text = remainingMsg 
-  }
+  reactions += { case CaretUpdate(c) => total.text = remainingMsg }
   message.peer.addKeyListener(new KeyAdapter() {
     override def keyTyped(e: KeyEvent) = if (e.getKeyChar == '\n') send 
   })
@@ -57,29 +62,46 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
     case EditDone(`searchText`) => usersCombo.peer.setModel(ComboBox.newConstantModel(users))
   }
 
-  private var userNames = ""
-  contents = new GridBagPanel {
-    preferredSize = new Dimension(600, 200)
-    border = Swing.EmptyBorder(5,5,5,5)
-    class Constr extends Constraints { anchor=GridBagPanel.Anchor.West }
-    recipientsOption match {
-      case Some(recipients) => {
-        userNames = recipients
+  if (! isDm) {
+    var userNames = ""
+    recipients match {
+      case Some(r) => 
+        userNames = r
         message.text = userNames + " "
-      }
       case None =>
     }
-    retweetMsgOption match {
-      case Some(retweetMsg) => message.text = "RT " + userNames + " " + retweetMsg
+    retweetMsg match {
+      case Some(msg) => message.text = "RT " + userNames + " " + msg
       case None =>
+    }
+  }
+  
+  contents = new GridBagPanel {
+    preferredSize = new Dimension(600, 250)
+    border = Swing.EmptyBorder(5,5,5,5)
+    class Constr extends Constraints { anchor=GridBagPanel.Anchor.West }
+    if (isDm) {
+      add(new FlowPanel(FlowPanel.Alignment.Left) {
+        contents += new Label("To: ")
+        recipients match {
+          case Some(r) => {
+            utm.followers.find(_.screenName == r) match {
+              case Some(u) => dmRecipCombo.selection.item = NameAndScreenName(u.name, u.screenName)
+              case _ =>
+            }
+          }
+          case _ =>
+        }
+        contents += dmRecipCombo
+      }, new Constr {grid=(0,0)})
     }
     add(new FlowPanel(FlowPanel.Alignment.Left) {
       val searchLabel = new Label("Search: ")
       searchLabel.peer.setLabelFor(searchText.peer)
       contents += searchLabel
       contents += searchText
-    }, new Constr {grid=(0,0); anchor=GridBagPanel.Anchor.West})
-    add(usersCombo, new Constr {grid=(0,1); anchor=GridBagPanel.Anchor.West})
+    }, new Constr {grid=(0,1); anchor=GridBagPanel.Anchor.West})
+    add(usersCombo, new Constr {grid=(0,2); anchor=GridBagPanel.Anchor.West})
     listenTo(usersCombo.selection)
     reactions += {
       case SelectionChanged(`usersCombo`) => usersCombo.selection.item match {
@@ -88,8 +110,24 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
         case _ =>
       }
     }
-    add(message,    new Constr {grid=(0,2); fill=GridBagPanel.Fill.Both; weightx=1; weighty=1})
-    add(total,      new Constr {grid=(0,3); anchor=GridBagPanel.Anchor.West})
+    add(message, new Constr {grid=(0,3); fill=GridBagPanel.Fill.Both; weightx=1; weighty=1})
+    add(total,   new Constr {grid=(0,4); anchor=GridBagPanel.Anchor.West})
+    case class SessionDisplay(val session: Session) {
+      override def toString = session.twitterSession.user + " " + session.serviceName
+    }
+    debug("Sessions: " + Globals.sessions.length)
+    if (Globals.sessions.length > 1)
+      add(new FlowPanel(FlowPanel.Alignment.Left) {
+        contents += new Label("Send from:")
+        val sessionsCB = new ComboBox(Globals.sessions.map(SessionDisplay)) {
+          selection.item = SessionDisplay(session)
+        }
+        reactions += {
+          case SelectionChanged(`sessionsCB`) => sendingSession = sessionsCB.selection.item.session 
+        }
+        listenTo(sessionsCB.selection)
+        contents += sessionsCB
+      }, new Constr {grid=(0,5); anchor=GridBagPanel.Anchor.West})
   }
   pack
   peer.setLocationRelativeTo(parent)
@@ -97,16 +135,19 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipientsOpti
   
   private def send {
     session.status.text = "Sending message"
-    new SwingWorker[TwitterStatus, Object] {
-      override def doInBackground: TwitterStatus = {
-        val twses = session.twitterSession
-        replyToId match {
-          case Some(idStr) => twses.updateStatus(message.text, java.lang.Long.parseLong(idStr))
+    new SwingWorker[Object, Object] {
+      override def doInBackground: Object = {
+        val twses = sendingSession.twitterSession
+        if (isDm) dmRecipCombo.selection.item match {
+          case u: NameAndScreenName => twses.newDirectMessage(u.screenName, message.text)
+          case _ =>
+        } else replyToId match {
+          case Some(idStr) => twses.updateStatus(message.text, idStr)
           case _ => twses.updateStatus(message.text)
         }
       }
       override def done = {
-        val twitterStatus = get
+        val result = get
         session.status.text = "Message sent"
       }
     }.execute

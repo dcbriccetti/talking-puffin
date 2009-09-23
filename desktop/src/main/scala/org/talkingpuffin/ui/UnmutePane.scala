@@ -6,21 +6,20 @@ import javax.swing.event.{TableModelEvent, TableModelListener}
 import javax.swing.BorderFactory
 import java.awt.Dimension
 import _root_.scala.swing.event.ButtonClicked
-import javax.swing.SpringLayout.Constraints
 import _root_.scala.swing.GridBagPanel._
 
 /**
  * A panel for unmuting any muted users
  */
 class UnmutePane(title: String, tableModel: StatusTableModel, filterSet: FilterSet, 
-    mutedList: scala.collection.mutable.Map[String,User], unMute: (List[String]) => Unit) 
+    mutedList: scala.collection.mutable.Map[Long,User], unMute: (List[Long]) => Unit) 
     extends GridBagPanel with TableModelListener {
   border = BorderFactory.createTitledBorder(title)
 
   val view = new ListView(mutedList.values.toList)
   add(new ScrollPane(view) {
     val dim = new Dimension(150,130); preferredSize=dim; minimumSize=dim
-  }, new Constraints {grid=(0,0); anchor=Anchor.West})
+  }, new Constraints {grid=(0,0); anchor=Anchor.West; fill=Fill.Both; weighty=1})
 
   tableModel.addTableModelListener(this)
   

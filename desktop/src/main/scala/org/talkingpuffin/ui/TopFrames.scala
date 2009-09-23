@@ -1,6 +1,5 @@
 package org.talkingpuffin.ui
 
-import apache.log4j.Logger
 import mac.QuitHandler
 import java.awt.Frame
 import talkingpuffin.util.Loggable
@@ -15,7 +14,7 @@ object TopFrames extends Loggable {
 
   def closeCurrentWindow(){
     frames.find(_.peer.isFocused) match{
-      case Some(frame) => close(frame)
+      case Some(frame) => frame.close
       case _ => closeOtherFrame()
     }
   }
@@ -33,13 +32,13 @@ object TopFrames extends Loggable {
   }
 
   def removeFrame(f: TopFrame){
-    frames = frames.remove {f == _}
+    frames -= f
     debug ("Frame removed. Number of frames is " + frames.size + ".")
     exitIfNoFrames
   }
 
   def exitIfNoFrames =
-    if(frames.size == 0){
+    if(frames == Nil){
       debug("No more frames. Exiting.")
       // it's kinda ugly to put the exit logic here, but not sure where
       // else to put it.'
@@ -48,20 +47,9 @@ object TopFrames extends Loggable {
   
   def numFrames = frames.size
 
-  def close(frame:TopFrame): Unit = {
-      frame.dispose
-      frame.saveState
-      TopFrames removeFrame frame
-  }
   def closeAll: Unit = closeAll(frames)
 
-  def closeAll(frames: List[TopFrame]): Unit = frames match {
-    case frame :: rest => {
-      close(frame)
-      closeAll(rest)
-    }
-    case Nil =>
-  }
+  def closeAll(frames: List[TopFrame])= frames.foreach(_.close)
 }
   
  

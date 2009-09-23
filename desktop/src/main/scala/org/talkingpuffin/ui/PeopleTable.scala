@@ -5,10 +5,10 @@ import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.decorator.HighlighterFactory
 import org.jdesktop.swingx.table.TableColumnExt
 import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator}
+
 /**
  * People Table
  */
-
 class PeopleTable(tableModel: UsersTableModel) extends JXTable(tableModel) {
   setColumnControlVisible(true)
   setHighlighters(HighlighterFactory.createSimpleStriping)

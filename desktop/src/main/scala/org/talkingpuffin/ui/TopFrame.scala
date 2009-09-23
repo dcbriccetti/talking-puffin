@@ -4,6 +4,7 @@ import _root_.scala.swing.event.{WindowClosing}
 import filter.{TagUsers}
 import java.awt.{Dimension}
 import javax.swing.{SwingWorker, ImageIcon}
+import state.PrefKeys
 import swing.TabbedPane.Page
 import swing.{Frame, TabbedPane, Label, GridBagPanel}
 import talkingpuffin.util.Loggable
@@ -17,7 +18,7 @@ import ui.util.FetchRequest
 class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable {
   val tagUsers = new TagUsers(service, twitterSession.user)
   TopFrames.addFrame(this)
-  val session = new Session(twitterSession)
+  val session = new Session(service, twitterSession)
   Globals.sessions ::= session
   iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
     
@@ -53,11 +54,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
 
   reactions += {
-    case WindowClosing(_) => {
-      Globals.sessions = Globals.sessions remove(s => s == session)
-      saveState
-      TopFrames.removeFrame(this)
-    }
+    case WindowClosing(_) => close
   }
 
   peer.setLocationRelativeTo(null)
@@ -66,23 +63,35 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   def setFocus = streams.views.last.pane.requestFocusForTable
   
-  def saveState {
-    val highFol = streams.followingProvider.getHighestId
-    val highMen = streams.mentionsProvider.getHighestId
-    info("Saving last seen IDs for " + twitterSession.user + ". Following: " + highFol + ", mentions: " + highMen)
+  def close {
+    Globals.sessions -= session
+    dispose
+    saveState
+    TopFrames.removeFrame(this)
+  }
+
+  private def saveState {
+    val highFol = streams.providers.followingProvider.getHighestId
+    val highMen = streams.providers.mentionsProvider.getHighestId
+    val highDmReceived = streams.providers.dmsReceivedProvider.getHighestId
+    val highDmSent = streams.providers.dmsSentProvider.getHighestId
+    info("Saving last seen IDs for " + twitterSession.user + ". Following: " + highFol + 
+        ", mentions: " + highMen + ", DMs rvcd: " + highDmReceived + ", DMs sent: " + highDmSent)
     val prefs = session.userPrefs
-    if (highFol.isDefined) prefs.put("highestId"       , highFol.get.toString())
-    if (highMen.isDefined) prefs.put("highestMentionId", highMen.get.toString())
+    if (highFol.isDefined) prefs.put(PrefKeys.HIGHEST_ID       , highFol.get.toString())
+    if (highMen.isDefined) prefs.put(PrefKeys.HIGHEST_MENTION_ID, highMen.get.toString())
+    if (highDmReceived.isDefined ) prefs.put(PrefKeys.HIGHEST_RECEIVED_DM_ID, highDmReceived.get.toString())
+    if (highDmSent.isDefined ) prefs.put(PrefKeys.HIGHEST_SENT_DM_ID, highDmSent.get.toString())
     tagUsers.save
     streams.views.last.pane.saveState // TODO instead save the order of the last status pane changed
   }
   
   private def getUserIds {
     /** Background user fetcher */
-    def fetchUsersBg(getter: Int => List[TwitterUserId], setter: List[String] => Unit) {
+    def fetchUsersBg(getter: Int => List[TwitterUserId], setter: List[Long] => Unit) {
       new SwingWorker[List[TwitterUserId], Object] {
         def doInBackground = twitterSession.loadAll(getter)
-        override def done = setter(get.map(_.id.toString))
+        override def done = setter(get.map(_.id))
       }.execute
     }
    

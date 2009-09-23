@@ -1,47 +1,10 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.xml.Node
 import javax.swing.table.AbstractTableModel
 import javax.swing.Icon
 import filter.TagUsers
 import table.EmphasizedString
 import twitter.{TwitterUser}
-
-/**
- * A model for users (followed and followers)
- */
-
-class UsersModel(friends: List[TwitterUser], followers: List[TwitterUser]) {
-  var users: Array[TwitterUser] = _
-  var arrows: Array[String] = _
-  var screenNameToUserNameMap = Map[String, String]()
-  var friendScreenNames: Set[String] = _
-
-  def build(sel: UserSelection) {
-    var set = scala.collection.mutable.Set[TwitterUser]()
-    if (sel.includeFollowing) set ++ selected(friends  , sel.searchString)
-    if (sel.includeFollowers) set ++ selected(followers, sel.searchString)
-    val combinedList = set.toList.sort((a,b) => 
-      (a.name.toLowerCase compareTo b.name.toLowerCase) < 0)
-    users = combinedList.toArray
-    arrows = combinedList.map(user => {
-      val friend = friends.contains(user)
-      val follower = followers.contains(user)
-      if (friend && follower) "↔" else if (friend) "→" else "←"
-    }).toArray
-    screenNameToUserNameMap = 
-        Map(users map {user => (user.screenName, user.name)} : _*)
-        friendScreenNames = Set(friends map {f => f.screenName} : _*)
-  }
-  
-  def selected(users: List[TwitterUser], search: Option[String]) = search match {
-    case None => users
-    case Some(search) => users.filter(u => u.name.toLowerCase.contains(search.toLowerCase))
-  }
-}
-
-case class UserSelection(val includeFollowing: Boolean, val includeFollowers: Boolean, 
-  val searchString: Option[String])
 
 class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], var followers: List[TwitterUser])
     extends AbstractTableModel with TaggingSupport{
@@ -91,10 +54,10 @@ class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], va
       }
       case UserColumns.SCREEN_NAME => new EmphasizedString(Some(user.screenName), followers.contains(user))
       case UserColumns.STATUS => user.status match {
-              case Some(status) => status.text
-              case None => ""
+        case Some(status) => status.text
+        case None => ""
       }
-      case UserColumns.TAGS => tagUsers.tagsForUser(user.id.toString()).mkString(", ")
+      case UserColumns.TAGS => tagUsers.tagsForUser(user.id).mkString(", ")
       case _ => null
     }
   }
@@ -105,9 +68,7 @@ class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], va
   def getUsers(rows: List[Int]): List[User] = 
     rows.map(rowIndex => {
       val user = usersModel.users(rowIndex)
-      val id = user.id.toString()
-      val name = user.name
-      new User(id, name)
+      new User(user.id, user.name)
     })
 }
 

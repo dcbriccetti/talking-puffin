@@ -1,6 +1,5 @@
 package org.talkingpuffin.ui.util
 
-import java.awt.{Rectangle}
 import java.net.{HttpURLConnection, URL}
 import javax.swing.text.JTextComponent
 

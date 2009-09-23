@@ -28,9 +28,9 @@ object LinkExtractor {
     var urls: List[(String,String)] = List()
     
     if (users) {
-      val replyTo = status.inReplyToStatusId.toString
+      val replyTo = status.inReplyToStatusId
       getReplyToUser(status.text) match {
-        case Some(user) => if (replyTo.length > 0) {
+        case Some(user) => if (replyTo != 0) {
           val url = getStatusUrl(replyTo, user)
           urls = ("Status " + replyTo + " of " + user, url) :: urls
         } 
@@ -55,7 +55,7 @@ object LinkExtractor {
     urls reverse
   }
   
-  def getStatusUrl(replyTo: String, replyToUser: String): String = 
+  def getStatusUrl(replyTo: Long, replyToUser: String): String = 
     "http://twitter.com/" + replyToUser + "/statuses/" + replyTo
 
   val replyToUserPattern = Pattern.compile("^@(\\S+)")

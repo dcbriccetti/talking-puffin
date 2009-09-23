@@ -12,7 +12,7 @@ object HtmlFormatter {
     val arrowLinkToParent = LinkExtractor.getReplyToUser(text) match {
       case Some(user) => {
         if (replyTo != 0) {
-          "<a href='" + LinkExtractor.getStatusUrl(replyTo.toString, user) + "'>↑</a> " 
+          "<a href='" + LinkExtractor.getStatusUrl(replyTo, user) + "'>↑</a> " 
         } else ""
       }
       case None => ""

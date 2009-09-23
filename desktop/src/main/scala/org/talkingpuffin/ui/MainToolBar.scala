@@ -2,7 +2,6 @@ package org.talkingpuffin.ui
 
 import java.awt.Dimension
 import java.awt.event.{ActionEvent, ActionListener}
-
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JToolBar
 import swing.{ProgressBar, Label, ComboBox, Action}
@@ -23,10 +22,10 @@ class MainToolBar extends JToolBar with LongOpListener {
   setFloatable(false)
 
   def init(streams: Streams) = {
-    addSourceControls(streams.followingProvider, streams.createFollowingView)
-    addSeparator
-    addSourceControls(streams.mentionsProvider, streams.createMentionsView)
-    addSeparator
+    streams.providers.providers.foreach(provider => {
+      addSourceControls(provider, streams.createView(provider, None))
+      addSeparator
+    })
     add(progressBar.peer)
   }
   
@@ -34,10 +33,10 @@ class MainToolBar extends JToolBar with LongOpListener {
   
   def stopOperation = if (operationsInProgress.decrementAndGet == 0) progressBar.indeterminate = false;
   
-  private def addSourceControls(provider: TweetsProvider, createView: => Unit) {
+  private def addSourceControls(provider: BaseProvider, createView: => Unit) {
     add(new Label(provider.providerName + ": ").peer)
-    val newViewAction = new Action("New View") {
-      toolTip = "Creates a new view"
+    val newViewAction = new Action("New") {
+      toolTip = "Creates a new " + provider.providerName + " view"
       def apply = createView
     }
     add(newViewAction.peer)
@@ -54,9 +53,9 @@ class MainToolBar extends JToolBar with LongOpListener {
     override def toString = TimeFormatter(seconds).longForm
   }
   
-  class RefreshCombo(provider: TweetsProvider, times: List[Int]) extends ComboBox(times map(DisplayTime(_))) {
+  class RefreshCombo(provider: BaseProvider, times: List[Int]) extends ComboBox(times map(DisplayTime(_))) {
     peer.setToolTipText("How often to load new items")
-    var defaultRefresh = DisplayTime(120)
+    var defaultRefresh = DisplayTime(600)
     peer.setSelectedItem(defaultRefresh)
     provider.setUpdateFrequency(defaultRefresh.seconds)
     peer.addActionListener(new ActionListener(){
