@@ -122,11 +122,13 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   def dm(screenName: String) =
     (new SendMsgDialog(session, null, Some(screenName), None, None, true)).visible = true
   
-  private def retweet {
+  private def retweetOldWay {
     val status = getSelectedStatuses(0) 
     val name = "@" + status.user.screenName
     createSendMsgDialog(status, Some(name), Some(status.text)).visible = true
   }
+
+  private def retweetNewWay = getSelectedStatuses.foreach(status => session.twitterSession.retweet(status.id))
   
   private def createSendMsgDialog(status: TwitterStatus, names: Option[String], retweetMsg: Option[String]) =
     new SendMsgDialog(session, null, names, Some(status.id), retweetMsg, false)
@@ -250,9 +252,10 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ap add(action, Actions.ks(KeyEvent.VK_D))
     specialMenuItems.oneScreennameSelected ::= action
     specialMenuItems.followersOnly ::= action
-    action = Action("Retweet") { retweet }
+    action = Action("Retweet old way…") { retweetOldWay }
     ap add(action, Actions.ks(KeyEvent.VK_E))
     specialMenuItems.oneStatusSelected ::= action
+    ap add(Action("Retweet new way") { retweetNewWay }, KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask))
     ap add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, shortcutKeyMask))
     ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B, shortcutKeyMask))
     
