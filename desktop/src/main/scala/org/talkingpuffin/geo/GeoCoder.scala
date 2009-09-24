@@ -13,13 +13,9 @@ object GeoCoder {
   private val num = """(-?\d+\.\d*)"""
   private val latLongRegex = ("""[^-\d]*""" + num + """,\s*""" + num).r
 
-  def extractLatLong(location: String): Option[String] = {
-    try {
-      val latLongRegex(lat, long) = location
-      Some(lat + "," + long)
-    } catch {
-      case e: MatchError => None
-    }
+  def extractLatLong(location: String): Option[String] = location match {
+    case latLongRegex(lat, long) => Some(lat + "," + long)
+    case _ => None
   }
   
 }

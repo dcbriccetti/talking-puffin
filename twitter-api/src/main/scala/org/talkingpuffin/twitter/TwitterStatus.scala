@@ -17,8 +17,8 @@ class TwitterStatus() extends Validated{
   var createdAt: DateTime = null
   var source: String = null
   var truncated: Boolean = false
-  var inReplyToStatusId: Long = 0L
-  var inReplyToUserId: Long = 0L
+  var inReplyToStatusId: Option[Long] = None
+  var inReplyToUserId: Option[Long] = None
   var favorited: Boolean = false
   var retweeted: Retweet = null
 
@@ -69,9 +69,11 @@ object TwitterStatus{
           case <source>{Text(text)}</source> => status.source = text
           case <truncated>{Text(text)}</truncated> => status.truncated = java.lang.Boolean.valueOf(text).booleanValue
           case <in_reply_to_status_id/> => Nil
-          case <in_reply_to_status_id>{Text(text)}</in_reply_to_status_id> => status.inReplyToStatusId = java.lang.Long.parseLong(text)
+          case <in_reply_to_status_id>{Text(text)}</in_reply_to_status_id> => status.inReplyToStatusId = 
+              Some(java.lang.Long.parseLong(text))
           case <in_reply_to_user_id/> => Nil
-          case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => status.inReplyToUserId = java.lang.Long.parseLong(text)
+          case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => status.inReplyToUserId = 
+              Some(java.lang.Long.parseLong(text))
           case <favorited>{Text(text)}</favorited> => status.favorited = java.lang.Boolean.valueOf(text).booleanValue
           case <user>{ _* }</user> => status.user = TwitterUser(sub)
           case <retweet_details>{ _* }</retweet_details> => status.retweeted = Retweet(sub)

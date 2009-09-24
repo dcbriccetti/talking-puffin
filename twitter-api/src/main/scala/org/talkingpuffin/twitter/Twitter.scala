@@ -442,8 +442,8 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     new Parser[Long](new URL(apiURL + "/followers/ids/" + id + ".xml"),authFetcher,(node:Node) => java.lang.Long.parseLong(node.text)).parseXMLList("id")
   }
 
-  def retweet(id:String) = {
-    val resp = authFetcher.doPost(new URL(apiURL + "/statuses/retweet" + id + ".xml?source=talkingpuffin"),Nil)
+  def retweet(id:Long) = {
+    val resp = authFetcher.doPost(new URL(apiURL + "/statuses/retweet/" + id + ".xml?source=talkingpuffin"),Nil)
     TwitterStatus(resp)
   }
 }

@@ -13,7 +13,7 @@ import swing.{Orientation, BoxPanel, TabbedPane, Frame, GridBagPanel, FlowPanel,
 class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: FilterSet, 
     tagUsers: TagUsers) extends Frame {
   title = paneTitle + " Filters"
-  preferredSize = new Dimension(550, 600)
+  preferredSize = new Dimension(600, 600)
   val generalPane = new GridBagPanel {
     border = new EmptyBorder(5, 5, 0, 5)
     add(new UnmutePane("Muted users", tableModel, filterSet, filterSet.mutedUsers, tableModel.unmuteUsers),

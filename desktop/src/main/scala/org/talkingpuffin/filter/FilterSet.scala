@@ -14,6 +14,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
   class InOutSet {
     var textFilters = new TextFilters()
     var tags = List[String]()
+    def tagMatches(userId: Long) = tags.exists(tagUsers.contains(_, userId))
   }
   val mutedUsers = LinkedHashMap[Long,User]()
   val retweetMutedUsers = LinkedHashMap[Long,User]()
@@ -28,31 +29,35 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
    * Filter the given list of statuses, returning a list of only those that pass the filters
    * in this set.
    */
-  def filter(statuses: List[TwitterStatus], friendUsernames: List[String], followerIds: List[Long]) = 
-    statuses.filter(includeStatus(friendUsernames, followerIds))
+  def filter(statuses: List[TwitterStatus], friendUsernames: List[String], followerIds: List[Long]): 
+      List[TwitterStatus] = {
+    
+    def includeStatus(status: TwitterStatus): Boolean = {
+      def tagFiltersInclude = includeSet.tags == Nil || includeSet.tagMatches(status.user.id)
+      def excludedByTags = excludeSet.tagMatches(status.user.id)
+    
+      def excludedByStringMatches: Boolean = { 
+        def matches(search: TextFilter) = 
+          if (search.isRegEx) 
+            Pattern.compile(search.text).matcher(status.text).find 
+          else 
+            status.text.toUpperCase.contains(search.text.toUpperCase)
+      
+        (includeSet.textFilters.list != Nil && ! includeSet.textFilters.list.exists(matches)) ||
+            excludeSet.textFilters.list.exists(matches)
+      }
+  
+      ! mutedUsers.contains(status.user.id) &&
+          ! (retweetMutedUsers.contains(status.user.id) && status.text.toLowerCase.startsWith("rt @")) &&
+          tagFiltersInclude && ! excludedByTags && 
+          ! (excludeFriendRetweets && Retweets.fromFriend_?(status.text, friendUsernames)) &&
+          ! (excludeNonFollowers && ! followerIds.contains(status.user.id)) &&
+          ! excludedByStringMatches
+    }
 
-  private def includeStatus(friendUsernames: List[String], followerIds: List[Long])(status: TwitterStatus): Boolean = {
-    val userId = status.user.id
-    ! mutedUsers.contains(userId) &&
-        ! (retweetMutedUsers.contains(userId) && status.text.toLowerCase.startsWith("rt @")) &&
-        tagFiltersInclude(userId) && 
-        ! excludedByTags(userId) && 
-        ! (excludeFriendRetweets && Retweets.fromFriend_?(status.text, friendUsernames)) &&
-        ! (excludeNonFollowers && ! followerIds.contains(status.user.id)) &&
-        ! excludedByStringMatches(status.text)
+    statuses.filter(includeStatus)
   }
-  
-  private def tagFiltersInclude(userId: Long) = includeSet.tags == Nil ||
-    includeSet.tags.exists(tagUsers.contains(_, userId)) 
-  
-  private def excludedByTags(userId: Long) = excludeSet.tags.exists(tagUsers.contains(_, userId))
 
-  private def excludedByStringMatches(text: String) = 
-    (includeSet.textFilters.list != Nil && ! includeSet.textFilters.list.exists(matches(text, _))) ||
-        excludeSet.textFilters.list.exists(matches(text, _))
-  
-  private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
-    Pattern.compile(search.text).matcher(text).find else text.toUpperCase.contains(search.text.toUpperCase)
 }
 
 class TextFilter (var text: String, var isRegEx: Boolean)
