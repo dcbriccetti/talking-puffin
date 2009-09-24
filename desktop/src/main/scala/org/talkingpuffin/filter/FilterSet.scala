@@ -14,6 +14,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
   class InOutSet {
     var textFilters = new TextFilters()
     var tags = List[String]()
+    def tagMatches(userId: Long) = tags.exists(tagUsers.contains(_, userId))
   }
   val mutedUsers = LinkedHashMap[Long,User]()
   val retweetMutedUsers = LinkedHashMap[Long,User]()
@@ -30,15 +31,13 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
    */
   def filter(statuses: List[TwitterStatus], friendUsernames: List[String], followerIds: List[Long]): 
       List[TwitterStatus] = {
+    
     def includeStatus(status: TwitterStatus): Boolean = {
-      val userId = status.user.id
-    
-      def tagFiltersInclude = includeSet.tags == Nil || includeSet.tags.exists(tagUsers.contains(_, userId))
-    
-      def excludedByTags = excludeSet.tags.exists(tagUsers.contains(_, userId))
+      def tagFiltersInclude = includeSet.tags == Nil || includeSet.tagMatches(status.user.id)
+      def excludedByTags = excludeSet.tagMatches(status.user.id)
     
       def excludedByStringMatches: Boolean = { 
-        def matches(search: TextFilter): Boolean = 
+        def matches(search: TextFilter) = 
           if (search.isRegEx) 
             Pattern.compile(search.text).matcher(status.text).find 
           else 
@@ -48,8 +47,8 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
             excludeSet.textFilters.list.exists(matches)
       }
   
-      ! mutedUsers.contains(userId) &&
-          ! (retweetMutedUsers.contains(userId) && status.text.toLowerCase.startsWith("rt @")) &&
+      ! mutedUsers.contains(status.user.id) &&
+          ! (retweetMutedUsers.contains(status.user.id) && status.text.toLowerCase.startsWith("rt @")) &&
           tagFiltersInclude && ! excludedByTags && 
           ! (excludeFriendRetweets && Retweets.fromFriend_?(status.text, friendUsernames)) &&
           ! (excludeNonFollowers && ! followerIds.contains(status.user.id)) &&
