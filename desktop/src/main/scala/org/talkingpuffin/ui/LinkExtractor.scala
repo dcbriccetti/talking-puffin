@@ -53,7 +53,7 @@ object LinkExtractor {
   def getStatusUrl(replyTo: Long, replyToUser: String) = 
     "http://twitter.com/" + replyToUser + "/statuses/" + replyTo
 
-  private val replyToUserRegex = ".*?@(\\S+).*".r
+  private val replyToUserRegex = (".*?" + usernameRegex + ".*").r
   
   /**
    * Returns the Twitter handle and status ID of the user whose @handle appears at the beginning of 
