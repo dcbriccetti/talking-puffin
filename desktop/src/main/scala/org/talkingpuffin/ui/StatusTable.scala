@@ -52,6 +52,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   configureColumns
 
   val ap = new ActionPrep(this)
+  private var specialMenuItems = new SpecialMenuItems
   buildActions
 
   new Reactor {
@@ -69,19 +70,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   })
   getSelectionModel.addListSelectionListener(new ListSelectionListener {
     def valueChanged(event: ListSelectionEvent) = 
-      if (! event.getValueIsAdjusting) {
-        (specialMenuItems.oneStatusSelected ::: specialMenuItems.oneScreennameSelected :::
-            specialMenuItems.followersOnly) foreach(_.enabled = true)
-        
-        specialMenuItems.oneStatusSelected.foreach(action => 
-            if (getSelectedStatuses.length != 1) action.enabled = false) 
-        specialMenuItems.oneScreennameSelected.foreach(action => 
-            if (getSelectedScreenNames.length != 1) action.enabled = false)
-        val anySelectedStatusNotFollowing = getSelectedStatus.exists(status =>
-            ! session.windows.streams.followerIds.contains(status.user.id))
-        specialMenuItems.followersOnly.foreach(action => 
-            if (anySelectedStatusNotFollowing) action.enabled = false)
-      }
+      if (! event.getValueIsAdjusting) 
+        specialMenuItems.enableActions(getSelectedStatuses, getSelectedScreenNames.length, 
+          session.windows.streams.friendIds, session.windows.streams.followerIds)
   })
   
   def saveState {
@@ -133,6 +124,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   private def createSendMsgDialog(status: TwitterStatus, names: Option[String], retweetMsg: Option[String]) =
     new SendMsgDialog(session, null, names, Some(status.id), retweetMsg, false)
   
+  private def follow   = getSelectedScreenNames foreach session.twitterSession.createFriendship
   private def unfollow = getSelectedScreenNames foreach session.twitterSession.destroyFriendship
   private def block    = getSelectedScreenNames foreach session.twitterSession.blockUser
   private def unblock  = getSelectedScreenNames foreach session.twitterSession.unblockUser
@@ -213,15 +205,6 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     else if (source == toCol)   op.showToColumn   = toCol  .isVisible
   }
 
-  private object specialMenuItems {
-    /** Only applicable when one status is selected */
-    var oneStatusSelected = List[Action]()
-    /** Only applicable when one screen name (even if multiple statuses) is selected */
-    var oneScreennameSelected = List[Action]()
-    /** Only applicable to followers */
-    var followersOnly = List[Action]()
-  }
-  
   protected def buildActions {
     val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
     val SHIFT = java.awt.event.InputEvent.SHIFT_DOWN_MASK
@@ -239,24 +222,29 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ap add new PrevTAction(this)
     ap add(new TagAction(this, tableModel), Actions.ks(KeyEvent.VK_T))
     ap add(Action("Increase Font Size") { changeFontSize(5) }, 
-        KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask))
+        KeyStroke.getKeyStroke(KeyEvent.VK_O, shortcutKeyMask))
     ap add(Action("Decrease Font Size") { changeFontSize(-5) }, 
-        KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask | SHIFT))
+        KeyStroke.getKeyStroke(KeyEvent.VK_O, shortcutKeyMask | SHIFT))
     ap add(Action("Increase Row Height") { changeRowHeight(8) })
     ap add(Action("Decrease Row Height") { changeRowHeight(-8) })
     var action = Action("Show Larger Image") { showBigPicture }
     ap add(action, Actions.ks(KeyEvent.VK_I))
-    specialMenuItems.oneStatusSelected ::= action
+    specialMenuItems.oneStatusSelected.list ::= action
     ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
     action = Action("Direct Message…") { dm(getSelectedScreenNames(0)) }
     ap add(action, Actions.ks(KeyEvent.VK_D))
-    specialMenuItems.oneScreennameSelected ::= action
-    specialMenuItems.followersOnly ::= action
+    specialMenuItems.oneScreennameSelected.list ::= action
+    specialMenuItems.followersOnly.list ::= action
     action = Action("Retweet old way…") { retweetOldWay }
     ap add(action, Actions.ks(KeyEvent.VK_E))
-    specialMenuItems.oneStatusSelected ::= action
+    specialMenuItems.oneStatusSelected.list ::= action
     ap add(Action("Retweet new way") { retweetNewWay }, KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask))
-    ap add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, shortcutKeyMask))
+    action = Action("Follow") { follow }
+    specialMenuItems.notFriendsOnly.list ::= action
+    ap add(action, KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask))
+    action = Action("Unfollow") { unfollow }
+    specialMenuItems.friendsOnly.list ::= action
+    ap add(action, KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask | SHIFT))
     ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B, shortcutKeyMask))
     
     ap add(Action("Delete selected tweets") {
