@@ -28,31 +28,37 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
    * Filter the given list of statuses, returning a list of only those that pass the filters
    * in this set.
    */
-  def filter(statuses: List[TwitterStatus], friendUsernames: List[String], followerIds: List[Long]) = 
-    statuses.filter(includeStatus(friendUsernames, followerIds))
+  def filter(statuses: List[TwitterStatus], friendUsernames: List[String], followerIds: List[Long]): 
+      List[TwitterStatus] = {
+    def includeStatus(status: TwitterStatus): Boolean = {
+      val userId = status.user.id
+    
+      def tagFiltersInclude = includeSet.tags == Nil || includeSet.tags.exists(tagUsers.contains(_, userId))
+    
+      def excludedByTags = excludeSet.tags.exists(tagUsers.contains(_, userId))
+    
+      def excludedByStringMatches: Boolean = { 
+        def matches(search: TextFilter): Boolean = 
+          if (search.isRegEx) 
+            Pattern.compile(search.text).matcher(status.text).find 
+          else 
+            status.text.toUpperCase.contains(search.text.toUpperCase)
+      
+        (includeSet.textFilters.list != Nil && ! includeSet.textFilters.list.exists(matches)) ||
+            excludeSet.textFilters.list.exists(matches)
+      }
+  
+      ! mutedUsers.contains(userId) &&
+          ! (retweetMutedUsers.contains(userId) && status.text.toLowerCase.startsWith("rt @")) &&
+          tagFiltersInclude && ! excludedByTags && 
+          ! (excludeFriendRetweets && Retweets.fromFriend_?(status.text, friendUsernames)) &&
+          ! (excludeNonFollowers && ! followerIds.contains(status.user.id)) &&
+          ! excludedByStringMatches
+    }
 
-  private def includeStatus(friendUsernames: List[String], followerIds: List[Long])(status: TwitterStatus): Boolean = {
-    val userId = status.user.id
-    ! mutedUsers.contains(userId) &&
-        ! (retweetMutedUsers.contains(userId) && status.text.toLowerCase.startsWith("rt @")) &&
-        tagFiltersInclude(userId) && 
-        ! excludedByTags(userId) && 
-        ! (excludeFriendRetweets && Retweets.fromFriend_?(status.text, friendUsernames)) &&
-        ! (excludeNonFollowers && ! followerIds.contains(status.user.id)) &&
-        ! excludedByStringMatches(status.text)
+    statuses.filter(includeStatus)
   }
-  
-  private def tagFiltersInclude(userId: Long) = includeSet.tags == Nil ||
-    includeSet.tags.exists(tagUsers.contains(_, userId)) 
-  
-  private def excludedByTags(userId: Long) = excludeSet.tags.exists(tagUsers.contains(_, userId))
 
-  private def excludedByStringMatches(text: String) = 
-    (includeSet.textFilters.list != Nil && ! includeSet.textFilters.list.exists(matches(text, _))) ||
-        excludeSet.textFilters.list.exists(matches(text, _))
-  
-  private def matches(text: String, search: TextFilter): Boolean = if (search.isRegEx) 
-    Pattern.compile(search.text).matcher(text).find else text.toUpperCase.contains(search.text.toUpperCase)
 }
 
 class TextFilter (var text: String, var isRegEx: Boolean)
