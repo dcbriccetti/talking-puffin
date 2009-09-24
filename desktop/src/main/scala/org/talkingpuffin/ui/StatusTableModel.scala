@@ -81,8 +81,9 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     def senderNameEs(status: TwitterStatus): EmphasizedString = 
       new EmphasizedString(Some(senderName(status)), followerIds.contains(status.user.id))
 
-    def toName(status: TwitterStatus) = LinkExtractor.getReplyToUser(getStatusText(status, username)) match {
-      case Some(u) => {
+    def toName(status: TwitterStatus) = 
+        LinkExtractor.getReplyToInfo(status.inReplyToStatusId, getStatusText(status, username)) match {
+      case Some((u,id)) => {
          if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) {
            Some(usersModel.screenNameToUserNameMap.getOrElse(u, u))
          } else {

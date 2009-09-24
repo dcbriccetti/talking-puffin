@@ -44,8 +44,9 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], tabl
           }
           
           if (urls.length > 1) {
-            addMenuItem(menu, if (urls.length == 2) "Both" else "All", index, 
-              browseUrls(urls.map(url => url._2)))
+            val a1 = Action(if (urls.length == 2) "Both" else "All") {browseUrls(urls.map(url => url._2))}
+            a1.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_A, 0)) 
+            menu.add(new MenuItem(a1).peer)
           }
           val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
           menu.show(table, menuLoc.getX().asInstanceOf[Int], menuLoc.getY().asInstanceOf[Int])

@@ -1,6 +1,5 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.xml.NodeSeq
 import java.util.regex.Pattern
 import org.talkingpuffin.twitter.{TwitterStatus}
 
@@ -28,13 +27,9 @@ object LinkExtractor {
     var urls: List[(String,String)] = List()
     
     if (users) {
-      val replyTo = status.inReplyToStatusId
-      getReplyToUser(status.text) match {
-        case Some(user) => if (replyTo != 0) {
-          val url = getStatusUrl(replyTo, user)
-          urls = ("Status " + replyTo + " of " + user, url) :: urls
-        } 
-        case None =>        
+      getReplyToInfo(status.inReplyToStatusId, status.text) match {
+        case Some((user, replyTo)) => urls ::= ("Status " + replyTo + " of " + user, getStatusUrl(replyTo, user))
+        case _ =>
       }
   
       val m = usernamePattern.matcher(status.text)
@@ -55,19 +50,23 @@ object LinkExtractor {
     urls reverse
   }
   
-  def getStatusUrl(replyTo: Long, replyToUser: String): String = 
+  def getStatusUrl(replyTo: Long, replyToUser: String) = 
     "http://twitter.com/" + replyToUser + "/statuses/" + replyTo
 
-  val replyToUserPattern = Pattern.compile("^@(\\S+)")
+  private val replyToUserRegex = ".*?@(\\S+).*".r
   
   /**
-   * Returns the Twitter handle of the user whose @handle appears at the beginning of 
-   * the tweet, or an empty string.
+   * Returns the Twitter handle and status ID of the user whose @handle appears at the beginning of 
+   * the tweet, None.
    */
-  def getReplyToUser(text: String): Option[String] = {
-    val m = replyToUserPattern.matcher(text)
-    if (m.find) Some(m.group(1)) else None
-  }
+  def getReplyToInfo(inReplyToStatusId: Option[Long], text: String): Option[(String,Long)] = 
+    inReplyToStatusId match {
+      case Some(id) => text match {
+        case replyToUserRegex(username) => Some((username, id))
+        case _ => None
+      }
+      case _ => None
+    }
 
   val withoutUserPattern = Pattern.compile("""^@\S+ (.*)""")
   
