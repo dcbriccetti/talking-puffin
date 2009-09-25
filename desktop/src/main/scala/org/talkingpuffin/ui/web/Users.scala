@@ -36,9 +36,10 @@ class Users extends Serializable {
 
   def getUsers: Array[TwitterUser] = {
     //TODO: make sure we get more than 20 here
-    following = session.getFriends(TwitterArgs.maxResults(200))
-    followers = session.getFollowers(TwitterArgs.maxResults(200))
-    val usersModel = new UsersModel(following, followers)
+    val rels = new Relationships()
+    rels.friends = session.getFriends(TwitterArgs.maxResults(200))
+    rels.followers = session.getFollowers(TwitterArgs.maxResults(200))
+    val usersModel = new UsersModel(rels)
     usersModel.build(UserSelection(true, true, None))
     usersModel.users.toArray
   }

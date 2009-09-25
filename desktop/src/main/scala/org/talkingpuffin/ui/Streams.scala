@@ -11,17 +11,13 @@ import twitter._
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
  */
 class Streams(val service: String, val twitterSession: AuthenticatedSession, 
-    session: Session, val tagUsers: TagUsers) 
+    session: Session, val tagUsers: TagUsers, relationships: Relationships) 
     extends Reactor with ViewCreator with Loggable {
   val prefs = PreferencesFactory.prefsForUser(service, twitterSession.user)
   val providers = new DataProviders(twitterSession, prefs, session.progress)
-  val usersTableModel = new UsersTableModel(tagUsers, List[TwitterUser](), List[TwitterUser]())
+  val usersTableModel = new UsersTableModel(tagUsers, relationships)
   
   var views = List[View]()
-  
-  var followerIds = List[Long]()
-  var friendIds = List[Long]()
-  var friends = List[TwitterUser]()
   
   reactions += {
     case TableContentsChanged(model, filtered, total) => 
@@ -48,8 +44,8 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
     }
 
   def createView[T](dataProvider: DataProvider[T], include: Option[String]): View = {
-    val view = View.create(dataProvider, usersTableModel.usersModel, service, twitterSession.user, tagUsers, 
-      session, include, this, followerIds, friendIds)
+    val view = View.create(dataProvider, usersTableModel.usersModel.screenNameToUserNameMap, service, 
+      twitterSession.user, tagUsers, session, include, this, relationships)
     listenTo(view.model)
     views ::= view
     view
@@ -57,19 +53,4 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
 
   def componentTitle(comp: Component) = views.filter(s => s.pane == comp)(0).title
   
-  def setFollowerIds(followerIds: List[Long]) {
-    this.followerIds = followerIds
-    views.foreach(_.model.followerIds = followerIds)
-  }
-  
-  def setFriendIds(friendIds: List[Long]) {
-    this.friendIds = friendIds
-    views.foreach(_.model.friendIds = friendIds)
-  }
-  
-  def setFriends(friends: List[TwitterUser]) {
-    this.friends = friends
-    val usernames = friends map(_.screenName)
-    views.foreach(_.model.friendUsernames = usernames)
-  }
 }

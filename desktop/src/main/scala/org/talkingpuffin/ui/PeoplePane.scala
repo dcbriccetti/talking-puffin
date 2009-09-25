@@ -4,8 +4,8 @@ import _root_.scala.swing.event.EditDone
 import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
 import java.awt.{Toolkit, Dimension}
 import javax.swing.{JButton, KeyStroke, JPopupMenu, JOptionPane, JTable, JToolBar, JToggleButton, JLabel}
-import swing.{MenuItem, GridBagPanel, ScrollPane, TextField, Action}
 import scala.swing.GridBagPanel._
+import swing.{Reactor, MenuItem, GridBagPanel, ScrollPane, TextField, Action}
 import talkingpuffin.util.{Loggable, PopupListener}
 import util.{TableUtil, DesktopUtil}
 import org.talkingpuffin.twitter.{TwitterUser}
@@ -24,37 +24,40 @@ object UserColumns {
 /**
  * Displays a list of friends or followers
  */
-class PeoplePane(session: Session, tableModel: UsersTableModel, 
-    friends: List[TwitterUser], followers: List[TwitterUser], 
-    updateCallback: () => Unit) extends GridBagPanel with Loggable {
+class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationships, 
+    updateCallback: () => Unit) extends GridBagPanel with Loggable with Reactor {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
     table = new PeopleTable(tableModel)
     peer.setViewportView(table)
   }
+  private val userActions = new UserActions(session.twitterSession, rels)
   val ap = new ActionPrep(table)
   buildActions(ap, table)
   table.addMouseListener(new PopupListener(table, getPopupMenu(ap)))
-  var followingButton: JToggleButton = _
-  var followersButton: JToggleButton = _
+
+  class FriendFollowButton(label: String) extends JToggleButton(label) {
+    setSelected(true)
+    addActionListener(new ActionListener {
+      def actionPerformed(e: ActionEvent) = buildModelData
+    })
+  }
+
+  var followingButton = new FriendFollowButton("")
+  var followersButton = new FriendFollowButton("")
+  var overlapLabel = new JLabel("")
   val searchText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
-  listenTo(searchText)
   reactions += {
     case EditDone(`searchText`) => buildModelData
   }
+  listenTo(searchText)
+
   val toolbar = new JToolBar {
     setFloatable(false)
-    class FriendFollowButton(label: String) extends JToggleButton(label) {
-      setSelected(true)
-      addActionListener(new ActionListener {
-        def actionPerformed(e: ActionEvent) = buildModelData
-      })
-    }
-    followingButton = new FriendFollowButton("Following: " + friends.size)
-    followersButton = new FriendFollowButton("Followers: " + followers.size) 
+    setLabels
     add(followingButton)
     add(followersButton)
-    add(new JLabel(" Overlap: " + (friends.size + followers.size - tableModel.usersModel.users.size)))
+    add(overlapLabel)
 
     addSeparator
 
@@ -75,6 +78,17 @@ class PeoplePane(session: Session, tableModel: UsersTableModel,
     grid=(0,1); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1 
   })
   
+  reactions += {
+    case e: UsersChanged => setLabels
+  }
+  listenTo(rels)
+  
+  private def setLabels {
+    followingButton.setText("Following: " + rels.friends.length)
+    followersButton.setText("Followers: " + rels.followers.length)
+    overlapLabel.setText(" Overlap: " + (rels.friends.length + rels.followers.length - tableModel.usersModel.users.length))
+  }
+  
   private def buildModelData = tableModel.buildModelData(UserSelection(
     followingButton.isSelected, followersButton.isSelected, searchText.text.length match {
       case 0 => None
@@ -88,9 +102,9 @@ class PeoplePane(session: Session, tableModel: UsersTableModel,
     ap add(new TagAction(table, tableModel), Actions.ks(KeyEvent.VK_T))
     ap.add(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
     val mask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
-    ap.add(Action("Follow") { follow }, KeyStroke.getKeyStroke(KeyEvent.VK_F, mask))
-    ap.add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, mask))
-    ap.add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B, mask))
+    ap.add(Action("Follow"  ) { userActions.follow(getSelectedScreenNames  ) }, UserActions.FollowAccel)
+    ap.add(Action("Unfollow") { userActions.unfollow(getSelectedScreenNames) }, UserActions.UnfollowAccel)
+    ap.add(Action("Block"   ) { userActions.block(getSelectedScreenNames   ) }, UserActions.BlockAccel)
   }
 
   private def getPopupMenu(ap: ActionPrep): JPopupMenu = {
@@ -106,30 +120,6 @@ class PeoplePane(session: Session, tableModel: UsersTableModel,
     getSelectedUsers.map(user => user.screenName)
   }
 
-  private def processScreenNames(screenNames:List[String],action:((String) => Unit),errHandler:((Throwable,String) => Unit)) = {
-    screenNames foreach{screenName =>
-      try{
-        action(screenName)
-      }catch{
-        case e:Throwable => errHandler(e,screenName)
-      }
-    }
-  }
-
-  private def showFollowErr(e:Throwable,action:String,screenName:String){
-    JOptionPane.showMessageDialog(null, "Error " + action + " " + screenName)
-  }
-
-  private def follow = processScreenNames(getSelectedScreenNames,
-                                          session.twitterSession.createFriendship,
-                                          showFollowErr(_,"following",_))
-  private def unfollow = processScreenNames(getSelectedScreenNames,
-                                            session.twitterSession.destroyFriendship,
-                                            showFollowErr(_,"unfollowing",_))
-  private def block = processScreenNames(getSelectedScreenNames,
-                                            session.twitterSession.blockUser,
-                                            showFollowErr(_,"block",_))
-  
   private def viewSelected {
     getSelectedUsers.foreach(user => {
       var uri = "http://twitter.com/" + user.screenName

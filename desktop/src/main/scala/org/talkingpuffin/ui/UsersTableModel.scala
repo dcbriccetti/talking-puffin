@@ -3,18 +3,23 @@ package org.talkingpuffin.ui
 import javax.swing.table.AbstractTableModel
 import javax.swing.Icon
 import filter.TagUsers
+import swing.Reactor
 import table.EmphasizedString
 import twitter.{TwitterUser}
 
-class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], var followers: List[TwitterUser])
-    extends AbstractTableModel with TaggingSupport{
+class UsersTableModel(val tagUsers: TagUsers, val relationships: Relationships)
+    extends AbstractTableModel with TaggingSupport with Reactor {
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
-  var usersModel = new UsersModel(friends, followers)
+  var usersModel = new UsersModel(relationships)
   var lastIncludeFollowing = true
   var lastIncludeFollowers = true
   var lastSearch: Option[String] = None
   buildModelData(UserSelection(true, true, None))
+  reactions += {
+    case _: UsersChanged => usersChanged
+  }
+  listenTo(relationships)
 
   def buildModelData(sel: UserSelection) {
     lastIncludeFollowing = sel.includeFollowing
@@ -24,8 +29,8 @@ class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], va
     fireTableDataChanged
   }
   
-  def usersChanged() = {
-    usersModel = new UsersModel(friends, followers)
+  private def usersChanged {
+    usersModel = new UsersModel(relationships)
     buildModelData(UserSelection(lastIncludeFollowing, lastIncludeFollowers, lastSearch))
   }
   
@@ -52,7 +57,7 @@ class UsersTableModel(val tagUsers: TagUsers, var friends: List[TwitterUser], va
         val picUrl = user.profileImageURL
         pcell.request(picUrl, rowIndex)
       }
-      case UserColumns.SCREEN_NAME => new EmphasizedString(Some(user.screenName), followers.contains(user))
+      case UserColumns.SCREEN_NAME => new EmphasizedString(Some(user.screenName), relationships.followers.contains(user))
       case UserColumns.STATUS => user.status match {
         case Some(status) => status.text
         case None => ""
