@@ -3,19 +3,19 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.event.{WindowClosing}
 import filter.{TagUsers}
 import java.awt.{Dimension}
-import javax.swing.{SwingWorker, ImageIcon}
+import javax.swing.{ImageIcon}
 import state.PrefKeys
 import swing.TabbedPane.Page
-import swing.{Frame, TabbedPane, Label, GridBagPanel}
+import swing.{Reactor, Frame, TabbedPane, Label, GridBagPanel}
 import talkingpuffin.util.Loggable
-import twitter.{TwitterUserId, TwitterUser, AuthenticatedSession}
+import twitter.{TwitterUser, AuthenticatedSession}
 import ui._
 import ui.util.FetchRequest
 
 /**
  * The top-level application Swing frame window. There is one per user session.
  */
-class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable {
+class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable with Reactor {
   val tagUsers = new TagUsers(service, twitterSession.user)
   TopFrames.addFrame(this)
   val session = new Session(service, twitterSession)
@@ -26,10 +26,25 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     preferredSize = new Dimension(900, 600)
   }
   session.windows.tabbedPane = tabbedPane
+  private var peoplePage: Page = _
+  private var peoplePane: PeoplePane = _
 
   val mainToolBar = new MainToolBar
   session.progress = mainToolBar
-  val streams = new Streams(service, twitterSession, session, tagUsers)
+  
+  val rels = new Relationships()
+  reactions += { 
+    case _: UsersChanged =>
+      if (peoplePage != null) {
+        // pane.title_= is buggy. index could be wrong
+        val pane = tabbedPane.peer
+        pane.setTitleAt(pane.indexOfComponent(peoplePane.peer), 
+          peoplePaneTitle(rels.friends.length, rels.followers.length)) 
+      }
+  }
+  listenTo(rels)
+  
+  val streams = new Streams(service, twitterSession, session, tagUsers, rels)
   session.windows.streams = streams
   mainToolBar.init(streams)
     
@@ -58,7 +73,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
 
   peer.setLocationRelativeTo(null)
-  getUserIds
+  rels.getIds(twitterSession, mainToolBar)
   createPeoplePane
 
   def setFocus = streams.views.last.pane.requestFocusForTable
@@ -86,48 +101,17 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     streams.views.last.pane.saveState // TODO instead save the order of the last status pane changed
   }
   
-  private def getUserIds {
-    /** Background user fetcher */
-    def fetchUsersBg(getter: Int => List[TwitterUserId], setter: List[Long] => Unit) {
-      new SwingWorker[List[TwitterUserId], Object] {
-        def doInBackground = twitterSession.loadAll(getter)
-        override def done = setter(get.map(_.id))
-      }.execute
-    }
-   
-    fetchUsersBg(twitterSession.getFriendsIds  , streams.setFriendIds)
-    fetchUsersBg(twitterSession.getFollowersIds, streams.setFollowerIds)
-  }
-  
   type Users = List[TwitterUser]
   
-  def updatePeople(): Unit = updatePeopleAndCallBack((friends: Users, followers: Users) => {})
-  
-  private var peoplePage: Page = _
   def peoplePaneTitle(numFriends: Int, numFollowers: Int) = "People (" + numFriends + ", " + numFollowers + ")"
   
-  def updatePeopleAndCallBack(edtCallback: (Users, Users) => Unit) = {
-    mainToolBar.startOperation
-
-    PeopleProvider.get(twitterSession, (friends: Users, followers: Users) => {
-      streams.usersTableModel.friends = friends
-      streams.usersTableModel.followers = followers
-      streams.usersTableModel.usersChanged()
-      streams.setFriends(friends)
-
-      edtCallback(friends, followers)
-      if (peoplePage != null) peoplePage.title = peoplePaneTitle(friends.length, followers.length) 
-      mainToolBar.stopOperation
-    })
-    
-  }
+  def updatePeople = rels.getUsers(twitterSession, mainToolBar)
   
   private def createPeoplePane: Unit = {
-    updatePeopleAndCallBack((friends: Users, followers: Users) => {
-      val pane = new PeoplePane(session, streams.usersTableModel, friends, followers, updatePeople)
-      peoplePage = new Page(peoplePaneTitle(friends.length, followers.length), pane)
-      tabbedPane.pages += peoplePage
-    })
+    updatePeople
+    peoplePane = new PeoplePane(session, streams.usersTableModel, rels, updatePeople _)
+    peoplePage = new Page(peoplePaneTitle(rels.friends.length, rels.followers.length), peoplePane)
+    tabbedPane.pages += peoplePage
   }
 }
 

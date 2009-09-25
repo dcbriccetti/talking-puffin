@@ -72,7 +72,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     def valueChanged(event: ListSelectionEvent) = 
       if (! event.getValueIsAdjusting) 
         specialMenuItems.enableActions(getSelectedStatuses, getSelectedScreenNames.length, 
-          session.windows.streams.friendIds, session.windows.streams.followerIds)
+          tableModel.relationships.friendIds, tableModel.relationships.followerIds)
   })
   
   def saveState {

@@ -4,8 +4,8 @@ import _root_.scala.swing.event.EditDone
 import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
 import java.awt.{Toolkit, Dimension}
 import javax.swing.{JButton, KeyStroke, JPopupMenu, JOptionPane, JTable, JToolBar, JToggleButton, JLabel}
-import swing.{MenuItem, GridBagPanel, ScrollPane, TextField, Action}
 import scala.swing.GridBagPanel._
+import swing.{Reactor, MenuItem, GridBagPanel, ScrollPane, TextField, Action}
 import talkingpuffin.util.{Loggable, PopupListener}
 import util.{TableUtil, DesktopUtil}
 import org.talkingpuffin.twitter.{TwitterUser}
@@ -24,9 +24,8 @@ object UserColumns {
 /**
  * Displays a list of friends or followers
  */
-class PeoplePane(session: Session, tableModel: UsersTableModel, 
-    friends: List[TwitterUser], followers: List[TwitterUser], 
-    updateCallback: () => Unit) extends GridBagPanel with Loggable {
+class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationships, 
+    updateCallback: () => Unit) extends GridBagPanel with Loggable with Reactor {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
     table = new PeopleTable(tableModel)
@@ -35,26 +34,29 @@ class PeoplePane(session: Session, tableModel: UsersTableModel,
   val ap = new ActionPrep(table)
   buildActions(ap, table)
   table.addMouseListener(new PopupListener(table, getPopupMenu(ap)))
-  var followingButton: JToggleButton = _
-  var followersButton: JToggleButton = _
+
+  class FriendFollowButton(label: String) extends JToggleButton(label) {
+    setSelected(true)
+    addActionListener(new ActionListener {
+      def actionPerformed(e: ActionEvent) = buildModelData
+    })
+  }
+
+  var followingButton = new FriendFollowButton("")
+  var followersButton = new FriendFollowButton("")
+  var overlapLabel = new JLabel("")
   val searchText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
-  listenTo(searchText)
   reactions += {
     case EditDone(`searchText`) => buildModelData
   }
+  listenTo(searchText)
+
   val toolbar = new JToolBar {
     setFloatable(false)
-    class FriendFollowButton(label: String) extends JToggleButton(label) {
-      setSelected(true)
-      addActionListener(new ActionListener {
-        def actionPerformed(e: ActionEvent) = buildModelData
-      })
-    }
-    followingButton = new FriendFollowButton("Following: " + friends.size)
-    followersButton = new FriendFollowButton("Followers: " + followers.size) 
+    setLabels
     add(followingButton)
     add(followersButton)
-    add(new JLabel(" Overlap: " + (friends.size + followers.size - tableModel.usersModel.users.size)))
+    add(overlapLabel)
 
     addSeparator
 
@@ -74,6 +76,17 @@ class PeoplePane(session: Session, tableModel: UsersTableModel,
   add(tableScrollPane, new Constraints { 
     grid=(0,1); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1 
   })
+  
+  reactions += {
+    case e: UsersChanged => setLabels
+  }
+  listenTo(rels)
+  
+  private def setLabels {
+    followingButton.setText("Following: " + rels.friends.length)
+    followersButton.setText("Followers: " + rels.followers.length)
+    overlapLabel.setText(" Overlap: " + (rels.friends.length + rels.followers.length - tableModel.usersModel.users.length))
+  }
   
   private def buildModelData = tableModel.buildModelData(UserSelection(
     followingButton.isSelected, followersButton.isSelected, searchText.text.length match {

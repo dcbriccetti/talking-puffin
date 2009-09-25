@@ -16,8 +16,9 @@ import util.DesktopUtil
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: BaseProvider, 
-    usersModel: UsersModel, filterSet: FilterSet, service: String, 
+class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: BaseProvider,
+    val relationships: Relationships,
+    screenNameToUserNameMap: Map[String, String], filterSet: FilterSet, service: String, 
     username: String, val tagUsers: TagUsers) 
     extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
   
@@ -85,7 +86,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
         LinkExtractor.getReplyToInfo(status.inReplyToStatusId, getStatusText(status, username)) match {
       case Some((u,id)) => {
          if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) {
-           Some(usersModel.screenNameToUserNameMap.getOrElse(u, u))
+           Some(screenNameToUserNameMap.getOrElse(u, u))
          } else {
            Some(u)
          }

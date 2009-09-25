@@ -37,7 +37,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
   private val utm = session.windows.streams.usersTableModel
   
   private def users = {
-    val matches = (nameAndScreenNames(utm.friends ::: utm.followers).
+    val matches = (nameAndScreenNames(utm.relationships.friends ::: utm.relationships.followers).
         filter(_.matches(searchText.text))).sort(_ < _).removeDuplicates
     (matches.length match {
       case 0 => "No matches were found"
@@ -46,7 +46,8 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
     }) :: matches
   }
   private val dmRecipCombo = new ComboBox(
-    if (utm.followers == Nil) List("Followers not loaded") else nameAndScreenNames(utm.followers).sort(_ < _))
+    if (utm.relationships.followers == Nil) List("Followers not loaded") else 
+      nameAndScreenNames(utm.relationships.followers).sort(_ < _))
   private val searchText = new TextField {columns = 15}
   private val usersCombo = new ComboBox(users)
   private val message = new CustomTextArea
@@ -85,7 +86,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
         contents += new Label("To: ")
         recipients match {
           case Some(r) => {
-            utm.followers.find(_.screenName == r) match {
+            utm.relationships.followers.find(_.screenName == r) match {
               case Some(u) => dmRecipCombo.selection.item = NameAndScreenName(u.name, u.screenName)
               case _ =>
             }
