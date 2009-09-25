@@ -13,7 +13,7 @@ import javax.swing.JDialog
 import javax.swing.SpringLayout.Constraints
 import org.talkingpuffin.twitter.{TwitterSession,AuthenticatedSession,API}
 import LongRunningSpinner._
-import state.{Accounts, GlobalPrefs, PreferencesFactory}
+import state.{Account, Accounts, GlobalPrefs, PreferencesFactory}
 import swing.event.{SelectionChanged, ButtonClicked, EditDone, Event}
 import talkingpuffin.util.Loggable
 import util.Cancelable
@@ -35,7 +35,7 @@ class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession
   private val infoLabel = new Label(" ")
   private val up = new Accounts()
 
-  private val comboBox = if (up.users.length > 0) new ComboBox(up.users) else null
+  private val comboBox = if (up.data != Nil) new ComboBox(up.data map ComboDisplay) else null
   private val usernameTextField = new TextField() {columns=20}
   private val passwordTextField = new PasswordField() {columns=20}
   private val accountNameTextField = new TextField(API.defaultService) {
@@ -97,16 +97,11 @@ class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession
 
   private def showSelectedUser {
     if (comboBox != null) {
-      val item = comboBox.selection.item
-      val parts = item.split(" ")
-      accountNameTextField.text = parts(0)
-      usernameTextField.text = parts(1) 
-      up.userFor(parts(0), parts(1)) match {
-        case Some(u) =>
-          passwordTextField.peer.setText(u.password)
-          apiUrlTextField.peer.setText(u.apiUrl)
-        case _ =>
-      }
+      val account = comboBox.selection.item.asInstanceOf[ComboDisplay].account
+      accountNameTextField.text = account.service
+      usernameTextField.text = account.user 
+      passwordTextField.peer.setText(account.password)
+      apiUrlTextField.peer.setText(account.apiUrl)
     }
   }
   
@@ -170,4 +165,10 @@ class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession
     peer.setLocationRelativeTo(null)
     visible = true
   }
+
+  private case class ComboDisplay(val account: Account) {
+    override def toString = account.service + " " + account.user
+  }
 }
+
+
