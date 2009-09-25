@@ -31,6 +31,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     table = new PeopleTable(tableModel)
     peer.setViewportView(table)
   }
+  private val userActions = new UserActions(session.twitterSession, rels)
   val ap = new ActionPrep(table)
   buildActions(ap, table)
   table.addMouseListener(new PopupListener(table, getPopupMenu(ap)))
@@ -101,9 +102,9 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     ap add(new TagAction(table, tableModel), Actions.ks(KeyEvent.VK_T))
     ap.add(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
     val mask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
-    ap.add(Action("Follow") { follow }, KeyStroke.getKeyStroke(KeyEvent.VK_F, mask))
-    ap.add(Action("Unfollow") { unfollow }, KeyStroke.getKeyStroke(KeyEvent.VK_U, mask))
-    ap.add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B, mask))
+    ap.add(Action("Follow"  ) { userActions.follow(getSelectedScreenNames  ) }, UserActions.FollowAccel)
+    ap.add(Action("Unfollow") { userActions.unfollow(getSelectedScreenNames) }, UserActions.UnfollowAccel)
+    ap.add(Action("Block"   ) { userActions.block(getSelectedScreenNames   ) }, UserActions.BlockAccel)
   }
 
   private def getPopupMenu(ap: ActionPrep): JPopupMenu = {
@@ -119,30 +120,6 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     getSelectedUsers.map(user => user.screenName)
   }
 
-  private def processScreenNames(screenNames:List[String],action:((String) => Unit),errHandler:((Throwable,String) => Unit)) = {
-    screenNames foreach{screenName =>
-      try{
-        action(screenName)
-      }catch{
-        case e:Throwable => errHandler(e,screenName)
-      }
-    }
-  }
-
-  private def showFollowErr(e:Throwable,action:String,screenName:String){
-    JOptionPane.showMessageDialog(null, "Error " + action + " " + screenName)
-  }
-
-  private def follow = processScreenNames(getSelectedScreenNames,
-                                          session.twitterSession.createFriendship,
-                                          showFollowErr(_,"following",_))
-  private def unfollow = processScreenNames(getSelectedScreenNames,
-                                            session.twitterSession.destroyFriendship,
-                                            showFollowErr(_,"unfollowing",_))
-  private def block = processScreenNames(getSelectedScreenNames,
-                                            session.twitterSession.blockUser,
-                                            showFollowErr(_,"block",_))
-  
   private def viewSelected {
     getSelectedUsers.foreach(user => {
       var uri = "http://twitter.com/" + user.screenName

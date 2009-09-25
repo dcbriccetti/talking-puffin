@@ -29,6 +29,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   val rowMarginVal = 3
   setRowMargin(rowMarginVal)
   setHighlighters(HighlighterFactory.createSimpleStriping)
+
+  private val userActions = new UserActions(session.twitterSession, tableModel.relationships)
   
   private var customRowHeight_ = 0
   private def customRowHeight = customRowHeight_
@@ -124,14 +126,6 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   private def createSendMsgDialog(status: TwitterStatus, names: Option[String], retweetMsg: Option[String]) =
     new SendMsgDialog(session, null, names, Some(status.id), retweetMsg, false)
   
-  private def follow   = getSelectedScreenNames foreach session.twitterSession.createFriendship
-  private def unfollow = {
-    val selectedScreenNames = getSelectedScreenNames
-    selectedScreenNames foreach session.twitterSession.destroyFriendship
-    tableModel.relationships.removeFriendsWithScreenNames(selectedScreenNames)
-  }
-  private def block    = getSelectedScreenNames foreach session.twitterSession.blockUser
-  private def unblock  = getSelectedScreenNames foreach session.twitterSession.unblockUser
   private def getSelectedScreenNames = getSelectedStatuses.map(_.user.screenName).removeDuplicates
   def getSelectedStatuses = tableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
 
@@ -243,13 +237,13 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ap add(action, Actions.ks(KeyEvent.VK_E))
     specialMenuItems.oneStatusSelected.list ::= action
     ap add(Action("Retweet new way") { retweetNewWay }, KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask))
-    action = Action("Follow") { follow }
+    action = Action("Follow") { userActions.follow(getSelectedScreenNames) }
     specialMenuItems.notFriendsOnly.list ::= action
-    ap add(action, KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask))
-    action = Action("Unfollow") { unfollow }
+    ap add(action, UserActions.FollowAccel)
+    action = Action("Unfollow") { userActions.unfollow(getSelectedScreenNames) }
     specialMenuItems.friendsOnly.list ::= action
-    ap add(action, KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask | SHIFT))
-    ap add(Action("Block") { block }, KeyStroke.getKeyStroke(KeyEvent.VK_B, shortcutKeyMask))
+    ap add(action, UserActions.UnfollowAccel)
+    ap add(Action("Block") { userActions.block(getSelectedScreenNames) }, UserActions.BlockAccel)
     
     ap add(Action("Delete selected tweets") {
       tableModel removeStatuses TableUtil.getSelectedModelIndexes(this) 
