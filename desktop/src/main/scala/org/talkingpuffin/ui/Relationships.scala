@@ -61,5 +61,12 @@ class Relationships extends Publisher {
     }.execute
   }
   
+  def removeFriendsWithScreenNames(names: List[String]) {
+    friends = friends.filter(user => ! names.contains(user.screenName))
+    friendIds = friends.map(_.id)
+    publish(UsersChanged())
+    publish(IdsChanged())
+  }
+  
 }
   

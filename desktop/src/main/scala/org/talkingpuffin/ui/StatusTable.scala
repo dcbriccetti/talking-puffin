@@ -125,7 +125,11 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     new SendMsgDialog(session, null, names, Some(status.id), retweetMsg, false)
   
   private def follow   = getSelectedScreenNames foreach session.twitterSession.createFriendship
-  private def unfollow = getSelectedScreenNames foreach session.twitterSession.destroyFriendship
+  private def unfollow = {
+    val selectedScreenNames = getSelectedScreenNames
+    selectedScreenNames foreach session.twitterSession.destroyFriendship
+    tableModel.relationships.removeFriendsWithScreenNames(selectedScreenNames)
+  }
   private def block    = getSelectedScreenNames foreach session.twitterSession.blockUser
   private def unblock  = getSelectedScreenNames foreach session.twitterSession.unblockUser
   private def getSelectedScreenNames = getSelectedStatuses.map(_.user.screenName).removeDuplicates
