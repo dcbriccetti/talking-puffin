@@ -5,8 +5,7 @@ import _root_.scala.collection.mutable.LinkedHashMap
 import _root_.scala.swing.Publisher
 import java.util.regex.Pattern
 import twitter.TwitterStatus
-import ui.User
-
+import ui.{Relationships, User}
 /**
  * A set of all filters, and logic to apply them
  */
@@ -29,8 +28,8 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
    * Filter the given list of statuses, returning a list of only those that pass the filters
    * in this set.
    */
-  def filter(statuses: List[TwitterStatus], friendUsernames: List[String], followerIds: List[Long]): 
-      List[TwitterStatus] = {
+  def filter(statuses: List[TwitterStatus], rels: Relationships): List[TwitterStatus] = {
+    val friendUsernames = rels.friends.map(_.screenName)
     
     def includeStatus(status: TwitterStatus): Boolean = {
       def tagFiltersInclude = includeSet.tags == Nil || includeSet.tagMatches(status.user.id)
@@ -51,7 +50,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
           ! (retweetMutedUsers.contains(status.user.id) && status.text.toLowerCase.startsWith("rt @")) &&
           tagFiltersInclude && ! excludedByTags && 
           ! (excludeFriendRetweets && Retweets.fromFriend_?(status.text, friendUsernames)) &&
-          ! (excludeNonFollowers && ! followerIds.contains(status.user.id)) &&
+          ! (excludeNonFollowers && ! rels.followerIds.contains(status.user.id)) &&
           ! excludedByStringMatches
     }
 

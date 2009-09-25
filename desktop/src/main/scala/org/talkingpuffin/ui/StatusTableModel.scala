@@ -59,10 +59,6 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     }
   })
   
-  var followerIds = List[Long]()
-  var friendIds = List[Long]()
-  var friendUsernames = List[String]()
-  
   def getColumnCount = 5
   def getRowCount = filteredStatuses_.length
   override def getColumnName(column: Int) = 
@@ -80,7 +76,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       else status.user.screenName
 
     def senderNameEs(status: TwitterStatus): EmphasizedString = 
-      new EmphasizedString(Some(senderName(status)), followerIds.contains(status.user.id))
+      new EmphasizedString(Some(senderName(status)), relationships.followerIds.contains(status.user.id))
 
     def toName(status: TwitterStatus) = 
         LinkExtractor.getReplyToInfo(status.inReplyToStatusId, getStatusText(status, username)) match {
@@ -196,7 +192,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       preChangeListener.tableChanging
     }
     
-    filteredStatuses_ = filterSet.filter(statuses, friendUsernames, followerIds) 
+    filteredStatuses_ = filterSet.filter(statuses, relationships) 
     publish(new TableContentsChanged(this, filteredStatuses_.length, statuses.length))
     fireTableDataChanged
   }
