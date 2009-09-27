@@ -53,7 +53,7 @@ class MainToolBar extends JToolBar with LongOpListener {
     override def toString = TimeFormatter(seconds).longForm
   }
   
-  class RefreshCombo(provider: BaseProvider, times: List[Int]) extends ComboBox(times map(DisplayTime(_))) {
+  class RefreshCombo(provider: BaseProvider, times: List[Int]) extends ComboBox(times map DisplayTime) {
     peer.setToolTipText("How often to load new items")
     var defaultRefresh = DisplayTime(600)
     peer.setSelectedItem(defaultRefresh)
