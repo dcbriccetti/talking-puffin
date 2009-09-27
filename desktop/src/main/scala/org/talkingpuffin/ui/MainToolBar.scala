@@ -1,16 +1,15 @@
 package org.talkingpuffin.ui
 
-import java.awt.Dimension
-import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.{Dimension}
 import java.util.concurrent.atomic.AtomicInteger
-import javax.swing.JToolBar
-import swing.{ProgressBar, Label, ComboBox, Action}
-import time.TimeFormatter
+import javax.swing.{SwingUtilities, JToolBar}
+import swing.{ProgressBar, Label, Action}
+import util.ToolBarHelpers
 
 /**
  * The main ToolBar
  */
-class MainToolBar extends JToolBar with LongOpListener {
+class MainToolBar extends JToolBar with ToolBarHelpers with LongOpListener {
   val progressBar = new ProgressBar {
     val s = new Dimension(40, 0)
     preferredSize = s
@@ -18,13 +17,20 @@ class MainToolBar extends JToolBar with LongOpListener {
   }
   val operationsInProgress = new AtomicInteger
   val remaining = new Label
+  var dataProvidersDialog: DataProvidersDialog = _
 
   setFloatable(false)
 
   def init(streams: Streams) = {
-    streams.providers.providers.foreach(provider => {
-      addSourceControls(provider, streams.createView(provider, None))
-    })
+    dataProvidersDialog = new DataProvidersDialog(SwingUtilities.getAncestorOfClass(classOf[java.awt.Frame],
+        MainToolBar.this).asInstanceOf[java.awt.Frame], streams)
+    val dataProvidersAction = new Action("Data Providers") {
+      toolTip = "Shows Data Providers Dialog"
+      def apply = dataProvidersDialog.visible = true
+    }
+
+    aa(dataProvidersAction)
+    addSeparator
     add(progressBar.peer)
   }
   
@@ -32,32 +38,5 @@ class MainToolBar extends JToolBar with LongOpListener {
   
   def stopOperation = if (operationsInProgress.decrementAndGet == 0) progressBar.indeterminate = false;
   
-  private def addSourceControls(provider: BaseProvider, createView: => Unit) {
-    add(new Label(provider.providerName + ": ").peer)
-
-    val tenThruFiftySecs = List.range(10, 50, 10)
-    val oneThruNineMins = List.range(60, 600, 60)
-    val tenThruSixtyMins = List.range(10 * 60, 60 * 60 + 1, 10 * 60)
-    val assortedTimes = tenThruFiftySecs ::: oneThruNineMins ::: tenThruSixtyMins 
-
-    add(new RefreshCombo(provider, assortedTimes).peer)
-  }
-  
-  case class DisplayTime(val seconds: Int) {
-    override def toString = TimeFormatter(seconds).longForm
-  }
-  
-  class RefreshCombo(provider: BaseProvider, times: List[Int]) extends ComboBox(times map DisplayTime) {
-    peer.setToolTipText("How often to load new items")
-    var defaultRefresh = DisplayTime(600)
-    peer.setSelectedItem(defaultRefresh)
-    provider.setUpdateFrequency(defaultRefresh.seconds)
-    peer.addActionListener(new ActionListener(){
-      def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
-        provider.setUpdateFrequency(selection.item.seconds)
-      }
-    })
-    
-  }
 }
 
