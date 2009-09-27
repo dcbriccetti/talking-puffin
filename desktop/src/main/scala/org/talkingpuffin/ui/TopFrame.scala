@@ -49,7 +49,11 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   mainToolBar.init(streams)
     
   title = Main.title + " - " + service + " " + twitterSession.user
-  menuBar = new MainMenuBar
+  menuBar = new MainMenuBar(streams.providers)
+  reactions += {
+    case e: NewViewEvent => streams.createView(e.provider, None)
+  }
+  listenTo(menuBar)
 
   contents = new GridBagPanel {
     val userPic = new Label

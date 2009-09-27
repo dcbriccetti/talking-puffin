@@ -38,7 +38,6 @@ class Relationships extends Publisher {
         Relationships.this.publish(UsersChanged())
       }
     }.execute
-    
   }
   
   def getIds(twitterSession: AuthenticatedSession, longOpListener: LongOpListener) {

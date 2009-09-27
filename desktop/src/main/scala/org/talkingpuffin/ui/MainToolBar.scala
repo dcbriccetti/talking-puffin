@@ -34,11 +34,6 @@ class MainToolBar extends JToolBar with LongOpListener {
   
   private def addSourceControls(provider: BaseProvider, createView: => Unit) {
     add(new Label(provider.providerName + ": ").peer)
-    val newViewAction = new Action("New") {
-      toolTip = "Creates a new " + provider.providerName + " view"
-      def apply = createView
-    }
-    add(newViewAction.peer)
 
     val tenThruFiftySecs = List.range(10, 50, 10)
     val oneThruNineMins = List.range(60, 600, 60)

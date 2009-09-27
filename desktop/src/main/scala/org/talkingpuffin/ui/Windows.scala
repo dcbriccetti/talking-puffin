@@ -14,7 +14,7 @@ class Windows {
     val frame = new Frame {
         title = streams.componentTitle(comp)
         contents = comp
-        menuBar = new MainMenuBar
+        menuBar = new MainMenuBar(streams.providers)
       }
       frame.visible = true
     }

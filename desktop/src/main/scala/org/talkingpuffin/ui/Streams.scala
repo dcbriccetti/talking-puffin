@@ -43,7 +43,7 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
       case i => session.windows.tabbedPane.peer.setTitleAt(i, title)
     }
 
-  def createView[T](dataProvider: DataProvider[T], include: Option[String]): View = {
+  def createView(dataProvider: DataProvider, include: Option[String]): View = {
     val view = View.create(dataProvider, usersTableModel.usersModel.screenNameToUserNameMap, service, 
       twitterSession.user, tagUsers, session, include, this, relationships)
     listenTo(view.model)

@@ -1,16 +1,16 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.swing.{MenuItem, MenuBar, Menu, CheckMenuItem, Action}
 import javax.swing.KeyStroke
 import java.awt.event.KeyEvent
 import java.awt.Toolkit
 import state.{GlobalPrefs, PrefKeys}
+import swing.event.{Event, ButtonClicked}
 
 /**
  * Main menu bar
  */
-class MainMenuBar extends MenuBar {
+class MainMenuBar(dataProviders: DataProviders) extends MenuBar {
   val prefs = GlobalPrefs.prefs
 
   val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
@@ -23,6 +23,15 @@ class MainMenuBar extends MenuBar {
     contents += new MenuItem(new Action("Close Window") {
       accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_W, shortcutKeyMask))
       def apply = TopFrames.closeCurrentWindow()
+    })
+  }
+  
+  contents += new Menu("Views") {
+    dataProviders.providers.foreach(provider => {
+      contents += new MenuItem(new Action("New " + provider.providerName) {
+        toolTip = "Creates a new " + provider.providerName + " view"
+        def apply = MainMenuBar.this.publish(NewViewEvent(provider))
+      })
     })
   }
   
@@ -54,3 +63,5 @@ class MainMenuBar extends MenuBar {
   }
   
 }
+
+case class NewViewEvent(val provider: DataProvider) extends Event

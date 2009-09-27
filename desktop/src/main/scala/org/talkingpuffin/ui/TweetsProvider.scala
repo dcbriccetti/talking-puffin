@@ -27,7 +27,7 @@ abstract class BaseProvider(val providerName: String) {
 /**
  * Provides tweets
  */
-abstract class DataProvider[T](session: AuthenticatedSession, startingId: Option[Long], 
+abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName) {
   private val log = Logger.getLogger("TweetsProvider " + providerName)
   protected var highestId:Option[Long] = startingId
@@ -71,11 +71,13 @@ abstract class DataProvider[T](session: AuthenticatedSession, startingId: Option
     loadData(session.user,TwitterArgs.maxResults(200),true)
   }
 
+  type TwitterDataWithId = {def id: Long} 
+
   def loadData(username: String, args: TwitterArgs, clear: Boolean): Unit = {
     longOpListener.startOperation
-    new SwingWorker[Option[List[T]], Object] {
+    new SwingWorker[Option[List[TwitterDataWithId]], Object] {
       val sendClear = clear
-      override def doInBackground: Option[List[T]] = {
+      override def doInBackground: Option[List[TwitterDataWithId]] = {
         try{
           val statuses = Some(updateFunc(args))
           statuses match {
@@ -105,9 +107,9 @@ abstract class DataProvider[T](session: AuthenticatedSession, startingId: Option
     }.execute
   }
 
-  def getResponseId(response: T): Long
+  def getResponseId(response: TwitterDataWithId): Long
 
-  private def computeHighestId(tweets: List[T], maxId: Option[Long]):Option[Long] = tweets match {
+  private def computeHighestId(tweets: List[TwitterDataWithId], maxId: Option[Long]):Option[Long] = tweets match {
     case tweet :: rest => maxId match {
         case Some(id) => computeHighestId(rest, if (getResponseId(tweet) > id) Some(getResponseId(tweet)) else Some(id))
         case None => computeHighestId(rest,Some(getResponseId(tweet)))
@@ -115,14 +117,14 @@ abstract class DataProvider[T](session: AuthenticatedSession, startingId: Option
     case Nil => maxId
   }
 
-  def updateFunc:(TwitterArgs) => List[T]
+  def updateFunc:(TwitterArgs) => List[TwitterDataWithId]
   
 }
 
 abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends
-    DataProvider[TwitterStatus](session, startingId, providerName, longOpListener) with Loggable {
-  override def getResponseId(response: TwitterStatus): Long = response.id
+    DataProvider(session, startingId, providerName, longOpListener) with Loggable {
+  override def getResponseId(response: TwitterDataWithId): Long = response.id
 }
 
 class FollowingProvider(session: AuthenticatedSession, startingId: Option[Long], 
@@ -139,16 +141,16 @@ class MentionsProvider(session: AuthenticatedSession, startingId: Option[Long],
 
 class DmsReceivedProvider(session: AuthenticatedSession, startingId: Option[Long], 
     longOpListener: LongOpListener)
-    extends DataProvider[TwitterMessage](session, startingId, "DMs Rcvd", longOpListener) {
+    extends DataProvider(session, startingId, "DMs Rcvd", longOpListener) {
   def updateFunc:(TwitterArgs) => List[TwitterMessage] = session.getDirectMessages
-  override def getResponseId(response: TwitterMessage): Long = response.id
+  override def getResponseId(response: TwitterDataWithId): Long = response.id
 }
 
 class DmsSentProvider(session: AuthenticatedSession, startingId: Option[Long], 
     longOpListener: LongOpListener)
-    extends DataProvider[TwitterMessage](session, startingId, "DMs Sent", longOpListener) {
+    extends DataProvider(session, startingId, "DMs Sent", longOpListener) {
   def updateFunc:(TwitterArgs) => List[TwitterMessage] = session.getSentMessages
-  override def getResponseId(response: TwitterMessage): Long = response.id
+  override def getResponseId(response: TwitterDataWithId): Long = response.id
 }
 
 case class TweetsArrived(tweets: NodeSeq) extends Event
