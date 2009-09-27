@@ -20,15 +20,16 @@ case class TimeFormatter(time: Long) {
   
   def longForm: String = {
     val sb = new StringBuilder
-    addPart(sb, days,    "d")
-    addPart(sb, hours,   "h")
-    addPart(sb, minutes, "m")
-    addPart(sb, seconds, "s")
+    addPart(sb, days,    "day")
+    addPart(sb, hours,   "hour")
+    addPart(sb, minutes, "min")
+    addPart(sb, seconds, "sec")
     
     def addPart(sb: StringBuilder, value: Long, name: String): Unit = {
       if (value > 0) {
         if (sb.length > 0) sb.append(' ')
         sb.append(value).append(' ').append(name)
+        if (value > 1) sb.append('s')
       }
     }
     
