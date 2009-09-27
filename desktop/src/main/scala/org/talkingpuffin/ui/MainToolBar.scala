@@ -12,7 +12,7 @@ import time.TimeFormatter
  */
 class MainToolBar extends JToolBar with LongOpListener {
   val progressBar = new ProgressBar {
-    val s = new Dimension(50, 0)
+    val s = new Dimension(40, 0)
     preferredSize = s
     minimumSize = s
   }
@@ -24,7 +24,6 @@ class MainToolBar extends JToolBar with LongOpListener {
   def init(streams: Streams) = {
     streams.providers.providers.foreach(provider => {
       addSourceControls(provider, streams.createView(provider, None))
-      addSeparator
     })
     add(progressBar.peer)
   }
