@@ -1,11 +1,11 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.{TabbedPane, Component, Reactor}
-import filter.{FilterSet, TextFilter, TagUsers}
+import _root_.scala.swing.{Component, Reactor}
+import filter.{TagUsers}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
 import state.{PreferencesFactory}
 import talkingpuffin.util.Loggable
-import twitter._
+import twitter.AuthenticatedSession
 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
