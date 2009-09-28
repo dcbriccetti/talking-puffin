@@ -7,50 +7,33 @@ import java.awt.event.{ActionListener, ActionEvent}
 import util.TitleCreator
 import javax.swing.{Timer, SwingWorker}
 
-/**
- * Provides tweets
- */
 abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName) {
   private val log = Logger.getLogger("TweetsProvider " + providerName)
-  protected var highestId:Option[Long] = startingId
+  private var highestId: Option[Long] = startingId
   val titleCreator = new TitleCreator(providerName)
 
   /** How often, in ms, to fetch and load new data */
-  private var updateFrequency = 120 * 1000;
+  private var updateFrequency = DataProvidersDialog.DefaultRefreshSecs * 1000;
   
   private var timer: Timer = _
   
-  protected def buildSinceParm(args: TwitterArgs) = highestId match {
-    case None => args
-    case Some(i) => args.since(i)
-  }
   def getHighestId = highestId
 
   /**
    * Sets the update frequency, in seconds.
    */
   def setUpdateFrequency(updateFrequencySecs: Int) {
-    this.updateFrequency = updateFrequencySecs * 1000
-    if (timer != null && timer.isRunning) {
-      timer.stop
-    }
-
-    if (updateFrequency > 0) {
-      timer = new Timer(updateFrequency, new ActionListener() {
-        def actionPerformed(event: ActionEvent) = loadNewData
-      })
-      timer.start
-    }
+    updateFrequency = updateFrequencySecs * 1000
+    restartTimer
   }
 
-  def loadNewData = {
-    val args = buildSinceParm(TwitterArgs.maxResults(200))
-    log.info("loading new data with args " + args)
-    loadData(session.user,args,false)
+  def loadNewData {
+    loadNewDataInternal
+    restartTimer
   }
   
-  def loadLastBlockOfTweets = {
+  def loadLastBlockOfTweets {
     loadData(session.user,TwitterArgs.maxResults(200),true)
   }
 
@@ -102,6 +85,29 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
 
   def updateFunc:(TwitterArgs) => List[TwitterDataWithId]
   
+  private def addSince(args: TwitterArgs) = highestId match {
+    case None => args
+    case Some(i) => args.since(i)
+  }
+  
+  private def restartTimer {
+    if (timer != null && timer.isRunning) {
+      timer.stop
+    }
+  
+    if (updateFrequency > 0) {
+      timer = new Timer(updateFrequency, new ActionListener() {
+        def actionPerformed(event: ActionEvent) = loadNewDataInternal
+      })
+      timer.start
+    }
+  }
+
+  private def loadNewDataInternal {
+    val args = addSince(TwitterArgs.maxResults(200))
+    log.info("loading new data with args " + args)
+    loadData(session.user, args, false)
+  }
 }
 
 abstract class BaseProvider(val providerName: String) {

@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import java.awt.event.{ActionEvent, ActionListener, KeyEvent}
+import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.Insets
 import javax.swing.{BorderFactory}
 import swing.GridBagPanel._
@@ -8,8 +8,11 @@ import swing.{Frame, Label, ComboBox, GridBagPanel, FlowPanel, Action, Button, B
 import time.TimeFormatter
 import util.Cancelable
 
-class DataProvidersDialog(owner: java.awt.Frame, streams: Streams) 
-    extends Frame with Cancelable {
+object DataProvidersDialog {
+  val DefaultRefreshSecs = 600
+}
+
+class DataProvidersDialog(owner: java.awt.Frame, streams: Streams) extends Frame with Cancelable {
   title = "Data Providers"
   val panel = new BorderPanel {
     val mainPanel = new GridBagPanel {
@@ -30,9 +33,9 @@ class DataProvidersDialog(owner: java.awt.Frame, streams: Streams)
   
       class RefreshCombo(provider: BaseProvider, times: List[Int]) extends ComboBox(times map DisplayTime) {
         peer.setToolTipText("How often to load new items")
-        var defaultRefresh = DisplayTime(600)
-        peer.setSelectedItem(defaultRefresh)
-        provider.setUpdateFrequency(defaultRefresh.seconds)
+        val DefaultRefresh = DisplayTime(DataProvidersDialog.DefaultRefreshSecs)
+        peer.setSelectedItem(DefaultRefresh)
+        provider.setUpdateFrequency(DefaultRefresh.seconds)
         peer.addActionListener(new ActionListener(){
           def actionPerformed(e: ActionEvent) = {  // Couldn’t get to work with reactions
             provider.setUpdateFrequency(selection.item.seconds)
