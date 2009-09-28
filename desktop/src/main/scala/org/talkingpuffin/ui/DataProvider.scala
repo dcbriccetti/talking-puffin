@@ -1,7 +1,8 @@
 package org.talkingpuffin.ui
 
 import apache.log4j.Logger
-import java.beans.{PropertyChangeSupport, PropertyChangeListener, PropertyChangeEvent}
+import joda.time.DateTime
+import swing.event.Event
 import swing.Publisher
 import twitter.{AuthenticatedSession, TwitterArgs}
 import java.awt.event.{ActionListener, ActionEvent}
@@ -51,7 +52,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
           statuses match {
             case Some(tweets) => highestId = computeHighestId(tweets,getHighestId)
           }
-          log.info("highest tweet id is now " + getHighestId)
+          log.info("highest tweet: " + getHighestId.getOrElse(""))
           statuses
         } catch {
           case e => error(e.toString); None
@@ -88,16 +89,23 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
   }
   
   private def restartTimer {
+    def publishNext = publish(NextLoadAt(new DateTime((new java.util.Date).getTime + updateFrequency)))
+
     if (timer != null && timer.isRunning) {
       timer.stop
     }
   
     if (updateFrequency > 0) {
       timer = new Timer(updateFrequency, new ActionListener() {
-        def actionPerformed(event: ActionEvent) = loadNewDataInternal
+        def actionPerformed(event: ActionEvent) = {
+          loadNewDataInternal
+          publishNext
+        }
       })
       timer.start
+      publishNext
     }
+    
   }
 
   private def loadNewDataInternal {
@@ -105,7 +113,10 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
     log.info("loading new data with args " + args)
     loadData(session.user, args, false)
   }
+
 }
+
+case class NextLoadAt(val when: DateTime) extends Event
 
 abstract class BaseProvider(val providerName: String) extends Publisher {
   def loadNewData
