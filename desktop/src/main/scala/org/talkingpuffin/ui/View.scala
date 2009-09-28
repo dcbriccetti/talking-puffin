@@ -6,7 +6,7 @@ import swing.TabbedPane
 case class View(val title: String, val model: StatusTableModel, val pane: StatusPane)
 
 object View {
-  def create[T](dataProvider: DataProvider[T], screenNameToUserNameMap: Map[String, String], 
+  def create(dataProvider: DataProvider, screenNameToUserNameMap: Map[String, String], 
                 service: String, user: String, 
                 tagUsers: TagUsers, session: Session, include: Option[String], viewCreator: ViewCreator,
                 relationships: Relationships): View = {

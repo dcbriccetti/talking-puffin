@@ -43,25 +43,19 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   reactions += { case e: PrefChangedEvent => 
     if (e.key == PrefKeys.SHOW_TWEET_DATE_AS_AGE) fireTableDataChanged}  
 
-  tweetsProvider.addPropertyChangeListener(new PropertyChangeListener {
-    def propertyChange(evt: PropertyChangeEvent) = evt.getPropertyName match {
-      case TweetsProvider.CLEAR_EVENT => clear(true)
-      case TweetsProvider.NEW_TWEETS_EVENT => {
-        val listAny = evt.getNewValue.asInstanceOf[List[AnyRef]]
-        log.info("Tweets Arrived: " + listAny.length)
-        val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
-          evt.getNewValue.asInstanceOf[List[TwitterStatus]]
-        else
-          adaptDmsToTweets(evt.getNewValue.asInstanceOf[List[TwitterMessage]])
-        processStatuses(newTweets)
-        if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
-      }
+  listenTo(tweetsProvider)
+  reactions += { 
+    case e: NewTwitterDataEvent => {
+      val listAny = e.data
+      log.info("Tweets Arrived: " + listAny.length)
+      val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
+        e.data.asInstanceOf[List[TwitterStatus]]
+      else
+        adaptDmsToTweets(e.data.asInstanceOf[List[TwitterMessage]])
+      processStatuses(newTweets)
+      if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
     }
-  })
-  
-  var followerIds = List[Long]()
-  var friendIds = List[Long]()
-  var friendUsernames = List[String]()
+  }
   
   def getColumnCount = 5
   def getRowCount = filteredStatuses_.length
@@ -80,7 +74,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       else status.user.screenName
 
     def senderNameEs(status: TwitterStatus): EmphasizedString = 
-      new EmphasizedString(Some(senderName(status)), followerIds.contains(status.user.id))
+      new EmphasizedString(Some(senderName(status)), relationships.followerIds.contains(status.user.id))
 
     def toName(status: TwitterStatus) = 
         LinkExtractor.getReplyToInfo(status.inReplyToStatusId, getStatusText(status, username)) match {
@@ -196,7 +190,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       preChangeListener.tableChanging
     }
     
-    filteredStatuses_ = filterSet.filter(statuses, friendUsernames, followerIds) 
+    filteredStatuses_ = filterSet.filter(statuses, relationships) 
     publish(new TableContentsChanged(this, filteredStatuses_.length, statuses.length))
     fireTableDataChanged
   }

@@ -1,11 +1,11 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.{TabbedPane, Component, Reactor}
-import filter.{FilterSet, TextFilter, TagUsers}
+import _root_.scala.swing.{Component, Reactor}
+import filter.{TagUsers}
 import javax.swing.{JFrame, JComponent, SwingUtilities}
 import state.{PreferencesFactory}
 import talkingpuffin.util.Loggable
-import twitter._
+import twitter.AuthenticatedSession
 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
@@ -43,7 +43,7 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
       case i => session.windows.tabbedPane.peer.setTitleAt(i, title)
     }
 
-  def createView[T](dataProvider: DataProvider[T], include: Option[String]): View = {
+  def createView(dataProvider: DataProvider, include: Option[String]): View = {
     val view = View.create(dataProvider, usersTableModel.usersModel.screenNameToUserNameMap, service, 
       twitterSession.user, tagUsers, session, include, this, relationships)
     listenTo(view.model)

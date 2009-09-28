@@ -29,7 +29,7 @@ class TagsDialog(owner: java.awt.Frame, tagUsers: TagUsers, checkedValues: List[
     }, BorderPanel.Position.South)
   }
   setContentPane(panel.peer)
-  setPreferredSize(new Dimension(200,300))
+  setPreferredSize(new Dimension(200,450))
   pack
   setLocationRelativeTo(owner)
   

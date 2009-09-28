@@ -43,7 +43,7 @@ class TwitterArgs(val sinceId:Option[Long], val maxId:Option[Long], val count:Op
   override def toString():String = {
     val argsMap = Map("since_id" -> sinceId, "max_id" -> maxId, "count" -> count, "page" -> page)
     argsMap.filter(_._2.isDefined)
-      .map((argTuple) => argTuple._1 + "=" + argTuple._2.get())
+      .map((argTuple) => argTuple._1 + "=" + argTuple._2.getOrElse(""))
       .mkString("?","&","")
   }
 }

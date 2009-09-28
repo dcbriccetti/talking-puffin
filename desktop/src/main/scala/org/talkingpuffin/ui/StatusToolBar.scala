@@ -3,13 +3,14 @@ package org.talkingpuffin.ui
 import java.awt.event.KeyEvent
 import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
 import swing.{Label, Component, Action}
+import util.ToolBarHelpers
 
 /**
  * Status pane tool bar
  */
 class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialog: FiltersDialog, 
     statusPane: Component, showWordFrequencies: => Unit, clearTweets: (Boolean) => Unit, 
-    showMaxColumns: (Boolean) => Unit) extends JToolBar {
+    showMaxColumns: (Boolean) => Unit) extends JToolBar with ToolBarHelpers {
   var tweetDetailPanel: TweetDetailPanel = _
   
   val showFiltersAction = new Action("Filter") {
@@ -107,8 +108,6 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
   addComponentsToToolBar
   
   private def addComponentsToToolBar {
-    def aa(actions: scala.swing.Action*) = actions.foreach(action => add(action.peer).setFocusable(false))
-    def ac(comps: java.awt.Component*) = comps.foreach(comp => add(comp).setFocusable(false))
     aa(sendAction, dmAction, showFiltersAction, clearAction, clearAllAction, loadNewAction)
     aa(last200Action, wordsAction)
     addSeparator
