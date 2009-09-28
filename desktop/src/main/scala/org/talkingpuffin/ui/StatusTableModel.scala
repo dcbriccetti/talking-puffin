@@ -43,21 +43,19 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   reactions += { case e: PrefChangedEvent => 
     if (e.key == PrefKeys.SHOW_TWEET_DATE_AS_AGE) fireTableDataChanged}  
 
-  tweetsProvider.addPropertyChangeListener(new PropertyChangeListener {
-    def propertyChange(evt: PropertyChangeEvent) = evt.getPropertyName match {
-      case TweetsProvider.CLEAR_EVENT => clear(true)
-      case TweetsProvider.NEW_TWEETS_EVENT => {
-        val listAny = evt.getNewValue.asInstanceOf[List[AnyRef]]
-        log.info("Tweets Arrived: " + listAny.length)
-        val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
-          evt.getNewValue.asInstanceOf[List[TwitterStatus]]
-        else
-          adaptDmsToTweets(evt.getNewValue.asInstanceOf[List[TwitterMessage]])
-        processStatuses(newTweets)
-        if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
-      }
+  listenTo(tweetsProvider)
+  reactions += { 
+    case e: NewTwitterDataEvent => {
+      val listAny = e.data
+      log.info("Tweets Arrived: " + listAny.length)
+      val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
+        e.data.asInstanceOf[List[TwitterStatus]]
+      else
+        adaptDmsToTweets(e.data.asInstanceOf[List[TwitterMessage]])
+      processStatuses(newTweets)
+      if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
     }
-  })
+  }
   
   def getColumnCount = 5
   def getRowCount = filteredStatuses_.length

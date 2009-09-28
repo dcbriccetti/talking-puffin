@@ -5,10 +5,7 @@ import _root_.scala.xml.{NodeSeq}
 import talkingpuffin.util.Loggable
 import twitter.{TwitterMessage, AuthenticatedSession, TwitterArgs, TwitterStatus}
 
-object TweetsProvider {
-  val CLEAR_EVENT = "clear"
-  val NEW_TWEETS_EVENT = "tweets"
-}
+case class NewTwitterDataEvent(val data: List[AnyRef], val clear: Boolean) extends Event
 
 abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends

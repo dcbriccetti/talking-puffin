@@ -2,13 +2,15 @@ package org.talkingpuffin.ui
 
 import apache.log4j.Logger
 import java.beans.{PropertyChangeSupport, PropertyChangeListener, PropertyChangeEvent}
+import swing.Publisher
 import twitter.{AuthenticatedSession, TwitterArgs}
 import java.awt.event.{ActionListener, ActionEvent}
 import util.TitleCreator
 import javax.swing.{Timer, SwingWorker}
 
 abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
-    providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName) {
+    providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
+    with Publisher {
   private val log = Logger.getLogger("TweetsProvider " + providerName)
   private var highestId: Option[Long] = startingId
   val titleCreator = new TitleCreator(providerName)
@@ -55,17 +57,12 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
           case e => error(e.toString); None
         }
       }
-      override def done = {
+      override def done {
         longOpListener.stopOperation
         get match {
           case Some(statuses) => {
-            if (statuses.length > 0) {
-              if (sendClear) 
-                propChg.firePropertyChange(new PropertyChangeEvent(DataProvider.this, 
-                  TweetsProvider.CLEAR_EVENT, null, null))
-              propChg.firePropertyChange(new PropertyChangeEvent(DataProvider.this, 
-                TweetsProvider.NEW_TWEETS_EVENT, null, statuses))
-            }
+            if (statuses.length > 0) 
+              DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
           }
           case None => // Ignore
         }
@@ -110,10 +107,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
   }
 }
 
-abstract class BaseProvider(val providerName: String) {
-  val propChg = new PropertyChangeSupport(this)
-  def addPropertyChangeListener   (l: PropertyChangeListener) = propChg.addPropertyChangeListener(l)
-  def removePropertyChangeListener(l: PropertyChangeListener) = propChg.removePropertyChangeListener(l)
+abstract class BaseProvider(val providerName: String) extends Publisher {
   def loadNewData
   def loadLastBlockOfTweets
   def setUpdateFrequency(updateFrequencySecs: Int)
