@@ -4,19 +4,13 @@ import java.util.concurrent.{Executors, LinkedBlockingQueue}
 import com.google.common.collect.MapMaker
 import java.util.{Collections, HashSet}
 import org.apache.log4j.Logger
+import talkingpuffin.util.Loggable
 
-case class FetchRequest[K](val key: K, val userData: Object)
-
-class ResourceReady[K,V](val key: K, val userData: Object, val resource: V)
-
-case class NoSuchResource(resource: String) extends Exception
-  
 /**
  * Fetches resources in the background, and calls a function in the Swing event thread when ready.
  */
 abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceReady[K,V]) => Unit) 
-    extends Cache[K,V] {
-  val log = Logger.getLogger(getClass)
+    extends Cache[K,V] with Loggable {
   val cache: java.util.Map[K,V] = new MapMaker().softValues().makeMap()
   val requestQueue = new LinkedBlockingQueue[FetchRequest[K]]
   val inProgress = Collections.synchronizedSet(new HashSet[K])
@@ -37,7 +31,7 @@ abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceRea
           var resource = cache.get(key)
           if (resource == null) {
             resource = getResourceFromSource(key)
-            log.debug("Fetched from source: " + key)
+            debug("Got " + key)
             store(cache, key, resource)
           }
           
@@ -72,3 +66,9 @@ abstract class BackgroundResourceFetcher[K,V](processReadyResource: (ResourceRea
   protected def getResourceFromSource(key: K): V
 }
 
+case class FetchRequest[K](val key: K, val userData: Object)
+
+class ResourceReady[K,V](val key: K, val userData: Object, val resource: V)
+
+case class NoSuchResource(resource: String) extends Exception
+  
