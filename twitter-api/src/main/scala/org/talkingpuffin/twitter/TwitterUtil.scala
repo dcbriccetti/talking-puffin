@@ -1,11 +1,11 @@
 package org.talkingpuffin.twitter
 
-import java.net.{URLConnection,URL,HttpURLConnection,URLEncoder}
+import java.net.{URL,HttpURLConnection,URLEncoder}
 import java.util.Locale
 import joda.time.format.DateTimeFormat
 import scala.xml._
 import org.apache.commons.codec.binary.Base64
-import java.io.{DataOutputStream,DataInputStream,IOException,BufferedReader,InputStreamReader}
+import java.io.{DataOutputStream,BufferedReader,InputStreamReader}
 import org.apache.log4j.Logger;
 
 /**
@@ -23,7 +23,7 @@ class XMLFetcher(user: String, password: String){
   * Fetch an XML document from the given URL
   */
   def doGet(url: URL) :Node = {
-    val conn: HttpURLConnection = (url.openConnection).asInstanceOf[HttpURLConnection]
+    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     log.debug("GETing data from " + url)
     if(encoding != null){
       conn.setRequestProperty ("Authorization", "Basic " + encoding);
@@ -32,7 +32,7 @@ class XMLFetcher(user: String, password: String){
   }
 
   def doDelete(url: URL) = {
-    val conn: HttpURLConnection = (url.openConnection).asInstanceOf[HttpURLConnection]
+    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     log.debug("DELETEing data at " + url)
 
     if(encoding != null){
@@ -47,7 +47,7 @@ class XMLFetcher(user: String, password: String){
   * @param params a List of String tuples, the first entry being the param, the second being the value
   */
   def doPost(url: URL, params: List[(String,String)]) :Node = {
-    val conn: HttpURLConnection = (url.openConnection).asInstanceOf[HttpURLConnection]
+    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     log.debug("POSTing data to " + url)
     if(encoding != null){
       conn.setRequestProperty ("Authorization", "Basic " + encoding);
