@@ -17,11 +17,11 @@ object LongRunningSpinner {
   def run(frame: UIElement, callback: (Status) => Unit, functions: () => Boolean*) {
     execSwingWorker({
       try {
-        invokeLater(frame.cursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
+        later(frame.cursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
       
         functions.find(f => !f())
         
-        invokeLater(frame.cursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+        later(frame.cursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
         Successful
       }
       catch {
