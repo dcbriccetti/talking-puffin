@@ -54,7 +54,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
           statuses match {
             case Some(tweets) => highestId = computeHighestId(tweets,getHighestId)
           }
-          log.info("highest tweet: " + getHighestId.getOrElse(""))
+          log.info("highest ID: " + getHighestId.getOrElse(""))
           statuses
         } catch {
           case e => error(e.toString); None
