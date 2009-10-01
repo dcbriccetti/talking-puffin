@@ -1,9 +1,11 @@
 package org.talkingpuffin.ui
 
 import apache.log4j.Logger
+import java.util.Date
 import joda.time.DateTime
 import swing.event.Event
 import swing.Publisher
+import time.TimeFormatter
 import twitter.{AuthenticatedSession, TwitterArgs}
 import java.awt.event.{ActionListener, ActionEvent}
 import util.TitleCreator
@@ -17,7 +19,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
   val titleCreator = new TitleCreator(providerName)
 
   /** How often, in ms, to fetch and load new data */
-  private var updateFrequency = DataProvidersDialog.DefaultRefreshSecs * 1000;
+  private var updateIntervalMs = DataProvidersDialog.DefaultRefreshSecs * 1000;
   
   private var timer: Timer = _
   
@@ -27,7 +29,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
    * Sets the update frequency, in seconds.
    */
   def setUpdateFrequency(updateFrequencySecs: Int) {
-    updateFrequency = updateFrequencySecs * 1000
+    updateIntervalMs = updateFrequencySecs * 1000
     restartTimer
   }
 
@@ -52,7 +54,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
           statuses match {
             case Some(tweets) => highestId = computeHighestId(tweets,getHighestId)
           }
-          log.info("highest tweet: " + getHighestId.getOrElse(""))
+          log.info("highest ID: " + getHighestId.getOrElse(""))
           statuses
         } catch {
           case e => error(e.toString); None
@@ -89,14 +91,18 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
   }
   
   private def restartTimer {
-    def publishNext = publish(NextLoadAt(new DateTime((new java.util.Date).getTime + updateFrequency)))
+    def publishNext {
+      val nextLoadAt = NextLoadAt(new DateTime((new Date).getTime + updateIntervalMs))
+      publish(nextLoadAt)
+      log.debug("Next load in " + new TimeFormatter(updateIntervalMs / 1000).longForm)
+    }
 
     if (timer != null && timer.isRunning) {
       timer.stop
     }
   
-    if (updateFrequency > 0) {
-      timer = new Timer(updateFrequency, new ActionListener() {
+    if (updateIntervalMs > 0) {
+      timer = new Timer(updateIntervalMs, new ActionListener() {
         def actionPerformed(event: ActionEvent) = {
           loadNewDataInternal
           publishNext

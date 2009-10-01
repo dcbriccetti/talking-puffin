@@ -14,7 +14,7 @@ object PictureFetcher {
   type ImageReady = ResourceReady[String,ImageWithScaled]
 
   /** Derives the full size filename from the thumbnail filename */
-  def getFullSizeUrl(thumb: String): String = thumb.replace("_normal", "")
+  def getFullSizeUrl(thumb: String) = thumb.replace("_normal", "")
 
   private def scaleImageToFitSquare(sideLength: Int, imageIcon: ImageIcon): ImageIcon = {
     val image = imageIcon.getImage

@@ -7,7 +7,7 @@ import javax.swing.{SwingUtilities, SwingWorker}
  */
 object SwingInvoke {
   
-  def invokeLater(f: => Unit) {
+  def later(f: => Unit) {
     SwingUtilities.invokeLater(new Runnable{ def run{f} })
   }
   

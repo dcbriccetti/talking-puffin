@@ -16,8 +16,11 @@ object DataProvidersDialog {
 }
 
 class DataProvidersDialog(owner: java.awt.Frame, streams: Streams) extends Frame with Cancelable with Loggable {
+  
   title = "Data Providers"
+  
   val panel = new BorderPanel {
+    
     val mainPanel = new GridBagPanel {
       border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
       val headingInsets = new Insets(0, 0, 10, 0)
@@ -25,19 +28,24 @@ class DataProvidersDialog(owner: java.awt.Frame, streams: Streams) extends Frame
       add(new Label("Update Every"), new Constraints {grid=(1,0); anchor=Anchor.West; insets=headingInsets})
       add(new Label("Next"), new Constraints {grid=(2,0); anchor=Anchor.West; insets=headingInsets})
       val firstReloadTime = new DateTime((new Date).getTime + DataProvidersDialog.DefaultRefreshSecs * 1000)
-      streams.providers.providers.zipWithIndex.foreach(p => {
+      
+      val reactors = streams.providers.providers.zipWithIndex.map(p => {
         val provider = p._1
         val i = p._2 + 1
         add(new Label(provider.providerName), new Constraints {grid=(0,i); anchor=Anchor.West})
         add(new RefreshCombo(provider, assortedTimes), new Constraints {grid=(1,i); anchor=Anchor.West})
         val nextLoadLabel = new Label(formatTime(firstReloadTime))
+        add(nextLoadLabel, new Constraints {grid=(2,i); anchor=Anchor.West})
         new Reactor {
           listenTo(provider)
           reactions += {
-            case e: NextLoadAt => nextLoadLabel.text = formatTime(e.when)
+            case e: NextLoadAt => {
+              val time = formatTime(e.when)
+              nextLoadLabel.text = time
+              debug("NextLoadAt received at " + hashCode + " from " + provider.providerName + ": " + time)
+            }
           }
-        }
-        add(nextLoadLabel, new Constraints {grid=(2,i); anchor=Anchor.West})
+        } // Save a reference to all reactors so they don’t get garbage collected
       })
       
       case class DisplayTime(val seconds: Int) {
