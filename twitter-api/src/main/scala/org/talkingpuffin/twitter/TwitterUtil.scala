@@ -22,7 +22,7 @@ class XMLFetcher(user: String, password: String){
   /**
   * Fetch an XML document from the given URL
   */
-  def doGet(url: URL) :Node = {
+  def doGet(url: URL): Node = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     log.debug("GETing data from " + url)
     if(encoding != null){
@@ -46,7 +46,7 @@ class XMLFetcher(user: String, password: String){
   * @param url the URL to post to
   * @param params a List of String tuples, the first entry being the param, the second being the value
   */
-  def doPost(url: URL, params: List[(String,String)]) :Node = {
+  def doPost(url: URL, params: List[(String,String)]): Node = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     log.debug("POSTing data to " + url)
     if(encoding != null){
@@ -77,7 +77,7 @@ class XMLFetcher(user: String, password: String){
   * This path also reads from conn.getErrorStream() to populate the twitterMessage field
   * in the thrown exception.
   */
-  def getXML(conn: HttpURLConnection) :Node = {
+  def getXML(conn: HttpURLConnection): Node = {
     val response = conn.getResponseCode()
     response match {
       case 200 => XML.load(conn.getInputStream())
@@ -94,7 +94,7 @@ class XMLFetcher(user: String, password: String){
     }
   }
 
-  def buildParams(params: List[(String,String)]) :String = {
+  def buildParams(params: List[(String,String)]): String = {
     params match {
       case Nil => null
       case (param,value) :: rest => {
@@ -111,7 +111,7 @@ class XMLFetcher(user: String, password: String){
 * and then processes the document with the specified factory, building a list (or single instance) 
 * of whatever the factory returns.
 */
-class Parser[T](url: URL, fetcher :XMLFetcher, factory: (Node) => T){  
+class Parser[T](url: URL, fetcher: XMLFetcher, factory: (Node) => T){  
   /**
   * build a list of instances of T from the returned XML document
   */
