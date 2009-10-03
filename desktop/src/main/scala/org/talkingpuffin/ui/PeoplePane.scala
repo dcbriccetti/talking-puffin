@@ -3,12 +3,13 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.event.EditDone
 import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
 import java.awt.{Toolkit, Dimension}
-import javax.swing.{JButton, KeyStroke, JPopupMenu, JOptionPane, JTable, JToolBar, JToggleButton, JLabel}
+import javax.swing.{JButton, JPopupMenu, JTable, JToolBar, JToggleButton, JLabel}
 import scala.swing.GridBagPanel._
 import swing.{Reactor, MenuItem, GridBagPanel, ScrollPane, TextField, Action}
-import talkingpuffin.util.{Loggable, PopupListener}
-import util.{TableUtil, DesktopUtil}
+import org.talkingpuffin.util.{Loggable, PopupListener}
+import org.talkingpuffin.ui.util.{TableUtil, DesktopUtil}
 import org.talkingpuffin.twitter.{TwitterUser}
+import org.talkingpuffin.Session
 
 object UserColumns {
   val ARROWS = 0

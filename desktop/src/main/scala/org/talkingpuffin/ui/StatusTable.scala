@@ -1,6 +1,5 @@
 package org.talkingpuffin.ui
 
-import com.google.common.collect.Lists
 import java.awt.{Toolkit}
 import _root_.scala.{Option}
 import java.awt.event.{KeyEvent, MouseEvent, MouseAdapter}
@@ -8,16 +7,18 @@ import java.beans.PropertyChangeEvent
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer}
 import javax.swing.{KeyStroke, JPopupMenu}
-import jdesktop.swingx.decorator.{SortKey, SortOrder, HighlighterFactory}
+import swing.{Reactor, MenuItem, Action}
+import com.google.common.collect.Lists
+import org.jdesktop.swingx.decorator.{SortKey, SortOrder, HighlighterFactory}
 import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
-import state.GlobalPrefs.PrefChangedEvent
-import state.{PrefKeys, GlobalPrefs}
-import swing.{Reactor, MenuItem, Action}
-import table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
-import talkingpuffin.util.{Loggable, PopupListener}
-import twitter.{TwitterStatus}
-import util.{TableUtil, DesktopUtil}
+import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
+import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
+import org.talkingpuffin.ui.table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
+import org.talkingpuffin.util.{Loggable, PopupListener}
+import org.talkingpuffin.twitter.{TwitterStatus}
+import org.talkingpuffin.ui.util.{TableUtil, DesktopUtil}
+import org.talkingpuffin.Session
 
 /**
  * Table of statuses.

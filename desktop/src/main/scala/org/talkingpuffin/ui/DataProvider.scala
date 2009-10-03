@@ -1,15 +1,15 @@
 package org.talkingpuffin.ui
 
-import apache.log4j.Logger
 import java.util.Date
-import joda.time.DateTime
+import java.awt.event.{ActionListener, ActionEvent}
+import javax.swing.{Timer, SwingWorker}
 import swing.event.Event
 import swing.Publisher
-import time.TimeFormatter
-import twitter.{AuthenticatedSession, TwitterArgs}
-import java.awt.event.{ActionListener, ActionEvent}
+import org.apache.log4j.Logger
 import util.TitleCreator
-import javax.swing.{Timer, SwingWorker}
+import org.talkingpuffin.twitter.{TwitterArgs, AuthenticatedSession}
+import org.talkingpuffin.time.TimeFormatter
+import org.joda.time.DateTime
 
 abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)

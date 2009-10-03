@@ -1,6 +1,6 @@
 package org.talkingpuffin.util
 
-import apache.log4j.Logger
+import org.apache.log4j.Logger
 
 trait Loggable {
   private val cn = getClass.getName

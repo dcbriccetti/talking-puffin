@@ -2,7 +2,7 @@ package org.talkingpuffin.twitter
 
 import java.net.{URL,HttpURLConnection,URLEncoder}
 import java.util.Locale
-import joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormat
 import scala.xml._
 import org.apache.commons.codec.binary.Base64
 import java.io.{DataOutputStream,BufferedReader,InputStreamReader}

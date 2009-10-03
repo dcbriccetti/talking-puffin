@@ -1,6 +1,4 @@
 package org.talkingpuffin.ui
-import _root_.scala.xml.NodeSeq
-import java.util.regex.Pattern
 
 /**
  * Helps with creating HTML for display in the UI

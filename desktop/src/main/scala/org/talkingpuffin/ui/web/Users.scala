@@ -1,13 +1,9 @@
 package org.talkingpuffin.ui.web
 
-import _root_.scala.xml.NodeSeq
 import java.io.Serializable
-import twitter.{AuthenticatedSession,TwitterUser,TwitterArgs}
-import ui.UsersModel
+import org.talkingpuffin.twitter.{AuthenticatedSession,TwitterUser,TwitterArgs}
+import org.talkingpuffin.ui.{UserSelection, Relationships, UsersModel}
 
-/**
- * Users managed bean.
- */
 class UserRow(val picUrl: String, val arrows: String, val screenName: String, val name: String,
     val numFriends: Int, val numFollowers: Int,
     val location: String, val description: String, val status: String) extends Serializable {
@@ -22,6 +18,9 @@ class UserRow(val picUrl: String, val arrows: String, val screenName: String, va
   def getStatus = status
 }
 
+/**
+ * Users managed bean.
+ */
 class Users extends Serializable {
   var session: AuthenticatedSession = _
   def setSession(session: AuthenticatedSession) = this.session = session
@@ -35,7 +34,6 @@ class Users extends Serializable {
   }
 
   def getUsers: Array[TwitterUser] = {
-    //TODO: make sure we get more than 20 here
     val rels = new Relationships()
     rels.friends = session.getFriends(TwitterArgs.maxResults(200))
     rels.followers = session.getFollowers(TwitterArgs.maxResults(200))

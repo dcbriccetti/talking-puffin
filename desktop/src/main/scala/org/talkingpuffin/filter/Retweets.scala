@@ -1,7 +1,10 @@
 package org.talkingpuffin.filter
 
-import ui.LinkExtractor
+import org.talkingpuffin.ui.LinkExtractor
 
+/**
+ * Methods related to old-style (RT, etc.) retweets
+ */
 object Retweets {
   private val user = LinkExtractor.usernameRegex
   private val rtUser = ("""(rt|RT|♺)\:? ?""" + user + ".*").r

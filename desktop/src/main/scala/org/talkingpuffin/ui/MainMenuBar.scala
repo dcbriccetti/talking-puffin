@@ -4,8 +4,9 @@ import _root_.scala.swing.{MenuItem, MenuBar, Menu, CheckMenuItem, Action}
 import javax.swing.KeyStroke
 import java.awt.event.KeyEvent
 import java.awt.Toolkit
-import state.{GlobalPrefs, PrefKeys}
 import swing.event.{Event, ButtonClicked}
+import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
+import org.talkingpuffin.Main
 
 /**
  * Main menu bar

@@ -3,7 +3,7 @@ package org.talkingpuffin.ui
 import java.util.concurrent.{Executors, Callable}
 import swing.event.Event
 import swing.Publisher
-import twitter.{TwitterUser, AuthenticatedSession, TwitterUserId}
+import org.talkingpuffin.twitter.{TwitterUser, AuthenticatedSession, TwitterUserId}
 import javax.swing.SwingWorker
 
 case class IdsChanged() extends Event

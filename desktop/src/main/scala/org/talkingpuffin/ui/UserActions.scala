@@ -3,7 +3,7 @@ package org.talkingpuffin.ui
 import java.awt.event.KeyEvent
 import java.awt.Toolkit
 import javax.swing.{KeyStroke, JOptionPane}
-import twitter.AuthenticatedSession
+import org.talkingpuffin.twitter.AuthenticatedSession
 
 /**
  * Handles user actions like follow

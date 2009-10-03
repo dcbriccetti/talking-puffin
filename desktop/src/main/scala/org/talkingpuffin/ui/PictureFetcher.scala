@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import cache.Cache
+import org.talkingpuffin.cache.Cache
 import java.awt.Image
 import javax.swing.{ImageIcon}
 import java.net.URL

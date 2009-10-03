@@ -5,9 +5,10 @@ import event.{SelectionChanged, CaretUpdate, EditDone}
 import java.awt.event.{KeyAdapter, KeyEvent}
 import java.awt.{Dimension, Font}
 import javax.swing.{SwingWorker}
-import talkingpuffin.util.Loggable
-import twitter.{TwitterUser}
-import util.Cancelable
+import org.talkingpuffin.util.Loggable
+import org.talkingpuffin.twitter.{TwitterUser}
+import org.talkingpuffin.ui.util.Cancelable
+import org.talkingpuffin.{Globals, Session}
 
 /**
  * A dialog for sending messages

@@ -1,9 +1,10 @@
 package org.talkingpuffin.ui.util
-import cache.Cache
 import java.util.concurrent.{Executors, LinkedBlockingQueue}
 import com.google.common.collect.MapMaker
 import java.util.{Collections, HashSet}
-import talkingpuffin.util.Loggable
+import org.talkingpuffin.ui.SwingInvoke
+import org.talkingpuffin.util.Loggable
+import org.talkingpuffin.cache.Cache
 
 /**
  * Fetches resources in the background, and calls a function in the Swing event thread when ready.

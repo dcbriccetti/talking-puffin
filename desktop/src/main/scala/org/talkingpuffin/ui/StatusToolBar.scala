@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent
 import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
 import swing.{Label, Component, Action}
 import util.ToolBarHelpers
+import org.talkingpuffin.Session
 
 /**
  * Status pane tool bar

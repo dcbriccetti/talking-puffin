@@ -5,7 +5,7 @@ import javax.swing.border.EmptyBorder
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.text.JTextComponent
 import javax.swing.{JTextPane, JTable}
-import talkingpuffin.util.Loggable
+import org.talkingpuffin.util.Loggable
 
 /**
  * HTML cell renderer.
@@ -33,4 +33,3 @@ class HtmlCellRenderer extends TableCellRenderer with Loggable {
   private def formatValue(string: String, color: Color): String = "<font face='helvetica' color='#" +  
     Integer.toHexString(color.getRGB & 0x00ffffff) + "'>" + string + "</font>"
 }
-

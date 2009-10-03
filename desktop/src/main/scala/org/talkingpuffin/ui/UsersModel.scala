@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import twitter.TwitterUser
+import org.talkingpuffin.twitter.TwitterUser
 
 /**
  * A model for users (followed and followers)

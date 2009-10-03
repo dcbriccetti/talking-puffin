@@ -1,11 +1,12 @@
 package org.talkingpuffin.ui
 
-import apache.log4j.Logger
-import filter.{TagUsers, FilterSet}
 import java.awt.{Dimension}
 import javax.swing.event._
-import twitter.TwitterStatus
+import org.apache.log4j.Logger
 import swing.{ScrollPane, GridBagPanel}
+import org.talkingpuffin.filter.{TagUsers, FilterSet}
+import org.talkingpuffin.twitter.TwitterStatus
+import org.talkingpuffin.Session
 
 /**
  * Displays friend statuses

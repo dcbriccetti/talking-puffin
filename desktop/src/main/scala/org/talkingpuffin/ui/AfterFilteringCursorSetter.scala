@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import apache.log4j.Logger
+import org.apache.log4j.Logger
 import javax.swing.JTable
 
 /**
