@@ -11,13 +11,12 @@ class Windows {
   var streams: Streams = _
     
   def undock(comp: Component) {
-    val frame = new Frame {
-        title = streams.componentTitle(comp)
-        contents = comp
-        menuBar = new MainMenuBar(streams.providers)
-      }
-      frame.visible = true
-    }
+    new Frame {
+      title = streams.componentTitle(comp)
+      contents = comp
+      menuBar = new MainMenuBar(streams.providers)
+    }.visible = true
+  }
   
   def dock(comp: Component) = {
     val frame = SwingUtilities.getAncestorOfClass(classOf[JFrame], comp.peer).asInstanceOf[JFrame]

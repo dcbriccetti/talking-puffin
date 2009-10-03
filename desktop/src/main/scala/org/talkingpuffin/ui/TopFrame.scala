@@ -1,16 +1,16 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.{WindowClosing}
-import filter.{TagUsers}
 import java.awt.{Dimension}
 import javax.swing.{ImageIcon}
-import state.PrefKeys
 import swing.TabbedPane.Page
 import swing.{Reactor, Frame, TabbedPane, Label, GridBagPanel}
-import talkingpuffin.util.Loggable
-import twitter.{TwitterUser, AuthenticatedSession}
-import ui._
-import ui.util.FetchRequest
+import org.talkingpuffin.filter.TagUsers
+import org.talkingpuffin.twitter.{TwitterUser, AuthenticatedSession}
+import util.FetchRequest
+import org.talkingpuffin.{Main, Globals, Session}
+import org.talkingpuffin.util.Loggable
+import org.talkingpuffin.state.StateSaver
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -85,26 +85,10 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   def close {
     Globals.sessions -= session
     dispose
-    saveState
+    StateSaver.save(streams, session.userPrefs, tagUsers)
     TopFrames.removeFrame(this)
   }
 
-  private def saveState {
-    val highFol = streams.providers.followingProvider.getHighestId
-    val highMen = streams.providers.mentionsProvider.getHighestId
-    val highDmReceived = streams.providers.dmsReceivedProvider.getHighestId
-    val highDmSent = streams.providers.dmsSentProvider.getHighestId
-    info("Saving last seen IDs for " + twitterSession.user + ". Following: " + highFol + 
-        ", mentions: " + highMen + ", DMs rvcd: " + highDmReceived + ", DMs sent: " + highDmSent)
-    val prefs = session.userPrefs
-    if (highFol.isDefined) prefs.put(PrefKeys.HIGHEST_ID       , highFol.get.toString())
-    if (highMen.isDefined) prefs.put(PrefKeys.HIGHEST_MENTION_ID, highMen.get.toString())
-    if (highDmReceived.isDefined ) prefs.put(PrefKeys.HIGHEST_RECEIVED_DM_ID, highDmReceived.get.toString())
-    if (highDmSent.isDefined ) prefs.put(PrefKeys.HIGHEST_SENT_DM_ID, highDmSent.get.toString())
-    tagUsers.save
-    streams.views.last.pane.saveState // TODO instead save the order of the last status pane changed
-  }
-  
   type Users = List[TwitterUser]
   
   def peoplePaneTitle(numFriends: Int, numFollowers: Int) = "People (" + numFriends + ", " + numFollowers + ")"

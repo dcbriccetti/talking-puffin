@@ -2,17 +2,18 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.{Label, GridBagPanel, TextArea, BorderPanel}
 import _root_.scala.swing.GridBagPanel._
-import filter.TagUsers
-import geo.GeoCoder
 import java.awt.event.{MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Font}
 import java.text.NumberFormat
 import java.util.prefs.Preferences
 import javax.swing._
-import state.{GlobalPrefs, PrefKeys}
-import util.{ShortUrl, FetchRequest, ResourceReady, TextChangingAnimator}
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
+import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
+import org.talkingpuffin.geo.GeoCoder
+import org.talkingpuffin.filter.TagUsers
+import org.talkingpuffin.Session
+import util.{ResourceReady, FetchRequest, ShortUrl, TextChangingAnimator}
 
 object Thumbnail {
   val THUMBNAIL_SIZE = 48
@@ -144,18 +145,22 @@ class TweetDetailPanel(session: Session, table: JTable,
   
   private def setText(user: TwitterUser, location: String) {
     addFreshUserDescription
+
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
-    val tags = tagUsers.tagsForUser(user.id).mkString(", ")
+
     userDescription.text = UserProperties.overriddenUserName(userPrefs, user) + 
         " (" + user.screenName + ") • " +
         location + " • " + user.description  + " • " +
         fmt(user.followersCount) + " followers, following " +
         fmt(user.friendsCount) +
-        (tags.length match { case 0 => "" case _ => " • Tags: " + tags})
+        (tagUsers.tagsForUser(user.id) match { 
+          case Nil => "" 
+          case tags => " • Tags: " + tags.mkString(", ")
+        })
   }
 
   private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = 
-    if (resourceReady.userData.equals(showingUser)) {
+    if (resourceReady.userData == showingUser) {
       animator.stop
       animator.run(showingUser.location, resourceReady.resource, (text: String) => setText(showingUser, text))
     }
@@ -185,4 +190,3 @@ class TweetDetailPanel(session: Session, table: JTable,
   }
 
 }
-
