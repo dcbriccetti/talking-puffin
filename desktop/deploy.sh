@@ -12,6 +12,6 @@ jar xf $JAR
 rm $JAR
 jar cf $JAR *
 
-jarsigner $JAR mykey2
+jarsigner $JAR mykey3
 popd
 mv /tmp/a/$JAR ../website/jws
