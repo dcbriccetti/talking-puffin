@@ -210,7 +210,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
 
     ap add(Action("View status in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
     ap add(Action("View user in Browser") {viewUser}, KeyStroke.getKeyStroke(KeyEvent.VK_V, SHIFT))
-    ap add(Action("Edit user properties…") {editUser}, KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask))
+    ap add(Action("Edit user properties…") {editUser}, KeyStroke.getKeyStroke(KeyEvent.VK_P, shortcutKeyMask))
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
     ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_U))
     ap add(Action("Mute") {tableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
