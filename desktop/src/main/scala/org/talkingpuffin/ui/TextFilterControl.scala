@@ -1,7 +1,7 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.ButtonClicked
-import filter.{TextFilters, TextFilter}
+import org.talkingpuffin.filter.{TextFilters, TextFilter}
 import java.awt.Dimension
 import java.awt.event.KeyEvent
 import javax.swing.{KeyStroke, BorderFactory}

@@ -1,6 +1,8 @@
 package org.talkingpuffin.ui.util
+
 import java.util.concurrent.atomic.AtomicBoolean
-import state.{GlobalPrefs, PrefKeys}
+import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
+import org.talkingpuffin.ui.SwingInvoke
 
 /**
  * An animator to make old text slide out and new text slide in.

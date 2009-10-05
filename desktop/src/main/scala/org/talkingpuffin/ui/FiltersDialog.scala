@@ -1,7 +1,7 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.GridBagPanel._
-import filter.{TextFilters, TagUsers, FilterSet}
+import org.talkingpuffin.filter.{TextFilters, TagUsers, FilterSet}
 import java.awt.event.KeyEvent
 import java.awt.{Dimension}
 import javax.swing.border.EmptyBorder

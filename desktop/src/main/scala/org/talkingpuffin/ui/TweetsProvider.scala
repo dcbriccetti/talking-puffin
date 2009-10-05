@@ -2,8 +2,8 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.Event
 import _root_.scala.xml.{NodeSeq}
-import talkingpuffin.util.Loggable
-import twitter.{TwitterMessage, AuthenticatedSession, TwitterArgs, TwitterStatus}
+import org.talkingpuffin.util.Loggable
+import org.talkingpuffin.twitter.{TwitterMessage, AuthenticatedSession, TwitterArgs, TwitterStatus}
 
 case class NewTwitterDataEvent(val data: List[AnyRef], val clear: Boolean) extends Event
 

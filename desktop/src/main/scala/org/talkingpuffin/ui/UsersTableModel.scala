@@ -2,10 +2,9 @@ package org.talkingpuffin.ui
 
 import javax.swing.table.AbstractTableModel
 import javax.swing.Icon
-import filter.TagUsers
 import swing.Reactor
-import table.EmphasizedString
-import twitter.{TwitterUser}
+import org.talkingpuffin.filter.TagUsers
+import org.talkingpuffin.ui.table.EmphasizedString
 
 class UsersTableModel(val tagUsers: TagUsers, val relationships: Relationships)
     extends AbstractTableModel with TaggingSupport with Reactor {

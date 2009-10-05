@@ -1,9 +1,9 @@
 package org.talkingpuffin.geo
 
-import com.google.common.collect.MapMaker
 import java.net.URL
 import _root_.scala.xml.XML
-import ui.util.{ResourceReady, BackgroundResourceFetcher}
+import com.google.common.collect.MapMaker
+import org.talkingpuffin.ui.util.{BackgroundResourceFetcher, ResourceReady}
 
 /**
  * Geocoding.
@@ -17,7 +17,6 @@ object GeoCoder {
     case latLongRegex(lat, long) => Some(lat + "," + long)
     case _ => None
   }
-  
 }
 
 class GeoCoder(processResults: (ResourceReady[String,String]) => Unit) 

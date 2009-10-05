@@ -1,7 +1,7 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.UIElement
-import java.awt.{Frame, Cursor}
+import java.awt.Cursor
 import SwingInvoke._
 
 /**

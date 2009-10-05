@@ -1,13 +1,5 @@
-/*
- * TwitterRateLimitStatus.scala
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
 package org.talkingpuffin.twitter
 
-import java.util.Date
 import scala.xml._
 import org.apache.log4j._
 import org.joda.time._
@@ -22,7 +14,6 @@ class TwitterRateLimitStatus() extends Validated{
   var resetTimeInSeconds:Int = 0
   def isValid() = {
     hourlyLimit != 0 &&
-    //resetTime != null &&
     resetTimeInSeconds != 0
   }
 }

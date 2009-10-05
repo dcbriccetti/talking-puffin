@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import filter.TextFilters
+import org.talkingpuffin.filter.TextFilters
 import javax.swing.table.AbstractTableModel
 
 /**

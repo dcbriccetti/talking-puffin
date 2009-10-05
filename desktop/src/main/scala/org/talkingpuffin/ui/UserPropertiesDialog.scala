@@ -4,11 +4,10 @@ import java.awt.Dimension
 import java.awt.event.KeyEvent
 import java.util.prefs.Preferences
 import javax.swing.border.EmptyBorder
-import _root_.scala.swing.GridBagPanel._
-import state.PreferencesFactory
-import swing._
-import twitter.{TwitterUser, TwitterStatus}
+import scala.swing.GridBagPanel._
+import org.talkingpuffin.twitter.{TwitterUser, TwitterStatus}
 import util.Cancelable
+import swing.{TextField, Label, GridBagPanel, Frame, TextArea, FlowPanel, Action, Button}
 
 class UserPropertiesDialog(userPrefs: Preferences, status: TwitterStatus) extends Frame with Cancelable {
   private val screenName = status.user.screenName

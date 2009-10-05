@@ -1,8 +1,8 @@
 package org.talkingpuffin.ui
 
-import mac.QuitHandler
+import org.talkingpuffin.mac.QuitHandler
 import java.awt.Frame
-import talkingpuffin.util.Loggable
+import org.talkingpuffin.util.Loggable
 
 /**
  * Keeps track of top-level frames.

@@ -5,10 +5,10 @@ import java.util.Date
 import javax.swing.border.EmptyBorder
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.{JTextPane, JTable}
-import joda.time.DateTime
-import joda.time.format.{DateTimeFormat}
-import state.{PrefKeys, GlobalPrefs}
-import time.TimeFormatter
+import org.talkingpuffin.time.TimeFormatter
+import org.joda.time.DateTime
+import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
+import org.joda.time.format.DateTimeFormat
 
 /**
  * Renderer for the Age column

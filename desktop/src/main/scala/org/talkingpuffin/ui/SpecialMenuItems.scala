@@ -1,8 +1,8 @@
 package org.talkingpuffin.ui
 
 import swing.Action
-import talkingpuffin.util.Loggable
-import twitter.TwitterStatus
+import org.talkingpuffin.util.Loggable
+import org.talkingpuffin.twitter.TwitterStatus
 
 class SpecialMenuItems extends Loggable {
   class ActionsList {

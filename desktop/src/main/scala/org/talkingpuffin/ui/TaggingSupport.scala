@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import filter.TagUsers
+import org.talkingpuffin.filter.TagUsers
 
 /**
  * Adds tagging support to table models.

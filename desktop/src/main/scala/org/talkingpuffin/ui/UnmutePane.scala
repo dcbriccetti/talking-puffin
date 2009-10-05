@@ -1,7 +1,7 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.{ListView, Button, GridBagPanel, ScrollPane}
-import filter.FilterSet
+import org.talkingpuffin.filter.FilterSet
 import javax.swing.event.{TableModelEvent, TableModelListener}
 import javax.swing.BorderFactory
 import java.awt.Dimension

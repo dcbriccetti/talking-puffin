@@ -1,22 +1,14 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.{ComboBox, CheckBox, Label, Button, Frame, PasswordField, Publisher, 
-FlowPanel, GridBagPanel, TextField}
-import _root_.scala.swing.GridBagPanel.Anchor.West
-import ComboBox._
-import _root_.scala.xml.Node
-import collection.mutable.Subscriber
-import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.Color
-import java.util.prefs.Preferences
-import javax.swing.JDialog
-import javax.swing.SpringLayout.Constraints
-import org.talkingpuffin.twitter.{TwitterSession,AuthenticatedSession,API}
-import LongRunningSpinner._
-import state.{Account, Accounts, GlobalPrefs, PreferencesFactory}
+import scala.swing.{ComboBox, CheckBox, Label, Button, Frame, PasswordField, Publisher,
+FlowPanel, GridBagPanel, TextField}
+import scala.swing.GridBagPanel.Anchor.West
 import swing.event.{SelectionChanged, ButtonClicked, EditDone, Event}
-import talkingpuffin.util.Loggable
-import util.Cancelable
+import org.talkingpuffin.twitter.{TwitterSession,AuthenticatedSession,API}
+import org.talkingpuffin.state.{Account, Accounts}
+import org.talkingpuffin.util.Loggable
+import org.talkingpuffin.ui.util.Cancelable
 
 class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession) => Unit)
     extends Frame with Cancelable with Loggable {

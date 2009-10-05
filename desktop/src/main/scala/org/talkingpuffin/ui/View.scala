@@ -1,7 +1,8 @@
 package org.talkingpuffin.ui
 
-import filter.{TagUsers, FilterSet, TextFilter}
 import swing.TabbedPane
+import org.talkingpuffin.filter.{TagUsers, FilterSet, TextFilter}
+import org.talkingpuffin.Session
 
 case class View(val title: String, val model: StatusTableModel, val pane: StatusPane)
 

@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import filter.TagUsers
+import org.talkingpuffin.filter.TagUsers
 import java.awt.Dimension
 import javax.swing.JDialog
 import util.Cancelable

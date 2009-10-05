@@ -1,20 +1,20 @@
 package org.talkingpuffin.ui
 
-import apache.log4j.Logger
 import java.util.Date
-import joda.time.DateTime
+import java.awt.event.{ActionListener, ActionEvent}
+import javax.swing.{Timer, SwingWorker}
 import swing.event.Event
 import swing.Publisher
-import time.TimeFormatter
-import twitter.{AuthenticatedSession, TwitterArgs}
-import java.awt.event.{ActionListener, ActionEvent}
+import org.apache.log4j.Logger
 import util.TitleCreator
-import javax.swing.{Timer, SwingWorker}
+import org.talkingpuffin.twitter.{TwitterArgs, AuthenticatedSession}
+import org.talkingpuffin.time.TimeFormatter
+import org.joda.time.DateTime
 
 abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
     with Publisher {
-  private val log = Logger.getLogger("TweetsProvider " + providerName)
+  private val log = Logger.getLogger("DataProvider " + providerName)
   private var highestId: Option[Long] = startingId
   val titleCreator = new TitleCreator(providerName)
 
@@ -38,40 +38,9 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
     restartTimer
   }
   
-  def loadLastBlockOfTweets {
-    loadData(session.user,TwitterArgs.maxResults(200),true)
-  }
+  def loadLastBlockOfTweets = loadData(TwitterArgs.maxResults(200), true)
 
   type TwitterDataWithId = {def id: Long} 
-
-  def loadData(username: String, args: TwitterArgs, clear: Boolean): Unit = {
-    longOpListener.startOperation
-    new SwingWorker[Option[List[TwitterDataWithId]], Object] {
-      val sendClear = clear
-      override def doInBackground: Option[List[TwitterDataWithId]] = {
-        try{
-          val statuses = Some(updateFunc(args))
-          statuses match {
-            case Some(tweets) => highestId = computeHighestId(tweets,getHighestId)
-          }
-          log.info("highest ID: " + getHighestId.getOrElse(""))
-          statuses
-        } catch {
-          case e => error(e.toString); None
-        }
-      }
-      override def done {
-        longOpListener.stopOperation
-        get match {
-          case Some(statuses) => {
-            if (statuses.length > 0) 
-              DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
-          }
-          case None => // Ignore
-        }
-      }
-    }.execute
-  }
 
   def getResponseId(response: TwitterDataWithId): Long
 
@@ -117,7 +86,30 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
   private def loadNewDataInternal {
     val args = addSince(TwitterArgs.maxResults(200))
     log.info("loading new data with args " + args)
-    loadData(session.user, args, false)
+    loadData(args, false)
+  }
+
+  private def loadData(args: TwitterArgs, clear: Boolean): Unit = {
+    longOpListener.startOperation
+    new SwingWorker[List[TwitterDataWithId], Object] {
+      val sendClear = clear
+      override def doInBackground: List[TwitterDataWithId] = {
+        try{
+          val data = updateFunc(args)
+          highestId = computeHighestId(data, getHighestId)
+          log.info("highest ID: " + getHighestId.getOrElse(""))
+          data
+        } catch {
+          case e => error(e.toString); Nil
+        }
+      }
+      override def done {
+        longOpListener.stopOperation
+        val statuses = get
+        if (statuses != Nil) 
+          DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
+      }
+    }.execute
   }
 
 }

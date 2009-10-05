@@ -2,15 +2,14 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
-import filter.{FilterSet, FilterSetChanged, TagUsers}
-import java.beans.{PropertyChangeEvent, PropertyChangeListener}
+import org.talkingpuffin.filter.{FilterSet, FilterSetChanged, TagUsers}
 import javax.swing._
 import javax.swing.table.{AbstractTableModel}
 import org.apache.log4j.Logger
-import state.GlobalPrefs.PrefChangedEvent
-import state.{PreferencesFactory, GlobalPrefs, PrefKeys}
-import twitter.{TwitterMessage, TwitterStatus}
-import ui.table.{EmphasizedString, StatusCell}
+import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
+import org.talkingpuffin.state.{PreferencesFactory, GlobalPrefs, PrefKeys}
+import org.talkingpuffin.twitter.{TwitterMessage, TwitterStatus}
+import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 
 /**

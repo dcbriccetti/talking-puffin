@@ -4,8 +4,9 @@ import _root_.scala.swing.event.Event
 import _root_.scala.collection.mutable.LinkedHashMap
 import _root_.scala.swing.Publisher
 import java.util.regex.Pattern
-import twitter.TwitterStatus
-import ui.{Relationships, User}
+import org.talkingpuffin.ui.{Relationships, User}
+import org.talkingpuffin.twitter.TwitterStatus
+
 /**
  * A set of all filters, and logic to apply them
  */

@@ -4,12 +4,12 @@ import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.Insets
 import java.util.Date
 import javax.swing.{BorderFactory}
-import joda.time.DateTime
 import swing.GridBagPanel._
 import swing.{Reactor, Frame, Label, ComboBox, GridBagPanel, FlowPanel, Action, Button, BorderPanel}
-import talkingpuffin.util.Loggable
-import time.TimeFormatter
+import org.joda.time.DateTime
+import org.talkingpuffin.util.Loggable
 import util.Cancelable
+import org.talkingpuffin.time.TimeFormatter
 
 object DataProvidersDialog {
   val DefaultRefreshSecs = 600

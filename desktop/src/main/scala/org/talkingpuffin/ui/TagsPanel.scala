@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import filter.TagUsers
+import org.talkingpuffin.filter.TagUsers
 import java.awt.event.KeyEvent
 import javax.swing.{BorderFactory, JCheckBox}
 import swing._

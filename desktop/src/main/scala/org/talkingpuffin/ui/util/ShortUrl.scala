@@ -2,13 +2,15 @@ package org.talkingpuffin.ui.util
 
 import java.net.{HttpURLConnection, URL}
 import javax.swing.text.JTextComponent
+import org.talkingpuffin.ui.LinkExtractor
 
 /**
  * URL shortening and expanding.
  */
 object ShortUrl {
   val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "ping.fm", "short.ie", "tinyurl.com", "tr.im")
-  val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + LinkExtractor.urlCharClass + "*"
+  val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + 
+      LinkExtractor.urlCharClass + "*"
   private val redirectionCodes = List(301, 302)
   private type LongUrlReady = ResourceReady[String,String]
   
