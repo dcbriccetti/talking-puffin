@@ -18,11 +18,11 @@
           <artifactId>twitter-api</artifactId>
           <version>${project.version}</version>
         </dependency>
-	<dependency>
-	  <groupId>net.lag</groupId>
-	  <artifactId>configgy</artifactId>
-	  <version>1.4.2</version>
-	</dependency>
+        <dependency>
+          <groupId>net.lag</groupId>
+          <artifactId>configgy</artifactId>
+          <version>1.4</version>
+        </dependency>
         <dependency>
             <groupId>org.swinglabs</groupId>
             <artifactId>swingx</artifactId>
