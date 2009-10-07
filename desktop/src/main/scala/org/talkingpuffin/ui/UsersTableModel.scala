@@ -10,7 +10,7 @@ class UsersTableModel(val tagUsers: TagUsers, val relationships: Relationships)
     extends AbstractTableModel with TaggingSupport with Reactor {
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
-  var usersModel = new UsersModel(relationships)
+  var usersModel: UsersModel = _
   var lastIncludeFollowing = true
   var lastIncludeFollowers = true
   var lastSearch: Option[String] = None
@@ -21,15 +21,14 @@ class UsersTableModel(val tagUsers: TagUsers, val relationships: Relationships)
   listenTo(relationships)
 
   def buildModelData(sel: UserSelection) {
-    lastIncludeFollowing = sel.includeFollowing
+    lastIncludeFollowing = sel.includeFriends
     lastIncludeFollowers = sel.includeFollowers
     lastSearch = sel.searchString
-    usersModel.build(sel)
+    usersModel = UsersModel(relationships, sel)
     fireTableDataChanged
   }
   
   private def usersChanged {
-    usersModel = new UsersModel(relationships)
     buildModelData(UserSelection(lastIncludeFollowing, lastIncludeFollowers, lastSearch))
   }
   

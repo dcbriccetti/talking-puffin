@@ -102,7 +102,6 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     ap.add(new PrevTAction(comp))
     ap add(new TagAction(table, tableModel), Actions.ks(KeyEvent.VK_T))
     ap.add(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
-    val mask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
     ap.add(Action("Follow"  ) { userActions.follow(getSelectedScreenNames  ) }, UserActions.FollowAccel)
     ap.add(Action("Unfollow") { userActions.unfollow(getSelectedScreenNames) }, UserActions.UnfollowAccel)
     ap.add(Action("Block"   ) { userActions.block(getSelectedScreenNames   ) }, UserActions.BlockAccel)
@@ -115,7 +114,8 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     menu
   }
   
-  private def getSelectedUsers:List[TwitterUser] = TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
+  private def getSelectedUsers:List[TwitterUser] = 
+    TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
   
   def getSelectedScreenNames: List[String] = {
     getSelectedUsers.map(user => user.screenName)
