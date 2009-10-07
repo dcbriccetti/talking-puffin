@@ -17,8 +17,7 @@ class Relationships extends Publisher {
 
   /**
    * Uses the provided AuthenticatedSession to get all friends and followers (doing the
-   * fetches in parallel to be quicker), and provides the results by callback in the 
-   * event-dispatching thread when done.
+   * fetches in parallel to be quicker), and publishes the results in the event-dispatching thread when done.
    */
   def getUsers(twitterSession: AuthenticatedSession, longOpListener: LongOpListener) {
     longOpListener.startOperation
