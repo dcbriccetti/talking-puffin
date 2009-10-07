@@ -11,7 +11,7 @@ class UsersTableModel(val tagUsers: TagUsers, val relationships: Relationships)
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
   var usersModel: UsersModel = _
-  var lastIncludeFollowing = true
+  var lastIncludeFriends = true
   var lastIncludeFollowers = true
   var lastSearch: Option[String] = None
   buildModelData(UserSelection(true, true, None))
@@ -20,18 +20,6 @@ class UsersTableModel(val tagUsers: TagUsers, val relationships: Relationships)
   }
   listenTo(relationships)
 
-  def buildModelData(sel: UserSelection) {
-    lastIncludeFollowing = sel.includeFriends
-    lastIncludeFollowers = sel.includeFollowers
-    lastSearch = sel.searchString
-    usersModel = UsersModel(relationships, sel)
-    fireTableDataChanged
-  }
-  
-  private def usersChanged {
-    buildModelData(UserSelection(lastIncludeFollowing, lastIncludeFollowers, lastSearch))
-  }
-  
   def getColumnCount = 8
   def getRowCount = usersModel.users.length
 
@@ -73,5 +61,18 @@ class UsersTableModel(val tagUsers: TagUsers, val relationships: Relationships)
       val user = usersModel.users(rowIndex)
       new User(user.id, user.name)
     })
+
+  private[ui] def buildModelData(sel: UserSelection) {
+    lastIncludeFriends = sel.includeFriends
+    lastIncludeFollowers = sel.includeFollowers
+    lastSearch = sel.searchString
+    usersModel = UsersModel(relationships, sel)
+    fireTableDataChanged
+  }
+  
+  private def usersChanged {
+    buildModelData(UserSelection(lastIncludeFriends, lastIncludeFollowers, lastSearch))
+  }
+  
 }
 
