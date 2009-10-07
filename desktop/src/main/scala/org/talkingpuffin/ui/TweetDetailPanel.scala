@@ -104,7 +104,7 @@ class TweetDetailPanel(session: Session, table: JTable,
         status.inReplyToStatusId, status.source))
     largeTweet setCaretPosition 0
 
-    if (GlobalPrefs.prefs.getBoolean(PrefKeys.EXPAND_URLS, false)) 
+    if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) 
       ShortUrl.substituteExpandedUrls(status.text, largeTweet)
     
     showMediumPicture(user.profileImageURL)
@@ -127,7 +127,7 @@ class TweetDetailPanel(session: Session, table: JTable,
     showingUser = user
     val rawLocationOfShowingItem = user.location
 
-    if (GlobalPrefs.prefs.getBoolean(PrefKeys.LOOK_UP_LOCATIONS, false)) { 
+    if (GlobalPrefs.isOn(PrefKeys.LOOK_UP_LOCATIONS)) { 
       GeoCoder.extractLatLong(rawLocationOfShowingItem) match {
         case Some(latLong) =>
           geoCoder.getCachedObject(latLong) match {

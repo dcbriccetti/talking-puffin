@@ -33,4 +33,6 @@ object GlobalPrefs {
   }
   
   def isColumnShowing(col: String): Boolean = prefs.getBoolean(PrefKeys.SHOW_COL_PREFIX + col, true)
+  
+  def isOn(key: String) = prefs.getBoolean(key, false) 
 }

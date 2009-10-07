@@ -34,11 +34,10 @@ class AgeCellRenderer extends JTextPane with TableCellRenderer {
 }
 
 object AgeCellRenderer {
-  val prefs = GlobalPrefs.prefs
   val fmt = DateTimeFormat.forPattern("MM/dd HH:mm:ss")
   val fmtNoDay = DateTimeFormat.forPattern("HH:mm:ss")
 
-  def showAsAge_? = prefs.getBoolean(PrefKeys.SHOW_TWEET_DATE_AS_AGE, false)
+  def showAsAge_? = GlobalPrefs.isOn(PrefKeys.SHOW_TWEET_DATE_AS_AGE)
   
   def formatAge(date: Date): String = {
     def today(d1: DateTime) = d1.getDayOfYear == new DateTime().getDayOfYear

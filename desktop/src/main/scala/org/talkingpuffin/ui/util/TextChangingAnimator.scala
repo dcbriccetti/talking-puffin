@@ -12,7 +12,7 @@ class TextChangingAnimator {
   var thread: Thread = _
   
   def run(origText: String, newText: String, callback: (String) => Unit) {
-    if (! GlobalPrefs.prefs.getBoolean(PrefKeys.USE_ANIMATIONS, false)) {
+    if (! GlobalPrefs.isOn(PrefKeys.USE_ANIMATIONS)) {
       callback(newText) // Simply show end result
     } else {
       keepAnimating.set(true)
