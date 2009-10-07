@@ -21,9 +21,11 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     add(new UnmutePane("Retweet-Muted users", tableModel, filterSet, filterSet.retweetMutedUsers, 
       tableModel.unmuteRetweetUsers),
       new Constraints {grid=(2,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
-    val excludeFriendRetweets = new CheckBox("Exclude retweets of statuses of people you follow")
+    val excludeFriendRetweets = new CheckBox("Exclude retweets of statuses of people you follow") {
+      peer.setMnemonic(KeyEvent.VK_R) // TODO find out why the pure scala.swing attempt caused assertion failure
+    }
     add(excludeFriendRetweets, new Constraints {grid=(0,1); gridwidth=3; anchor=Anchor.West})
-    val excludeNonFollowers = new CheckBox("Exclude non-followers")
+    val excludeNonFollowers = new CheckBox("Exclude non-followers") {peer.setMnemonic(KeyEvent.VK_F)}
     add(excludeNonFollowers, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
   }
   val includePane = new InOutPane("Only Tweets Containing One of", filterSet.includeSet.textFilters)
