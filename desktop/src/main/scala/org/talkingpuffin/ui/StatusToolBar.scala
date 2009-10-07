@@ -25,13 +25,14 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
   }
 
   val clearAction = new Action("Clear") {
-    toolTip = "Removes all tweets (except filtered-out ones)"
+    toolTip = "Removes all tweets (except filtered-out ones) from the view"
     mnemonic = KeyEvent.VK_C
     def apply = clearTweets(false)
   }
 
   val clearAllAction = new Action("Clear All") {
-    toolTip = "Removes all tweets (including filtered-out ones)"
+    toolTip = "Removes all tweets (including filtered-out ones) from the view"
+    mnemonic = KeyEvent.VK_L
     def apply = clearTweets(true)
   }
 
