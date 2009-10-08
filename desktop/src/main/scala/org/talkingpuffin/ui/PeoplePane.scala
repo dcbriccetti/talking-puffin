@@ -87,7 +87,10 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
   private def setLabels {
     followingButton.setText("Following: " + rels.friends.length)
     followersButton.setText("Followers: " + rels.followers.length)
-    overlapLabel.setText(" Overlap: " + (rels.friends.length + rels.followers.length - tableModel.usersModel.users.length))
+    overlapLabel.setText({
+      val numUsers = tableModel.usersModel.users.length
+      if (numUsers == 0) " " else " Overlap: " + (rels.friends.length + rels.followers.length - numUsers)
+    })
   }
   
   private def buildModelData = tableModel.buildModelData(UserSelection(
@@ -102,7 +105,6 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     ap.add(new PrevTAction(comp))
     ap add(new TagAction(table, tableModel), Actions.ks(KeyEvent.VK_T))
     ap.add(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
-    val mask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
     ap.add(Action("Follow"  ) { userActions.follow(getSelectedScreenNames  ) }, UserActions.FollowAccel)
     ap.add(Action("Unfollow") { userActions.unfollow(getSelectedScreenNames) }, UserActions.UnfollowAccel)
     ap.add(Action("Block"   ) { userActions.block(getSelectedScreenNames   ) }, UserActions.BlockAccel)
@@ -115,7 +117,8 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     menu
   }
   
-  private def getSelectedUsers:List[TwitterUser] = TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
+  private def getSelectedUsers:List[TwitterUser] = 
+    TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
   
   def getSelectedScreenNames: List[String] = {
     getSelectedUsers.map(user => user.screenName)

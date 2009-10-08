@@ -10,6 +10,8 @@ object PrefKeys {
   val LOOK_UP_LOCATIONS = "lookUpLocations"
   val EXPAND_URLS       = "expandUrls"
   val SHOW_TWEET_DATE_AS_AGE = "showTweetDateAsAge"
+  val NEW_AFTER_CLEAR   = "newAfterClear"
+  
   val SORT_BY           = "sortBy"
   
   val HIGHEST_ID        = "highestId"

@@ -61,6 +61,8 @@ class MainMenuBar(dataProviders: DataProviders) extends MenuBar {
       PrefKeys.EXPAND_URLS, false)
     contents += ItemFactory("Show tweet date as age", "Shows the tweet date as an age", 
       PrefKeys.SHOW_TWEET_DATE_AS_AGE, false)
+    contents += ItemFactory("New after Clear", "Performs a “Load New” after “Clear” and “Clear All”", 
+      PrefKeys.NEW_AFTER_CLEAR, false)
   }
   
 }

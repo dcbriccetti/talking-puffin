@@ -52,7 +52,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       else
         adaptDmsToTweets(e.data.asInstanceOf[List[TwitterMessage]])
       processStatuses(newTweets)
-      if (GlobalPrefs.prefs.getBoolean(PrefKeys.NOTIFY_TWEETS, true)) doNotify(newTweets)
+      if (GlobalPrefs.isOn(PrefKeys.NOTIFY_TWEETS)) doNotify(newTweets)
     }
   }
   
@@ -68,7 +68,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     val status = filteredStatuses_(rowIndex)
     
     def senderName(status: TwitterStatus) = 
-      if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) 
+      if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) 
         UserProperties.overriddenUserName(userPrefs, status.user) 
       else status.user.screenName
 
@@ -78,7 +78,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     def toName(status: TwitterStatus) = 
         LinkExtractor.getReplyToInfo(status.inReplyToStatusId, getStatusText(status, username)) match {
       case Some((u,id)) => {
-         if (GlobalPrefs.prefs.getBoolean(PrefKeys.USE_REAL_NAMES, true)) {
+         if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) {
            Some(screenNameToUserNameMap.getOrElse(u, u))
          } else {
            Some(u)

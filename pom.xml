@@ -23,6 +23,11 @@
             <name>Scala-Tools Maven2 Repository</name>
             <url>http://scala-tools.org/repo-releases</url>
         </repository>
+        <repository>
+            <id>lag.net</id>
+            <name>lag.net Repository</name>
+            <url>http://www.lag.net/repo</url>
+        </repository>
     </repositories>
 
     <pluginRepositories>

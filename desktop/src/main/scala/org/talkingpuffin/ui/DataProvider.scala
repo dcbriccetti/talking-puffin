@@ -2,7 +2,6 @@ package org.talkingpuffin.ui
 
 import java.util.Date
 import java.awt.event.{ActionListener, ActionEvent}
-import javax.swing.{Timer, SwingWorker}
 import swing.event.Event
 import swing.Publisher
 import org.apache.log4j.Logger
@@ -10,6 +9,7 @@ import util.TitleCreator
 import org.talkingpuffin.twitter.{TwitterArgs, AuthenticatedSession}
 import org.talkingpuffin.time.TimeFormatter
 import org.joda.time.DateTime
+import javax.swing.{JOptionPane, Timer, SwingWorker}
 
 abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
@@ -94,20 +94,24 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
     new SwingWorker[List[TwitterDataWithId], Object] {
       val sendClear = clear
       override def doInBackground: List[TwitterDataWithId] = {
-        try{
-          val data = updateFunc(args)
-          highestId = computeHighestId(data, getHighestId)
-          log.info("highest ID: " + getHighestId.getOrElse(""))
-          data
-        } catch {
-          case e => error(e.toString); Nil
-        }
+        val data = updateFunc(args)
+        highestId = computeHighestId(data, getHighestId)
+        log.info("highest ID: " + getHighestId.getOrElse(""))
+        data
       }
       override def done {
         longOpListener.stopOperation
-        val statuses = get
-        if (statuses != Nil) 
-          DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
+        try {
+          val statuses = get
+          if (statuses != Nil)
+            DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
+        } catch {
+          case e: Throwable => {
+            val msg = "Error fetching " + providerName + " data for " + session.user + ": " + e.getMessage
+            log.error(msg)
+            JOptionPane.showMessageDialog(null, msg)
+          }
+        }
       }
     }.execute
   }

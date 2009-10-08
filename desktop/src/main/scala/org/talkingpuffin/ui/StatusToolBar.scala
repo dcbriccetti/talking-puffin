@@ -5,6 +5,7 @@ import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
 import swing.{Label, Component, Action}
 import util.ToolBarHelpers
 import org.talkingpuffin.Session
+import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 
 /**
  * Status pane tool bar
@@ -25,14 +26,15 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
   }
 
   val clearAction = new Action("Clear") {
-    toolTip = "Removes all tweets (except filtered-out ones)"
+    toolTip = "Removes all tweets (except filtered-out ones) from the view"
     mnemonic = KeyEvent.VK_C
-    def apply = clearTweets(false)
+    def apply = clearAndOptionallyLoad(false)
   }
 
   val clearAllAction = new Action("Clear All") {
-    toolTip = "Removes all tweets (including filtered-out ones)"
-    def apply = clearTweets(true)
+    toolTip = "Removes all tweets (including filtered-out ones) from the view"
+    mnemonic = KeyEvent.VK_L
+    def apply = clearAndOptionallyLoad(true)
   }
 
   val sendAction = new Action("Send") {
@@ -45,12 +47,6 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
     toolTip = "Opens a window from which you can send a direct message"
     mnemonic = KeyEvent.VK_D
     def apply = (new SendMsgDialog(session, null, None, None, None, true)).visible = true
-  }
-
-  val clearRepliesAction = new Action("Clear") {
-    toolTip = "Removes all mentions"
-    mnemonic = KeyEvent.VK_C
-    def apply = clearTweets
   }
 
   val loadNewAction = new Action("Load New") {
@@ -116,6 +112,12 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
     aa(showMinColsAction, showMaxColsAction)
     addSeparator
     ac(dockedButton, detailsButton)
+  }
+  
+  private def clearAndOptionallyLoad(all: Boolean) {
+    clearTweets(all)
+    if (GlobalPrefs.isOn(PrefKeys.NEW_AFTER_CLEAR))
+      tweetsProvider.loadNewData
   }
 }
   

@@ -16,7 +16,7 @@ abstract class TweetsProvider(session: AuthenticatedSession, startingId: Option[
 class FollowingProvider(session: AuthenticatedSession, startingId: Option[Long], 
     longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, "Following", longOpListener) {
-  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getFriendsTimeline
+  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getHomeTimeline
 }
 
 class MentionsProvider(session: AuthenticatedSession, startingId: Option[Long], 
