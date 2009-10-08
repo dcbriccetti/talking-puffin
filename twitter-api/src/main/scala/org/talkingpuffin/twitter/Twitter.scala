@@ -193,6 +193,10 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   def getHomeTimeline(id: String, args: TwitterArgs): List[TwitterStatus] = {
     new Parser[TwitterStatus](new URL(apiURL + "/statuses/home_timeline/" + urlEncode(id) + ".xml" + args),authFetcher,TwitterStatus.apply).parseXMLList("status")
   }
+  def getHomeTimeline(args: TwitterArgs): List[TwitterStatus] = {
+    getHomeTimeline(user,args)
+  }
+
   /**
   * @param id the user id <i>or</i> user name who was mentioned
   */
