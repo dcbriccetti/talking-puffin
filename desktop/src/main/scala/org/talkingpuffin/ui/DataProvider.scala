@@ -106,8 +106,11 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
           if (statuses != Nil)
             DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
         } catch {
-          case e: Throwable => JOptionPane.showMessageDialog(null, "Error fetching " + providerName +   
-              " data for " + session.user + "\n\n" + e.getMessage)
+          case e: Throwable => {
+            val msg = "Error fetching " + providerName + " data for " + session.user + ": " + e.getMessage
+            log.error(msg)
+            JOptionPane.showMessageDialog(null, msg)
+          }
         }
       }
     }.execute
