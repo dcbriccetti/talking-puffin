@@ -47,6 +47,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     case e: NewTwitterDataEvent => {
       val listAny = e.data
       log.info("Tweets Arrived: " + listAny.length)
+      if (e.clear) clear(true)
       val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
         e.data.asInstanceOf[List[TwitterStatus]]
       else
