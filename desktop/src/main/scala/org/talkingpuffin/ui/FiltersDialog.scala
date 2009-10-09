@@ -24,9 +24,12 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     val excludeFriendRetweets = new CheckBox("Exclude retweets of statuses of people you follow") {
       peer.setMnemonic(KeyEvent.VK_R) // TODO find out why the pure scala.swing attempt caused assertion failure
     }
-    add(excludeFriendRetweets, new Constraints {grid=(0,1); gridwidth=3; anchor=Anchor.West})
+    class Cns(row: Int) extends Constraints {grid=(0,row); gridwidth=3; anchor=Anchor.West}
+    add(excludeFriendRetweets, new Cns(1))
     val excludeNonFollowers = new CheckBox("Exclude non-followers") {peer.setMnemonic(KeyEvent.VK_F)}
-    add(excludeNonFollowers, new Constraints {grid=(0,2); gridwidth=3; anchor=Anchor.West})
+    add(excludeNonFollowers, new Cns(2))
+    val useNoiseFilters = new CheckBox("Use external noise filters") {peer.setMnemonic(KeyEvent.VK_N)}
+    add(useNoiseFilters, new Cns(3))
   }
   val includePane = new InOutPane("Only Tweets Containing One of", filterSet.includeSet.textFilters)
   val excludePane = new InOutPane("Tweets Containing Any of", filterSet.excludeSet.textFilters)
@@ -66,6 +69,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     filterSet.excludeSet.tags = excludePane.tagsPanel.selectedTags
     filterSet.excludeFriendRetweets = generalPane.excludeFriendRetweets.selected
     filterSet.excludeNonFollowers = generalPane.excludeNonFollowers.selected
+    filterSet.useNoiseFilters = generalPane.useNoiseFilters.selected
     filterSet.publish
   }
 
