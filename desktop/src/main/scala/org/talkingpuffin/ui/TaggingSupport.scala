@@ -18,20 +18,14 @@ trait TaggingSupport {
     val users = getUsers(selectedRows)
     val firstUserTags = tagUsers.tagsForUser(users(0).id)
     val firstUserTagsSet = Set(firstUserTags: _*)
-    var i = 1
-    while (i < users.length) {
-      val userTags = Set(tagUsers.tagsForUser(users(i).id): _*)
-      if (userTags != firstUserTagsSet) return List[String]()
-      i += 1
-    }
-    firstUserTags
+    if (users.tail.forall(u => Set(tagUsers.tagsForUser(u.id): _*) == firstUserTagsSet)) 
+      firstUserTags 
+    else 
+      List[String]() 
   }
   
-  def tagSelectedUsers(rows: List[Int], tag: String) =
-    for (user <- getUsers(rows)) 
-      tagUsers.add(tag, user.id)
+  def tagSelectedUsers(rows: List[Int], tags: List[String]) = 
+      getUsers(rows).foreach(user => tags.foreach(tag => tagUsers.add(tag, user.id)))
 
-  def untagSelectedUsers(rows: List[Int]) =
-    for (user <- getUsers(rows)) 
-      tagUsers.removeForUser(user.id)
+  def untagSelectedUsers(rows: List[Int]) = getUsers(rows).foreach(u => tagUsers.removeForUser(u.id))
 }

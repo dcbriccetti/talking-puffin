@@ -20,10 +20,7 @@ class TagAction(table: JTable, taggingSupport: TaggingSupport) extends Action("T
       
       if (tagsDialog.ok) {
         taggingSupport.untagSelectedUsers(modelIndexes)
-        
-        for (tag <- tagsDialog.selectedTags) {
-          taggingSupport.tagSelectedUsers(modelIndexes, tag) 
-        }
+        taggingSupport.tagSelectedUsers(modelIndexes, tagsDialog.selectedTags) 
       }
     }
     TableUtil.invalidateModelIndexes(table, modelIndexes)

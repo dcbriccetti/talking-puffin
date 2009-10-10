@@ -1,9 +1,9 @@
 package org.talkingpuffin.filter
 
-import apache.log4j.Logger
+import org.apache.log4j.Logger
 import com.google.common.collect.{Multimap, HashMultimap}
 import java.util.ArrayList
-import state.PreferencesFactory
+import org.talkingpuffin.state.PreferencesFactory
 
 /**
  * Repository of tag -> user mappings, stored within a service/user
@@ -44,7 +44,7 @@ class TagUsers(service: String, username: String) {
     val el = getEntriesAsList
     for (i <- 0 until el.size) {
       val tu = el.get(i)
-      if (tu.getValue == userId) tags = tu.getKey :: tags
+      if (tu.getValue == userId) tags ::= tu.getKey
     }
     tags
   }
