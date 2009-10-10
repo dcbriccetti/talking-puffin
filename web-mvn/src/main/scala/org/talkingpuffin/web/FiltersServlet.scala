@@ -10,6 +10,8 @@ class FiltersServlet extends HttpServlet {
     resp.getWriter().println(
 """Just joined a twibe. Visit http\://twibes\.com/.*
 just joined a video chat at http\://tinychat\.com.*
+I just ousted .* as the mayor of .* on @foursquare!.*
+ran .* on .* at .* with a pace of .*
 """)
   }
 }
