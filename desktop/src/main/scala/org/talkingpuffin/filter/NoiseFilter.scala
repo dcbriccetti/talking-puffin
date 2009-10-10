@@ -10,20 +10,25 @@ object NoiseFilter extends Loggable {
   
   def noise_?(text: String): Boolean = {
     if (exprs == Nil && loadError == null) load
-    
+    val textOneLine = text.replaceAll("(\n|\r)", "")
     exprs.exists(e => {
-      text match {
-        case e() => true
+      textOneLine match {
+        case e() => {
+          debug(textOneLine + " matched " + e)
+          true
+        }
         case _ => false
       }
     })
   }
   
-  private def load {
+  def load {
     try {
-      val regExStrings = Source.fromURL("http://talkingpuffin.appspot.com/filters/noise").getLines.map(_.trim).toList
+      val regExStrings = Source.fromURL("http://talkingpuffin.appspot.com/filters/noise").getLines.
+          map(_.trim).toList.filter(_.length > 0)
       info("Loaded " + regExStrings)
       exprs = regExStrings.map(_.r)
+      loadError = null
     } catch {
       case e: Exception => {
         loadError = e

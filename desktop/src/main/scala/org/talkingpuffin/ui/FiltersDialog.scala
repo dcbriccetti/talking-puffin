@@ -1,11 +1,11 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.GridBagPanel._
-import org.talkingpuffin.filter.{TextFilters, TagUsers, FilterSet}
 import java.awt.event.KeyEvent
 import java.awt.{Dimension}
 import javax.swing.border.EmptyBorder
 import swing.{Orientation, BoxPanel, TabbedPane, Frame, GridBagPanel, FlowPanel, Button, CheckBox, Action}
+import org.talkingpuffin.filter.{NoiseFilter, TextFilters, TagUsers, FilterSet}
 
 /**
  * Dialog for setting filters
@@ -29,7 +29,15 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     val excludeNonFollowers = new CheckBox("Exclude non-followers") {peer.setMnemonic(KeyEvent.VK_F)}
     add(excludeNonFollowers, new Cns(2))
     val useNoiseFilters = new CheckBox("Use external noise filters") {peer.setMnemonic(KeyEvent.VK_N)}
-    add(useNoiseFilters, new Cns(3))
+    add(new FlowPanel {
+      contents += useNoiseFilters
+      contents += new Button(new Action("Update") {
+        mnemonic = KeyEvent.VK_O
+        def apply = NoiseFilter.load
+      }) {
+        tooltip = "Fetch the latest noise filters from the external service"
+      }
+    }, new Cns(3))
   }
   val includePane = new InOutPane("Only Tweets Containing One of", filterSet.includeSet.textFilters)
   val excludePane = new InOutPane("Tweets Containing Any of", filterSet.excludeSet.textFilters)
