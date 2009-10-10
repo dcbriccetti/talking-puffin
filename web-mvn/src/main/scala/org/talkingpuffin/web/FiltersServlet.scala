@@ -12,6 +12,9 @@ class FiltersServlet extends HttpServlet {
 just joined a video chat at http\://tinychat\.com.*
 I just ousted .* as the mayor of .* on @foursquare!.*
 ran .* on .* at .* with a pace of .*
+just voted .* on .* vote too .*
+Just added myself to the .*wefollow.*
+.*add a \#twibbon to your avatar now.*
 """)
   }
 }
