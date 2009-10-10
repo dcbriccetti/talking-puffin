@@ -46,7 +46,6 @@ abstract class BackgroundResourceFetcher[K,V](processResource: (ResourceReady[K,
           var resource = cache.get(key)
           if (resource == null) {
             resource = getResourceFromSource(key)
-            debug("Got " + key)
             store(cache, key, resource)
           }
           
