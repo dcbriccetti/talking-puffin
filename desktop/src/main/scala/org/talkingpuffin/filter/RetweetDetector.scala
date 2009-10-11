@@ -12,18 +12,18 @@ object RetweetDetector {
   private val viaUser = (""".*\((via|VIA|Via) +""" + user + """\)""").r
   private val regexes = List(rtUser, viaUser)
   
-  implicit def string2Retweet(text: String) = new RetweetDetector(text)
-  implicit def status2Retweet(status: TwitterStatus) = new RetweetDetector(status.text)
+  implicit def string2RetweetDetector(text: String) = new RetweetDetector(text)
+  implicit def status2RetweetDetector(status: TwitterStatus) = new RetweetDetector(status.text)
 }
   
 class RetweetDetector(text: String) {
   def isRetweet = RetweetDetector.regexes.exists(regex => text match {
-    case regex(rtSymbol, username) => true
+    case regex(_, _) => true
     case _ => false
   })
   
   def isFromFriend(friendUsernames: List[String]) = RetweetDetector.regexes.exists(regex => text match {
-    case regex(rtSymbol, username) => friendUsernames.contains(username)
+    case regex(_, username) => friendUsernames.contains(username)
     case _ => false
   })
 }
