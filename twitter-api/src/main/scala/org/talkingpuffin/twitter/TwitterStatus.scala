@@ -40,9 +40,10 @@ class TwitterStatus() extends Validated{
    * From the “source” string, which oddly may contain either a simple string, such as “web,”
    * or an anchor tag with an href and a source name, extract:
    * <ol>
-   * <li>the entire contents into <code>source</code>, for backward compatibility
-   * <li>a URL, if found, into <code>sourceUrl</code>
-   * <li>the source name into <code>sourceName</code>
+   * <li>the entire contents into {@link #source}, for backward compatibility
+   * <li>a URL, if found, into {@link #sourceUrl}
+   * <li>the source name into {@link #sourceName}
+   * </ol>
    */
   private def extractSource(text: String) {
     source = text
