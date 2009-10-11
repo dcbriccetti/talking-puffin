@@ -15,7 +15,7 @@ class TwitterStatus() extends Validated{
   var createdAt: DateTime = null
   @Deprecated var source: String = null
   var sourceName: String = null
-  var sourceUrl: String = null
+  var sourceUrl: Option[String] = None
   var truncated: Boolean = false
   var inReplyToStatusId: Option[Long] = None
   var inReplyToUserId: Option[Long] = None
@@ -53,7 +53,7 @@ class TwitterStatus() extends Validated{
         // “<a href="http://help.twitter.com/index.php?pg=kb.page&id=75" rel="nofollow">txt</a>”
         && ! text.endsWith(">txt</a>")) { 
       val x = XML.loadString(text)
-      sourceUrl = (x \ "@href").text
+      sourceUrl = Some((x \ "@href").text)
       sourceName = (x.child(0)).text
     } else {
       sourceName = text
