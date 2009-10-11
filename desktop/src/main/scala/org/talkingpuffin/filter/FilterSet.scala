@@ -6,6 +6,7 @@ import _root_.scala.swing.Publisher
 import java.util.regex.Pattern
 import org.talkingpuffin.ui.{Relationships, User}
 import org.talkingpuffin.twitter.TwitterStatus
+import org.talkingpuffin.filter.RetweetDetector._
 
 /**
  * A set of all filters, and logic to apply them
@@ -49,9 +50,9 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
       }
   
       ! mutedUsers.contains(status.user.id) &&
-          ! (retweetMutedUsers.contains(status.user.id) && Retweets.isRetweet_?(status.text)) &&
+          ! (retweetMutedUsers.contains(status.user.id) && status.isRetweet) &&
           tagFiltersInclude && ! excludedByTags && 
-          ! (excludeFriendRetweets && Retweets.fromFriend_?(status.text, friendUsernames)) &&
+          ! (excludeFriendRetweets && status.isFromFriend(friendUsernames)) &&
           ! (excludeNonFollowers && ! rels.followerIds.contains(status.user.id)) &&
           ! (useNoiseFilters && NoiseFilter.noise_?(status.text)) &&
           ! excludedByStringMatches
