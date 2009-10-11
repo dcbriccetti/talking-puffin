@@ -15,5 +15,10 @@ object Retweets {
     case regex(rtSymbol, username) => friendUsernames.contains(username)
     case _ => false
   })
+
+  def isRetweet_?(text: String) = regexes.exists(regex => text match {
+    case regex(rtSymbol, username) => true
+    case _ => false
+  })
 }
 

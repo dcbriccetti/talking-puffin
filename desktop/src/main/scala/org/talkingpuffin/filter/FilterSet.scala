@@ -49,7 +49,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
       }
   
       ! mutedUsers.contains(status.user.id) &&
-          ! (retweetMutedUsers.contains(status.user.id) && status.text.toLowerCase.startsWith("rt @")) &&
+          ! (retweetMutedUsers.contains(status.user.id) && Retweets.isRetweet_?(status.text)) &&
           tagFiltersInclude && ! excludedByTags && 
           ! (excludeFriendRetweets && Retweets.fromFriend_?(status.text, friendUsernames)) &&
           ! (excludeNonFollowers && ! rels.followerIds.contains(status.user.id)) &&

@@ -9,7 +9,11 @@ object RetweetsSpec extends Specification {
   "Retweets are identified correctly" in {
     assert(Retweets.fromFriend_?("RT @dave Hi", List("dave", "mary")))
     assert(Retweets.fromFriend_?("Hi (via @dave)", List("dave", "mary")))
-    assert(!Retweets.fromFriend_?("Hi (via @dave2)", List("dave", "mary")))
+    assert(! Retweets.fromFriend_?("Hi (via @dave2)", List("dave", "mary")))
+    
+    assert(Retweets.isRetweet_?("RT @dave Hi"))
+    assert(Retweets.isRetweet_?("Hi (via @dave2)"))
+    assert(! Retweets.isRetweet_?("The sky is blue"))
   }
 }
  
