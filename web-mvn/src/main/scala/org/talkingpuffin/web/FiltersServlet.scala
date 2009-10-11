@@ -17,6 +17,7 @@ just voted .* on .* vote too .*
 Just added myself to the .*wefollow.*
 .*add a \#twibbon to your avatar now.*
 Hey, I just added you to my Mafia family\. You should accept my invitation! :\) Click here: .*
+I favorited a YouTube video.*
 """)
   }
 }
