@@ -440,11 +440,11 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
 
   def getFriendIds(id:String) = {
-    new Parser[Long](new URL(apiURL + "/friends/ids/" + id + ".xml"),authFetcher,(node:Node) => java.lang.Long.parseLong(node.text)).parseXMLList("id")
+    new Parser[Long](new URL(apiURL + "/friends/ids/" + id + ".xml"),authFetcher,(node:Node) => node.text.toLong).parseXMLList("id")
   }
 
   def getFollowerIds(id:String) = {
-    new Parser[Long](new URL(apiURL + "/followers/ids/" + id + ".xml"),authFetcher,(node:Node) => java.lang.Long.parseLong(node.text)).parseXMLList("id")
+    new Parser[Long](new URL(apiURL + "/followers/ids/" + id + ".xml"),authFetcher,(node:Node) => node.text.toLong).parseXMLList("id")
   }
 
   def retweet(id:Long) = {

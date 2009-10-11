@@ -9,7 +9,7 @@ class DataProviders(user: AuthenticatedSession, prefs: Preferences, progress: Lo
     PrefKeys.HIGHEST_SENT_DM_ID)
 
   private def getHighest(idx: Int) = 
-    prefs.get(prefKeys(idx), null) match {case null => None; case v => Some(java.lang.Long.parseLong(v))} 
+    prefs.get(prefKeys(idx), null) match {case null => None; case v => Some(v.toLong)} 
 
   val followingProvider = new FollowingProvider(user, getHighest(0), progress)
   val mentionsProvider  = new MentionsProvider (user, getHighest(1), progress)

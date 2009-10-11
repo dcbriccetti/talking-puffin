@@ -87,17 +87,17 @@ object TwitterStatus{
     n.child foreach {(sub) =>
       try {
         sub match {
-          case <id>{Text(text)}</id> => status.id = java.lang.Long.parseLong(text)
+          case <id>{Text(text)}</id> => status.id = text.toLong
           case <created_at>{Text(text)}</created_at> => status.createdAt = fmt.parseDateTime(text)
           case <text>{Text(text)}</text> => status.text = text
           case <source>{Text(text)}</source> => status.extractSource(text)
           case <truncated>{Text(text)}</truncated> => status.truncated = java.lang.Boolean.valueOf(text).booleanValue
           case <in_reply_to_status_id/> => Nil
           case <in_reply_to_status_id>{Text(text)}</in_reply_to_status_id> => status.inReplyToStatusId = 
-              Some(java.lang.Long.parseLong(text))
+              Some(text.toLong)
           case <in_reply_to_user_id/> => Nil
           case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => status.inReplyToUserId = 
-              Some(java.lang.Long.parseLong(text))
+              Some(text.toLong)
           case <favorited>{Text(text)}</favorited> => status.favorited = java.lang.Boolean.valueOf(text).booleanValue
           case <user>{ _* }</user> => status.user = TwitterUser(sub)
           case <retweet_details>{ _* }</retweet_details> => status.retweeted = Retweet(sub)

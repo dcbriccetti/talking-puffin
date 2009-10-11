@@ -12,8 +12,7 @@ class TagUsers(service: String, username: String) {
   private val log = Logger getLogger "TagUsers"
   private val prefs = PreferencesFactory.prefsForUser(service, username).node("tags")
   private val tagUsers: Multimap[String,Long] = HashMultimap.create()
-  prefs.keys.foreach(tag => prefs.get(tag, null).split("\t").foreach(userId => 
-      add(tag, java.lang.Long.parseLong(userId))))
+  prefs.keys.foreach(tag => prefs.get(tag, null).split("\t").foreach(userId => add(tag, userId.toLong)))
   
   def add(tag: String, userId: Long) = tagUsers.put(tag, userId)
   
