@@ -19,6 +19,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
   }
   val mutedUsers = LinkedHashMap[Long,User]()
   val retweetMutedUsers = LinkedHashMap[Long,User]()
+  val mutedApps = LinkedHashMap[Long,User]()
   var excludeFriendRetweets: Boolean = false
   var excludeNonFollowers: Boolean = false
   var useNoiseFilters: Boolean = false
@@ -50,6 +51,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
       }
   
       ! mutedUsers.contains(status.user.id) &&
+          ! mutedApps.contains(status.sourceName.hashCode) &&
           ! (retweetMutedUsers.contains(status.user.id) && status.isRetweet) &&
           tagFiltersInclude && ! excludedByTags && 
           ! (excludeFriendRetweets && status.isFromFriend(friendUsernames)) &&

@@ -12,15 +12,22 @@ import org.talkingpuffin.filter.{NoiseFilter, TextFilters, TagUsers, FilterSet}
  */
 class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: FilterSet, 
     tagUsers: TagUsers) extends Frame {
+  
   title = paneTitle + " Filters"
   preferredSize = new Dimension(600, 600)
+  
   val generalPane = new GridBagPanel {
+    class CnsM(x: Int) extends Constraints {grid=(x,0); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1}
+
     border = new EmptyBorder(5, 5, 0, 5)
+
     add(new UnmutePane("Muted users", tableModel, filterSet, filterSet.mutedUsers, tableModel.unmuteUsers),
-      new Constraints {grid=(1,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
+      new CnsM(1))
     add(new UnmutePane("Retweet-Muted users", tableModel, filterSet, filterSet.retweetMutedUsers, 
-      tableModel.unmuteRetweetUsers),
-      new Constraints {grid=(2,0); anchor=Anchor.West; fill=Fill.Vertical; weighty=1})
+      tableModel.unmuteRetweetUsers), new CnsM(2))
+    add(new UnmutePane("Muted apps", tableModel, filterSet, filterSet.mutedApps, 
+      tableModel.unmuteApps), new CnsM(3))
+
     val excludeFriendRetweets = new CheckBox("Exclude retweets of statuses of people you follow") {
       peer.setMnemonic(KeyEvent.VK_R) // TODO find out why the pure scala.swing attempt caused assertion failure
     }
@@ -39,15 +46,17 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
       }
     }, new Cns(3))
   }
+  
   val includePane = new InOutPane("Only Tweets Containing One of", filterSet.includeSet.textFilters)
+  
   val excludePane = new InOutPane("Tweets Containing Any of", filterSet.excludeSet.textFilters)
-  val tabbedPane = new TabbedPane {
-    pages += new TabbedPane.Page("General", generalPane)
-    pages += new TabbedPane.Page("Include", includePane)
-    pages += new TabbedPane.Page("Exclude", excludePane)
-  }
+  
   contents = new BoxPanel(Orientation.Vertical) {
-    contents += tabbedPane
+    contents += new TabbedPane {
+      pages += new TabbedPane.Page("General", generalPane)
+      pages += new TabbedPane.Page("Include", includePane)
+      pages += new TabbedPane.Page("Exclude", excludePane)
+    }
     contents += new FlowPanel {
       val applyAction = Action("Apply") {applyChanges}
       contents += new Button(applyAction)
