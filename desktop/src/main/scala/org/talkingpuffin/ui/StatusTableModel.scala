@@ -47,6 +47,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     case e: NewTwitterDataEvent => {
       val listAny = e.data
       log.info("Tweets Arrived: " + listAny.length)
+      if (e.clear) clear(true)
       val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
         e.data.asInstanceOf[List[TwitterStatus]]
       else
@@ -119,10 +120,12 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       case None => None
     }
 
+  private def mapToIdTuple(users: List[User]) = users.map(user => (user.id, user))
+  
   def muteSelectedUsers(rows: List[Int]) = muteUsers(getUsers(rows))
 
   private def muteUsers(users: List[User]) {
-    filterSet.mutedUsers ++= users.map(user => (user.id, user))
+    filterSet.mutedUsers ++= mapToIdTuple(users)
     filterAndNotify
   }
 
@@ -131,15 +134,10 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     filterAndNotify
   }
   
-  def unMuteAll {
-    filterSet.mutedUsers.clear
-    filterAndNotify
-  }
-
   def muteSelectedUsersRetweets(rows: List[Int]) = muteRetweetUsers(getUsers(rows))
 
   private def muteRetweetUsers(users: List[User]) {
-    filterSet.retweetMutedUsers ++= users.map(user => (user.id, user))
+    filterSet.retweetMutedUsers ++= mapToIdTuple(users)
     filterAndNotify
   }
 
@@ -148,11 +146,23 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     filterAndNotify
   }
   
-  def unMuteRetweetAll {
-    filterSet.retweetMutedUsers.clear
+  def muteSelectedApps(rows: List[Int]) = muteApps(getApps(rows))
+
+  private def getApps(rows: List[Int]) = rows.map(i => {
+    val app = filteredStatuses_(i).sourceName
+    new User(app.hashCode, app)
+  })
+  
+  private def muteApps(apps: List[User]) {
+    filterSet.mutedApps ++= mapToIdTuple(apps)
     filterAndNotify
   }
 
+  def unmuteApps(appIds: List[Long]) {
+    filterSet.mutedApps --= appIds
+    filterAndNotify
+  }
+  
   def getUsers(rows: List[Int]) = rows.map(i => {
     val user = filteredStatuses_(i).user
     new User(user.id, user.name)

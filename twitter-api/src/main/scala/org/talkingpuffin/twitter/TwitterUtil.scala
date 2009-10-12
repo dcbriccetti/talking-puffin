@@ -24,7 +24,7 @@ class XMLFetcher(user: String, password: String){
   */
   def doGet(url: URL): Node = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    log.debug("GETing data from " + url)
+    log.debug("GET " + url)
     if(encoding != null){
       conn.setRequestProperty ("Authorization", "Basic " + encoding);
     }
@@ -33,7 +33,7 @@ class XMLFetcher(user: String, password: String){
 
   def doDelete(url: URL) = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    log.debug("DELETEing data at " + url)
+    log.debug("DELETE " + url)
 
     if(encoding != null){
       conn.setRequestProperty ("Authorization", "Basic " + encoding);
@@ -48,7 +48,7 @@ class XMLFetcher(user: String, password: String){
   */
   def doPost(url: URL, params: List[(String,String)]): Node = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    log.debug("POSTing data to " + url)
+    log.debug("POST " + url)
     if(encoding != null){
       conn.setRequestProperty ("Authorization", "Basic " + encoding);
     }

@@ -59,10 +59,10 @@ object TwitterMessage{
     val message = new TwitterMessage
     n.child foreach {(sub) => 
       sub match{
-        case <id>{Text(text)}</id> => message.id = java.lang.Long.parseLong(text)
+        case <id>{Text(text)}</id> => message.id = text.toLong
         case <text>{Text(text)}</text> => message.text = text
-        case <sender_id>{Text(text)}</sender_id> => message.senderId = java.lang.Long.parseLong(text)
-        case <recipient_id>{Text(text)}</recipient_id> => message.recipientId = java.lang.Long.parseLong(text)
+        case <sender_id>{Text(text)}</sender_id> => message.senderId = text.toLong
+        case <recipient_id>{Text(text)}</recipient_id> => message.recipientId = text.toLong
         case <sender_screen_name>{Text(text)}</sender_screen_name> => message.senderScreenName = text
         case <recipient_screen_name>{Text(text)}</recipient_screen_name> => message.recipientScreenName = text
         case <created_at>{Text(text)}</created_at> => message.createdAt = fmt.parseDateTime(text)

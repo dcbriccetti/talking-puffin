@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-<%@page pageEncoding="UTF-8" import="org.talkingpuffin.twitter.*,org.talkingpuffin.ui.web.*" %>
+<%@page pageEncoding="UTF-8" import="org.talkingpuffin.twitter.*,org.talkingpuffin.web.*" %>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title>TalkingPuffin Friends and Followers Summary V0.1</title>
@@ -12,7 +12,7 @@
 <h1>TalkingPuffin Friends and Followers Summary V0.1</h1>
 
 <table><tr>
-    <td><img src="davehead-small.jpg" alt="Picture of Dave Briccetti"/></td>
+    <td><img src="TalkingPuffin.png" alt="Picture of an Atlantic Puffin"/></td>
     <td valign="top">Thank you for trying this early, experimental web application,
         which shows a summary of the people who follow you and those you follow.
     <p>    
@@ -80,7 +80,7 @@ will be shown.</p>
     <td class="number rightmostNumber"><%= user.followersCount() %></td>
     <td><%= user.location() %></td>
     <td><%= user.description() %></td>
-    <td><%= user.status().isDefined() ? user.status().get().text() : ""%></td>
+    <td><%= user.status() %></td>
 </tr>
 <%
     }

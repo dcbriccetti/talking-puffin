@@ -3,4 +3,14 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
     http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 
+    <servlet>
+        <description>Retrieve and suggest filters</description>
+        <display-name>Filters</display-name>
+        <servlet-name>FiltersServlet</servlet-name>
+        <servlet-class>org.talkingpuffin.web.FiltersServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FiltersServlet</servlet-name>
+        <url-pattern>/filters/noise</url-pattern>
+    </servlet-mapping>
 </web-app>

@@ -1,4 +1,4 @@
-package org.talkingpuffin.ui.web
+package org.talkingpuffin.web
 
 import java.io.Serializable
 

@@ -1,10 +1,8 @@
 package org.talkingpuffin.twitter
 
-import java.util.Date
 import scala.xml._
 import org.apache.log4j._
 import org.joda.time._
-import org.joda.time.format._
 
 /**
 * Represents a twitter status update.
@@ -15,7 +13,9 @@ class TwitterStatus() extends Validated{
   var user: TwitterUser = null
   var id: Long = 0L
   var createdAt: DateTime = null
-  var source: String = null
+  @Deprecated var source: String = null
+  var sourceName: String = null
+  var sourceUrl: Option[String] = None
   var truncated: Boolean = false
   var inReplyToStatusId: Option[Long] = None
   var inReplyToUserId: Option[Long] = None
@@ -36,6 +36,30 @@ class TwitterStatus() extends Validated{
 
   override def hashCode() = id.hashCode
 
+  /**
+   * From the “source” string, which oddly may contain either a simple string, such as “web,”
+   * or an anchor tag with an href and a source name, extract:
+   * <ol>
+   * <li>the entire contents into {@link #source}, for backward compatibility
+   * <li>a URL, if found, into {@link #sourceUrl}
+   * <li>the source name into {@link #sourceName}
+   * </ol>
+   */
+  private def extractSource(text: String) {
+    source = text
+    
+    if (text.startsWith("<a") 
+        // Special case: XML.loadString doesn’t like the &id request param in 
+        // “<a href="http://help.twitter.com/index.php?pg=kb.page&id=75" rel="nofollow">txt</a>”
+        && ! text.endsWith(">txt</a>")) { 
+      val x = XML.loadString(text)
+      sourceUrl = Some((x \ "@href").text)
+      sourceName = (x.child(0)).text
+    } else {
+      sourceName = text
+    }
+    
+  }
 }
 
 class Retweet extends TwitterUser{
@@ -63,17 +87,17 @@ object TwitterStatus{
     n.child foreach {(sub) =>
       try {
         sub match {
-          case <id>{Text(text)}</id> => status.id = java.lang.Long.parseLong(text)
+          case <id>{Text(text)}</id> => status.id = text.toLong
           case <created_at>{Text(text)}</created_at> => status.createdAt = fmt.parseDateTime(text)
           case <text>{Text(text)}</text> => status.text = text
-          case <source>{Text(text)}</source> => status.source = text
+          case <source>{Text(text)}</source> => status.extractSource(text)
           case <truncated>{Text(text)}</truncated> => status.truncated = java.lang.Boolean.valueOf(text).booleanValue
           case <in_reply_to_status_id/> => Nil
           case <in_reply_to_status_id>{Text(text)}</in_reply_to_status_id> => status.inReplyToStatusId = 
-              Some(java.lang.Long.parseLong(text))
+              Some(text.toLong)
           case <in_reply_to_user_id/> => Nil
           case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => status.inReplyToUserId = 
-              Some(java.lang.Long.parseLong(text))
+              Some(text.toLong)
           case <favorited>{Text(text)}</favorited> => status.favorited = java.lang.Boolean.valueOf(text).booleanValue
           case <user>{ _* }</user> => status.user = TwitterUser(sub)
           case <retweet_details>{ _* }</retweet_details> => status.retweeted = Retweet(sub)
@@ -83,8 +107,9 @@ object TwitterStatus{
         case e: NumberFormatException => logger.error(e + " " + sub + " " + n)
       }
     }
-    return status
+    status
   }
+  
 }
 
 /**

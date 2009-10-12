@@ -217,6 +217,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
       KeyStroke.getKeyStroke(KeyEvent.VK_M, shortcutKeyMask))
     ap add(Action("Mute Retweets") {tableModel.muteSelectedUsersRetweets(TableUtil.getSelectedModelIndexes(this))}, 
       KeyStroke.getKeyStroke(KeyEvent.VK_M, shortcutKeyMask | SHIFT))
+    ap add(Action("Mute Application") {tableModel.muteSelectedApps(TableUtil.getSelectedModelIndexes(this))}, 
+      KeyStroke.getKeyStroke(KeyEvent.VK_A, shortcutKeyMask | SHIFT))
     ap add new NextTAction(this)
     ap add new PrevTAction(this)
     ap add(new TagAction(this, tableModel), Actions.ks(KeyEvent.VK_T))
