@@ -7,7 +7,6 @@ import swing.Publisher
 import org.apache.log4j.Logger
 import util.TitleCreator
 import org.talkingpuffin.twitter.{TwitterArgs, AuthenticatedSession}
-import org.talkingpuffin.time.TimeFormatter
 import org.joda.time.DateTime
 import javax.swing.{JOptionPane, Timer, SwingWorker}
 
@@ -60,11 +59,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
   }
   
   private def restartTimer {
-    def publishNext {
-      val nextLoadAt = NextLoadAt(new DateTime((new Date).getTime + updateIntervalMs))
-      publish(nextLoadAt)
-      log.debug("Next load in " + new TimeFormatter(updateIntervalMs / 1000).longForm)
-    }
+    def publishNext = publish(NextLoadAt(new DateTime((new Date).getTime + updateIntervalMs)))
 
     if (timer != null && timer.isRunning) {
       timer.stop
@@ -83,11 +78,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
     
   }
 
-  private def loadNewDataInternal {
-    val args = addSince(TwitterArgs.maxResults(200))
-    log.info("loading new data with args " + args)
-    loadData(args, false)
-  }
+  private def loadNewDataInternal = loadData(addSince(TwitterArgs.maxResults(200)), false)
 
   private def loadData(args: TwitterArgs, clear: Boolean): Unit = {
     longOpListener.startOperation
@@ -96,7 +87,6 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
       override def doInBackground: List[TwitterDataWithId] = {
         val data = updateFunc(args)
         highestId = computeHighestId(data, getHighestId)
-        log.info("highest ID: " + getHighestId.getOrElse(""))
         data
       }
       override def done {
