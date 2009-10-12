@@ -1,6 +1,6 @@
 package org.talkingpuffin.twitter
 
-import scala.xml._
+import org.apache.log4j.Logger
 
 /**
 * Handles an arbitrary IOException while connecting to Twitter.
@@ -26,22 +26,33 @@ case class TwitterNotFound(override val twitterMessage: String) extends TwitterE
 case class TwitterInternalServer(override val twitterMessage: String) extends TwitterException(twitterMessage)
 case class TwitterBadGateway(override val twitterMessage: String) extends TwitterException(twitterMessage)
 case class TwitterServiceUnavailable(override val twitterMessage: String) extends TwitterException(twitterMessage)
-case class TwitterUnknown(override val twitterMessage: String) extends TwitterException(twitterMessage)
+case class TwitterUnknown(val code: Int, override val twitterMessage: String) extends TwitterException(twitterMessage)
 case class TwitterBadXML() extends TwitterException("couldn't process XML as requested")
 
 /**
 * Factory object to construct TwitterException instances from an HTTP response code
 */
-object TwitterException {
-  def apply(message: String, code: Int) = code match {
-    case 304 => new TwitterNotModified(message)
-    case 400 => new TwitterBadRequest(message)
-    case 401 => new TwitterNotAuthorized(message)
-    case 403 => new TwitterForbidden(message)
-    case 404 => new TwitterNotFound(message)
-    case 500 => new TwitterInternalServer(message)
-    case 502 => new TwitterBadGateway(message)
-    case 503 => new TwitterServiceUnavailable(message)
-    case _ => new TwitterUnknown(message)
+object TwitterException extends Exception {
+  private val log = Logger.getLogger("TwitterException")
+  private val titleRegEx = """.*?<title>(.*?)</title>.*""".r
+  
+  def apply(message: String, code: Int) = {
+    val title = message match { // Error message may appear in title of an HTML page
+      case titleRegEx(t) => t
+      case _ => ""
+    }
+    log.debug("Code: " + code + ", Title: " + title + ", Message: " + message)
+    
+    code match {
+      case 304 => new TwitterNotModified(message)
+      case 400 => new TwitterBadRequest(message)
+      case 401 => new TwitterNotAuthorized(message)
+      case 403 => new TwitterForbidden(message)
+      case 404 => new TwitterNotFound(message)
+      case 500 => new TwitterInternalServer(message)
+      case 502 => new TwitterBadGateway(message)
+      case 503 => new TwitterServiceUnavailable(message)
+      case _ => new TwitterUnknown(code, message)
+    }
   }
 }
