@@ -9,7 +9,7 @@ import javax.swing.SwingWorker
 case class IdsChanged() extends Event
 case class UsersChanged() extends Event
 
-class Relationships extends Publisher {
+class Relationships extends Publisher with ErrorHandler {
   var friendIds = List[Long]()
   var followerIds = List[Long]()
   var friends = List[TwitterUser]()
@@ -29,12 +29,14 @@ class Relationships extends Publisher {
 
     new SwingWorker[Tuple2[List[TwitterUser],List[TwitterUser]], Object] {
       def doInBackground = (friendsFuture.get, followersFuture.get)
-      override def done { 
-        val (fr, fo) = get
-        friends = fr
-        followers = fo
+      override def done {
         longOpListener.stopOperation
-        Relationships.this.publish(UsersChanged())
+        doAndHandleError(() => {
+          val (fr, fo) = get
+          friends = fr
+          followers = fo
+          Relationships.this.publish(UsersChanged())
+          }, "Error fetching friends and followers for " + twitterSession.user)
       }
     }.execute
   }
@@ -49,12 +51,14 @@ class Relationships extends Publisher {
 
     new SwingWorker[Tuple2[List[TwitterUserId],List[TwitterUserId]], Object] {
       def doInBackground = (friendsFuture.get, followersFuture.get)
-      override def done { 
-        val (fr, fo) = get
-        friendIds = fr.map(_.id)
-        followerIds = fo.map(_.id)
+      override def done {
         longOpListener.stopOperation
-        Relationships.this.publish(IdsChanged()) // SwingWorker also has a publish
+        doAndHandleError(() => {
+          val (fr, fo) = get
+          friendIds = fr.map(_.id)
+          followerIds = fo.map(_.id)
+          Relationships.this.publish(IdsChanged()) // SwingWorker also has a publish
+        }, "Error fetching friend and follower IDs for " + twitterSession.user)
       }
     }.execute
   }

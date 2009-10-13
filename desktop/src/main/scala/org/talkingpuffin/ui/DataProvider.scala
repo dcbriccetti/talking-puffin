@@ -12,7 +12,7 @@ import javax.swing.{JOptionPane, Timer, SwingWorker}
 
 abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
-    with Publisher {
+    with Publisher with ErrorHandler {
   private val log = Logger.getLogger("DataProvider " + providerName)
   private var highestId: Option[Long] = startingId
   val titleCreator = new TitleCreator(providerName)
@@ -91,17 +91,11 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
       }
       override def done {
         longOpListener.stopOperation
-        try {
+        doAndHandleError(() => {
           val statuses = get
           if (statuses != Nil)
             DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
-        } catch {
-          case e: Throwable => {
-            val msg = "Error fetching " + providerName + " data for " + session.user + ": " + e.getMessage
-            log.error(msg)
-            JOptionPane.showMessageDialog(null, msg)
-          }
-        }
+          }, "Error fetching " + providerName + " data for " + session.user)
       }
     }.execute
   }
