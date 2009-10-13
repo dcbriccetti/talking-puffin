@@ -9,7 +9,7 @@ trait ErrorHandler extends Loggable {
       f()
     } catch {
       case e: Throwable => {
-        error(msg + " " + e.getMessage)
+        error(msg + ": " + e.getMessage)
         JOptionPane.showMessageDialog(null, msg)
       }
     }
