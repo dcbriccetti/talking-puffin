@@ -13,8 +13,8 @@ class TwitterStatus() extends Validated{
   var user: TwitterUser = null
   var id: Long = 0L
   var createdAt: DateTime = null
-  @Deprecated var source: String = null
-  var sourceName: String = null
+  @Deprecated var source: String = ""
+  var sourceName: String = ""
   var sourceUrl: Option[String] = None
   var truncated: Boolean = false
   var inReplyToStatusId: Option[Long] = None
