@@ -83,6 +83,9 @@ class TwitterStatusTest {
           <verified>false</verified>
         </retweeting_user>
       </retweet_details>
+      <geo>
+        <georss:Point>37.780300 -122.396900</georss:Point>
+      </geo>
     </status>
     <status>
       <created_at>Fri May 16 03:50:13 +0000 2008</created_at>
@@ -133,5 +136,13 @@ class TwitterStatusTest {
   def testRetweet() = assert(statuses(1).retweeted != null)
   def testRetweetTime() = assert(statuses(1).retweeted.retweetedAt != null)
   def testRetweetUser() = assert(statuses(1).retweeted.name == "Marcel Molina")
-
+  def testGeo() = {
+    statuses(1).location match {
+      case Some((lat,long)) => {
+        assertEquals(lat, 37.780300D)
+        assertEquals(long, -122.396900)
+      }
+      case _ => fail
+    }
+  }
 }
