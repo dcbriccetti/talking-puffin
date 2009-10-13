@@ -2,11 +2,13 @@ package org.talkingpuffin.ui
 
 import java.awt.{Toolkit}
 import _root_.scala.{Option}
-import java.awt.event.{KeyEvent, MouseEvent, MouseAdapter}
+import java.awt.event.{MouseEvent, MouseAdapter}
+import java.awt.event.KeyEvent._
 import java.beans.PropertyChangeEvent
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer}
-import javax.swing.{KeyStroke, JPopupMenu}
+import javax.swing.{JPopupMenu}
+import javax.swing.KeyStroke.{getKeyStroke => ks}
 import swing.{Reactor, MenuItem, Action}
 import com.google.common.collect.Lists
 import org.jdesktop.swingx.decorator.{SortKey, SortOrder, HighlighterFactory}
@@ -92,6 +94,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   
   private def viewSelected = getSelectedStatuses.foreach(status => 
     DesktopUtil.browse("http://twitter.com/" + status.user.screenName + "/statuses/" + status.id))
+ 
+  private def viewSourceSelected = getSelectedStatuses.foreach(status => 
+    DesktopUtil.browse("http://twitter.com/statuses/show/" + status.id + ".xml"))
  
   private def viewUser = getSelectedScreenNames.foreach(screenName => 
     DesktopUtil.browse("http://twitter.com/" + screenName))
@@ -205,41 +210,40 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   }
 
   protected def buildActions {
-    val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
+    val SHORTCUT = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
     val SHIFT = java.awt.event.InputEvent.SHIFT_DOWN_MASK
 
-    ap add(Action("View status in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
-    ap add(Action("View user in Browser") {viewUser}, KeyStroke.getKeyStroke(KeyEvent.VK_V, SHIFT))
-    ap add(Action("Edit user properties…") {editUser}, KeyStroke.getKeyStroke(KeyEvent.VK_P, shortcutKeyMask))
-    ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_L))
-    ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(KeyEvent.VK_U))
+    ap add(Action("View status in Browser") {viewSelected}, Actions.ks(VK_V))
+    ap add(Action("View status source in Browser") {viewSourceSelected}, ks(VK_V, SHORTCUT | SHIFT))
+    ap add(Action("View user in Browser") {viewUser}, ks(VK_V, SHIFT))
+    ap add(Action("Edit user properties…") {editUser}, ks(VK_P, SHORTCUT))
+    ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(VK_L))
+    ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(VK_U))
     ap add(Action("Mute") {tableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
-      KeyStroke.getKeyStroke(KeyEvent.VK_M, shortcutKeyMask))
+      ks(VK_M, SHORTCUT))
     ap add(Action("Mute Retweets") {tableModel.muteSelectedUsersRetweets(TableUtil.getSelectedModelIndexes(this))}, 
-      KeyStroke.getKeyStroke(KeyEvent.VK_M, shortcutKeyMask | SHIFT))
+      ks(VK_M, SHORTCUT | SHIFT))
     ap add(Action("Mute Application") {tableModel.muteSelectedApps(TableUtil.getSelectedModelIndexes(this))}, 
-      KeyStroke.getKeyStroke(KeyEvent.VK_A, shortcutKeyMask | SHIFT))
+      ks(VK_A, SHORTCUT | SHIFT))
     ap add new NextTAction(this)
     ap add new PrevTAction(this)
-    ap add(new TagAction(this, tableModel), Actions.ks(KeyEvent.VK_T))
-    ap add(Action("Increase Font Size") { changeFontSize(5) }, 
-        KeyStroke.getKeyStroke(KeyEvent.VK_O, shortcutKeyMask))
-    ap add(Action("Decrease Font Size") { changeFontSize(-5) }, 
-        KeyStroke.getKeyStroke(KeyEvent.VK_O, shortcutKeyMask | SHIFT))
+    ap add(new TagAction(this, tableModel), Actions.ks(VK_T))
+    ap add(Action("Increase Font Size") { changeFontSize(5) }, ks(VK_O, SHORTCUT))
+    ap add(Action("Decrease Font Size") { changeFontSize(-5) }, ks(VK_O, SHORTCUT | SHIFT))
     ap add(Action("Increase Row Height") { changeRowHeight(8) })
     ap add(Action("Decrease Row Height") { changeRowHeight(-8) })
     var action = Action("Show Larger Image") { showBigPicture }
-    ap add(action, Actions.ks(KeyEvent.VK_I))
+    ap add(action, Actions.ks(VK_I))
     specialMenuItems.oneStatusSelected.list ::= action
-    ap add(Action("Reply…") { reply }, Actions.ks(KeyEvent.VK_R))
+    ap add(Action("Reply…") { reply }, Actions.ks(VK_R))
     action = Action("Direct Message…") { dm(getSelectedScreenNames(0)) }
-    ap add(action, Actions.ks(KeyEvent.VK_D))
+    ap add(action, Actions.ks(VK_D))
     specialMenuItems.oneScreennameSelected.list ::= action
     specialMenuItems.followersOnly.list ::= action
     action = Action("Retweet old way…") { retweetOldWay }
-    ap add(action, Actions.ks(KeyEvent.VK_E))
+    ap add(action, Actions.ks(VK_E))
     specialMenuItems.oneStatusSelected.list ::= action
-    ap add(Action("Retweet new way") { retweetNewWay }, KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask))
+    ap add(Action("Retweet new way") { retweetNewWay }, ks(VK_E, SHORTCUT))
     action = Action("Follow") { userActions.follow(getSelectedScreenNames) }
     specialMenuItems.notFriendsOnly.list ::= action
     ap add(action, UserActions.FollowAccel)
@@ -250,12 +254,12 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     
     ap add(Action("Delete selected tweets") {
       tableModel removeStatuses TableUtil.getSelectedModelIndexes(this) 
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, shortcutKeyMask),
-      Actions.ks(KeyEvent.VK_DELETE), Actions.ks(KeyEvent.VK_BACK_SPACE))
+    }, ks(VK_D, SHORTCUT),
+      Actions.ks(VK_DELETE), Actions.ks(VK_BACK_SPACE))
 
     ap add(Action("Delete all tweets from all selected users") {
       tableModel removeStatusesFrom getSelectedScreenNames 
-    }, KeyStroke.getKeyStroke(KeyEvent.VK_D, shortcutKeyMask | SHIFT))
+    }, ks(VK_D, SHORTCUT | SHIFT))
   }
 
   private def changeFontSize(change: Int) {
