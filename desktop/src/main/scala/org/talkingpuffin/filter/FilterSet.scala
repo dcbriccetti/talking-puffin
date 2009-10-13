@@ -56,7 +56,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
           tagFiltersInclude && ! excludedByTags && 
           ! (excludeFriendRetweets && status.isFromFriend(friendUsernames)) &&
           ! (excludeNonFollowers && ! rels.followerIds.contains(status.user.id)) &&
-          ! (useNoiseFilters && NoiseFilter.noise_?(status.text)) &&
+          ! (useNoiseFilters && NoiseFilter.isNoise(status.text)) &&
           ! excludedByStringMatches
     }
 

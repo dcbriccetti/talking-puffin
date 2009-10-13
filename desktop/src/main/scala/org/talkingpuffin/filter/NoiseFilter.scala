@@ -8,9 +8,12 @@ object NoiseFilter extends Loggable {
   var exprs = List[Regex]()
   var loadError: Exception = _
   
-  def noise_?(text: String): Boolean = {
-    if (exprs == Nil && loadError == null) load
-    val textOneLine = text.replaceAll("(\n|\r)", "")
+  def isNoise(text: String): Boolean = {
+    if (needsLoading) 
+      load
+    
+    val textOneLine = text.replaceAll("(\n|\r)", "") // Easier to match text all on one line
+    
     exprs.exists(e => {
       textOneLine match {
         case e() => {
@@ -35,6 +38,10 @@ object NoiseFilter extends Loggable {
         error(e.toString) 
       }
     }
+  }
+  
+  private def needsLoading: Boolean = {
+    exprs == Nil /* None loaded */ && loadError == null /* We didn’t previously fail on loading */
   }
   
   private def loadSamples {
