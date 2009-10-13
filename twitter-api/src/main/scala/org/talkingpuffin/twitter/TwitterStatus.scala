@@ -45,20 +45,18 @@ class TwitterStatus() extends Validated{
    * <li>a URL, if found, into {@link #sourceUrl}
    * <li>the source name into {@link #sourceName}
    * </ol>
+   * 
    */
   private def extractSource(text: String) {
     source = text
-    
-    if (text.startsWith("<a") 
-        // Special case: XML.loadString doesn’t like the &id request param in 
-        // “<a href="http://help.twitter.com/index.php?pg=kb.page&id=75" rel="nofollow">txt</a>”
-        && ! text.endsWith(">txt</a>")) { 
-      val x = XML.loadString(text)
-      sourceUrl = Some((x \ "@href").text)
-      sourceName = (x.child(0)).text
-    } else {
-      sourceName = text
+    // XML.loadString might have been used instead of this regex, but it throws exceptions because of the contents
+    val anchorRegex = """<a.*href=["'](.*?)["'].*?>(.*?)</a>""".r
+    val fields = text match {
+      case anchorRegex(u,s) => (Some(u), s)
+      case _ => (None, text) 
     }
+    sourceUrl = fields._1
+    sourceName = fields._2
   }
 
   /**
