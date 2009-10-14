@@ -70,7 +70,7 @@ class TwitterStatus() extends Validated{
    * <code>node</code> contains <code>geo</code>
    */
   private def extractLocation(node: NodeSeq) {
-    node \ "Point" match {
+    node \ "point" match {
       case p if p.length > 0 => 
         val loc = p.text.split(" ")
         if (loc.length == 2)
