@@ -16,7 +16,7 @@ class MainToolBar extends JToolBar with ToolBarHelpers with LongOpListener {
     minimumSize = s
   }
   val operationsInProgress = new AtomicInteger
-  val remaining = new Label
+  val remaining = new Label(" ")
   var dataProvidersDialog: DataProvidersDialog = _
 
   setFloatable(false)
@@ -29,6 +29,9 @@ class MainToolBar extends JToolBar with ToolBarHelpers with LongOpListener {
       toolTip = "Shows Data Providers Dialog"
       def apply = dataProvidersDialog.visible = true
     })
+    addSeparator
+    add(new Label("Approx. requests left: ").peer)
+    add(remaining.peer)
     addSeparator
     add(progressBar.peer)
   }
