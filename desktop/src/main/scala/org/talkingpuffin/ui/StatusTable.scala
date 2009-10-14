@@ -7,9 +7,8 @@ import java.awt.event.KeyEvent._
 import java.beans.PropertyChangeEvent
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer}
-import javax.swing.{JPopupMenu}
 import javax.swing.KeyStroke.{getKeyStroke => ks}
-import swing.{Reactor, MenuItem, Action}
+import swing.{Reactor, Action}
 import com.google.common.collect.Lists
 import org.jdesktop.swingx.decorator.{SortKey, SortOrder, HighlighterFactory}
 import org.jdesktop.swingx.event.TableColumnModelExtListener
@@ -21,6 +20,7 @@ import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.twitter.{TwitterStatus}
 import org.talkingpuffin.ui.util.{TableUtil, DesktopUtil}
 import org.talkingpuffin.Session
+import javax.swing.{JMenu}
 
 /**
  * Table of statuses.
@@ -56,7 +56,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)
   configureColumns
 
-  private val ap = new ActionPrep(this)
+  private val ap = new PopupMenuHelper(this)
   private var specialMenuItems = new SpecialMenuItems
   buildActions
 
@@ -69,7 +69,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     }
   }
 
-  addMouseListener(new PopupListener(this, new PopupMenu))
+  addMouseListener(new PopupListener(this, ap.menu))
   addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = if (e.getClickCount == 2) reply
   })
@@ -140,10 +140,6 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     if (row == -1) None else Some(tableModel.getStatusAt(convertRowIndexToModel(row)))
   }
 
-  class PopupMenu extends JPopupMenu {
-    ap.actions.reverse.foreach(a => add(new MenuItem(a).peer))
-  }
-  
   private def configureColumns {
     ageCol.setPreferredWidth(60)
     ageCol.setMaxWidth(100)
@@ -229,31 +225,37 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ap add(Action("Retweet new way") { retweetNewWay }, ks(VK_E, SHORTCUT))
     
     ap add(new TagAction(this, tableModel), Actions.ks(VK_T))
-    ap add(new Action("Show Larger Image") { 
+    ap add(new Action("Show larger image") { 
       def apply = showBigPicture
       specialMenuItems.oneStatusSelected.list ::= this
     }, Actions.ks(VK_I))
     
-    ap add(Action("View status in Browser") {viewSelected}, Actions.ks(VK_V))
-    ap add(Action("View status source in Browser") {viewSourceSelected}, ks(VK_V, SHORTCUT | SHIFT))
-    ap add(Action("View user in Browser") {viewUser}, ks(VK_V, SHIFT))
+    ap.menu.add(new JMenu("View in browser") {
+      ap add(Action("Status") {viewSelected}, this, Actions.ks(VK_V))
+      ap add(Action("Status source") {viewSourceSelected}, this, ks(VK_V, SHORTCUT | SHIFT))
+      ap add(Action("User") {viewUser}, this, ks(VK_V, SHIFT))
+    })
     
     ap add(Action("Edit user properties…") {editUser}, ks(VK_P, SHORTCUT))
     
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(VK_L))
     ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(VK_U))
     
-    ap add(Action("Mute") {tableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
-      ks(VK_M, SHORTCUT))
-    ap add(Action("Mute Retweets") {tableModel.muteSelectedUsersRetweets(TableUtil.getSelectedModelIndexes(this))}, 
-      ks(VK_M, SHORTCUT | SHIFT))
-    ap add(Action("Mute Application") {tableModel.muteSelectedApps(TableUtil.getSelectedModelIndexes(this))}, 
-      ks(VK_A, SHORTCUT | SHIFT))
+    ap.menu.add(new JMenu("Mute") {
+      ap add(Action("User") {tableModel.muteSelectedUsers(
+        TableUtil.getSelectedModelIndexes(StatusTable.this))}, this, ks(VK_M, SHORTCUT))
+      ap add(Action("Retweets by user") {tableModel.muteSelectedUsersRetweets(
+        TableUtil.getSelectedModelIndexes(StatusTable.this))}, this, ks(VK_M, SHORTCUT | SHIFT))
+      ap add(Action("Application") {tableModel.muteSelectedApps(
+        TableUtil.getSelectedModelIndexes(StatusTable.this))}, this, ks(VK_A, SHORTCUT | SHIFT))
+    })
     
-    ap add(Action("Increase Font Size") { changeFontSize(5) }, ks(VK_O, SHORTCUT))
-    ap add(Action("Decrease Font Size") { changeFontSize(-5) }, ks(VK_O, SHORTCUT | SHIFT))
-    ap add(Action("Increase Row Height") { changeRowHeight(8) })
-    ap add(Action("Decrease Row Height") { changeRowHeight(-8) })
+    ap.menu.add(new JMenu("Size") {
+      ap add(Action("Increase Font Size") { changeFontSize(5) }, this, ks(VK_O, SHORTCUT))
+      ap add(Action("Decrease Font Size") { changeFontSize(-5) }, this, ks(VK_O, SHORTCUT | SHIFT))
+      ap add(Action("Increase Row Height") { changeRowHeight(8) }, this)
+      ap add(Action("Decrease Row Height") { changeRowHeight(-8) }, this)
+    })
     
     ap add(new Action("Follow") { 
       def apply = userActions.follow(getSelectedScreenNames)
@@ -265,14 +267,14 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     }, UserActions.UnfollowAccel)
     ap add(Action("Block") { userActions.block(getSelectedScreenNames) }, UserActions.BlockAccel)
     
-    ap add(Action("Delete selected tweets") {
-      tableModel removeStatuses TableUtil.getSelectedModelIndexes(this) 
-    }, ks(VK_D, SHORTCUT),
-      Actions.ks(VK_DELETE), Actions.ks(VK_BACK_SPACE))
-
-    ap add(Action("Delete all tweets from all selected users") {
-      tableModel removeStatusesFrom getSelectedScreenNames 
-    }, ks(VK_D, SHORTCUT | SHIFT))
+    ap.menu.add(new JMenu("Delete") {
+      ap add(Action("Selected tweets") {
+        tableModel removeStatuses TableUtil.getSelectedModelIndexes(StatusTable.this) 
+      }, this, ks(VK_D, SHORTCUT), Actions.ks(VK_DELETE), Actions.ks(VK_BACK_SPACE))
+  
+      ap add(Action("All tweets from selected users") {
+        tableModel removeStatusesFrom getSelectedScreenNames }, this, ks(VK_D, SHORTCUT | SHIFT))
+    })
   }
 
   private def changeFontSize(change: Int) {

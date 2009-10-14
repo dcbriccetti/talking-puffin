@@ -2,10 +2,10 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.EditDone
 import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
-import java.awt.{Toolkit, Dimension}
-import javax.swing.{JButton, JPopupMenu, JTable, JToolBar, JToggleButton, JLabel}
+import java.awt.Dimension
+import javax.swing.{JButton, JTable, JToolBar, JToggleButton, JLabel}
 import scala.swing.GridBagPanel._
-import swing.{Reactor, MenuItem, GridBagPanel, ScrollPane, TextField, Action}
+import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.ui.util.{TableUtil, DesktopUtil}
 import org.talkingpuffin.twitter.{TwitterUser}
@@ -33,9 +33,9 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     peer.setViewportView(table)
   }
   private val userActions = new UserActions(session.twitterSession, rels)
-  val ap = new ActionPrep(table)
+  val ap = new PopupMenuHelper(table)
   buildActions(ap, table)
-  table.addMouseListener(new PopupListener(table, getPopupMenu(ap)))
+  table.addMouseListener(new PopupListener(table, ap.menu))
 
   class FriendFollowButton(label: String) extends JToggleButton(label) {
     setSelected(true)
@@ -99,7 +99,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
       case _ => Some(searchText.text)
     }))
 
-  private def buildActions(ap: ActionPrep, comp: java.awt.Component) = {
+  private def buildActions(ap: PopupMenuHelper, comp: java.awt.Component) = {
     ap.add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
     ap.add(new NextTAction(comp))
     ap.add(new PrevTAction(comp))
@@ -110,13 +110,6 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     ap.add(Action("Block"   ) { userActions.block(getSelectedScreenNames   ) }, UserActions.BlockAccel)
   }
 
-  private def getPopupMenu(ap: ActionPrep): JPopupMenu = {
-    val menu = new JPopupMenu
-    for (action <- ap.actions.reverse) 
-      menu.add(new MenuItem(action).peer)
-    menu
-  }
-  
   private def getSelectedUsers:List[TwitterUser] = 
     TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
   
