@@ -9,8 +9,9 @@ trait ErrorHandler extends Loggable {
       f()
     } catch {
       case e: Throwable => {
-        error(msg + ": " + e.getMessage)
-        JOptionPane.showMessageDialog(null, msg)
+        val displayMsg = msg + ": " + e.getMessage
+        error(displayMsg)
+        JOptionPane.showMessageDialog(null, displayMsg)
       }
     }
     
