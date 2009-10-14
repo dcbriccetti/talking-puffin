@@ -56,7 +56,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)
   configureColumns
 
-  val ap = new ActionPrep(this)
+  private val ap = new ActionPrep(this)
   private var specialMenuItems = new SpecialMenuItems
   buildActions
 
@@ -213,43 +213,56 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     val SHORTCUT = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
     val SHIFT = java.awt.event.InputEvent.SHIFT_DOWN_MASK
 
+    ap add new NextTAction(this)
+    ap add new PrevTAction(this)
+    
+    ap add(Action("Reply…") { reply }, Actions.ks(VK_R))
+    ap add(new Action("Direct Message…") { 
+      def apply = dm(getSelectedScreenNames(0))
+      specialMenuItems.oneScreennameSelected.list ::= this
+      specialMenuItems.followersOnly.list ::= this
+    }, Actions.ks(VK_D))
+    ap add(new Action("Retweet old way…") { 
+      def apply = retweetOldWay
+      specialMenuItems.oneStatusSelected.list ::= this
+    }, Actions.ks(VK_E))
+    ap add(Action("Retweet new way") { retweetNewWay }, ks(VK_E, SHORTCUT))
+    
+    ap add(new TagAction(this, tableModel), Actions.ks(VK_T))
+    ap add(new Action("Show Larger Image") { 
+      def apply = showBigPicture
+      specialMenuItems.oneStatusSelected.list ::= this
+    }, Actions.ks(VK_I))
+    
     ap add(Action("View status in Browser") {viewSelected}, Actions.ks(VK_V))
     ap add(Action("View status source in Browser") {viewSourceSelected}, ks(VK_V, SHORTCUT | SHIFT))
     ap add(Action("View user in Browser") {viewUser}, ks(VK_V, SHIFT))
+    
     ap add(Action("Edit user properties…") {editUser}, ks(VK_P, SHORTCUT))
+    
     ap add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(VK_L))
     ap add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), Actions.ks(VK_U))
+    
     ap add(Action("Mute") {tableModel.muteSelectedUsers(TableUtil.getSelectedModelIndexes(this))}, 
       ks(VK_M, SHORTCUT))
     ap add(Action("Mute Retweets") {tableModel.muteSelectedUsersRetweets(TableUtil.getSelectedModelIndexes(this))}, 
       ks(VK_M, SHORTCUT | SHIFT))
     ap add(Action("Mute Application") {tableModel.muteSelectedApps(TableUtil.getSelectedModelIndexes(this))}, 
       ks(VK_A, SHORTCUT | SHIFT))
-    ap add new NextTAction(this)
-    ap add new PrevTAction(this)
-    ap add(new TagAction(this, tableModel), Actions.ks(VK_T))
+    
     ap add(Action("Increase Font Size") { changeFontSize(5) }, ks(VK_O, SHORTCUT))
     ap add(Action("Decrease Font Size") { changeFontSize(-5) }, ks(VK_O, SHORTCUT | SHIFT))
     ap add(Action("Increase Row Height") { changeRowHeight(8) })
     ap add(Action("Decrease Row Height") { changeRowHeight(-8) })
-    var action = Action("Show Larger Image") { showBigPicture }
-    ap add(action, Actions.ks(VK_I))
-    specialMenuItems.oneStatusSelected.list ::= action
-    ap add(Action("Reply…") { reply }, Actions.ks(VK_R))
-    action = Action("Direct Message…") { dm(getSelectedScreenNames(0)) }
-    ap add(action, Actions.ks(VK_D))
-    specialMenuItems.oneScreennameSelected.list ::= action
-    specialMenuItems.followersOnly.list ::= action
-    action = Action("Retweet old way…") { retweetOldWay }
-    ap add(action, Actions.ks(VK_E))
-    specialMenuItems.oneStatusSelected.list ::= action
-    ap add(Action("Retweet new way") { retweetNewWay }, ks(VK_E, SHORTCUT))
-    action = Action("Follow") { userActions.follow(getSelectedScreenNames) }
-    specialMenuItems.notFriendsOnly.list ::= action
-    ap add(action, UserActions.FollowAccel)
-    action = Action("Unfollow") { userActions.unfollow(getSelectedScreenNames) }
-    specialMenuItems.friendsOnly.list ::= action
-    ap add(action, UserActions.UnfollowAccel)
+    
+    ap add(new Action("Follow") { 
+      def apply = userActions.follow(getSelectedScreenNames)
+      specialMenuItems.notFriendsOnly.list ::= this
+    }, UserActions.FollowAccel)
+    ap add(new Action("Unfollow") {
+      def apply = userActions.unfollow(getSelectedScreenNames)
+      specialMenuItems.friendsOnly.list ::= this
+    }, UserActions.UnfollowAccel)
     ap add(Action("Block") { userActions.block(getSelectedScreenNames) }, UserActions.BlockAccel)
     
     ap add(Action("Delete selected tweets") {
