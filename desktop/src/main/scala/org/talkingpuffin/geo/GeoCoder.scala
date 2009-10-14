@@ -13,10 +13,19 @@ object GeoCoder {
   private val num = """(-?\d+\.\d*)"""
   private val latLongRegex = ("""[^-\d]*""" + num + """,\s*""" + num).r
 
+  /**
+   * From a (latitude, comma, optional spaces, longitude), produces a (latitude, comma, longitude) String,
+   * or None if the pattern does not match.
+   */
   def extractLatLong(location: String): Option[String] = location match {
-    case latLongRegex(lat, long) => Some(lat + "," + long)
+    case latLongRegex(lat, long) => Some(formatLatLongKey(lat, long))
     case _ => None
   }
+  
+  def formatLatLongKey(lat: String, long: String): String = lat + "," + long 
+  
+  def formatLatLongKey(location: Tuple2[Double, Double]): String = 
+    formatLatLongKey(location._1.toString, location._2.toString) 
 }
 
 class GeoCoder(processResults: (ResourceReady[String,String]) => Unit) 

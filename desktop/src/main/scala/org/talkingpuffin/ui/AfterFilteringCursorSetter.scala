@@ -9,8 +9,6 @@ import javax.swing.JTable
  * visible in the model.
  */
 class AfterFilteringCursorSetter(table: JTable) {
-  
-  private val log = Logger.getLogger("CursorSetter")
   private var cursorCandidates = List[Long]()
   private val model = table.getModel.asInstanceOf[StatusTableModel] 
 
@@ -20,7 +18,6 @@ class AfterFilteringCursorSetter(table: JTable) {
       case selectedRow => (for(row <- selectedRow + 1 until table.getRowCount)  
         yield model.getStatusAt(table.convertRowIndexToModel(row)).id).toList 
     }
-    log.debug("Collected " + cursorCandidates.size + " candidates")
   }
   
   def discardCandidates = cursorCandidates = List[Long]()
@@ -31,7 +28,6 @@ class AfterFilteringCursorSetter(table: JTable) {
         case Some(i) =>
           val viewIdx = table.convertRowIndexToView(i)
           table.getSelectionModel.addSelectionInterval(viewIdx, viewIdx);
-          log.debug("Found cursor index from candidates: " + i)
           return
         case None =>
       }

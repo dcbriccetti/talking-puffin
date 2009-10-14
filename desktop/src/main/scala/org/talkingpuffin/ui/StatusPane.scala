@@ -14,7 +14,6 @@ import org.talkingpuffin.Session
 class StatusPane(session: Session, title: String, statusTableModel: StatusTableModel, 
     filterSet: FilterSet, tagUsers: TagUsers, viewCreator: ViewCreator) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
-  private val log = Logger.getLogger("StatusPane " + hashCode)
   var table: StatusTable = _
   private var lastSelectedRows: List[TwitterStatus] = Nil
   private var lastRowSelected: Boolean = _
@@ -90,8 +89,6 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
       }
       cursorSetter.captureTableState
     }
-    log.debug("Before table change. Selected rows: " + lastSelectedRows.size + 
-        ", last selected? " + lastRowSelected)
   }
 
   def tableChanged(e: TableModelEvent) = {
@@ -111,7 +108,6 @@ class StatusPane(session: Session, title: String, statusTableModel: StatusTableM
       if (numRestoredFromPrevSel == 0 && table.getRowCount > 0) {
         if (lastRowSelected) {
           val i = table.getRowCount - 1
-          log.debug("Selecting last row, " + i)
           selectionModel.addSelectionInterval(i, i)
         } else {
           cursorSetter.setCursor

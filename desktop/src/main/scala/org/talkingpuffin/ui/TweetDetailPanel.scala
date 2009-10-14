@@ -14,6 +14,7 @@ import org.talkingpuffin.geo.GeoCoder
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.Session
 import util.{ResourceReady, FetchRequest, ShortUrl, TextChangingAnimator}
+import org.talkingpuffin.util.Loggable
 
 object Thumbnail {
   val THUMBNAIL_SIZE = 48
@@ -29,7 +30,7 @@ object Thumbnail {
  */
 class TweetDetailPanel(session: Session, table: JTable, 
     filtersDialog: FiltersDialog, tagUsers: TagUsers, viewCreator: ViewCreator, userPrefs: Preferences) 
-    extends GridBagPanel {
+    extends GridBagPanel with Loggable {
   private val geoCoder = new GeoCoder(processFinishedGeocodes)
   private val animator = new TextChangingAnimator
 
@@ -97,8 +98,7 @@ class TweetDetailPanel(session: Session, table: JTable,
 
   def showStatusDetails(status: TwitterStatus) {
     session.status.text = " "
-    val user = status.user
-    setText(user)
+    setText(status)
     largeTweetScrollPane.setVisible(true)
     largeTweet.setText(HtmlFormatter.createTweetHtml(status.text,
         status.inReplyToStatusId, status.source))
@@ -107,7 +107,7 @@ class TweetDetailPanel(session: Session, table: JTable,
     if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) 
       ShortUrl.substituteExpandedUrls(status.text, largeTweet)
     
-    showMediumPicture(user.profileImageURL)
+    showMediumPicture(status.user.profileImageURL)
   }
   
   def clearStatusDetails {
@@ -122,13 +122,21 @@ class TweetDetailPanel(session: Session, table: JTable,
   
   def showBigPicture = bigPic.showBigPicture(showingUrl, peer)
 
-  private def setText(user: TwitterUser) {
+  private def setText(status: TwitterStatus) {
+    val user = status.user
     animator.stop
     showingUser = user
     val rawLocationOfShowingItem = user.location
 
-    if (GlobalPrefs.isOn(PrefKeys.LOOK_UP_LOCATIONS)) { 
-      GeoCoder.extractLatLong(rawLocationOfShowingItem) match {
+    if (GlobalPrefs.isOn(PrefKeys.LOOK_UP_LOCATIONS)) {
+      (status.location match {
+        case Some(location) => {
+          val key = GeoCoder.formatLatLongKey(location)
+          debug("New geo loc found: " + key)
+          Some(key)
+        }
+        case None => GeoCoder.extractLatLong(rawLocationOfShowingItem) 
+      }) match {
         case Some(latLong) =>
           geoCoder.getCachedObject(latLong) match {
             case Some(location) => {

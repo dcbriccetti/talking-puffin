@@ -1,9 +1,9 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.Action
 import java.awt.Component
 import java.awt.event.KeyEvent
-import javax.swing.{KeyStroke, JComponent}
+import scala.swing.{Action}
+import javax.swing.{JMenuItem, JPopupMenu, KeyStroke, JComponent}
 
 /**
  * Reusable actions with associated accelerators
@@ -27,13 +27,18 @@ object Actions {
   def ks(keyEvent: Int): KeyStroke = KeyStroke.getKeyStroke(keyEvent, 0)
 }
 
-class ActionPrep(comp: JComponent) {
-  var actions = List[Action]()
+class PopupMenuHelper(comp: JComponent) {
+  val menu = new JPopupMenu
+  
   def add(action: Action, keys: KeyStroke*) {
+    add(action, menu, keys: _*)
+  }
+  
+  def add(action: Action, menu: JComponent, keys: KeyStroke*) {
     if (keys.length > 0) action.accelerator = Some(keys(0))
     comp.getActionMap.put(action.title, action.peer)
     keys foreach(comp.getInputMap.put(_, action.title))
-    actions ::= action
+    menu.add(new JMenuItem(action.peer))
   }
 
   def add(kta: KeyTriggeredAction): Unit = add(kta.action, kta.keyStroke: _*)
