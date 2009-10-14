@@ -7,7 +7,6 @@ import javax.swing.{BorderFactory}
 import swing.GridBagPanel._
 import swing.{Reactor, Frame, Label, ComboBox, GridBagPanel, FlowPanel, Action, Button, BorderPanel}
 import org.joda.time.DateTime
-import org.talkingpuffin.util.Loggable
 import util.Cancelable
 import org.talkingpuffin.time.TimeFormatter
 
@@ -15,7 +14,7 @@ object DataProvidersDialog {
   val DefaultRefreshSecs = 600
 }
 
-class DataProvidersDialog(owner: java.awt.Frame, streams: Streams) extends Frame with Cancelable with Loggable {
+class DataProvidersDialog(owner: java.awt.Frame, streams: Streams) extends Frame with Cancelable {
   
   title = "Data Providers"
   
@@ -42,7 +41,6 @@ class DataProvidersDialog(owner: java.awt.Frame, streams: Streams) extends Frame
             case e: NextLoadAt => {
               val time = formatTime(e.when)
               nextLoadLabel.text = time
-              debug("NextLoadAt received at " + hashCode + " from " + provider.providerName + ": " + time)
             }
           }
         } // Save a reference to all reactors so they don’t get garbage collected
