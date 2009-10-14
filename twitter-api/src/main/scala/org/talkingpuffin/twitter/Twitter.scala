@@ -73,7 +73,7 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
       }
   }
   /** utility class to connect to a URL and fetch XML. */
-  private val http = new Http(null,null)
+  private val http = new Http(None, None)
   
   def getPublicTimeline(): List[TwitterStatus] = {
     new Parser[TwitterStatus](new URL(apiURL + "/statuses/public_timeline.xml"),http,TwitterStatus.apply).parseXMLList("status")
@@ -135,7 +135,7 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
 */
 class AuthenticatedSession(val user: String, val password: String, val apiURL: String) extends UnauthenticatedSession(apiURL){
 
-  private val http = new Http(user,password)
+  private val http = new Http(Some(user), Some(password))
 
   def this(user: String,password: String) = this(user,password,API.defaultURL)
   /**

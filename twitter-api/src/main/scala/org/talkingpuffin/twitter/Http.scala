@@ -1,19 +1,22 @@
 package org.talkingpuffin.twitter
 
 import scala.xml.{Node, XML}
-import org.apache.log4j.Logger
-import org.apache.commons.codec.binary.Base64
 import java.net.{URL, HttpURLConnection, URLEncoder}
 import java.io.{DataOutputStream, BufferedReader, InputStreamReader}
+import org.apache.commons.codec.binary.Base64
+import org.apache.log4j.Logger
 
 /**
 * Handles HTTP requests.
 */
-class Http(user: String, password: String){
+class Http(user: Option[String], password: Option[String]) {
   private val log = Logger.getLogger("Http")
 
   /** the encoded authentication string.  This is null if user or password is null. */
-  val encoding = if(user != null && password != null) new String(Base64.encodeBase64((user + ":" + password).getBytes())) else null
+  private val encoding = if(user.isDefined && password.isDefined) 
+    Some(new String(Base64.encodeBase64((user.get + ":" + password.get).getBytes())))
+  else 
+    None
   
   /**
   * Fetch an XML document from the given URL
@@ -21,19 +24,14 @@ class Http(user: String, password: String){
   def doGet(url: URL): Node = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     log.debug("GET " + url)
-    if(encoding != null){
-      conn.setRequestProperty ("Authorization", "Basic " + encoding);
-    }
+    setAuth(conn)
     getXML(conn)
   }
 
   def doDelete(url: URL) = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     log.debug("DELETE " + url)
-
-    if(encoding != null){
-      conn.setRequestProperty ("Authorization", "Basic " + encoding);
-    }
+    setAuth(conn)
     conn.setRequestMethod("DELETE")
     getXML(conn)
   }
@@ -45,9 +43,7 @@ class Http(user: String, password: String){
   def doPost(url: URL, params: List[(String,String)]): Node = {
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     log.debug("POST " + url)
-    if(encoding != null){
-      conn.setRequestProperty ("Authorization", "Basic " + encoding);
-    }
+    setAuth(conn)
     conn.setDoInput(true)
     conn.setRequestMethod("POST")
     val content = buildParams(params)
@@ -65,7 +61,13 @@ class Http(user: String, password: String){
     }
     getXML(conn)
   }
-  
+
+  private def setAuth(conn: HttpURLConnection) {
+    if (encoding.isDefined) {
+      conn.setRequestProperty ("Authorization", "Basic " + encoding.get);
+    }
+  }
+
   /*
   * take an opened (and posted to, if applicable) connection, read the response code, and take appropriate action.
   * If the response code is 200, return an XML node built on the response.
