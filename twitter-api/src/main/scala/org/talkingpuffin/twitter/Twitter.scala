@@ -442,7 +442,6 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
 
   def reportSpam(userId: String): TwitterUser = {
     val resp = http.doPost(new URL(apiURL + "/report_spam.xml"), List(("screen_name", userId.toString())))
-    println(resp)
     TwitterUser(resp)
   }
 

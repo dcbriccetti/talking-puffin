@@ -24,15 +24,15 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   * Fetch an XML document from the given URL
   */
   def doGet(url: URL): Node = {
-    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     logAction("GET", url)
+    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
     getXML(conn)
   }
 
   def doDelete(url: URL) = {
-    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     logAction("DELETE", url)
+    val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
     conn.setRequestMethod("DELETE")
     getXML(conn)
@@ -43,8 +43,8 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   * @param params a List of String tuples, the first entry being the param, the second being the value
   */
   def doPost(url: URL, params: List[(String,String)]): Node = {
+    logAction("POST", url, params.map(kv => kv._1.trim + "=" + kv._2.trim).mkString(" "))
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    logAction("POST", url)
     setAuth(conn)
     conn.setDoInput(true)
     conn.setRequestMethod("POST")
@@ -63,8 +63,11 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
     }
     getXML(conn)
   }
-  
-  private def logAction(action: String, url: URL) = log.debug(user.getOrElse("") + " " + action + " " + url)
+
+  private def actionAndUrl(action: String, url: URL) = user.getOrElse("") + " " + action + " " + url
+  private def logAction(action: String, url: URL) = log.debug(actionAndUrl(action, url))
+  private def logAction(action: String, url: URL, params: String) = 
+      log.debug(actionAndUrl(action, url) + " " + params)
 
   private def setAuth(conn: HttpURLConnection) {
     if (encoding.isDefined) {
