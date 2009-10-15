@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.talkingpuffin</groupId>
     <artifactId>talking-puffin-base</artifactId>
-    <version>0.70</version>
+    <version>0.71</version>
     <inceptionYear>2008</inceptionYear>
     <properties>
         <scala.version>2.7.4</scala.version>

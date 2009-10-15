@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <jnlp spec="1.0+" codebase="http://talkingpuffin.org/jws" href="talking-puffin.jnlp">
   <information>
-    <title>TalkingPuffin 0.70</title>
+    <title>TalkingPuffin 0.71</title>
     <vendor>Dave Briccetti Software Consulting</vendor>
     <homepage href="http://davebsoft.com"/>
     <description>TalkingPuffin Twitter Client</description>
@@ -15,7 +15,7 @@
   <security><all-permissions/></security>
   <resources>
     <j2se version="1.6+"/>
-    <jar href="talking-puffin-0.70-jar-with-dependencies.jar"/>
+    <jar href="talking-puffin-0.71-jar-with-dependencies.jar"/>
   </resources>
   <application-desc main-class="org.talkingpuffin.Main">
   </application-desc>
