@@ -75,6 +75,8 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
   /** utility class to connect to a URL and fetch XML. */
   private val http = new Http(None, None)
   
+  def httpPublisher = http
+  
   def getPublicTimeline(): List[TwitterStatus] = {
     new Parser[TwitterStatus](new URL(apiURL + "/statuses/public_timeline.xml"),http,TwitterStatus.apply).parseXMLList("status")
   }
@@ -138,6 +140,9 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   private val http = new Http(Some(user), Some(password))
 
   def this(user: String,password: String) = this(user,password,API.defaultURL)
+
+  override def httpPublisher = http
+  
   /**
   * @param id the user id <i>or</i> user name of the desired friends timeline
   */
@@ -435,7 +440,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     TwitterUser(resp)
   }
 
-  def getUserRateLimitStatus(): TwitterRateLimitStatus = {
+  @Deprecated def getUserRateLimitStatus(): TwitterRateLimitStatus = {
     new Parser[TwitterRateLimitStatus](new URL(apiURL + "/account/rate_limit_status.xml"),http,TwitterRateLimitStatus.apply).parseXMLElement()
   }
 
