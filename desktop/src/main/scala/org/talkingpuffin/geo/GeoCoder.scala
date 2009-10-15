@@ -35,10 +35,8 @@ class GeoCoder(processResults: (ResourceReady[String,String]) => Unit)
   protected def getResourceFromSource(latLong: String): String = {
     val url = new URL("http://maps.google.com/maps/geo?key=" + GeoCoder.apiKey + 
         "&ll=" + latLong + "&output=xml&oe=utf-8")
-    XML.load(url.openConnection.getInputStream) \ "Response" \ "Placemark" \ "address" toList match {
-      case address :: _ => address.text
-      case _ => latLong
-    }
+    (XML.load(url.openConnection.getInputStream) \ "Response" \ "Placemark" \ "address").
+        firstOption.map(_.text).getOrElse(latLong)
   }
   
 }
