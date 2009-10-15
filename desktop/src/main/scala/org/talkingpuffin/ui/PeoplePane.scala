@@ -3,6 +3,7 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.event.EditDone
 import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
 import java.awt.Dimension
+import javax.swing.KeyStroke.{getKeyStroke => ks}
 import javax.swing.{JButton, JTable, JToolBar, JToggleButton, JLabel}
 import scala.swing.GridBagPanel._
 import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
@@ -100,11 +101,11 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     }))
 
   private def buildActions(mh: PopupMenuHelper, comp: java.awt.Component) = {
-    mh.add(Action("View in Browser") {viewSelected}, Actions.ks(KeyEvent.VK_V))
+    mh.add(Action("View in Browser") {viewSelected}, ks(KeyEvent.VK_V,0))
     mh.add(new NextTAction(comp))
     mh.add(new PrevTAction(comp))
-    mh add(new TagAction(table, tableModel), Actions.ks(KeyEvent.VK_T))
-    mh.add(Action("Reply") { reply }, Actions.ks(KeyEvent.VK_R))
+    mh add(new TagAction(table, tableModel), ks(KeyEvent.VK_T,0))
+    mh.add(Action("Reply") { reply }, ks(KeyEvent.VK_R,0))
     mh.add(Action("Follow"  ) { userActions.follow(getSelectedScreenNames  ) }, UserActions.FollowAccel)
     mh.add(Action("Unfollow") { userActions.unfollow(getSelectedScreenNames) }, UserActions.UnfollowAccel)
     mh.add(Action("Block"   ) { userActions.block(getSelectedScreenNames   ) }, UserActions.BlockAccel)

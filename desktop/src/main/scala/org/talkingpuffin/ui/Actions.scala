@@ -1,31 +1,29 @@
 package org.talkingpuffin.ui
 
 import java.awt.Component
-import java.awt.event.KeyEvent
 import scala.swing.{Action}
 import javax.swing.{JMenuItem, JPopupMenu, KeyStroke, JComponent}
+import java.awt.event.KeyEvent
+import java.awt.event.KeyEvent._
+import javax.swing.KeyStroke.{getKeyStroke => ks}
 
 /**
  * Reusable actions with associated accelerators
  */
 class EventGeneratingAction(title: String, comp: java.awt.Component, resultKey: Int) extends Action(title) {
-  def apply = comp.dispatchEvent(new KeyEvent(comp, KeyEvent.KEY_PRESSED, System.currentTimeMillis, 
-      0, resultKey, KeyEvent.CHAR_UNDEFINED))
+  def apply = comp.dispatchEvent(new KeyEvent(comp, KEY_PRESSED, System.currentTimeMillis, 
+      0, resultKey, CHAR_UNDEFINED))
 }
     
-class NextAction(comp: java.awt.Component) extends EventGeneratingAction("Next"    , comp, KeyEvent.VK_DOWN)
-class PrevAction(comp: java.awt.Component) extends EventGeneratingAction("Previous", comp, KeyEvent.VK_UP)
+class NextAction(comp: java.awt.Component) extends EventGeneratingAction("Next"    , comp, VK_DOWN)
+class PrevAction(comp: java.awt.Component) extends EventGeneratingAction("Previous", comp, VK_UP)
 
 class KeyTriggeredAction(val action: Action, val keyStroke: KeyStroke*)
 
 class NextTAction(comp: Component) extends KeyTriggeredAction(new NextAction(comp), 
-  Actions.ks(KeyEvent.VK_N), KeyStroke.getKeyStroke(KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK))
+  ks(VK_N, 0), KeyStroke.getKeyStroke(VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK))
 class PrevTAction(comp: Component) extends KeyTriggeredAction(new PrevAction(comp), 
-  Actions.ks(KeyEvent.VK_P), KeyStroke.getKeyStroke(KeyEvent.VK_P, java.awt.event.InputEvent.CTRL_DOWN_MASK))
-
-object Actions {
-  def ks(keyEvent: Int): KeyStroke = KeyStroke.getKeyStroke(keyEvent, 0)
-}
+  ks(VK_P, 0), KeyStroke.getKeyStroke(VK_P, java.awt.event.InputEvent.CTRL_DOWN_MASK))
 
 class PopupMenuHelper(comp: JComponent) {
   val menu = new JPopupMenu
