@@ -266,6 +266,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
       specialMenuItems.friendsOnly.list ::= this
     }, UserActions.UnfollowAccel)
     mh add(Action("Block") { userActions.block(getSelectedScreenNames) }, UserActions.BlockAccel)
+    mh.add(Action("Report Spam") { userActions.reportSpam(getSelectedScreenNames) }, UserActions.ReportSpamAccel)
     
     mh.menu.add(new JMenu("Delete") {
       mh add(Action("Selected tweets") {

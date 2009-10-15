@@ -440,6 +440,12 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     TwitterUser(resp)
   }
 
+  def reportSpam(userId: String): TwitterUser = {
+    val resp = http.doPost(new URL(apiURL + "/report_spam.xml"), List(("screen_name", userId.toString())))
+    println(resp)
+    TwitterUser(resp)
+  }
+
   @Deprecated def getUserRateLimitStatus(): TwitterRateLimitStatus = {
     new Parser[TwitterRateLimitStatus](new URL(apiURL + "/account/rate_limit_status.xml"),http,TwitterRateLimitStatus.apply).parseXMLElement()
   }

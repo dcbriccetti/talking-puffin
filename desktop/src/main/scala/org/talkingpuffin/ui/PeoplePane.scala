@@ -109,6 +109,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     mh.add(Action("Follow"  ) { userActions.follow(getSelectedScreenNames  ) }, UserActions.FollowAccel)
     mh.add(Action("Unfollow") { userActions.unfollow(getSelectedScreenNames) }, UserActions.UnfollowAccel)
     mh.add(Action("Block"   ) { userActions.block(getSelectedScreenNames   ) }, UserActions.BlockAccel)
+    mh.add(Action("Report Spam") { userActions.reportSpam(getSelectedScreenNames) }, UserActions.ReportSpamAccel)
   }
 
   private def getSelectedUsers:List[TwitterUser] = 

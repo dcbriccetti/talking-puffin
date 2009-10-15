@@ -23,6 +23,8 @@ class UserActions(twitterSession: AuthenticatedSession, rels: Relationships) {
   
   def unblock(names: List[String]) = process(names, twitterSession.unblockUser, "unblock")
   
+  def reportSpam(names: List[String]) = process(names, twitterSession.reportSpam, "report spam")
+  
   private def process(names:List[String], action:((String) => Unit), actionName: String) = 
     names foreach {name => 
       try {
@@ -45,4 +47,5 @@ object UserActions {
   val UnfollowAccel = KeyStroke.getKeyStroke(KeyEvent.VK_F, shortcutKeyMask | Shift)
   val BlockAccel    = KeyStroke.getKeyStroke(KeyEvent.VK_B, shortcutKeyMask)  
   val UnblockAccel  = KeyStroke.getKeyStroke(KeyEvent.VK_B, shortcutKeyMask | Shift)  
+  val ReportSpamAccel = KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcutKeyMask | Shift)  
 }
