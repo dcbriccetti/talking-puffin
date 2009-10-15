@@ -84,7 +84,7 @@ class TwitterStatusTest {
         </retweeting_user>
       </retweet_details>
       <geo>
-        <georss:Point>37.780300 -122.396900</georss:Point>
+        <georss:point>37.780300 -122.396900</georss:point>
       </geo>
     </status>
     <status>
