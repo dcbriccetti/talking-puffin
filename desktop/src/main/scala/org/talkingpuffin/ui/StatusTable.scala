@@ -8,7 +8,8 @@ import java.beans.PropertyChangeEvent
 import javax.swing.event._
 import javax.swing.table.{DefaultTableCellRenderer}
 import javax.swing.KeyStroke.{getKeyStroke => ks}
-import swing.{Reactor, Action}
+import javax.swing.{JMenu}
+import scala.swing.{Reactor, Action}
 import com.google.common.collect.Lists
 import org.jdesktop.swingx.decorator.{SortKey, SortOrder, HighlighterFactory}
 import org.jdesktop.swingx.event.TableColumnModelExtListener
@@ -20,7 +21,6 @@ import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.twitter.{TwitterStatus}
 import org.talkingpuffin.ui.util.{TableUtil, DesktopUtil}
 import org.talkingpuffin.Session
-import javax.swing.{JMenu}
 
 /**
  * Table of statuses.
@@ -237,9 +237,11 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     })
     
     mh add(Action("Edit user properties…") {editUser}, ks(VK_P, SHORTCUT))
-    
+
     mh add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_L, 0))
     mh add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, 0))
+    
+    mh add(Action("View lists…") {userActions.viewLists(getSelectedScreenNames, this)}, UserActions.ViewListAccel)
     
     mh.menu.add(new JMenu("Mute") {
       mh add(Action("User") {tableModel.muteSelectedUsers(
@@ -286,5 +288,6 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   private def changeRowHeight(change: Int) = customRowHeight += change
   
   private def thumbnailHeight = Thumbnail.THUMBNAIL_SIZE + rowMarginVal + 2
+  
 }
 

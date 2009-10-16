@@ -1,7 +1,7 @@
 package org.talkingpuffin.twitter
 
 import java.net.URL
-import scala.xml.Node
+import scala.xml.{NodeSeq, Node}
 
 /**
 * Provides access to Twitter API methods that require authentication.
@@ -193,6 +193,10 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     getSentMessages(TwitterArgs.page(page))
   }
 
+  def getLists(screen_name: String): NodeSeq = {
+    http.doGet(new URL(apiURL + "/" + screen_name + "/lists.xml"))  // Leave this as XML until it solidifies
+  }
+  
   def getSentMessages(args: TwitterArgs): List[TwitterMessage] = {
     new Parser[TwitterMessage](new URL(apiURL + "/direct_messages/sent.xml" + args),http,
         TwitterMessage.apply).parseXMLList("direct_message").list
