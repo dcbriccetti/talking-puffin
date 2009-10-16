@@ -90,7 +90,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     followersButton.setText("Followers: " + rels.followers.length)
     overlapLabel.setText({
       val numUsers = tableModel.usersModel.users.length
-      if (numUsers == 0) " " else " Overlap: " + (rels.friends.length + rels.followers.length - numUsers)
+      if (numUsers == 0) " " else " Overlap: " + (rels.friends intersect rels.followers).length
     })
   }
   

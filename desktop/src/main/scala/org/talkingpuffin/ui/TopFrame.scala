@@ -107,8 +107,16 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   def createPeoplePane(users: Option[List[TwitterUser]], updatePeople: () => Unit): Unit = {
     val model = if (users.isDefined) new UsersTableModel(users, tagUsers, rels) else streams.usersTableModel
-    peoplePane = new PeoplePane(session, model, rels, updatePeople)
-    peoplePage = new Page(peoplePaneTitle(rels.friends.length, rels.followers.length), peoplePane)
+    val customRels = if (users.isDefined) {
+      new Relationships {
+        friends = rels.friends intersect users.get
+        friendIds = friends map(_.id)
+        followers = rels.followers intersect users.get
+        followerIds = followers map(_.id)
+      }
+    } else rels
+    peoplePane = new PeoplePane(session, model, customRels, updatePeople)
+    peoplePage = new Page(peoplePaneTitle(customRels.friends.length, customRels.followers.length), peoplePane)
     tabbedPane.pages += peoplePage
   }
 

@@ -32,7 +32,7 @@ object UsersModel {
     val arrows = combinedList.map(user => {
       val friend = rels.friends.contains(user)
       val follower = rels.followers.contains(user)
-      if (friend && follower) "↔" else if (friend) "→" else "←"
+      if (friend && follower) "↔" else if (friend) "→" else if (follower) "←" else " "
     }).toArray
     val screenNameToUserNameMap = Map(users map {user => (user.screenName, user.name)} : _*)
     val friendScreenNames = Set(rels.friends map {f => f.screenName} : _*)
