@@ -193,8 +193,13 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     getSentMessages(TwitterArgs.page(page))
   }
 
-  def getLists(screen_name: String): NodeSeq = {
-    http.doGet(new URL(apiURL + "/" + screen_name + "/lists.xml"))  // Leave this as XML until it solidifies
+  def getLists(screenName: String): NodeSeq = {
+    http.doGet(new URL(apiURL + "/" + screenName + "/lists.xml"))  // Leave this as XML until it solidifies
+  }
+  
+  def getListMembers(list: NodeSeq): List[TwitterUser] = {
+    (http.doGet(new URL(apiURL + "/" + (list \ "user" \ "screen_name").text + "/" + (list \ "slug").text + 
+        "/members.xml")) \ "users" \ "user").map(TwitterUser.apply).toList
   }
   
   def getSentMessages(args: TwitterArgs): List[TwitterMessage] = {

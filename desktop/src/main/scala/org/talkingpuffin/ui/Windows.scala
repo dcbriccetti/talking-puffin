@@ -9,6 +9,7 @@ import javax.swing.{JFrame, SwingUtilities}
 class Windows {
   var tabbedPane: TabbedPane = _
   var streams: Streams = _
+  var peoplePaneCreator: PeoplePaneCreator = _
     
   def undock(comp: Component) {
     new Frame {

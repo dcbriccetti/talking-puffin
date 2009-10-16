@@ -10,19 +10,24 @@ class UsersModel(rels: Relationships, val users: Array[TwitterUser], val arrows:
 
 object UsersModel {
 
-  def apply(rels: Relationships, sel: UserSelection): UsersModel = {
+  /**
+   * If users is None, the list of users will be built from the relationships.
+   */
+  def apply(usersList: Option[List[TwitterUser]], rels: Relationships, sel: UserSelection): UsersModel = {
 
     def selected(users: List[TwitterUser], search: Option[String]) = search match {
       case None => users
       case Some(search) => users.filter(u => u.name.toLowerCase.contains(search.toLowerCase))
     }
 
-    val combinedList = {
-      var set = Set[TwitterUser]()
-      if (sel.includeFriends)   set ++= selected(rels.friends  , sel.searchString)
-      if (sel.includeFollowers) set ++= selected(rels.followers, sel.searchString)
-      set.toList.sort(_.name.toLowerCase < _.name.toLowerCase)
-    }
+    val combinedList = (usersList match {
+      case Some(u) => u
+      case None =>  
+        var set = Set[TwitterUser]()
+        if (sel.includeFriends)   set ++= selected(rels.friends  , sel.searchString)
+        if (sel.includeFollowers) set ++= selected(rels.followers, sel.searchString)
+        set.toList
+    }).sort(_.name.toLowerCase < _.name.toLowerCase)
     val users = combinedList.toArray
     val arrows = combinedList.map(user => {
       val friend = rels.friends.contains(user)

@@ -16,7 +16,8 @@ import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, Authenticat
 /**
  * The top-level application Swing frame window. There is one per user session.
  */
-class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable with Reactor {
+class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable 
+    with PeoplePaneCreator with Reactor {
   val tagUsers = new TagUsers(service, twitterSession.user)
   TopFrames.addFrame(this)
   val session = new Session(service, twitterSession)
@@ -27,6 +28,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     preferredSize = new Dimension(900, 600)
   }
   session.windows.tabbedPane = tabbedPane
+  session.windows.peoplePaneCreator = this
   private var peoplePage: Page = _
   private var peoplePane: PeoplePane = _
 
@@ -100,7 +102,12 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   private def createPeoplePane: Unit = {
     updatePeople
-    peoplePane = new PeoplePane(session, streams.usersTableModel, rels, updatePeople _)
+    createPeoplePane(None, updatePeople _)
+  }
+  
+  def createPeoplePane(users: Option[List[TwitterUser]], updatePeople: () => Unit): Unit = {
+    val model = if (users.isDefined) new UsersTableModel(users, tagUsers, rels) else streams.usersTableModel
+    peoplePane = new PeoplePane(session, model, rels, updatePeople)
     peoplePage = new Page(peoplePaneTitle(rels.friends.length, rels.followers.length), peoplePane)
     tabbedPane.pages += peoplePage
   }

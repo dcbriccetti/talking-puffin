@@ -35,10 +35,10 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
   private def nameAndScreenNames(names: List[TwitterUser]) = names.map(u => 
       NameAndScreenName(u.name, u.screenName))
   private var sendingSession = session
-  private val utm = session.windows.streams.usersTableModel
+  private val rels = session.windows.streams.relationships
   
   private def users = {
-    val matches = (nameAndScreenNames(utm.relationships.friends ::: utm.relationships.followers).
+    val matches = (nameAndScreenNames(rels.friends ::: rels.followers).
         filter(_.matches(searchText.text))).sort(_ < _).removeDuplicates
     (matches.length match {
       case 0 => "No matches were found"
@@ -47,8 +47,8 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
     }) :: matches
   }
   private val dmRecipCombo = new ComboBox(
-    if (utm.relationships.followers == Nil) List("Followers not loaded") else 
-      nameAndScreenNames(utm.relationships.followers).sort(_ < _))
+    if (rels.followers == Nil) List("Followers not loaded") else 
+      nameAndScreenNames(rels.followers).sort(_ < _))
   private val searchText = new TextField {columns = 15}
   private val usersCombo = new ComboBox(users)
   private val message = new CustomTextArea
@@ -87,7 +87,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
         contents += new Label("To: ")
         recipients match {
           case Some(r) => {
-            utm.relationships.followers.find(_.screenName == r) match {
+            rels.followers.find(_.screenName == r) match {
               case Some(u) => dmRecipCombo.selection.item = NameAndScreenName(u.name, u.screenName)
               case _ =>
             }

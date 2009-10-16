@@ -33,7 +33,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     table = new PeopleTable(tableModel)
     peer.setViewportView(table)
   }
-  private val userActions = new UserActions(session.twitterSession, rels)
+  private val userActions = new UserActions(session, rels)
   val mh = new PopupMenuHelper(table)
   buildActions(mh, table)
   table.addMouseListener(new PopupListener(table, mh.menu))
@@ -120,12 +120,8 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     getSelectedUsers.map(user => user.screenName)
   }
 
-  private def viewSelected {
-    getSelectedUsers.foreach(user => {
-      var uri = "http://twitter.com/" + user.screenName
-      DesktopUtil.browse(uri)
-    })
-  }
+  private def viewSelected = getSelectedUsers.foreach(u => DesktopUtil.browse("http://twitter.com/" + 
+      u.screenName))
   
   private def reply {
     val names = getSelectedUsers.map(user => ("@" + user.screenName)).mkString(" ")

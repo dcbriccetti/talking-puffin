@@ -5,9 +5,11 @@ import javax.swing.Icon
 import swing.Reactor
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.ui.table.EmphasizedString
+import org.talkingpuffin.twitter.TwitterUser
 
-class UsersTableModel(val tagUsers: TagUsers, val relationships: Relationships)
-    extends AbstractTableModel with TaggingSupport with Reactor {
+class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers, 
+    val relationships: Relationships) extends AbstractTableModel with TaggingSupport with Reactor {
+  
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
   var usersModel: UsersModel = _
@@ -66,7 +68,7 @@ class UsersTableModel(val tagUsers: TagUsers, val relationships: Relationships)
     lastIncludeFriends = sel.includeFriends
     lastIncludeFollowers = sel.includeFollowers
     lastSearch = sel.searchString
-    usersModel = UsersModel(relationships, sel)
+    usersModel = UsersModel(users, relationships, sel)
     fireTableDataChanged
   }
   
