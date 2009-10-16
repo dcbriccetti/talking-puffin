@@ -30,7 +30,7 @@ class MainToolBar extends JToolBar with ToolBarHelpers with LongOpListener {
       def apply = dataProvidersDialog.visible = true
     })
     addSeparator
-    add(new Label("Approx. requests left: ").peer)
+    add(new Label("Left: ") {tooltip = "The number of requests remaining in the hour, before reset"}.peer)
     add(remaining.peer)
     addSeparator
     add(progressBar.peer)

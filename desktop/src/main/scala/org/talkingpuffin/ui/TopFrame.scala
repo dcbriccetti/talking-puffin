@@ -6,12 +6,12 @@ import javax.swing.{ImageIcon}
 import swing.TabbedPane.Page
 import swing.{Reactor, Frame, TabbedPane, Label, GridBagPanel}
 import org.talkingpuffin.filter.TagUsers
-import org.talkingpuffin.twitter.{TwitterUser, AuthenticatedSession}
 import util.FetchRequest
 import org.talkingpuffin.{Main, Globals, Session}
 import org.talkingpuffin.util.Loggable
-import org.talkingpuffin.state.{RateLimitStatusEvent, UserStatusPoller, StateSaver}
+import org.talkingpuffin.state.{StateSaver}
 import java.text.NumberFormat
+import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, AuthenticatedSession}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -32,7 +32,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   val mainToolBar = new MainToolBar
   session.progress = mainToolBar
-  val userStatusPoller = setUpUserStatusPoller
+  setUpUserStatusReactor
   
   val rels = new Relationships()
   reactions += { 
@@ -85,8 +85,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   def setFocus = streams.views.last.pane.requestFocusForTable
   
   def close {
-    deafTo(userStatusPoller)
-    userStatusPoller.stop
+    deafTo(twitterSession.httpPublisher)
     Globals.sessions -= session
     dispose
     StateSaver.save(streams, session.userPrefs, tagUsers)
@@ -106,15 +105,13 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     tabbedPane.pages += peoplePage
   }
 
-  private def setUpUserStatusPoller: UserStatusPoller = {
-    val usp = new UserStatusPoller(twitterSession)
+  private def setUpUserStatusReactor {
     reactions += {
-      case e: RateLimitStatusEvent =>
+      case e: RateLimitStatusEvent => SwingInvoke.later {
         mainToolBar.remaining.text = NumberFormat.getIntegerInstance.format(e.status.remainingHits)
+      }
     }
-    listenTo(usp)
-
-    usp
+    listenTo(twitterSession.httpPublisher)
   }
 
 }

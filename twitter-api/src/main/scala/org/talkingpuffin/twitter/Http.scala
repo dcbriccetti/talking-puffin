@@ -1,15 +1,17 @@
 package org.talkingpuffin.twitter
 
 import scala.xml.{Node, XML}
+import swing.Publisher
 import java.net.{URL, HttpURLConnection, URLEncoder}
 import java.io.{DataOutputStream, BufferedReader, InputStreamReader}
 import org.apache.commons.codec.binary.Base64
 import org.apache.log4j.Logger
+import swing.event.Event
 
 /**
 * Handles HTTP requests.
 */
-class Http(user: Option[String], password: Option[String]) {
+class Http(user: Option[String], password: Option[String]) extends Publisher {
   private val log = Logger.getLogger("Http")
 
   /** the encoded authentication string.  This is null if user or password is null. */
@@ -22,15 +24,15 @@ class Http(user: Option[String], password: Option[String]) {
   * Fetch an XML document from the given URL
   */
   def doGet(url: URL): Node = {
+    logAction("GET", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    log.debug("GET " + url)
     setAuth(conn)
     getXML(conn)
   }
 
   def doDelete(url: URL) = {
+    logAction("DELETE", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    log.debug("DELETE " + url)
     setAuth(conn)
     conn.setRequestMethod("DELETE")
     getXML(conn)
@@ -41,8 +43,8 @@ class Http(user: Option[String], password: Option[String]) {
   * @param params a List of String tuples, the first entry being the param, the second being the value
   */
   def doPost(url: URL, params: List[(String,String)]): Node = {
+    logAction("POST", url, params.map(kv => kv._1.trim + "=" + kv._2.trim).mkString(" "))
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    log.debug("POST " + url)
     setAuth(conn)
     conn.setDoInput(true)
     conn.setRequestMethod("POST")
@@ -62,6 +64,11 @@ class Http(user: Option[String], password: Option[String]) {
     getXML(conn)
   }
 
+  private def actionAndUrl(action: String, url: URL) = user.getOrElse("") + " " + action + " " + url
+  private def logAction(action: String, url: URL) = log.debug(actionAndUrl(action, url))
+  private def logAction(action: String, url: URL, params: String) = 
+      log.debug(actionAndUrl(action, url) + " " + params)
+
   private def setAuth(conn: HttpURLConnection) {
     if (encoding.isDefined) {
       conn.setRequestProperty ("Authorization", "Basic " + encoding.get);
@@ -78,7 +85,10 @@ class Http(user: Option[String], password: Option[String]) {
   private def getXML(conn: HttpURLConnection): Node = {
     val response = conn.getResponseCode()
     response match {
-      case 200 => XML.load(conn.getInputStream())
+      case 200 => {
+        publishRateLimitInfo(conn)
+        XML.load(conn.getInputStream())
+      }
       case _ => throw TwitterException({
           var errMsg = ""
           val reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))
@@ -89,6 +99,20 @@ class Http(user: Option[String], password: Option[String]) {
           }
           errMsg  
         },response)
+    }
+  }
+  
+  private def publishRateLimitInfo(conn: HttpURLConnection) {
+    val hRemaining = conn.getHeaderField("X-RateLimit-Remaining")
+    val hLimit = conn.getHeaderField("X-RateLimit-Limit")
+    val hReset = conn.getHeaderField("X-RateLimit-Reset")
+
+    if (hRemaining != null && hLimit != null && hReset != null) {
+      publish(RateLimitStatusEvent(new TwitterRateLimitStatus {
+        remainingHits      = hRemaining.toInt
+        hourlyLimit        = hLimit.toInt
+        resetTimeInSeconds = hReset.toInt
+      }))
     }
   }
 
@@ -103,3 +127,4 @@ class Http(user: Option[String], password: Option[String]) {
   }
 }
 
+case class RateLimitStatusEvent(status: TwitterRateLimitStatus) extends Event
