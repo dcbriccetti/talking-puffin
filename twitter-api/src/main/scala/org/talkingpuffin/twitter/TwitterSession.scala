@@ -135,12 +135,16 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
   */
   def getFriends(id: String, cursor: Long): XmlResult[TwitterUser] = getFriends(id,TwitterArgs.cursor(cursor))
 
-  def getFriends(id: String, args: TwitterArgs): XmlResult[TwitterUser] = {
-    new Parser[TwitterUser](new URL(apiURL + "/statuses/friends/" + urlEncode(id) + ".xml" + args),http,
-        TwitterUser.apply).parseXMLList("users", "user")
-  }
+  def getFriends(id: String, args: TwitterArgs): XmlResult[TwitterUser] = 
+      parse("/statuses/friends/" + urlEncode(id) + ".xml" + args, TwitterUser.apply, "users", "user")
   
   protected def urlEncode(value: String) = URLEncoder.encode(value, "UTF-8")
+
+  protected def parse[T](urlPart: String, factory: (Node) => T, selectors: String*): XmlResult[T] = {
+    new Parser[T](new URL(apiURL + urlPart), getHttp, factory).parseXMLList(selectors: _*)
+  }
+  
+  protected def getHttp = http
 }
 
 /**
@@ -298,24 +302,20 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   def getFollowers(): XmlResult[TwitterUser] = getFollowers(TwitterArgs())
   def getFollowers(cursor: Long): XmlResult[TwitterUser] = getFollowers(TwitterArgs().cursor(cursor))
 
-  def getFollowers(args: TwitterArgs): XmlResult[TwitterUser] = {
-    new Parser[TwitterUser](new URL(apiURL + "/statuses/followers.xml" + args),http,
-        TwitterUser.apply).parseXMLList("users", "user")
-  }
+  def getFollowers(args: TwitterArgs): XmlResult[TwitterUser] = 
+    parse("/statuses/followers.xml" + args, TwitterUser.apply, "users", "user")
   
   def getFriendsIds(): XmlResult[TwitterUserId] = getFriendsIds(TwitterArgs())
   def getFriendsIds(cursor: Long): XmlResult[TwitterUserId] = getFriendsIds(TwitterArgs().cursor(cursor))
 
   def getFriendsIds(args: TwitterArgs): XmlResult[TwitterUserId] = 
-    new Parser[TwitterUserId](new URL(apiURL + "/friends/ids.xml" + args),http,
-        TwitterUserId.apply).parseXMLList("ids", "id")
+      parse("/friends/ids.xml" + args, TwitterUserId.apply, "ids", "id")
   
   def getFollowersIds(): XmlResult[TwitterUserId] = getFollowersIds(TwitterArgs())
   def getFollowersIds(cursor: Long): XmlResult[TwitterUserId] = getFollowersIds(TwitterArgs().cursor(cursor))
 
   def getFollowersIds(args: TwitterArgs): XmlResult[TwitterUserId] = 
-    new Parser[TwitterUserId](new URL(apiURL + "/followers/ids.xml" + args),http,
-        TwitterUserId.apply).parseXMLList("ids", "id")
+      parse("/followers/ids.xml" + args, TwitterUserId.apply, "ids", "id")
   
   def getDirectMessages(): List[TwitterMessage] = {
     getDirectMessages(TwitterArgs())
@@ -480,6 +480,8 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     val resp = http.doPost(new URL(apiURL + "/statuses/retweet/" + id + ".xml?source=talkingpuffin"),Nil)
     TwitterStatus(resp)
   }
+
+  override protected def getHttp = http
 }
 
 // end session apiURL + /account/end_session
