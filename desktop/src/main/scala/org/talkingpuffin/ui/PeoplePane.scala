@@ -105,6 +105,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     mh.add(new NextTAction(comp))
     mh.add(new PrevTAction(comp))
     mh add(new TagAction(table, tableModel), ks(KeyEvent.VK_T,0))
+    mh add(Action("View lists…") {userActions.viewLists(getSelectedScreenNames, table)}, UserActions.ViewListAccel)
     mh.add(Action("Reply") { reply }, ks(KeyEvent.VK_R,0))
     mh.add(Action("Follow"  ) { userActions.follow(getSelectedScreenNames  ) }, UserActions.FollowAccel)
     mh.add(Action("Unfollow") { userActions.unfollow(getSelectedScreenNames) }, UserActions.UnfollowAccel)
