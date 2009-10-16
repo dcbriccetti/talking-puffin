@@ -45,9 +45,9 @@ class Relationships extends Publisher with ErrorHandler {
     longOpListener.startOperation
     val pool = Executors.newFixedThreadPool(2)
     val friendsFuture = pool.submit(new Callable[List[TwitterUserId]] {
-      def call = twitterSession.getFriendsIds })
+      def call = twitterSession.loadAllWithCursor(twitterSession.getFriendsIds) })
     val followersFuture = pool.submit(new Callable[List[TwitterUserId]] {
-      def call = twitterSession.getFollowersIds })
+      def call = twitterSession.loadAllWithCursor(twitterSession.getFollowersIds) })
 
     new SwingWorker[Tuple2[List[TwitterUserId],List[TwitterUserId]], Object] {
       def doInBackground = (friendsFuture.get, followersFuture.get)
