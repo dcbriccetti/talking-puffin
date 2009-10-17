@@ -41,8 +41,10 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
       if (c.source eq rels) {
         // pane.title_= is buggy. index could be wrong
         val pane = tabbedPane.peer
-        pane.setTitleAt(pane.indexOfComponent(peoplePane.peer), 
-          peoplePaneTitle(rels.friends.length, rels.followers.length)) 
+        pane.indexOfComponent(peoplePane.peer) match {
+          case -1 =>
+          case index => pane.setTitleAt(index, peoplePaneTitle(rels.friends.length, rels.followers.length))
+        }
       }
   }
   listenTo(rels)
@@ -101,10 +103,10 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   private def createPeoplePane: Unit = {
     updatePeople
-    peoplePane = createPeoplePane("Friends and Folowers", None, Some(updatePeople _))
+    peoplePane = createPeoplePane("Friends and Followers", None, Some(updatePeople _))
   }
   
-  def createPeoplePane(tipTitle: String, users: Option[List[TwitterUser]], 
+  def createPeoplePane(paneTitle: String, users: Option[List[TwitterUser]], 
         updatePeople: Option[() => Unit]): PeoplePane = {
     val model = if (users.isDefined) new UsersTableModel(users, tagUsers, rels) else streams.usersTableModel
     val customRels = if (users.isDefined) {
@@ -115,9 +117,9 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
         followerIds = followers map(_.id)
       }
     } else rels
-    val peoplePane = new PeoplePane(session, model, customRels, updatePeople)
+    val peoplePane = new PeoplePane(paneTitle, session, model, customRels, updatePeople)
     tabbedPane.pages += new Page(peoplePaneTitle(customRels.friends.length, customRels.followers.length), 
-        peoplePane) {tip=tipTitle}
+        peoplePane) {tip=paneTitle}
     peoplePane
   }
 

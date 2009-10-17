@@ -2,19 +2,19 @@ package org.talkingpuffin.ui
 
 import java.awt.event.KeyEvent
 import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
-import scala.swing.{Label, Component, Action}
+import scala.swing.{Label, Action}
 import org.talkingpuffin.Session
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
-import util.{Dockable, ToolBarHelpers}
+import util.{ToolBarHelpers}
 
 /**
  * Status pane tool bar
  */
 class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersDialog: FiltersDialog, 
-    val statusPane: Component, showWordFrequencies: => Unit, clearTweets: (Boolean) => Unit, 
+    val statusPane: StatusPane, showWordFrequencies: => Unit, clearTweets: (Boolean) => Unit, 
     showMaxColumns: (Boolean) => Unit) extends {
       val pane = statusPane
-    } with JToolBar with Dockable with ToolBarHelpers {
+    } with JToolBar with ToolBarHelpers {
   var tweetDetailPanel: TweetDetailPanel = _
   
   val showFiltersAction = new Action("Filter") {
@@ -99,7 +99,7 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
     add(new Label("Cols: ").peer)
     aa(showMinColsAction, showMaxColsAction)
     addSeparator
-    ac(dockedButton, detailsButton)
+    ac(statusPane.dockedButton, detailsButton)
   }
   
   private def clearAndOptionallyLoad(all: Boolean) {

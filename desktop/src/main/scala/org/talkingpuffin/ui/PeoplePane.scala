@@ -26,8 +26,9 @@ object UserColumns {
 /**
  * Displays a list of friends or followers
  */
-class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relationships, 
-    updateCallback: Option[() => Unit]) extends GridBagPanel with Loggable with Reactor {
+class PeoplePane(val paneTitle: String, val session: Session, tableModel: UsersTableModel, rels: Relationships, 
+    updateCallback: Option[() => Unit]) extends {val title = paneTitle} with GridBagPanel 
+    with Loggable with Reactor with Dockable {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
     table = new PeopleTable(tableModel)
@@ -54,10 +55,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
   }
   listenTo(searchText)
 
-  val toolbar = new {
-    val pane = this; 
-    val session = PeoplePane.this.session
-  } with JToolBar with Dockable {
+  val toolbar = new JToolBar {
     setFloatable(false)
     setLabels
     add(followingButton)

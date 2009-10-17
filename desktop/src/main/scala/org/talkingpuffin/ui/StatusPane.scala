@@ -2,22 +2,22 @@ package org.talkingpuffin.ui
 
 import java.awt.{Dimension}
 import javax.swing.event._
-import org.apache.log4j.Logger
 import swing.{ScrollPane, GridBagPanel}
 import org.talkingpuffin.filter.{TagUsers, FilterSet}
 import org.talkingpuffin.twitter.TwitterStatus
 import org.talkingpuffin.Session
+import util.{Dockable}
 
 /**
  * Displays friend statuses
  */
-class StatusPane(session: Session, title: String, statusTableModel: StatusTableModel, 
+class StatusPane(val session: Session, val paneTitle: String, statusTableModel: StatusTableModel, 
     filterSet: FilterSet, tagUsers: TagUsers, viewCreator: ViewCreator) 
-    extends GridBagPanel with TableModelListener with PreChangeListener {
+    extends GridBagPanel with TableModelListener with PreChangeListener with Dockable {
   var table: StatusTable = _
   private var lastSelectedRows: List[TwitterStatus] = Nil
   private var lastRowSelected: Boolean = _
-  private val filtersDialog = new FiltersDialog(title, statusTableModel, filterSet, tagUsers)
+  private val filtersDialog = new FiltersDialog(paneTitle, statusTableModel, filterSet, tagUsers)
 
   statusTableModel.addTableModelListener(this)
   statusTableModel.preChangeListener = this
