@@ -6,39 +6,53 @@ import swing.{MenuItem, Action}
 import util.DesktopUtil
 import scala.xml.NodeSeq
 import javax.swing._
-import org.talkingpuffin.twitter.{AuthenticatedSession}
+import org.talkingpuffin.Session
+import org.talkingpuffin.twitter.{TwitterUser, AuthenticatedSession}
 
 /**
  * Handles user actions like follow
  */
-class UserActions(twitterSession: AuthenticatedSession, rels: Relationships) {
-  def follow(names: List[String]) = process(names, twitterSession.createFriendship, "following")
+class UserActions(session: Session, rels: Relationships) {
+  val tsess = session.twitterSession
+  
+  def follow(names: List[String]) = process(names, tsess.createFriendship, "following")
   
   def unfollow(names: List[String]) {
-    process(names, twitterSession.destroyFriendship, "unfollowing")
+    process(names, tsess.destroyFriendship, "unfollowing")
     rels.removeFriendsWithScreenNames(names)
   }
 
   def block(names: List[String]) {
-    process(names, twitterSession.blockUser, "block")
+    process(names, tsess.blockUser, "block")
     rels.removeFriendsWithScreenNames(names)
   }
   
-  def unblock(names: List[String]) = process(names, twitterSession.unblockUser, "unblock")
+  def unblock(names: List[String]) = process(names, tsess.unblockUser, "unblock")
   
-  def reportSpam(names: List[String]) = process(names, twitterSession.reportSpam, "report spam")
+  def reportSpam(names: List[String]) = process(names, tsess.reportSpam, "report spam")
   
   def viewLists(selectedScreenNames: List[String], table: JTable) {
+    def viewList(list: NodeSeq) = {
+      val listShortName = (list \ "name").text
+      val listLongName = listShortName + " from " + (list \ "user" \ "name").text
+      SwingInvoke.execSwingWorker({tsess.getListMembers(list)}, {
+        members: List[TwitterUser] => {
+          session.windows.peoplePaneCreator.createPeoplePane(listLongName, listShortName,
+            Some(members), None)
+        }
+      })
+    }
+    
     selectedScreenNames.foreach(screenName => {
       SwingInvoke.execSwingWorker({
-        twitterSession.getLists(screenName)
+        tsess.getLists(screenName)
       }, {
         listsNode: NodeSeq => {
           val lists = listsNode \ "list"
           if (lists.length > 0) {
             val menu = new JPopupMenu
             lists.foreach(l => {
-              val a1 = Action((l \ "name").text) {DesktopUtil.browse("http://twitter.com/" + (l \ "uri").text)}
+              val a1 = Action((l \ "name").text) {viewList(l)}
               menu.add(new MenuItem(a1).peer)
             })
             val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation

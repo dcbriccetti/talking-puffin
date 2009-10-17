@@ -8,9 +8,9 @@ import javax.swing.{JButton, JTable, JToolBar, JToggleButton, JLabel}
 import scala.swing.GridBagPanel._
 import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
 import org.talkingpuffin.util.{Loggable, PopupListener}
-import org.talkingpuffin.ui.util.{TableUtil, DesktopUtil}
 import org.talkingpuffin.twitter.{TwitterUser}
 import org.talkingpuffin.Session
+import util.{Dockable, TableUtil, DesktopUtil}
 
 object UserColumns {
   val ARROWS = 0
@@ -26,14 +26,16 @@ object UserColumns {
 /**
  * Displays a list of friends or followers
  */
-class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationships, 
-    updateCallback: () => Unit) extends GridBagPanel with Loggable with Reactor {
+class PeoplePane(val longTitle: String, val shortTitle: String, val session: Session, 
+    tableModel: UsersTableModel, rels: Relationships, 
+    updateCallback: Option[() => Unit]) extends GridBagPanel 
+    with Loggable with Reactor with Dockable {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
     table = new PeopleTable(tableModel)
     peer.setViewportView(table)
   }
-  private val userActions = new UserActions(session.twitterSession, rels)
+  private val userActions = new UserActions(session, rels)
   val mh = new PopupMenuHelper(table)
   buildActions(mh, table)
   table.addMouseListener(new PopupListener(table, mh.menu))
@@ -63,16 +65,20 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
 
     addSeparator
 
-    val reloadAction = new Action("Reload") {
-      toolTip = "Reloads this data from Twitter"
-      def apply = updateCallback()
+    if (updateCallback.isDefined) {
+      add(new JButton(new Action("Reload") {
+        toolTip = "Reloads this data from Twitter"
+        def apply = updateCallback.get()
+      }.peer))
     }
-    add(new JButton(reloadAction.peer))
 
     addSeparator
 
     add(new JLabel("Search user name: "))
-    add(searchText.peer) 
+    add(searchText.peer)
+    
+    addSeparator
+    add(dockedButton)
   }
   peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
   
@@ -88,10 +94,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
   private def setLabels {
     followingButton.setText("Following: " + rels.friends.length)
     followersButton.setText("Followers: " + rels.followers.length)
-    overlapLabel.setText({
-      val numUsers = tableModel.usersModel.users.length
-      if (numUsers == 0) " " else " Overlap: " + (rels.friends.length + rels.followers.length - numUsers)
-    })
+    overlapLabel.setText(" Overlap: " + (rels.friends intersect rels.followers).length)
   }
   
   private def buildModelData = tableModel.buildModelData(UserSelection(
@@ -120,12 +123,8 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     getSelectedUsers.map(user => user.screenName)
   }
 
-  private def viewSelected {
-    getSelectedUsers.foreach(user => {
-      var uri = "http://twitter.com/" + user.screenName
-      DesktopUtil.browse(uri)
-    })
-  }
+  private def viewSelected = getSelectedUsers.foreach(u => DesktopUtil.browse("http://twitter.com/" + 
+      u.screenName))
   
   private def reply {
     val names = getSelectedUsers.map(user => ("@" + user.screenName)).mkString(" ")

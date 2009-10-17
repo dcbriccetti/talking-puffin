@@ -12,11 +12,11 @@ import org.talkingpuffin.Session
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
  */
 class Streams(val service: String, val twitterSession: AuthenticatedSession, 
-    session: Session, val tagUsers: TagUsers, relationships: Relationships) 
+    session: Session, val tagUsers: TagUsers, val relationships: Relationships) 
     extends Reactor with ViewCreator with Loggable {
   val prefs = PreferencesFactory.prefsForUser(service, twitterSession.user)
   val providers = new DataProviders(twitterSession, prefs, session.progress)
-  val usersTableModel = new UsersTableModel(tagUsers, relationships)
+  val usersTableModel = new UsersTableModel(None, tagUsers, relationships)
   
   var views = List[View]()
   
@@ -52,6 +52,4 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
     view
   }
 
-  def componentTitle(comp: Component) = views.filter(s => s.pane == comp)(0).title
-  
 }

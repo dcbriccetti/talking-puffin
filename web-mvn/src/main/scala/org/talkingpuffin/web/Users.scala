@@ -26,6 +26,6 @@ class Users extends Serializable {
   def getUsers: Array[TwitterUser] = {
     rels.friends   = session.getFriends  (TwitterArgs.maxResults(200)).list
     rels.followers = session.getFollowers(TwitterArgs.maxResults(200)).list
-    UsersModel(rels, UserSelection(true, true, None)).users.toArray
+    UsersModel(None, rels, UserSelection(true, true, None)).users.toArray
   }
 }

@@ -16,7 +16,8 @@ import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, Authenticat
 /**
  * The top-level application Swing frame window. There is one per user session.
  */
-class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable with Reactor {
+class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable 
+    with PeoplePaneCreator with Reactor {
   val tagUsers = new TagUsers(service, twitterSession.user)
   TopFrames.addFrame(this)
   val session = new Session(service, twitterSession)
@@ -27,7 +28,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     preferredSize = new Dimension(900, 600)
   }
   session.windows.tabbedPane = tabbedPane
-  private var peoplePage: Page = _
+  session.windows.peoplePaneCreator = this
   private var peoplePane: PeoplePane = _
 
   val mainToolBar = new MainToolBar
@@ -35,16 +36,6 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   setUpUserStatusReactor
   
   val rels = new Relationships()
-  reactions += { 
-    case _: UsersChanged =>
-      if (peoplePage != null) {
-        // pane.title_= is buggy. index could be wrong
-        val pane = tabbedPane.peer
-        pane.setTitleAt(pane.indexOfComponent(peoplePane.peer), 
-          peoplePaneTitle(rels.friends.length, rels.followers.length)) 
-      }
-  }
-  listenTo(rels)
   
   val streams = new Streams(service, twitterSession, session, tagUsers, rels)
   session.windows.streams = streams
@@ -94,15 +85,28 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   type Users = List[TwitterUser]
   
-  def peoplePaneTitle(numFriends: Int, numFollowers: Int) = "People (" + numFriends + ", " + numFollowers + ")"
-  
   def updatePeople = rels.getUsers(twitterSession, mainToolBar)
   
   private def createPeoplePane: Unit = {
     updatePeople
-    peoplePane = new PeoplePane(session, streams.usersTableModel, rels, updatePeople _)
-    peoplePage = new Page(peoplePaneTitle(rels.friends.length, rels.followers.length), peoplePane)
-    tabbedPane.pages += peoplePage
+    peoplePane = createPeoplePane("People You Follow and People Who Follow You", "People", None, 
+        Some(updatePeople _))
+  }
+  
+  def createPeoplePane(longTitle: String, shortTitle: String, users: Option[List[TwitterUser]], 
+        updatePeople: Option[() => Unit]): PeoplePane = {
+    val model = if (users.isDefined) new UsersTableModel(users, tagUsers, rels) else streams.usersTableModel
+    val customRels = if (users.isDefined) {
+      new Relationships {
+        friends = rels.friends intersect users.get
+        friendIds = friends map(_.id)
+        followers = rels.followers intersect users.get
+        followerIds = followers map(_.id)
+      }
+    } else rels
+    val peoplePane = new PeoplePane(longTitle, shortTitle, session, model, customRels, updatePeople)
+    tabbedPane.pages += new Page(shortTitle, peoplePane) {tip = longTitle}
+    peoplePane
   }
 
   private def setUpUserStatusReactor {

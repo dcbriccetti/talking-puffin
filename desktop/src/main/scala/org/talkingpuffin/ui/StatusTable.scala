@@ -33,7 +33,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   setRowMargin(rowMarginVal)
   setHighlighters(HighlighterFactory.createSimpleStriping)
 
-  private val userActions = new UserActions(session.twitterSession, tableModel.relationships)
+  private val userActions = new UserActions(session, tableModel.relationships)
   
   private var customRowHeight_ = 0
   private def customRowHeight = customRowHeight_

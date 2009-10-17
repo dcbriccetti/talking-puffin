@@ -2,17 +2,19 @@ package org.talkingpuffin.ui
 
 import java.awt.event.KeyEvent
 import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
-import swing.{Label, Component, Action}
-import util.ToolBarHelpers
+import scala.swing.{Label, Action}
 import org.talkingpuffin.Session
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
+import util.{ToolBarHelpers}
 
 /**
  * Status pane tool bar
  */
-class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialog: FiltersDialog, 
-    statusPane: Component, showWordFrequencies: => Unit, clearTweets: (Boolean) => Unit, 
-    showMaxColumns: (Boolean) => Unit) extends JToolBar with ToolBarHelpers {
+class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersDialog: FiltersDialog, 
+    val statusPane: StatusPane, showWordFrequencies: => Unit, clearTweets: (Boolean) => Unit, 
+    showMaxColumns: (Boolean) => Unit) extends {
+      val pane = statusPane
+    } with JToolBar with ToolBarHelpers {
   var tweetDetailPanel: TweetDetailPanel = _
   
   val showFiltersAction = new Action("Filter") {
@@ -87,20 +89,6 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
   detailsButton = new JToggleButton(showDetailsAction.peer)
   detailsButton.setSelected(true)
 
-  var dockedButton: JToggleButton = _ 
-  val dockedAction = new Action("Docked") {
-    toolTip = "Docks or frees the pane"
-    def apply = {
-      if (! dockedButton.isSelected) {
-        session.windows.undock(statusPane)
-      } else {
-        session.windows.dock(statusPane)
-      }
-    }
-  }
-  dockedButton = new JToggleButton(dockedAction.peer)
-  dockedButton.setSelected(true)
-
   setFloatable(false)
   addComponentsToToolBar
   
@@ -111,7 +99,7 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
     add(new Label("Cols: ").peer)
     aa(showMinColsAction, showMaxColsAction)
     addSeparator
-    ac(dockedButton, detailsButton)
+    ac(statusPane.dockedButton, detailsButton)
   }
   
   private def clearAndOptionallyLoad(all: Boolean) {
@@ -120,4 +108,4 @@ class StatusToolBar(session: Session, tweetsProvider: BaseProvider, filtersDialo
       tweetsProvider.loadNewData
   }
 }
-  
+
