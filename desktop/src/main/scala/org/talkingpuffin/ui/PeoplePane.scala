@@ -8,9 +8,9 @@ import javax.swing.{JButton, JTable, JToolBar, JToggleButton, JLabel}
 import scala.swing.GridBagPanel._
 import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
 import org.talkingpuffin.util.{Loggable, PopupListener}
-import org.talkingpuffin.ui.util.{TableUtil, DesktopUtil}
 import org.talkingpuffin.twitter.{TwitterUser}
 import org.talkingpuffin.Session
+import util.{Dockable, TableUtil, DesktopUtil}
 
 object UserColumns {
   val ARROWS = 0
@@ -26,7 +26,7 @@ object UserColumns {
 /**
  * Displays a list of friends or followers
  */
-class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationships, 
+class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relationships, 
     updateCallback: Option[() => Unit]) extends GridBagPanel with Loggable with Reactor {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
@@ -54,7 +54,10 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
   }
   listenTo(searchText)
 
-  val toolbar = new JToolBar {
+  val toolbar = new {
+    val pane = this; 
+    val session = PeoplePane.this.session
+  } with JToolBar with Dockable {
     setFloatable(false)
     setLabels
     add(followingButton)
@@ -73,7 +76,10 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
     addSeparator
 
     add(new JLabel("Search user name: "))
-    add(searchText.peer) 
+    add(searchText.peer)
+    
+    addSeparator
+    add(dockedButton)
   }
   peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
   

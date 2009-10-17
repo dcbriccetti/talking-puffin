@@ -52,6 +52,4 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
     view
   }
 
-  def componentTitle(comp: Component) = views.filter(s => s.pane == comp)(0).title
-  
 }
