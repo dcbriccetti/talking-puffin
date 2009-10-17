@@ -27,7 +27,7 @@ object UserColumns {
  * Displays a list of friends or followers
  */
 class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationships, 
-    updateCallback: () => Unit) extends GridBagPanel with Loggable with Reactor {
+    updateCallback: Option[() => Unit]) extends GridBagPanel with Loggable with Reactor {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
     table = new PeopleTable(tableModel)
@@ -63,11 +63,12 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
 
     addSeparator
 
-    val reloadAction = new Action("Reload") {
-      toolTip = "Reloads this data from Twitter"
-      def apply = updateCallback()
+    if (updateCallback.isDefined) {
+      add(new JButton(new Action("Reload") {
+        toolTip = "Reloads this data from Twitter"
+        def apply = updateCallback.get
+      }.peer))
     }
-    add(new JButton(reloadAction.peer))
 
     addSeparator
 
@@ -88,10 +89,7 @@ class PeoplePane(session: Session, tableModel: UsersTableModel, rels: Relationsh
   private def setLabels {
     followingButton.setText("Following: " + rels.friends.length)
     followersButton.setText("Followers: " + rels.followers.length)
-    overlapLabel.setText({
-      val numUsers = tableModel.usersModel.users.length
-      if (numUsers == 0) " " else " Overlap: " + (rels.friends intersect rels.followers).length
-    })
+    overlapLabel.setText(" Overlap: " + (rels.friends intersect rels.followers).length)
   }
   
   private def buildModelData = tableModel.buildModelData(UserSelection(

@@ -6,8 +6,8 @@ import swing.Publisher
 import org.talkingpuffin.twitter.{TwitterUser, AuthenticatedSession, TwitterUserId}
 import javax.swing.SwingWorker
 
-case class IdsChanged() extends Event
-case class UsersChanged() extends Event
+case class IdsChanged(val source: Relationships) extends Event
+case class UsersChanged(val source: Relationships) extends Event
 
 class Relationships extends Publisher with ErrorHandler {
   var friendIds = List[Long]()
@@ -35,7 +35,7 @@ class Relationships extends Publisher with ErrorHandler {
           val (fr, fo) = get
           friends = fr
           followers = fo
-          Relationships.this.publish(UsersChanged())
+          Relationships.this.publish(UsersChanged(Relationships.this))
           }, "Error fetching friends and followers for " + twitterSession.user)
       }
     }.execute
@@ -57,7 +57,7 @@ class Relationships extends Publisher with ErrorHandler {
           val (fr, fo) = get
           friendIds = fr.map(_.id)
           followerIds = fo.map(_.id)
-          Relationships.this.publish(IdsChanged()) // SwingWorker also has a publish
+          Relationships.this.publish(IdsChanged(Relationships.this)) // SwingWorker also has a publish
         }, "Error fetching friend and follower IDs for " + twitterSession.user)
       }
     }.execute
@@ -66,8 +66,8 @@ class Relationships extends Publisher with ErrorHandler {
   def removeFriendsWithScreenNames(names: List[String]) {
     friends = friends.filter(user => ! names.contains(user.screenName))
     friendIds = friends.map(_.id)
-    publish(UsersChanged())
-    publish(IdsChanged())
+    publish(UsersChanged(this))
+    publish(IdsChanged(this))
   }
   
 }

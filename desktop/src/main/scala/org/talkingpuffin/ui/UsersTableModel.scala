@@ -18,7 +18,7 @@ class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers,
   var lastSearch: Option[String] = None
   buildModelData(UserSelection(true, true, None))
   reactions += {
-    case _: UsersChanged => usersChanged
+    case u: UsersChanged => if (u.source eq relationships) usersChanged
   }
   listenTo(relationships)
 

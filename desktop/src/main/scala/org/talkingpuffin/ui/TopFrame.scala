@@ -29,7 +29,6 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
   session.windows.tabbedPane = tabbedPane
   session.windows.peoplePaneCreator = this
-  private var peoplePage: Page = _
   private var peoplePane: PeoplePane = _
 
   val mainToolBar = new MainToolBar
@@ -38,8 +37,8 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   val rels = new Relationships()
   reactions += { 
-    case _: UsersChanged =>
-      if (peoplePage != null) {
+    case c: UsersChanged =>
+      if (c.source eq rels) {
         // pane.title_= is buggy. index could be wrong
         val pane = tabbedPane.peer
         pane.setTitleAt(pane.indexOfComponent(peoplePane.peer), 
@@ -102,10 +101,11 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   private def createPeoplePane: Unit = {
     updatePeople
-    createPeoplePane(None, updatePeople _)
+    peoplePane = createPeoplePane("Friends and Folowers", None, Some(updatePeople _))
   }
   
-  def createPeoplePane(users: Option[List[TwitterUser]], updatePeople: () => Unit): Unit = {
+  def createPeoplePane(tipTitle: String, users: Option[List[TwitterUser]], 
+        updatePeople: Option[() => Unit]): PeoplePane = {
     val model = if (users.isDefined) new UsersTableModel(users, tagUsers, rels) else streams.usersTableModel
     val customRels = if (users.isDefined) {
       new Relationships {
@@ -115,9 +115,10 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
         followerIds = followers map(_.id)
       }
     } else rels
-    peoplePane = new PeoplePane(session, model, customRels, updatePeople)
-    peoplePage = new Page(peoplePaneTitle(customRels.friends.length, customRels.followers.length), peoplePane)
-    tabbedPane.pages += peoplePage
+    val peoplePane = new PeoplePane(session, model, customRels, updatePeople)
+    tabbedPane.pages += new Page(peoplePaneTitle(customRels.friends.length, customRels.followers.length), 
+        peoplePane) {tip=tipTitle}
+    peoplePane
   }
 
   private def setUpUserStatusReactor {

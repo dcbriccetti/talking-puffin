@@ -35,7 +35,9 @@ class UserActions(session: Session, rels: Relationships) {
     def viewList(list: NodeSeq) = {
       SwingInvoke.execSwingWorker({tsess.getListMembers(list)}, {
         members: List[TwitterUser] => {
-          session.windows.peoplePaneCreator.createPeoplePane(Some(members), () => {})
+          session.windows.peoplePaneCreator.createPeoplePane((list \ "name").text +
+            " from " + (list \ "user" \ "name").text,
+            Some(members), None)
         }
       })
     }
