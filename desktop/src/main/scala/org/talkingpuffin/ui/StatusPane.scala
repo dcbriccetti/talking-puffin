@@ -11,13 +11,14 @@ import util.{Dockable}
 /**
  * Displays friend statuses
  */
-class StatusPane(val session: Session, val paneTitle: String, statusTableModel: StatusTableModel, 
+class StatusPane(val session: Session, val longTitle: String, val shortTitle: String, 
+    statusTableModel: StatusTableModel, 
     filterSet: FilterSet, tagUsers: TagUsers, viewCreator: ViewCreator) 
     extends GridBagPanel with TableModelListener with PreChangeListener with Dockable {
   var table: StatusTable = _
   private var lastSelectedRows: List[TwitterStatus] = Nil
   private var lastRowSelected: Boolean = _
-  private val filtersDialog = new FiltersDialog(paneTitle, statusTableModel, filterSet, tagUsers)
+  private val filtersDialog = new FiltersDialog(longTitle, statusTableModel, filterSet, tagUsers)
 
   statusTableModel.addTableModelListener(this)
   statusTableModel.preChangeListener = this

@@ -36,18 +36,6 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   setUpUserStatusReactor
   
   val rels = new Relationships()
-  reactions += { 
-    case c: UsersChanged =>
-      if (c.source eq rels) {
-        // pane.title_= is buggy. index could be wrong
-        val pane = tabbedPane.peer
-        pane.indexOfComponent(peoplePane.peer) match {
-          case -1 =>
-          case index => pane.setTitleAt(index, peoplePaneTitle(rels.friends.length, rels.followers.length))
-        }
-      }
-  }
-  listenTo(rels)
   
   val streams = new Streams(service, twitterSession, session, tagUsers, rels)
   session.windows.streams = streams
@@ -97,16 +85,15 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   type Users = List[TwitterUser]
   
-  def peoplePaneTitle(numFriends: Int, numFollowers: Int) = "People (" + numFriends + ", " + numFollowers + ")"
-  
   def updatePeople = rels.getUsers(twitterSession, mainToolBar)
   
   private def createPeoplePane: Unit = {
     updatePeople
-    peoplePane = createPeoplePane("Friends and Followers", None, Some(updatePeople _))
+    peoplePane = createPeoplePane("People You Follow and People Who Follow You", "People", None, 
+        Some(updatePeople _))
   }
   
-  def createPeoplePane(paneTitle: String, users: Option[List[TwitterUser]], 
+  def createPeoplePane(longTitle: String, shortTitle: String, users: Option[List[TwitterUser]], 
         updatePeople: Option[() => Unit]): PeoplePane = {
     val model = if (users.isDefined) new UsersTableModel(users, tagUsers, rels) else streams.usersTableModel
     val customRels = if (users.isDefined) {
@@ -117,9 +104,8 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
         followerIds = followers map(_.id)
       }
     } else rels
-    val peoplePane = new PeoplePane(paneTitle, session, model, customRels, updatePeople)
-    tabbedPane.pages += new Page(peoplePaneTitle(customRels.friends.length, customRels.followers.length), 
-        peoplePane) {tip=paneTitle}
+    val peoplePane = new PeoplePane(longTitle, shortTitle, session, model, customRels, updatePeople)
+    tabbedPane.pages += new Page(shortTitle, peoplePane) {tip = longTitle}
     peoplePane
   }
 

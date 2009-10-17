@@ -25,7 +25,7 @@ object View {
       case p: BaseProvider => new StatusTableModel(sto, p, relationships, screenNameToUserNameMap,
         filterSet, service, user, tagUsers)
     }
-    val pane = new StatusPane(session, title, model, filterSet, tagUsers, viewCreator)
+    val pane = new StatusPane(session, title, title, model, filterSet, tagUsers, viewCreator)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
     val view = new View(title, model, pane)
     view

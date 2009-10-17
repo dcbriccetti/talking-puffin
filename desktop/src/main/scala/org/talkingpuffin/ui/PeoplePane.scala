@@ -26,8 +26,9 @@ object UserColumns {
 /**
  * Displays a list of friends or followers
  */
-class PeoplePane(val paneTitle: String, val session: Session, tableModel: UsersTableModel, rels: Relationships, 
-    updateCallback: Option[() => Unit]) extends {val title = paneTitle} with GridBagPanel 
+class PeoplePane(val longTitle: String, val shortTitle: String, val session: Session, 
+    tableModel: UsersTableModel, rels: Relationships, 
+    updateCallback: Option[() => Unit]) extends GridBagPanel 
     with Loggable with Reactor with Dockable {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
@@ -67,7 +68,7 @@ class PeoplePane(val paneTitle: String, val session: Session, tableModel: UsersT
     if (updateCallback.isDefined) {
       add(new JButton(new Action("Reload") {
         toolTip = "Reloads this data from Twitter"
-        def apply = updateCallback.get
+        def apply = updateCallback.get()
       }.peer))
     }
 

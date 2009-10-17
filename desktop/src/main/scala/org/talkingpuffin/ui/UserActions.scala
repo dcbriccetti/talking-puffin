@@ -33,10 +33,11 @@ class UserActions(session: Session, rels: Relationships) {
   
   def viewLists(selectedScreenNames: List[String], table: JTable) {
     def viewList(list: NodeSeq) = {
+      val listShortName = (list \ "name").text
+      val listLongName = listShortName + " from " + (list \ "user" \ "name").text
       SwingInvoke.execSwingWorker({tsess.getListMembers(list)}, {
         members: List[TwitterUser] => {
-          session.windows.peoplePaneCreator.createPeoplePane((list \ "name").text +
-            " from " + (list \ "user" \ "name").text,
+          session.windows.peoplePaneCreator.createPeoplePane(listLongName, listShortName,
             Some(members), None)
         }
       })

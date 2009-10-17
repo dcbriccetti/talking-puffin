@@ -13,7 +13,8 @@ import org.talkingpuffin.util.Loggable
  */
 trait Dockable extends Component with Loggable {
   val session: Session
-  val paneTitle: String
+  val longTitle: String
+  val shortTitle: String
   
   var dockedButton: JToggleButton = _ 
   val dockedAction = new Action("Docked") {
@@ -25,7 +26,7 @@ trait Dockable extends Component with Loggable {
 
   private def undock {
     new Frame {
-      title = paneTitle + " " + (peer.getParent match {
+      title = longTitle + " " + (peer.getParent match {
         case tp: JTabbedPane => tp.getTitleAt(tp.indexOfComponent(peer))
         case _ => ""
       })
@@ -36,7 +37,7 @@ trait Dockable extends Component with Loggable {
   
   private def dock {                                            
     val frame = SwingUtilities.getAncestorOfClass(classOf[JFrame], peer).asInstanceOf[JFrame]
-    session.windows.tabbedPane.pages += new TabbedPane.Page(frame.getTitle, this) {tip = paneTitle}
+    session.windows.tabbedPane.pages += new TabbedPane.Page(shortTitle, this) {tip = longTitle}
     frame.dispose
   }
 
