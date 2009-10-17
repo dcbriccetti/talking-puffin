@@ -20,13 +20,10 @@ trait Dockable extends Component with Loggable {
   def titleSuffix = titleSuffix_
   private val tabbedPane = session.windows.tabbedPane
   
-  var dockedButton: JToggleButton = _ 
-  val dockedAction = new Action("Docked") {
+  val dockedButton: JToggleButton = new JToggleButton(new Action("Docked") {
     toolTip = "Docks or frees the pane"
     def apply = if (dockedButton.isSelected) dock else undock
-  }
-  dockedButton = new JToggleButton(dockedAction.peer)
-  dockedButton.setSelected(true)
+  }.peer) {setSelected(true)} 
 
   private def undock {
     peer.asInstanceOf[JComponent].setPreferredSize(new Dimension(800,700))
