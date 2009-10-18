@@ -194,11 +194,11 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
 
   def createList(listName: String): NodeSeq = {
-    http.doPost(url(user, "lists.xml"), List(("name", listName)))
+    http.post(url(user, "lists.xml"), List(("name", listName)))
   }
   
   def getLists(screenName: String): NodeSeq = {
-    http.doGet(url(screenName, "lists.xml"))  // Leave this as XML until it solidifies
+    http.get(url(screenName, "lists.xml"))  // Leave this as XML until it solidifies
   }
   
   def getListNamed(listName: String): Option[NodeSeq] = {
@@ -206,7 +206,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
   
   def getListMembers(list: NodeSeq): List[TwitterUser] = {
-    (http.doGet(new URL(apiURL + "/" + (list \ "user" \ "screen_name").text + "/" + (list \ "slug").text + 
+    (http.get(new URL(apiURL + "/" + (list \ "user" \ "screen_name").text + "/" + (list \ "slug").text + 
         "/members.xml")) \ "users" \ "user").map(TwitterUser.apply).toList
   }
   
@@ -218,7 +218,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
       case None => createList(listName)
     }) \ "slug").text
     memberIds.foreach(memberId => {
-      http.doPost(url(user, slug, "members.xml"), List(("id", memberId.toString)))
+      http.post(url(user, slug, "members.xml"), List(("id", memberId.toString)))
     })
   }
   
@@ -228,7 +228,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
 
   def getFriendshipExists(id1: String, id2: String): Boolean = {
-    val xml = http.doGet(new URL(apiURL + "/friendships/exists.xml?user_a=" + urlEncode(id1) + "&user_b=" + urlEncode(id2)))
+    val xml = http.get(new URL(apiURL + "/friendships/exists.xml?user_a=" + urlEncode(id1) + "&user_b=" + urlEncode(id2)))
     xml match {
       case <friends>true</friends> => true
       case _ => false
@@ -237,7 +237,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   
   def verifyCredentials(): Boolean = {
     try{
-      http.doGet(new URL(apiURL + "/account/verify_credentials.xml"))
+      http.get(new URL(apiURL + "/account/verify_credentials.xml"))
       return true
     } catch {
       case e:TwitterNotAuthorized => false
@@ -256,16 +256,16 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
   
   def updateStatus(status: String): TwitterStatus = {
-    val resp = http.doPost(new URL(apiURL + "/statuses/update.xml?source=talkingpuffin"),List(("status",status)))
+    val resp = http.post(new URL(apiURL + "/statuses/update.xml?source=talkingpuffin"),List(("status",status)))
     TwitterStatus(resp)
   }
 
   def updateStatus(status: String, statusId: Long): TwitterStatus = {
-    val resp = http.doPost(new URL(apiURL + "/statuses/update.xml?source=talkingpuffin"),List(("status",status),("in_reply_to_status_id",statusId.toString())))
+    val resp = http.post(new URL(apiURL + "/statuses/update.xml?source=talkingpuffin"),List(("status",status),("in_reply_to_status_id",statusId.toString())))
     TwitterStatus(resp)
   }
   def destroyStatus(statusId: Long): TwitterStatus = {
-    val resp = http.doDelete(new URL(apiURL + "/statuses/destroy/" + statusId.toString() + ".xml"))
+    val resp = http.delete(new URL(apiURL + "/statuses/destroy/" + statusId.toString() + ".xml"))
     TwitterStatus(resp)
   }
   
@@ -274,12 +274,12 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   * @param text the body of the message
   */
   def newDirectMessage(recipient: String, text: String): TwitterMessage = {
-    val resp = http.doPost(new URL(apiURL + "/direct_messages/new.xml"),List(("user",recipient),("text",text)))
+    val resp = http.post(new URL(apiURL + "/direct_messages/new.xml"),List(("user",recipient),("text",text)))
     TwitterMessage(resp)
   }
   
   def destroyDirectMessage(messageId: Long): TwitterMessage = {
-    val resp = http.doDelete(new URL(apiURL + "/direct_messages/destroy/" + messageId.toString() + ".xml"))
+    val resp = http.delete(new URL(apiURL + "/direct_messages/destroy/" + messageId.toString() + ".xml"))
     TwitterMessage(resp)
   }
   
@@ -287,7 +287,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   * @param friendId the user id <i>or</i> user name to create a friendship to
   */
   def createFriendship(friendId: String): TwitterUser = {
-    val resp = http.doPost(new URL(apiURL + "/friendships/create/" + friendId + ".xml"),Nil)
+    val resp = http.post(new URL(apiURL + "/friendships/create/" + friendId + ".xml"),Nil)
     TwitterUser(resp)
   }
   
@@ -295,52 +295,52 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   * @param friendId the user id <i>or</i> user name to destroy a friendship with
   */
   def destroyFriendship(friendId: String): TwitterUser = {
-    val resp = http.doDelete(new URL(apiURL + "/friendships/destroy/" + friendId + ".xml"))
+    val resp = http.delete(new URL(apiURL + "/friendships/destroy/" + friendId + ".xml"))
     TwitterUser(resp)
   }
   
   def updateLocation(location: String): TwitterUser = {
-    val resp = http.doPost(new URL(apiURL + "/account/update_location.xml"),List(("location",location)))
+    val resp = http.post(new URL(apiURL + "/account/update_location.xml"),List(("location",location)))
     TwitterUser(resp)
   }
 
   def updateDeliveryService(device: String): TwitterUser = {
-    val resp = http.doPost(new URL(apiURL + "/account/update_delivery_device.xml"),List(("device",device)))
+    val resp = http.post(new URL(apiURL + "/account/update_delivery_device.xml"),List(("device",device)))
     TwitterUser(resp)
   }
   
   def createFavorite(statusId: Long): TwitterStatus = {
-    val resp = http.doPost(new URL(apiURL + "/favorites/create/" + statusId.toString() + ".xml"),Nil)
+    val resp = http.post(new URL(apiURL + "/favorites/create/" + statusId.toString() + ".xml"),Nil)
     TwitterStatus(resp)
   }
 
   def destroyFavorite(statusId: Long): TwitterStatus = {
-    val resp = http.doDelete(new URL(apiURL + "/favorites/destroy/" + statusId.toString() + ".xml"))
+    val resp = http.delete(new URL(apiURL + "/favorites/destroy/" + statusId.toString() + ".xml"))
     TwitterStatus(resp)
   }
   
   def followNotifications(userId: String): TwitterUser = {
-    val resp = http.doPost(new URL(apiURL + "/notifications/follow/" + userId.toString() + ".xml"),Nil)
+    val resp = http.post(new URL(apiURL + "/notifications/follow/" + userId.toString() + ".xml"),Nil)
     TwitterUser(resp)
   }
 
   def leaveNotifications(userId: String): TwitterUser = {
-    val resp = http.doPost(new URL(apiURL + "/notifications/leave/" + userId.toString() + ".xml"),Nil)
+    val resp = http.post(new URL(apiURL + "/notifications/leave/" + userId.toString() + ".xml"),Nil)
     TwitterUser(resp)
   }
 
   def blockUser(userId: String): TwitterUser = {
-    val resp = http.doPost(new URL(apiURL + "/blocks/create/" + userId.toString() + ".xml"),Nil)
+    val resp = http.post(new URL(apiURL + "/blocks/create/" + userId.toString() + ".xml"),Nil)
     TwitterUser(resp)
   }
 
   def unblockUser(userId: String): TwitterUser = {
-    val resp = http.doPost(new URL(apiURL + "/blocks/destroy/" + userId.toString() + ".xml"),Nil)
+    val resp = http.post(new URL(apiURL + "/blocks/destroy/" + userId.toString() + ".xml"),Nil)
     TwitterUser(resp)
   }
 
   def reportSpam(userId: String): TwitterUser = {
-    val resp = http.doPost(new URL(apiURL + "/report_spam.xml"), List(("screen_name", userId.toString())))
+    val resp = http.post(new URL(apiURL + "/report_spam.xml"), List(("screen_name", userId.toString())))
     TwitterUser(resp)
   }
 
@@ -360,7 +360,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
 
   def retweet(id:Long) = {
-    val resp = http.doPost(new URL(apiURL + "/statuses/retweet/" + id + ".xml?source=talkingpuffin"),Nil)
+    val resp = http.post(new URL(apiURL + "/statuses/retweet/" + id + ".xml?source=talkingpuffin"),Nil)
     TwitterStatus(resp)
   }
 

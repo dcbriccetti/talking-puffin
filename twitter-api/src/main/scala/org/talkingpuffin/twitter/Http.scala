@@ -23,14 +23,14 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   /**
   * Fetch an XML document from the given URL
   */
-  def doGet(url: URL): Node = retry {
+  def get(url: URL): Node = retry {
     logAction("GET", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
     getXML(conn)
   }
 
-  def doDelete(url: URL) = retry {
+  def delete(url: URL) = retry {
     logAction("DELETE", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
@@ -42,7 +42,7 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   * @param url the URL to post to
   * @param params a List of String tuples, the first entry being the param, the second being the value
   */
-  def doPost(url: URL, params: List[(String,String)]): Node = retry {
+  def post(url: URL, params: List[(String,String)]): Node = retry {
     logAction("POST", url, params.map(kv => kv._1.trim + "=" + kv._2.trim).mkString(" "))
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
