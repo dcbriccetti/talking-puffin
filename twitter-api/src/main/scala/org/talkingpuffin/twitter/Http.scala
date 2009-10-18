@@ -23,14 +23,14 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   /**
   * Fetch an XML document from the given URL
   */
-  def doGet(url: URL): Node = {
+  def doGet(url: URL): Node = retry {
     logAction("GET", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
     getXML(conn)
   }
 
-  def doDelete(url: URL) = {
+  def doDelete(url: URL) = retry {
     logAction("DELETE", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
@@ -42,7 +42,7 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   * @param url the URL to post to
   * @param params a List of String tuples, the first entry being the param, the second being the value
   */
-  def doPost(url: URL, params: List[(String,String)]): Node = {
+  def doPost(url: URL, params: List[(String,String)]): Node = retry {
     logAction("POST", url, params.map(kv => kv._1.trim + "=" + kv._2.trim).mkString(" "))
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
@@ -62,6 +62,24 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
       }
     }
     getXML(conn)
+  }
+  
+  private def retry(f: => Node): Node = {
+    var maxTries = 5
+    var lastException: TwitterException = null
+    
+    1 to maxTries foreach(i => {
+      try {
+        return f
+      } catch {
+        case e: TwitterException => {
+          log.warn(e.toString)
+          lastException = e
+        }
+      }
+      Thread.sleep(2000)
+    })
+    throw lastException
   }
 
   private def actionAndUrl(action: String, url: URL) = user.getOrElse("") + " " + action + " " + url

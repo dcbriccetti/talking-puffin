@@ -38,7 +38,7 @@ class UserActions(session: Session, rels: Relationships) {
       SwingInvoke.execSwingWorker({tsess.getListMembers(list)}, {
         members: List[TwitterUser] => {
           session.windows.peoplePaneCreator.createPeoplePane(listLongName, listShortName,
-            Some(members), None)
+            Some(members), None, true)
         }
       })
     }

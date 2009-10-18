@@ -42,7 +42,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   mainToolBar.init(streams)
     
   title = Main.title + " - " + service + " " + twitterSession.user
-  menuBar = new MainMenuBar(streams.providers)
+  menuBar = new MainMenuBar(streams.providers, tagUsers)
   reactions += {
     case e: NewViewEvent => streams.createView(e.provider, None)
   }
@@ -90,11 +90,11 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   private def createPeoplePane: Unit = {
     updatePeople
     peoplePane = createPeoplePane("People You Follow and People Who Follow You", "People", None, 
-        Some(updatePeople _))
+        Some(updatePeople _), false)
   }
   
   def createPeoplePane(longTitle: String, shortTitle: String, users: Option[List[TwitterUser]], 
-        updatePeople: Option[() => Unit]): PeoplePane = {
+        updatePeople: Option[() => Unit], selectPane: Boolean): PeoplePane = {
     val model = if (users.isDefined) new UsersTableModel(users, tagUsers, rels) else streams.usersTableModel
     val customRels = if (users.isDefined) {
       new Relationships {
@@ -105,7 +105,10 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
       }
     } else rels
     val peoplePane = new PeoplePane(longTitle, shortTitle, session, model, customRels, updatePeople)
-    tabbedPane.pages += new Page(shortTitle, peoplePane) {tip = longTitle}
+    val peoplePage = new Page(shortTitle, peoplePane) {tip = longTitle}
+    tabbedPane.pages += peoplePage
+    if (selectPane)
+      tabbedPane.selection.page = peoplePage
     peoplePane
   }
 

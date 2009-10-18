@@ -193,13 +193,33 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     getSentMessages(TwitterArgs.page(page))
   }
 
+  def createList(listName: String): NodeSeq = {
+    http.doPost(url(user, "lists.xml"), List(("name", listName)))
+  }
+  
   def getLists(screenName: String): NodeSeq = {
-    http.doGet(new URL(apiURL + "/" + screenName + "/lists.xml"))  // Leave this as XML until it solidifies
+    http.doGet(url(screenName, "lists.xml"))  // Leave this as XML until it solidifies
+  }
+  
+  def getListNamed(listName: String): Option[NodeSeq] = {
+    (getLists(user) \ "list").find(list => (list \ "name").text == listName)
   }
   
   def getListMembers(list: NodeSeq): List[TwitterUser] = {
     (http.doGet(new URL(apiURL + "/" + (list \ "user" \ "screen_name").text + "/" + (list \ "slug").text + 
         "/members.xml")) \ "users" \ "user").map(TwitterUser.apply).toList
+  }
+  
+  private def url(parts: String*) = new URL((List(apiURL) ::: parts.toList).mkString("/"))
+  
+  def addToList(listName: String, memberIds: List[Long]): Unit = {
+    val slug = ((getListNamed(listName) match {
+      case Some(list) => list
+      case None => createList(listName)
+    }) \ "slug").text
+    memberIds.foreach(memberId => {
+      http.doPost(url(user, slug, "members.xml"), List(("id", memberId.toString)))
+    })
   }
   
   def getSentMessages(args: TwitterArgs): List[TwitterMessage] = {

@@ -1,6 +1,5 @@
 package org.talkingpuffin.filter
 
-import org.apache.log4j.Logger
 import com.google.common.collect.{Multimap, HashMultimap}
 import java.util.ArrayList
 import org.talkingpuffin.state.PreferencesFactory
@@ -9,7 +8,6 @@ import org.talkingpuffin.state.PreferencesFactory
  * Repository of tag -> user mappings, stored within a service/user
  */
 class TagUsers(service: String, username: String) {
-  private val log = Logger getLogger "TagUsers"
   private val prefs = PreferencesFactory.prefsForUser(service, username).node("tags")
   private val tagUsers: Multimap[String,Long] = HashMultimap.create()
   prefs.keys.foreach(tag => prefs.get(tag, null).split("\t").foreach(userId => add(tag, userId.toLong)))
@@ -23,20 +21,12 @@ class TagUsers(service: String, username: String) {
     while (it.hasNext) {
       val item = it.next
       if (item.getValue == userId) {
-        log.debug("Removing " + item)
         it.remove
       }
     }
   }
   
-  def getTags: List[String] = {
-    var tags = List[String]()
-    val keys = tagUsers.keySet.iterator
-    while(keys.hasNext) {
-      tags ::= keys.next
-    }
-    tags.sort(_ < _)
-  }
+  def getTags: List[String] = itToList(tagUsers.keySet.iterator).sort(_ < _)
   
   def tagsForUser(userId: Long): List[String] = {
     var tags = List[String]()
@@ -47,6 +37,8 @@ class TagUsers(service: String, username: String) {
     }
     tags
   }
+  
+  def usersForTag(tag: String): List[Long] = itToList(tagUsers.get(tag).iterator)
   
   def save {
     prefs.clear
@@ -61,6 +53,14 @@ class TagUsers(service: String, username: String) {
       prefs.put(tag, sb.toString)
     }
   }
+  
+  private def itToList[T](it: java.util.Iterator[T]): List[T] = {
+    var l = List[T]()
+    while (it.hasNext) {
+      l ::= it.next
+    }
+    l.reverse
+  } 
   
   private def getEntriesAsList = new ArrayList[java.util.Map.Entry[String,Long]](tagUsers.entries) 
   private def getKeysAsList = new ArrayList[String](tagUsers.keys) 

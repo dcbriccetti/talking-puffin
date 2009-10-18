@@ -30,7 +30,7 @@ trait Dockable extends Component with Loggable {
     new Frame {
       title = withSuffix(longTitle)
       contents = Dockable.this
-      menuBar = new MainMenuBar(session.windows.streams.providers)
+      menuBar = new MainMenuBar(session.windows.streams.providers, session.windows.streams.tagUsers)
       peer.setLocationRelativeTo(null)
     }.visible = true
   }
