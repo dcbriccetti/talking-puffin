@@ -72,6 +72,7 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
       try {
         return f
       } catch {
+        case e: TwitterNotFound => throw e
         case e: TwitterException => {
           log.warn(e.toString)
           lastException = e
