@@ -18,4 +18,6 @@ class DataProviders(val twitterSession: AuthenticatedSession, prefs: Preferences
 
   val providers = List(followingProvider, mentionsProvider, dmsReceivedProvider, dmsSentProvider)
   val providersAndPrefKeys = providers zip prefKeys
+  
+  def stop = providers.foreach(_.stop)
 }

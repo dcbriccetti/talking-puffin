@@ -76,6 +76,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   def setFocus = streams.views.last.pane.requestFocusForTable
   
   def close {
+    streams.providers.stop
     deafTo(twitterSession.httpPublisher)
     Globals.sessions -= session
     dispose
