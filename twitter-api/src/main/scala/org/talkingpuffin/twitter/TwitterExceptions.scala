@@ -17,17 +17,16 @@ import org.apache.log4j.Logger
 * <li>503 Service Unavailable: the Twitter servers are up, but are overloaded with requests.  Try again later.</li>
 * </ul>
 */
-case class TwitterException(twitterMessage: String) extends Throwable
-case class TwitterNotModified(override val twitterMessage: String) extends TwitterException(twitterMessage)
-case class TwitterBadRequest(override val twitterMessage: String) extends TwitterException(twitterMessage)
-case class TwitterNotAuthorized(override val twitterMessage: String) extends TwitterException(twitterMessage)
-case class TwitterForbidden(override val twitterMessage: String) extends TwitterException(twitterMessage)
-case class TwitterNotFound(override val twitterMessage: String) extends TwitterException(twitterMessage)
-case class TwitterInternalServer(override val twitterMessage: String) extends TwitterException(twitterMessage)
-case class TwitterBadGateway(override val twitterMessage: String) extends TwitterException(twitterMessage)
-case class TwitterServiceUnavailable(override val twitterMessage: String) extends TwitterException(twitterMessage)
-case class TwitterUnknown(val code: Int, override val twitterMessage: String) extends TwitterException(twitterMessage)
-case class TwitterBadXML() extends TwitterException("couldn't process XML as requested")
+case class TwitterException(val code: Int, twitterMessage: String) extends Throwable
+case class TwitterNotModified(override val code: Int, override val twitterMessage: String) extends TwitterException(code, twitterMessage)
+case class TwitterBadRequest(override val code: Int, override val twitterMessage: String) extends TwitterException(code, twitterMessage)
+case class TwitterNotAuthorized(override val code: Int, override val twitterMessage: String) extends TwitterException(code, twitterMessage)
+case class TwitterForbidden(override val code: Int, override val twitterMessage: String) extends TwitterException(code, twitterMessage)
+case class TwitterNotFound(override val code: Int, override val twitterMessage: String) extends TwitterException(code, twitterMessage)
+case class TwitterInternalServer(override val code: Int, override val twitterMessage: String) extends TwitterException(code, twitterMessage)
+case class TwitterBadGateway(override val code: Int, override val twitterMessage: String) extends TwitterException(code, twitterMessage)
+case class TwitterServiceUnavailable(override val code: Int, override val twitterMessage: String) extends TwitterException(code, twitterMessage)
+case class TwitterUnknown(override val code: Int, override val twitterMessage: String) extends TwitterException(code, twitterMessage)
 
 /**
 * Factory object to construct TwitterException instances from an HTTP response code
@@ -38,20 +37,21 @@ object TwitterException extends Exception {
   
   def apply(message: String, code: Int) = {
     val title = message match { // Error message may appear in title of an HTML page
-      case titleRegEx(t) => t
-      case _ => ""
+      case titleRegEx(t) => Some(t)
+      case _ => None
     }
-    log.debug("Code: " + code + ", Title: " + title + ", Message: " + message)
+    log.debug("Code: " + code + 
+        (title match {case Some(t) => ", Title: " + t case None => ", Message: " + message}))
     
     code match {
-      case 304 => new TwitterNotModified(message)
-      case 400 => new TwitterBadRequest(message)
-      case 401 => new TwitterNotAuthorized(message)
-      case 403 => new TwitterForbidden(message)
-      case 404 => new TwitterNotFound(message)
-      case 500 => new TwitterInternalServer(message)
-      case 502 => new TwitterBadGateway(message)
-      case 503 => new TwitterServiceUnavailable(message)
+      case 304 => new TwitterNotModified(code, message)
+      case 400 => new TwitterBadRequest(code, message)
+      case 401 => new TwitterNotAuthorized(code, message)
+      case 403 => new TwitterForbidden(code, message)
+      case 404 => new TwitterNotFound(code, message)
+      case 500 => new TwitterInternalServer(code, message)
+      case 502 => new TwitterBadGateway(code, message)
+      case 503 => new TwitterServiceUnavailable(code, message)
       case _ => new TwitterUnknown(code, message)
     }
   }

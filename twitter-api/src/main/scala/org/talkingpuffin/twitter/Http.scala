@@ -64,21 +64,21 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
     getXML(conn)
   }
   
-  private def retry(f: => Node): Node = {
-    var maxTries = 5
+  private def retry[T](f: => T): T = {
     var lastException: TwitterException = null
-    
-    1 to maxTries foreach(i => {
+    List(0, 250, 2000, 2000, 5000, 10000, 60000, -1).foreach(delayMs => {
       try {
         return f
       } catch {
-        case e: TwitterNotFound => throw e
+        case e: TwitterException if e.code < 500 => throw e
         case e: TwitterException => {
-          log.warn(e.toString)
+          if (delayMs >= 0)
+            log.warn(e.toString + ", retrying " + 
+                (if (delayMs == 0) "immediately " else "in " + delayMs + " ms"))
           lastException = e
         }
       }
-      Thread.sleep(2000)
+      Thread.sleep(delayMs)
     })
     throw lastException
   }
