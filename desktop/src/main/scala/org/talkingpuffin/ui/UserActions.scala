@@ -68,17 +68,17 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
   }
   
   class Tiler(numTiles: Int) {
-    val dim = Toolkit.getDefaultToolkit().getScreenSize()
-    val cols = Math.sqrt(numTiles.toDouble).ceil.toInt
-    val h = dim.height / cols
-    val w = dim.width / cols
-    var index = new AtomicInteger(0)
+    private val screenSize = Toolkit.getDefaultToolkit().getScreenSize()
+    private val cols = Math.sqrt(numTiles.toDouble).ceil.toInt
+    private val tileHeight = screenSize.height / cols
+    private val tileWidth = screenSize.width / cols
+    private val nextTileIndex = new AtomicInteger(0)
     
     def next: Point = {
-      val i = index.getAndIncrement
-      val row = i / cols
-      val col = i % cols
-      new Point(col * w, row * h)
+      val tileIndex = nextTileIndex.getAndIncrement
+      val row = tileIndex / cols
+      val col = tileIndex % cols
+      new Point(col * tileWidth, row * tileHeight)
     } 
   }
 
