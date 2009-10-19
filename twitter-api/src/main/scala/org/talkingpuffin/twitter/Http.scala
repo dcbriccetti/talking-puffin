@@ -23,14 +23,14 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   /**
   * Fetch an XML document from the given URL
   */
-  def doGet(url: URL): Node = {
+  def get(url: URL): Node = retry {
     logAction("GET", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
     getXML(conn)
   }
 
-  def doDelete(url: URL) = {
+  def delete(url: URL) = retry {
     logAction("DELETE", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
@@ -42,7 +42,7 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   * @param url the URL to post to
   * @param params a List of String tuples, the first entry being the param, the second being the value
   */
-  def doPost(url: URL, params: List[(String,String)]): Node = {
+  def post(url: URL, params: List[(String,String)]): Node = retry {
     logAction("POST", url, params.map(kv => kv._1.trim + "=" + kv._2.trim).mkString(" "))
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
@@ -62,6 +62,25 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
       }
     }
     getXML(conn)
+  }
+  
+  private def retry[T](f: => T): T = {
+    var lastException: TwitterException = null
+    List(0, 250, 2000, 2000, 5000, 10000, 60000, -1).foreach(delayMs => {
+      try {
+        return f
+      } catch {
+        case e: TwitterException if e.code < 500 => throw e
+        case e: TwitterException => {
+          if (delayMs >= 0)
+            log.warn(e.toString + ", retrying " + 
+                (if (delayMs == 0) "immediately " else "in " + delayMs + " ms"))
+          lastException = e
+        }
+      }
+      Thread.sleep(delayMs)
+    })
+    throw lastException
   }
 
   private def actionAndUrl(action: String, url: URL) = user.getOrElse("") + " " + action + " " + url

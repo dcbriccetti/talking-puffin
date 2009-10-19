@@ -1,18 +1,19 @@
 package org.talkingpuffin.ui
 
 import java.awt.event.KeyEvent
-import java.awt.Toolkit
 import swing.{MenuItem, Action}
-import util.DesktopUtil
 import scala.xml.NodeSeq
 import javax.swing._
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.{TwitterUser, AuthenticatedSession}
+import org.talkingpuffin.twitter.{TwitterUser}
+import java.awt.{Point, Toolkit}
+import org.talkingpuffin.util.Loggable
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Handles user actions like follow
  */
-class UserActions(session: Session, rels: Relationships) {
+class UserActions(session: Session, rels: Relationships) extends Loggable {
   val tsess = session.twitterSession
   
   def follow(names: List[String]) = process(names, tsess.createFriendship, "following")
@@ -32,13 +33,13 @@ class UserActions(session: Session, rels: Relationships) {
   def reportSpam(names: List[String]) = process(names, tsess.reportSpam, "report spam")
   
   def viewLists(selectedScreenNames: List[String], table: JTable) {
-    def viewList(list: NodeSeq) = {
+    def viewList(list: NodeSeq, tiler: Option[Tiler]) = {
       val listShortName = (list \ "name").text
       val listLongName = listShortName + " from " + (list \ "user" \ "name").text
       SwingInvoke.execSwingWorker({tsess.getListMembers(list)}, {
         members: List[TwitterUser] => {
           session.windows.peoplePaneCreator.createPeoplePane(listLongName, listShortName,
-            Some(members), None)
+            Some(members), None, true, tiler match {case Some(t) => Some(t.next) case _ => None})
         }
       })
     }
@@ -48,19 +49,37 @@ class UserActions(session: Session, rels: Relationships) {
         tsess.getLists(screenName)
       }, {
         listsNode: NodeSeq => {
-          val lists = listsNode \ "list"
-          if (lists.length > 0) {
+          val lists = (listsNode \ "list").toList
+          if (lists != Nil) {
             val menu = new JPopupMenu
             lists.foreach(l => {
-              val a1 = Action((l \ "name").text) {viewList(l)}
-              menu.add(new MenuItem(a1).peer)
+              menu.add(new MenuItem(Action((l \ "name").text) {viewList(l, None)}).peer)
             })
+            menu.add(new MenuItem(Action("All") {
+              val tiler = new Tiler(lists.length)
+              lists.foreach(l2 => { viewList(l2, Some(tiler))})}).peer)
+
             val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
             menu.show(table, menuLoc.getX().asInstanceOf[Int], menuLoc.getY().asInstanceOf[Int])
           }
         }
       })
     })    
+  }
+  
+  class Tiler(numTiles: Int) {
+    val dim = Toolkit.getDefaultToolkit().getScreenSize()
+    val cols = Math.sqrt(numTiles.toDouble).ceil.toInt
+    val h = dim.height / cols
+    val w = dim.width / cols
+    var index = new AtomicInteger(0)
+    
+    def next: Point = {
+      val i = index.getAndIncrement
+      val row = i / cols
+      val col = i % cols
+      new Point(col * w, row * h)
+    } 
   }
 
   private def process(names:List[String], action:((String) => Unit), actionName: String) = 

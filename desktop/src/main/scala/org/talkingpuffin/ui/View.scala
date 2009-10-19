@@ -1,10 +1,22 @@
 package org.talkingpuffin.ui
 
-import swing.TabbedPane
 import org.talkingpuffin.filter.{TagUsers, FilterSet, TextFilter}
 import org.talkingpuffin.Session
+import swing.{Reactor, TabbedPane}
 
-case class View(val title: String, val model: StatusTableModel, val pane: StatusPane)
+case class View(val model: StatusTableModel, val pane: StatusPane) extends Reactor {
+  listenTo(model)
+  reactions += {
+    case TableContentsChanged(model, filtered, total) =>
+      pane.titleSuffix = if (total == 0) 
+        "" 
+      else 
+        "(" + (if (total == filtered) 
+          total 
+        else 
+          filtered + "/" + total) + ")"
+  }
+}
 
 object View {
   def create(dataProvider: DataProvider, screenNameToUserNameMap: Map[String, String], 
@@ -27,8 +39,7 @@ object View {
     }
     val pane = new StatusPane(session, title, title, model, filterSet, tagUsers, viewCreator)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
-    val view = new View(title, model, pane)
-    view
+    new View(model, pane)
   }
 }
 

@@ -21,7 +21,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     username: String, val tagUsers: TagUsers) 
     extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
   
-  private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName)
+  private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
   log.info("Created")
 
   private val userPrefs = PreferencesFactory.prefsForUser(service, username)

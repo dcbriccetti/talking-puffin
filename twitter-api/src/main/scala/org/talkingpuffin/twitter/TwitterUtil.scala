@@ -7,17 +7,17 @@ import scala.xml._
 
 /**
 * Provides generalized processing of a Twitter XML response.
-* Under the covers this uses the specified fetcher and URL to get an XML document, 
+* Under the covers this uses the specified HTTP object and URL to get an XML document, 
 * and then processes the document with the specified factory, building a list (or single instance) 
 * of whatever the factory returns.
 */
-class Parser[T](url: URL, fetcher: Http, factory: (Node) => T){
+class Parser[T](url: URL, http: Http, factory: (Node) => T){
   /**
   * build a list of instances of T from the returned XML document
   */
   def parseXMLList(selectors: String*): XmlResult[T] = {
     var list = List[T]()
-    val xml = fetcher.doGet(url)
+    val xml = http.get(url)
     applySelectors(xml, selectors.toList) foreach {(entry) =>
       list = factory(entry) :: list
     }
@@ -35,7 +35,7 @@ class Parser[T](url: URL, fetcher: Http, factory: (Node) => T){
   * build a single instance of T from the returned XML document
   */
   def parseXMLElement(): T = {
-    return factory(fetcher.doGet(url))
+    return factory(http.get(url))
   }
 }
 

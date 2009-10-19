@@ -1,7 +1,6 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.{WindowClosing}
-import java.awt.{Dimension}
 import javax.swing.{ImageIcon}
 import swing.TabbedPane.Page
 import swing.{Reactor, Frame, TabbedPane, Label, GridBagPanel}
@@ -12,6 +11,7 @@ import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.state.{StateSaver}
 import java.text.NumberFormat
 import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, AuthenticatedSession}
+import java.awt.{Point, Dimension}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -42,7 +42,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   mainToolBar.init(streams)
     
   title = Main.title + " - " + service + " " + twitterSession.user
-  menuBar = new MainMenuBar(streams.providers)
+  menuBar = new MainMenuBar(streams.providers, tagUsers)
   reactions += {
     case e: NewViewEvent => streams.createView(e.provider, None)
   }
@@ -76,6 +76,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   def setFocus = streams.views.last.pane.requestFocusForTable
   
   def close {
+    streams.providers.stop
     deafTo(twitterSession.httpPublisher)
     Globals.sessions -= session
     dispose
@@ -90,11 +91,11 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   private def createPeoplePane: Unit = {
     updatePeople
     peoplePane = createPeoplePane("People You Follow and People Who Follow You", "People", None, 
-        Some(updatePeople _))
+        Some(updatePeople _), false, None)
   }
   
   def createPeoplePane(longTitle: String, shortTitle: String, users: Option[List[TwitterUser]], 
-        updatePeople: Option[() => Unit]): PeoplePane = {
+        updatePeople: Option[() => Unit], selectPane: Boolean, location: Option[Point]): PeoplePane = {
     val model = if (users.isDefined) new UsersTableModel(users, tagUsers, rels) else streams.usersTableModel
     val customRels = if (users.isDefined) {
       new Relationships {
@@ -105,7 +106,11 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
       }
     } else rels
     val peoplePane = new PeoplePane(longTitle, shortTitle, session, model, customRels, updatePeople)
-    tabbedPane.pages += new Page(shortTitle, peoplePane) {tip = longTitle}
+    val peoplePage = new Page(shortTitle, peoplePane) {tip = longTitle}
+    tabbedPane.pages += peoplePage
+    if (selectPane)
+      tabbedPane.selection.page = peoplePage
+    location match {case Some(loc) => peoplePane.undock(Some(loc)) case _ =>}
     peoplePane
   }
 

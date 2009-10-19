@@ -7,11 +7,12 @@ import java.awt.Toolkit
 import swing.event.{Event, ButtonClicked}
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.Main
+import org.talkingpuffin.filter.TagUsers
 
 /**
  * Main menu bar
  */
-class MainMenuBar(dataProviders: DataProviders) extends MenuBar {
+class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends MenuBar {
   val prefs = GlobalPrefs.prefs
 
   val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
@@ -34,6 +35,20 @@ class MainMenuBar(dataProviders: DataProviders) extends MenuBar {
         def apply = MainMenuBar.this.publish(NewViewEvent(provider))
       })
     })
+  }
+  
+  contents += new Menu("Lists") {
+    contents += new Menu("Export tag to list") {
+      tagUsers.getTags.foreach(tag => {
+        contents += new MenuItem(new Action(tag) {
+          def apply = {
+            SwingInvoke.execSwingWorker({
+              dataProviders.twitterSession.addToList(tag, tagUsers.usersForTag(tag))
+            }, (r: Unit) => {})
+          }
+        })
+      })
+    }
   }
   
   contents += new Menu("Options") {

@@ -8,12 +8,13 @@ import org.apache.log4j.Logger
 import util.TitleCreator
 import org.talkingpuffin.twitter.{TwitterArgs, AuthenticatedSession}
 import org.joda.time.DateTime
-import javax.swing.{JOptionPane, Timer, SwingWorker}
+import javax.swing.{Timer, SwingWorker}
 
 abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
     with Publisher with ErrorHandler {
-  private val log = Logger.getLogger("DataProvider " + providerName)
+  
+  private val log = Logger.getLogger("DataProvider " + providerName + " " + session.user)
   private var highestId: Option[Long] = startingId
   val titleCreator = new TitleCreator(providerName)
 
@@ -37,22 +38,24 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
     restartTimer
   }
   
+  def stop: Unit = {log.debug("stopping"); if (timer != null) timer.stop}
+  
   def loadLastBlockOfTweets = loadData(TwitterArgs.maxResults(200), true)
 
   type TwitterDataWithId = {def id: Long} 
 
   def getResponseId(response: TwitterDataWithId): Long
 
+  protected def updateFunc:(TwitterArgs) => List[TwitterDataWithId]
+
   private def computeHighestId(tweets: List[TwitterDataWithId], maxId: Option[Long]):Option[Long] = tweets match {
     case tweet :: rest => maxId match {
-        case Some(id) => computeHighestId(rest, if (getResponseId(tweet) > id) Some(getResponseId(tweet)) else Some(id))
-        case None => computeHighestId(rest,Some(getResponseId(tweet)))
+      case Some(id) => computeHighestId(rest, if (getResponseId(tweet) > id) Some(getResponseId(tweet)) else Some(id))
+      case None => computeHighestId(rest,Some(getResponseId(tweet)))
     }
     case Nil => maxId
   }
 
-  def updateFunc:(TwitterArgs) => List[TwitterDataWithId]
-  
   private def addSince(args: TwitterArgs) = highestId match {
     case None => args
     case Some(i) => args.since(i)
