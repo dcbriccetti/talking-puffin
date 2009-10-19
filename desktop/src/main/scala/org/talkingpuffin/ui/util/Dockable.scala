@@ -1,12 +1,12 @@
 package org.talkingpuffin.ui.util
 
 import swing.TabbedPane.Page
-import java.awt.Dimension
 import javax.swing.{JFrame, SwingUtilities, JComponent, JToggleButton}
 import swing.{Action, Frame, TabbedPane, Component}
 import org.talkingpuffin.Session
 import org.talkingpuffin.ui.{MainMenuBar}
 import org.talkingpuffin.util.Loggable
+import java.awt.{Point, Dimension}
 
 /**
  * Provides a “docked” toggle button, connected to undock and dock methods.
@@ -22,17 +22,19 @@ trait Dockable extends Component with Loggable {
   
   val dockedButton: JToggleButton = new JToggleButton(new Action("Docked") {
     toolTip = "Docks or frees the pane"
-    def apply = if (dockedButton.isSelected) dock else undock
+    def apply = if (dockedButton.isSelected) dock else undock(None)
   }.peer) {setSelected(true)} 
 
-  private def undock {
+  def undock(loc: Option[Point]): Frame = {
     peer.asInstanceOf[JComponent].setPreferredSize(new Dimension(800,700))
-    new Frame {
+    val frame = new Frame {
       title = withSuffix(longTitle)
       contents = Dockable.this
       menuBar = new MainMenuBar(session.windows.streams.providers, session.windows.streams.tagUsers)
-      peer.setLocationRelativeTo(null)
-    }.visible = true
+      loc match {case Some(l) => location = l case None => peer.setLocationRelativeTo(null)}
+    }
+    frame.visible = true
+    frame
   }
   
   private def dock {                                            
