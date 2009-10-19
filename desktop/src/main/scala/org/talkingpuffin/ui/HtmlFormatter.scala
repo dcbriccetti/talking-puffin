@@ -12,9 +12,7 @@ object HtmlFormatter {
       case None => ""
     }
               
-    var r = text.replaceAll(LinkExtractor.hyperlinkRegex, "<a href='$1'>$1</a>")
-
-    r = r.replaceAll(LinkExtractor.usernameRegex, "<a href='" + LinkExtractor.usernameUrl + "'>@$1</a>")
+    val r = LinkExtractor.createLinks(text.replaceAll(LinkExtractor.hyperlinkRegex, "<a href='$1'>$1</a>"))
 
     htmlAround(arrowLinkToParent + fontAround(r, "+2") + fontAround(" from " + source, "-1"))
   }

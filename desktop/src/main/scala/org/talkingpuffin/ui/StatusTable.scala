@@ -240,6 +240,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
 
     mh add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_L, 0))
     mh add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, 0))
+    mh add(new OpenTwitterUserListsAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, SHIFT))
     
     mh add(Action("View lists…") {userActions.viewLists(getSelectedScreenNames, this)}, UserActions.ViewListAccel)
     

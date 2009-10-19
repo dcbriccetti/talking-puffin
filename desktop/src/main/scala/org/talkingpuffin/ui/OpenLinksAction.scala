@@ -30,7 +30,7 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], tabl
 
     getSelectedStatus match {
       case Some(status) =>
-        val urls = LinkExtractor.getLinks(status, users, pages)
+        val urls = LinkExtractor.getLinks(status, users, pages, lists)
   
         if (urls.length == 1) {
           browse(urls(0)._2)
@@ -57,6 +57,7 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], tabl
   
   def users: Boolean
   def pages: Boolean
+  def lists: Boolean
 }
 
 class OpenPageLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
@@ -64,6 +65,7 @@ class OpenPageLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JT
     "Open Links…") {
   def users = false
   def pages = true
+  def lists = false
 }
 
 class OpenTwitterUserLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
@@ -71,4 +73,13 @@ class OpenTwitterUserLinksAction(getSelectedStatus: => Option[TwitterStatus], ta
     "Open User Links…") {
   def users = true
   def pages = false
+  def lists = false
+}
+
+class OpenTwitterUserListsAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
+    browse: (String) => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,  
+    "Open User Lists…") {
+  def users = false
+  def pages = false
+  def lists = true
 }
