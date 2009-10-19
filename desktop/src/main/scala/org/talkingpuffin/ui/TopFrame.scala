@@ -110,7 +110,8 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     tabbedPane.pages += peoplePage
     if (selectPane)
       tabbedPane.selection.page = peoplePage
-    location match {case Some(loc) => peoplePane.undock(Some(loc)) case _ =>}
+    if (location.isDefined) 
+      peoplePane.undock(location)
     peoplePane
   }
 
