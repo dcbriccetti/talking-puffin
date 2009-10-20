@@ -197,12 +197,16 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     TwitterList(http.post(url(user, "lists.xml"), List(("name", listName))))
   }
   
-  def getLists(screenName: String): TwitterLists = {
-    TwitterLists(http.get(url(screenName, "lists.xml")))
+  def getLists(screenName: String): Option[TwitterLists] = {
+    val lists = http.get(url(screenName, "lists.xml"))
+    if (lists.length > 0) Some(TwitterLists(lists)) else None
   }
   
   def getListNamed(listName: String): Option[TwitterList] = {
-    getLists(user).lists.find(list => list.name == listName)
+    getLists(user) match {
+      case Some(lists) => lists.lists.find(list => list.name == listName)
+      case None => None
+    }
   }
   
   def getListMembers(list: TwitterList): List[TwitterUser] = {
@@ -212,14 +216,17 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   private def url(parts: String*) = new URL((List(apiURL) ::: parts.toList).mkString("/"))
   
   def addToList(listName: String, memberIds: List[Long]): Unit = {
-    val slug = (getListNamed(listName) match {
-      case Some(list) => list
-      case None => createList(listName)
-    }).slug
-    memberIds.foreach(memberId => {
-      http.post(url(user, slug, "members.xml"), List(("id", memberId.toString)))
-    })
+    val slug = getListSlug(listName)
+    memberIds.foreach(id => addToListWithSlug(slug)(id))
   }
+  
+  def getListSlug(listName: String) = (getListNamed(listName) match {
+    case Some(list) => list
+    case None => createList(listName)
+  }).slug 
+  
+  def addToListWithSlug(slug: String)(memberId: Long) = 
+      http.post(url(user, slug, "members.xml"), List(("id", memberId.toString)))
   
   def getSentMessages(args: TwitterArgs): List[TwitterMessage] = {
     new Parser[TwitterMessage](new URL(apiURL + "/direct_messages/sent.xml" + args),http,

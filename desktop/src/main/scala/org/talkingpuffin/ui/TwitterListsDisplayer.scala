@@ -2,9 +2,11 @@ package org.talkingpuffin.ui
 
 import org.talkingpuffin.Session
 import javax.swing.{JPopupMenu, JTable}
-import org.talkingpuffin.twitter.{TwitterUser, TwitterList}
 import org.talkingpuffin.ui.util.Tiler
 import swing.{Action, MenuItem}
+import org.talkingpuffin.twitter.{TwitterLists, TwitterUser, TwitterList}
+import java.util.concurrent.{Executors, Callable}
+import org.talkingpuffin.util.Parallelizer
 
 object TwitterListsDisplayer {
 
@@ -12,7 +14,7 @@ object TwitterListsDisplayer {
    * Presents a pop-up menu of lists belonging to users with the specified screen names. One or
    * all lists can be selected. Each list is launched in a new PeoplePane.
    */
-  def viewLists(session: Session, selectedScreenNames: List[String], table: JTable) {
+  def viewLists(session: Session, screenNames: List[String], table: JTable) {
     
     def viewList(list: TwitterList, tiler: Option[Tiler]) = {
       SwingInvoke.execSwingWorker({session.twitterSession.getListMembers(list)}, {
@@ -23,16 +25,15 @@ object TwitterListsDisplayer {
       })
     }
     
-    SwingInvoke.execSwingWorker({
-      var listsList = List[org.talkingpuffin.twitter.TwitterLists]()
-      selectedScreenNames.foreach(screenName => {
-        val lists = session.twitterSession.getLists(screenName)
-        if (lists.xml != Nil)
-          listsList ::= lists
-      })
-      listsList reverse
-      }, {
-        listsList: List[org.talkingpuffin.twitter.TwitterLists] => {
+    def getLists: List[TwitterLists] = {
+      for {
+        twitterLists <- Parallelizer.run(20, screenNames, session.twitterSession.getLists)
+        if twitterLists.isDefined 
+      } yield twitterLists.get
+    }
+    
+    SwingInvoke.execSwingWorker({getLists}, {
+      listsList: List[org.talkingpuffin.twitter.TwitterLists] => {
           if (listsList != Nil) {
             var numMenuItems = 0
             val menu = new JPopupMenu
