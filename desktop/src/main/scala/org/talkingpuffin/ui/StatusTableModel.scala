@@ -24,6 +24,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
   log.info("Created")
 
+  val unessentialCols = List("When", "Image", "From", "To") // Can be quickly hidden
+  
   private val userPrefs = PreferencesFactory.prefsForUser(service, username)
 
   /** All loaded statuses */
@@ -59,9 +61,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   
   def getColumnCount = 5
   def getRowCount = filteredStatuses_.length
-  override def getColumnName(column: Int) = 
-    List(if (AgeCellRenderer.showAsAge_?) "When" else "When", "Image", "From", "To", "Status")(column)
-  // TODO get dynamic column title changing working
+  override def getColumnName(column: Int) = (unessentialCols ::: List("Status"))(column)
 
   private val pictureCell = new PictureCell(this, 0)
 

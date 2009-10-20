@@ -132,7 +132,7 @@ class StatusPane(val session: Session, val longTitle: String, val shortTitle: St
   }
   
   private def showMaxColumns(showMax: Boolean) =
-    List("Age","Image","From","To").foreach(table.getColumnExt(_).setVisible(showMax))
+    statusTableModel.unessentialCols.foreach(table.getColumnExt(_).setVisible(showMax))
   
   private def clearSelection {
     table.getSelectionModel.clearSelection
