@@ -4,8 +4,7 @@ import org.talkingpuffin.Session
 import javax.swing.{JPopupMenu, JTable}
 import org.talkingpuffin.ui.util.Tiler
 import swing.{Action, MenuItem}
-import org.talkingpuffin.twitter.{TwitterLists, TwitterUser, TwitterList}
-import java.util.concurrent.{Executors, Callable}
+import org.talkingpuffin.twitter.{TwitterUser, TwitterList}
 import org.talkingpuffin.util.Parallelizer
 
 object TwitterListsDisplayer {
@@ -15,9 +14,11 @@ object TwitterListsDisplayer {
    * all lists can be selected. Each list is launched in a new PeoplePane.
    */
   def viewLists(session: Session, screenNames: List[String], table: JTable) {
+
+    val tsess = session.twitterSession
     
     def viewList(list: TwitterList, tiler: Option[Tiler]) = {
-      SwingInvoke.execSwingWorker({session.twitterSession.getListMembers(list)}, {
+      SwingInvoke.execSwingWorker({tsess.getListMembers(list)}, {
         members: List[TwitterUser] => {
           session.windows.peoplePaneCreator.createPeoplePane(list.longName, list.shortName,
             Some(members), None, true, tiler match {case Some(t) => Some(t.next) case _ => None})
@@ -25,41 +26,41 @@ object TwitterListsDisplayer {
       })
     }
     
-    def getLists: List[TwitterLists] = {
+    def getLists: List[List[TwitterList]] = {
       for {
-        twitterLists <- Parallelizer.run(20, screenNames, session.twitterSession.getLists)
-        if twitterLists.isDefined 
-      } yield twitterLists.get
+        twitterLists <- Parallelizer.run(20, screenNames, tsess.getLists)
+        if twitterLists != Nil 
+      } yield twitterLists
     }
     
-    SwingInvoke.execSwingWorker({getLists}, {
-      listsList: List[org.talkingpuffin.twitter.TwitterLists] => {
-          if (listsList != Nil) {
-            var numMenuItems = 0
-            val menu = new JPopupMenu
-            var combinedList = List[TwitterList]()
-            listsList foreach(twitterLists => {
-              val twLists = twitterLists.lists.toList
-              if (twLists != Nil) {
-                twLists.foreach(l => {
-                  menu.add(new MenuItem(Action(
-                    if (listsList.length == 1) l.shortName else l.longName) {viewList(l, None)}).peer)
-                  numMenuItems += 1
-                })
-                combinedList :::= twLists
-              }
-            })
-            if (numMenuItems > 1) {
-              menu.add(new MenuItem(Action("All") {
-                val tiler = new Tiler(combinedList.length)
-                combinedList.foreach(twitterList => { viewList(twitterList, Some(tiler))})}).peer)
+    SwingInvoke.execSwingWorker({getLists}, { 
+      allListsOfLists: List[List[TwitterList]] => {
+        if (allListsOfLists != Nil) {
+          var numMenuItems = 0
+          val menu = new JPopupMenu
+          var combinedList = List[TwitterList]()
+          allListsOfLists foreach(lists => {
+            if (lists != Nil) {
+              lists.foreach(twitterList => {
+                menu.add(new MenuItem(Action(if (screenNames.length == 1) 
+                    twitterList.shortName else twitterList.longName) {viewList(twitterList, None)}).peer)
+                numMenuItems += 1
+              })
+              combinedList :::= lists
             }
+          })
+          if (numMenuItems > 1) {
+            val tiler = new Tiler(combinedList.length)
+            menu.add(new MenuItem(Action("All") {combinedList.foreach(twitterList => {
+              viewList(twitterList, Some(tiler))})}).peer) }
 
+          if (numMenuItems > 0) {
             val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
-            menu.show(table, menuLoc.getX().asInstanceOf[Int], menuLoc.getY().asInstanceOf[Int])
+            menu.show(table, menuLoc.getX().toInt, menuLoc.getY().toInt)
           }
         }
-      })
+      }
+    })
   }
   
 }
