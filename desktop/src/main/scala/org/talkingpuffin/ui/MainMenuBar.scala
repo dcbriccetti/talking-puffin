@@ -5,15 +5,18 @@ import javax.swing.KeyStroke
 import java.awt.event.KeyEvent
 import java.awt.Toolkit
 import swing.event.{Event, ButtonClicked}
+import scala.xml.Node
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.Main
 import org.talkingpuffin.filter.TagUsers
+import org.talkingpuffin.util.Parallelizer
 
 /**
  * Main menu bar
  */
 class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends MenuBar {
   val prefs = GlobalPrefs.prefs
+  val tsess = dataProviders.twitterSession
 
   val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
   
@@ -43,8 +46,9 @@ class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends Menu
         contents += new MenuItem(new Action(tag) {
           def apply = {
             SwingInvoke.execSwingWorker({
-              dataProviders.twitterSession.addToList(tag, tagUsers.usersForTag(tag))
-            }, (r: Unit) => {})
+              Parallelizer.run(10, tagUsers.usersForTag(tag), 
+                tsess.addToListWithSlug(tsess.getListSlug(tag)))
+            }, (r: List[Node]) => {})
           }
         })
       })

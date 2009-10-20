@@ -193,34 +193,33 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     getSentMessages(TwitterArgs.page(page))
   }
 
-  def createList(listName: String): NodeSeq = {
-    http.post(url(user, "lists.xml"), List(("name", listName)))
+  def createList(listName: String): TwitterList = {
+    TwitterList(http.post(url(user, "lists.xml"), List(("name", listName))))
   }
   
-  def getLists(screenName: String): NodeSeq = {
-    http.get(url(screenName, "lists.xml"))  // Leave this as XML until it solidifies
-  }
+  def getLists(screenName: String): List[TwitterList] = ((http.get(url(screenName, "lists.xml")) \ "list") map(
+      TwitterList.apply)).toList
   
-  def getListNamed(listName: String): Option[NodeSeq] = {
-    (getLists(user) \ "list").find(list => (list \ "name").text == listName)
-  }
+  def getListNamed(listName: String): Option[TwitterList] = getLists(user) find(_.name == listName)
   
-  def getListMembers(list: NodeSeq): List[TwitterUser] = {
-    (http.get(new URL(apiURL + "/" + (list \ "user" \ "screen_name").text + "/" + (list \ "slug").text + 
-        "/members.xml")) \ "users" \ "user").map(TwitterUser.apply).toList
+  def getListMembers(list: TwitterList): List[TwitterUser] = {
+    (http.get(url(list.owner.screenName, list.slug, "members.xml")) \ "users" \ "user").map(TwitterUser.apply).toList
   }
   
   private def url(parts: String*) = new URL((List(apiURL) ::: parts.toList).mkString("/"))
   
   def addToList(listName: String, memberIds: List[Long]): Unit = {
-    val slug = ((getListNamed(listName) match {
-      case Some(list) => list
-      case None => createList(listName)
-    }) \ "slug").text
-    memberIds.foreach(memberId => {
-      http.post(url(user, slug, "members.xml"), List(("id", memberId.toString)))
-    })
+    val slug = getListSlug(listName)
+    memberIds.foreach(id => addToListWithSlug(slug)(id))
   }
+  
+  def getListSlug(listName: String) = (getListNamed(listName) match {
+    case Some(list) => list
+    case None => createList(listName)
+  }).slug 
+  
+  def addToListWithSlug(slug: String)(memberId: Long) = 
+      http.post(url(user, slug, "members.xml"), List(("id", memberId.toString)))
   
   def getSentMessages(args: TwitterArgs): List[TwitterMessage] = {
     new Parser[TwitterMessage](new URL(apiURL + "/direct_messages/sent.xml" + args),http,

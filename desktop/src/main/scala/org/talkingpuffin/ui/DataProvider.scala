@@ -14,7 +14,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
     with Publisher with ErrorHandler {
   
-  private val log = Logger.getLogger("DataProvider " + providerName + " " + session.user)
+  private val log = Logger.getLogger(providerName + " " + session.user)
   private var highestId: Option[Long] = startingId
   val titleCreator = new TitleCreator(providerName)
 
