@@ -15,8 +15,15 @@ abstract class BackgroundResourceFetcher[K,V](processResource: (ResourceReady[K,
   val requestQueue = new LinkedBlockingQueue[FetchRequest[K]]
   val inProgress = Collections.synchronizedSet(new HashSet[K])
   val threadPool = Executors.newFixedThreadPool(15)
-  
-  new Thread(new Runnable {def run = while(true) processNextRequestWithPoolThread}).start
+  var running = true
+
+  val thread = new Thread(new Runnable {
+    def run = {
+      while (running)
+        processNextRequestWithPoolThread
+    }
+  }, "BGFetcher " + hashCode)
+  thread.start
 
   /**
    * Returns the object if it exists in the cache, otherwise None.
@@ -35,27 +42,39 @@ abstract class BackgroundResourceFetcher[K,V](processResource: (ResourceReady[K,
         ! requestQueue.contains(request) && ! inProgress.contains(request.key)) 
       requestQueue.put(request)
   
+  def stop = {
+    if (running) {
+      running = false
+      threadPool.shutdownNow
+      thread.interrupt
+    }
+  }
+  
   private def processNextRequestWithPoolThread {
-    val fetchRequest = requestQueue.take
-    val key = fetchRequest.key
-    inProgress.add(key)
-    
-    threadPool.execute(new Runnable {
-      def run {
-        try {
-          var resource = cache.get(key)
-          if (resource == null) {
-            resource = getResourceFromSource(key)
-            store(cache, key, resource)
+    try {
+      val fetchRequest = requestQueue.take
+      val key = fetchRequest.key
+      inProgress.add(key)
+
+      threadPool.execute(new Runnable {
+        def run {
+          try {
+            var resource = cache.get(key)
+            if (resource == null) {
+              resource = getResourceFromSource(key)
+              store(cache, key, resource)
+            }
+
+            SwingInvoke.later({processResource(new ResourceReady[K,V](key, fetchRequest.userData, resource))})
+          } catch {
+            case e: NoSuchResource => // Do nothing
           }
-          
-          SwingInvoke.later({processResource(new ResourceReady[K,V](key, fetchRequest.userData, resource))})
-        } catch {
-          case e: NoSuchResource => // Do nothing
+          inProgress.remove(key)
         }
-        inProgress.remove(key)
-      }
-    })
+      })
+    } catch {
+      case e: InterruptedException => // This is how the thread is ended
+    }
   }
   
   protected def getResourceFromSource(key: K): V

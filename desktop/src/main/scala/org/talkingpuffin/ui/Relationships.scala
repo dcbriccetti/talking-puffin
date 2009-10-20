@@ -39,6 +39,7 @@ class Relationships extends Publisher with ErrorHandler {
           }, "Error fetching friends and followers for " + twitterSession.user)
       }
     }.execute
+    pool.shutdown()
   }
   
   def getIds(twitterSession: AuthenticatedSession, longOpListener: LongOpListener) {
@@ -61,6 +62,7 @@ class Relationships extends Publisher with ErrorHandler {
         }, "Error fetching friend and follower IDs for " + twitterSession.user)
       }
     }.execute
+    pool.shutdown()
   }
   
   def removeFriendsWithScreenNames(names: List[String]) {

@@ -63,6 +63,8 @@ class StatusPane(val session: Session, val longTitle: String, val shortTitle: St
     }
   })
 
+  def stop = statusTableModel.stop
+  
   def saveState = table.saveState
   
   private def prefetchAdjacentRows {        
