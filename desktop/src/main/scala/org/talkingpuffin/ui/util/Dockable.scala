@@ -3,11 +3,11 @@ package org.talkingpuffin.ui.util
 import swing.TabbedPane.Page
 import javax.swing.{JFrame, SwingUtilities, JComponent, JToggleButton}
 import swing.{Action, Frame, Component, Reactor}
-import swing.event.WindowClosing
 import org.talkingpuffin.Session
 import org.talkingpuffin.ui.{MainMenuBar}
 import org.talkingpuffin.util.Loggable
 import java.awt.{Point, Dimension}
+import swing.event.{WindowClosed, WindowEvent, WindowClosing}
 
 /**
  * Provides a “docked” toggle button, connected to undock and dock methods.
@@ -20,12 +20,12 @@ trait Dockable extends Component with Loggable {
   var frame: Frame = _
   val reactor = new Reactor {}
   reactor.reactions += {
-    case e: WindowClosing => 
+    case e: WindowEvent if (e.isInstanceOf[WindowClosing] || e.isInstanceOf[WindowClosed]) => 
       if (e.source == frame) {
         reactor.deafTo(frame)
         stop
       }
-    case _ => 
+    case _ =>  
   }
   
   private var titleSuffix_ = ""
