@@ -78,7 +78,8 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
           lastException = e
         }
       }
-      Thread.sleep(delayMs)
+      if (delayMs > 0) 
+        Thread.sleep(delayMs)
     })
     throw lastException
   }
