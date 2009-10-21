@@ -38,7 +38,11 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
     restartTimer
   }
   
-  def stop: Unit = {log.debug("stopping"); if (timer != null) timer.stop}
+  def stop: Unit = {
+    log.debug("stopping")
+    if (timer != null) 
+      timer.stop
+  }
   
   def loadLastBlockOfTweets = loadData(TwitterArgs.maxResults(200), true)
 

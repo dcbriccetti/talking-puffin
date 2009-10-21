@@ -24,4 +24,6 @@ class PictureCell(model: AbstractTableModel, column: Int) {
       }
     }
   }
+  
+  def stop = picFetcher.stop
 }

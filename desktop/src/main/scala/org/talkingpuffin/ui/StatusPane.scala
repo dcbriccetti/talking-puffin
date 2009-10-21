@@ -63,6 +63,8 @@ class StatusPane(val session: Session, val longTitle: String, val shortTitle: St
     }
   })
 
+  def stop = statusTableModel.stop
+  
   def saveState = table.saveState
   
   private def prefetchAdjacentRows {        
@@ -132,7 +134,7 @@ class StatusPane(val session: Session, val longTitle: String, val shortTitle: St
   }
   
   private def showMaxColumns(showMax: Boolean) =
-    List("Age","Image","From","To").foreach(table.getColumnExt(_).setVisible(showMax))
+    statusTableModel.unessentialCols.foreach(table.getColumnExt(_).setVisible(showMax))
   
   private def clearSelection {
     table.getSelectionModel.clearSelection

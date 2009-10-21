@@ -6,10 +6,12 @@ import swing.Reactor
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.ui.table.EmphasizedString
 import org.talkingpuffin.twitter.TwitterUser
+import org.talkingpuffin.util.Loggable
 
 class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers, 
-    val relationships: Relationships) extends AbstractTableModel with TaggingSupport with Reactor {
+    val relationships: Relationships) extends AbstractTableModel with TaggingSupport with Reactor with Loggable {
   
+  val pcell = new PictureCell(this, 1)
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Tags", "Location", "Description", "Status")
   private val elementNames = List("", "", "screen_name", "name", "", "location", "description", "")
   var usersModel: UsersModel = _
@@ -22,6 +24,11 @@ class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers,
   }
   listenTo(relationships)
 
+  def stop = {
+    debug("stopping")
+    pcell.stop
+  }
+  
   def getColumnCount = 8
   def getRowCount = usersModel.users.length
 
@@ -31,8 +38,6 @@ class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers,
       case _ => classOf[String] 
     }
   }
-
-  val pcell = new PictureCell(this, 1)
 
   def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val user = usersModel.users(rowIndex)
