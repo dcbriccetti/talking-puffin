@@ -8,7 +8,7 @@ import org.talkingpuffin.ui.util.{BackgroundResourceFetcher, ResourceReady}
 /**
  * Geocoding.
  */
-object GeoCoder {
+object GeoCoder extends BackgroundResourceFetcher[String, String] {
   private val locationCache: java.util.Map[String, String] = new MapMaker().softValues().makeMap()
   private val num = """(-?\d+\.\d*)"""
   private val latLongRegex = ("""[^-\d]*""" + num + """,\s*""" + num).r
@@ -27,10 +27,6 @@ object GeoCoder {
   
   def formatLatLongKey(location: Tuple2[Double, Double]): String = 
     formatLatLongKey(location._1.toString, location._2.toString) 
-}
-
-class GeoCoder(processResults: (ResourceReady[String,String]) => Unit) 
-    extends BackgroundResourceFetcher[String, String](processResults) {
 
   protected def getResourceFromSource(latLong: String): String = {
     val url = new URL("http://maps.google.com/maps/geo?key=" + GeoCoder.apiKey + 

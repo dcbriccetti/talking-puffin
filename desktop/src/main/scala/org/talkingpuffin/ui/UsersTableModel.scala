@@ -24,11 +24,6 @@ class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers,
   }
   listenTo(relationships)
 
-  def stop = {
-    debug("stopping")
-    pcell.stop
-  }
-  
   def getColumnCount = 8
   def getRowCount = usersModel.users.length
 

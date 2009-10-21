@@ -71,7 +71,7 @@ trait Dockable extends Component with Loggable {
     }
   }
   
-  protected def stop: Unit
+  protected def stop = {} // Override as needed
   
   private def withSuffix(title: String) = if (titleSuffix_.length == 0) title else title + " " + titleSuffix_
 }

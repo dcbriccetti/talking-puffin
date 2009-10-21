@@ -50,12 +50,13 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   contents = new GridBagPanel {
     val userPic = new Label
-    val picFetcher = new PictureFetcher(None, (imageReady: PictureFetcher.ImageReady) => {
-      if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
-        userPic.icon = imageReady.resource.image 
-      }
-    })
-    picFetcher.requestItem(new FetchRequest(twitterSession.getUserDetail().profileImageURL, null))
+    val picFetcher = new PictureFetcher(None)
+    picFetcher.requestItem(new FetchRequest(twitterSession.getUserDetail().profileImageURL, null, 
+      (imageReady: PictureFetcher.ImageReady) => {
+        if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
+          userPic.icon = imageReady.resource.image 
+        }
+      }))
     add(userPic, new Constraints { grid = (0,0); gridheight=2})
     add(session.status, new Constraints {
       grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  

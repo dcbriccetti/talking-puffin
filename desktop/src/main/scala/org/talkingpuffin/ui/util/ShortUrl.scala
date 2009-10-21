@@ -14,7 +14,7 @@ object ShortUrl {
   private val redirectionCodes = List(301, 302)
   private type LongUrlReady = ResourceReady[String,String]
   
-  private val fetcher = new BackgroundResourceFetcher[String, String](processResult) {
+  private val fetcher = new BackgroundResourceFetcher[String, String] {
     override def getResourceFromSource(url: String): String = {
       val conn = (new URL(url)).openConnection.asInstanceOf[HttpURLConnection]
       conn.setRequestMethod("HEAD")
@@ -35,7 +35,7 @@ object ShortUrl {
       if (urlIsShortened(url)) {
         fetcher.getCachedObject(url) match {
           case Some(longUrl) => replaceUrl(textComponent, url, longUrl)
-          case None => fetcher.requestItem(new FetchRequest(url, textComponent))
+          case None => fetcher.requestItem(new FetchRequest(url, textComponent, processResult))
         }
       }
     }

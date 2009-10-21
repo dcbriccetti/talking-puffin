@@ -31,7 +31,6 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
   
   def stop = {
     providers.stop
-    views.foreach(_.stop)
   }
 
 }

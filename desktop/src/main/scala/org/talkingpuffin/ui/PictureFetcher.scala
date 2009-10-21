@@ -5,6 +5,7 @@ import java.awt.Image
 import javax.swing.{ImageIcon}
 import java.net.URL
 import util.{FetchRequest, ResourceReady, BackgroundResourceFetcher}
+import org.talkingpuffin.util.Loggable
 
 /**
  * Fetches pictures in the background, and calls a method in the event
@@ -30,12 +31,18 @@ object PictureFetcher {
  * A picture fetcher, which when instantiated with an optional scale maximum and a “done” callback,
  * can be called with its requestItem method to request pictures.
  */
-class PictureFetcher(scaleTo: Option[Int], processFinishedImage: (PictureFetcher.ImageReady) => Unit) 
-    extends BackgroundResourceFetcher[String, ImageWithScaled](processFinishedImage) 
-    with Cache[String,ImageWithScaled] {
+class PictureFetcher(scaleTo: Option[Int]) extends BackgroundResourceFetcher[String, ImageWithScaled] 
+    with Cache[String,ImageWithScaled] with Loggable {
   
-  def FetchImageRequest(url: String, id: Object) = new FetchRequest[String](url, id)
+  debug("starting")
+  
+  def FetchImageRequest(url: String, id: Object, processFinishedImage: (PictureFetcher.ImageReady) => Unit) = 
+      new FetchRequest[String,ImageWithScaled](url, id, processFinishedImage)
 
+  /**
+   * Given the URL provided, fetches an image, and if the PictureFetcher was created with a scaleTo value,
+   * uses that size to produce a scaled version of the image.
+   */
   protected def getResourceFromSource(url: String): ImageWithScaled = {
     val icon = new ImageIcon(new URL(url))
     ImageWithScaled(icon,
