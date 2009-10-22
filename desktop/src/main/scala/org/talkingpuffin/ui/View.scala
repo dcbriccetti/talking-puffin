@@ -17,7 +17,6 @@ case class View(val model: StatusTableModel, val pane: StatusPane) extends React
           filtered + "/" + total) + ")"
   }
   
-  def stop = model.stop
 }
 
 object View {

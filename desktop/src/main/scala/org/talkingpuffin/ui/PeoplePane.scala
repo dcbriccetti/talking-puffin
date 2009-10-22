@@ -91,8 +91,6 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
   }
   listenTo(rels)
   
-  def stop = tableModel.stop
-  
   private def setLabels {
     followingButton.setText("Following: " + rels.friends.length)
     followersButton.setText("Followers: " + rels.followers.length)

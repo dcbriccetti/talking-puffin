@@ -27,10 +27,7 @@ object TwitterListsDisplayer {
     }
     
     def getLists: List[List[TwitterList]] = {
-      for {
-        twitterLists <- Parallelizer.run(20, screenNames, tsess.getLists)
-        if twitterLists != Nil 
-      } yield twitterLists
+      Parallelizer.run(20, screenNames, tsess.getLists) filter(_ != Nil)
     }
     
     SwingInvoke.execSwingWorker({getLists}, { 
@@ -39,15 +36,13 @@ object TwitterListsDisplayer {
           var numMenuItems = 0
           val menu = new JPopupMenu
           var combinedList = List[TwitterList]()
-          allListsOfLists foreach(lists => {
-            if (lists != Nil) {
-              lists.foreach(twitterList => {
-                menu.add(new MenuItem(Action(if (screenNames.length == 1) 
-                    twitterList.shortName else twitterList.longName) {viewList(twitterList, None)}).peer)
-                numMenuItems += 1
-              })
-              combinedList :::= lists
-            }
+          allListsOfLists filter(_ != Nil) foreach(lists => {
+            lists.foreach(twitterList => {
+              menu.add(new MenuItem(Action(if (screenNames.length == 1) 
+                  twitterList.shortName else twitterList.longName) {viewList(twitterList, None)}).peer)
+              numMenuItems += 1
+            })
+            combinedList :::= lists
           })
           if (numMenuItems > 1) {
             val tiler = new Tiler(combinedList.length)

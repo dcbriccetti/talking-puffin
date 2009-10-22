@@ -59,11 +59,6 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     }
   }
   
-  def stop = {
-    log.debug("stopping")
-    pictureCell.stop
-  }
-  
   def getColumnCount = 5
   def getRowCount = filteredStatuses_.length
   override def getColumnName(column: Int) = (unessentialCols ::: List("Status"))(column)

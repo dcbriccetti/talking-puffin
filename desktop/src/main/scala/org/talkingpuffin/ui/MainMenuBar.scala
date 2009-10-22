@@ -9,12 +9,12 @@ import scala.xml.Node
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.Main
 import org.talkingpuffin.filter.TagUsers
-import org.talkingpuffin.util.Parallelizer
+import org.talkingpuffin.util.{Loggable, Parallelizer}
 
 /**
  * Main menu bar
  */
-class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends MenuBar {
+class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends MenuBar with Loggable {
   val prefs = GlobalPrefs.prefs
   val tsess = dataProviders.twitterSession
 
@@ -48,7 +48,7 @@ class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends Menu
             SwingInvoke.execSwingWorker({
               Parallelizer.run(10, tagUsers.usersForTag(tag), 
                 tsess.addToListWithSlug(tsess.getListSlug(tag)))
-            }, (r: List[Node]) => {})
+            }, (r: List[Node]) => {debug("Tag exported to list")})
           }
         })
       })

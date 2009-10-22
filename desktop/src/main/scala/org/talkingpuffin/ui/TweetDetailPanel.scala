@@ -25,25 +25,21 @@ object Thumbnail {
     BufferedImage.TYPE_INT_ARGB))
 }
 
+object medThumbPicFetcher extends PictureFetcher(Some(Thumbnail.MEDIUM_SIZE))
+
 /**
  * Details of the currently-selected tweet.
  */
 class TweetDetailPanel(session: Session, table: JTable, 
     filtersDialog: FiltersDialog, tagUsers: TagUsers, viewCreator: ViewCreator, userPrefs: Preferences) 
     extends GridBagPanel with Loggable {
-  private val geoCoder = new GeoCoder(processFinishedGeocodes)
   private val animator = new TextChangingAnimator
 
   private var picLabel: Label = new Label {
     icon = Thumbnail.transparentMedium
   }
-  val picFetcher = new PictureFetcher(Some(Thumbnail.MEDIUM_SIZE), (imageReady: PictureFetcher.ImageReady) => {
-    if (imageReady.key.equals(showingUrl)) {
-      setPicLabelIconAndBigPic(imageReady.resource) 
-    }
-  })
 
-  private val bigPic = new BigPictureDisplayer(picFetcher)
+  private val bigPic = new BigPictureDisplayer(medThumbPicFetcher)
   private var userDescription: TextArea = _
   private var largeTweet = new LargeTweet(filtersDialog, viewCreator, table, background)
   private var showingUrl: String = _
@@ -138,12 +134,13 @@ class TweetDetailPanel(session: Session, table: JTable,
         case None => GeoCoder.extractLatLong(rawLocationOfShowingItem) 
       }) match {
         case Some(latLong) =>
-          geoCoder.getCachedObject(latLong) match {
+          GeoCoder.getCachedObject(latLong) match {
             case Some(location) => {
               setText(user, location)
               return
             }
-            case None => geoCoder.requestItem(new FetchRequest[String](latLong, user)) 
+            case None => GeoCoder.requestItem(new FetchRequest[String,String](latLong, user, 
+                processFinishedGeocodes)) 
           }
         case None =>
       }
@@ -173,20 +170,27 @@ class TweetDetailPanel(session: Session, table: JTable,
       animator.run(showingUser.location, resourceReady.resource, (text: String) => setText(showingUser, text))
     }
   
+  private def processFinishedPicture(imageReady: PictureFetcher.ImageReady) = {
+    if (imageReady.key.equals(showingUrl)) {
+      setPicLabelIconAndBigPic(imageReady.resource) 
+    }
+  }
+  
   def prefetch(status: TwitterStatus) {
     val smallUrl = status.user.profileImageURL
     val mediumUrl = PictureFetcher.getFullSizeUrl(smallUrl)
-    List(smallUrl, mediumUrl).foreach(url => picFetcher.requestItem(picFetcher.FetchImageRequest(url, null)))
+    List(smallUrl, mediumUrl).foreach(url => medThumbPicFetcher.requestItem(
+        medThumbPicFetcher.FetchImageRequest(url, null, processFinishedPicture)))
   }
 
   private def showMediumPicture(picUrl: String) {
     val fullSizeUrl = PictureFetcher.getFullSizeUrl(picUrl)
     if (! fullSizeUrl.equals(showingUrl)) {
       showingUrl = fullSizeUrl
-      setPicLabelIconAndBigPic(picFetcher.getCachedObject(fullSizeUrl) match {
+      setPicLabelIconAndBigPic(medThumbPicFetcher.getCachedObject(fullSizeUrl) match {
         case Some(images) => images
         case None => 
-          picFetcher.requestItem(picFetcher.FetchImageRequest(fullSizeUrl, null))
+          medThumbPicFetcher.requestItem(medThumbPicFetcher.FetchImageRequest(fullSizeUrl, null, processFinishedPicture))
           ImageWithScaled(Thumbnail.transparentMedium, None)
       })
     }

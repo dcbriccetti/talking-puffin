@@ -1,6 +1,6 @@
 package org.talkingpuffin.util
 
-import java.util.concurrent.{Callable, Executors}
+import java.util.concurrent.{ExecutorCompletionService, Callable, Executors}
 
 object Parallelizer {
   /**
@@ -8,10 +8,9 @@ object Parallelizer {
    */
   def run[T,A,F](numThreads: Int, args: List[A], f: (A) => T): List[T] = {
     val pool = Executors.newFixedThreadPool(numThreads)
-    val result: List[T] = (for {
-      arg <- args
-      future = pool.submit(new Callable[T] {def call = f(arg)})
-    } yield future).map(_.get)
+    val completionService = new ExecutorCompletionService[T](pool)
+    args.foreach(arg => completionService.submit(new Callable[T] {def call = f(arg)}))
+    val result = args map(_ => completionService.take.get)
     pool.shutdown
     result
   }
