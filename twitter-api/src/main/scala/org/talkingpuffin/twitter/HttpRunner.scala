@@ -12,8 +12,8 @@ trait HttpRunnerMBean {
 }
 
 /**
- * Runs HTTP requests, retrying repeatedly if need, recording when the request is 
- * ultimately successful, making thoso statistics available via Java Management 
+ * Runs HTTP requests, retrying repeatedly if needed, recording when the request is 
+ * ultimately successful, making those statistics available via Java Management 
  * Extensions (JMX).
  */
 class HttpRunner(retryAfterFailureDelays: List[Int]) extends HttpRunnerMBean {
