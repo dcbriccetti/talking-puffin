@@ -7,10 +7,8 @@ import org.apache.log4j.Logger
 trait HttpRunnerMBean {
   /** A request is a single HTTP request, counted only once even if retries are necessary. */
   def getRequests: Long
-  /** A failure is an HTTP request that failed. There can be >= 0 failures for one request. */
-  def getFailures: Long
-  /** Returns a string containing all the retry statistics */
-  def getWhenSucceeded: String
+  /** Counts of if and when the requests eventually succeeded */
+  def getWhenSucceeded: Array[Long]
 }
 
 /**
@@ -18,43 +16,43 @@ trait HttpRunnerMBean {
  * ultimately successful, making thoso statistics available via Java Management 
  * Extensions (JMX).
  */
-class HttpRunner extends HttpRunnerMBean {
+class HttpRunner(retryAfterFailureDelays: List[Int]) extends HttpRunnerMBean {
   private val log = Logger.getLogger("Http")
   private var requests = 0L
+  private var delaysBefore = 0 :: retryAfterFailureDelays 
+  private val whenSucceeded = new Array[Long](delaysBefore.length + 1 /* No more retries */)
+  
   def getRequests = requests
-  private var failures = 0
-  def getFailures = failures
-  val retryDelays = List(0, 250, 2000, 2000, 5000, 10000, 60000)
-  val maxRetries = retryDelays.length
-  val whenSucceeded = new Array[Long](maxRetries + 1)
-  def getWhenSucceeded: String = (List("1st try") ::: retryDelays).zip(whenSucceeded.toList).
-      map(p => p._1.toString + ": " + p._2).mkString(", ")
+  def getWhenSucceeded = whenSucceeded
 
-  ManagementFactory.getPlatformMBeanServer.registerMBean(this, new ObjectName("TalkingPuffin:name=HttpRunner"))
+  ManagementFactory.getPlatformMBeanServer.registerMBean(this, 
+      new ObjectName("TalkingPuffin:name=HttpRunner"))
 
   def run[T](twitterOperation: => T): T = {
-    var lastException: TwitterException = null
     requests += 1
-
-    retryDelays.zipWithIndex.foreach(delayWithIndex => {
-      val delayMs = delayWithIndex._1
-      val repeatCount = delayWithIndex._2
-
+    var lastException: TwitterException = null
+    val lastIndex = whenSucceeded.length - 1
+    
+    0 until lastIndex foreach(i => {
+      val delayMs = delaysBefore(i)
+      if (delayMs > 0) {
+        log.warn("Delaying " + delayMs + " ms")
+        Thread.sleep(delayMs)
+      }
       try {
         val result = twitterOperation
-        whenSucceeded(repeatCount) += 1
+        whenSucceeded(i) += 1
         return result
       } catch {
         case e: TwitterException if e.code < 500 => throw e
         case e: TwitterException => {
-          failures += 1
-          log.warn(e.toString + ", retrying " + 
-              (if (delayMs == 0) "immediately " else "in " + delayMs + " ms"))
+          log.warn(e.toString)
           lastException = e
         }
       }
-      Thread.sleep(delayMs)
     })
+    log.error("Giving up after " + delaysBefore.length + " attempts")
+    whenSucceeded(lastIndex) += 1
     throw lastException
   }
 }

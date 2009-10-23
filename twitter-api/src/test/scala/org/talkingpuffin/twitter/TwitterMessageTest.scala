@@ -1,14 +1,6 @@
 package org.talkingpuffin.twitter
 
-import junit.framework._;
-import Assert._;
-
-object TwitterMessageTest {
-  def suite: Test = {
-      val suite = new TestSuite(classOf[TwitterMessageTest]);
-      suite
-  }
-}
+import org.junit.Test
 
 class TwitterMessageTest {
   var msgs = List[TwitterMessage]()
@@ -177,6 +169,6 @@ class TwitterMessageTest {
   }
 
   // test featured parsing
-  def testSenderDetail = assert(msgs.head.sender != null)
-  def testRecipientDetail = assert(msgs.head.recipient != null)
+  @Test def testSenderDetail = assert(msgs.head.sender != null)
+  @Test def testRecipientDetail = assert(msgs.head.recipient != null)
 }

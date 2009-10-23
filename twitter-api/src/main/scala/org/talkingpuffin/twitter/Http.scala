@@ -127,8 +127,8 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
 }
 
 object Http {
-  val runner = new HttpRunner
-  
+  val retryAfterFailureDelays = List(0, 250, 2000, 5000, 10000, 30000, 60000)
+  val runner = new HttpRunner(retryAfterFailureDelays)
   def run[T](f: => T) = runner.run(f)
 }
 
