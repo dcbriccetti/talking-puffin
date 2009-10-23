@@ -17,15 +17,22 @@ class Users extends Serializable {
 
   def setSession(session: AuthenticatedSession) = this.session = session
 
-  def getArrows(user:TwitterUser): String = {
+  def getUsers: Array[TwitterUser] = {
+    rels.friends   = session.loadAllWithCursor(session.getFriends)
+    rels.followers = session.loadAllWithCursor(session.getFollowers)
+    UsersModel(None, rels, UserSelection(true, true, None)).users.toArray
+  }
+  
+  def getStatus(user: TwitterUser): String = {
+    user.status match {
+      case Some(ts) => ts.text
+      case _ => ""
+    }
+  }
+  
+  def getArrows(user: TwitterUser): String = {
     val friend = rels.friends.contains(user)
     val follower = rels.followers.contains(user)
-    if (friend && follower) "↔" else if (friend) "→" else "←"
-  }
-
-  def getUsers: Array[TwitterUser] = {
-    rels.friends   = session.getFriends  (TwitterArgs.maxResults(200)).list
-    rels.followers = session.getFollowers(TwitterArgs.maxResults(200)).list
-    UsersModel(None, rels, UserSelection(true, true, None)).users.toArray
+    if (friend && follower) "↔" else if (friend) "→" else if (follower) "←" else " "
   }
 }

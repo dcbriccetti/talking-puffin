@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<h1>TalkingPuffin Friends and Followers Summary V0.1</h1>
+<h1>TalkingPuffin Friends and Followers Summary V0.2</h1>
 
 <table><tr>
     <td><img src="TalkingPuffin.png" alt="Picture of an Atlantic Puffin"/></td>
@@ -27,11 +27,11 @@
             userParm.trim().length() == 0 || passwordParm.trim().length() == 0) {
 %>
 
-<p>Enter your Twitter user name and password, and push <b>Log In</b>. After some time,
+<p>Enter your Twitter user name and password, and push <b>Log In</b>. After some time waiting for Twitter,
 you should see a summary of your friends and followers. Your credentials will be used
 only for the interaction with Twitter, and will not be stored. There is no error handling,
-including for invalid credentials. Only the first 1,000 of your friends and followers 
-will be shown.</p>    
+including for invalid credentials. Should work fine for people with a modest number of friends 
+and followers.</p>    
 
 <form id="form" method="post" action="index.jsp">
     <table>
@@ -80,7 +80,7 @@ will be shown.</p>
     <td class="number rightmostNumber"><%= user.followersCount() %></td>
     <td><%= user.location() %></td>
     <td><%= user.description() %></td>
-    <td><%= user.status() %></td>
+    <td><%= u.getStatus(user) %></td>
 </tr>
 <%
     }
