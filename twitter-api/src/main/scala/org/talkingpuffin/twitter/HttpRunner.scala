@@ -53,8 +53,7 @@ class HttpRunner extends HttpRunnerMBean {
           lastException = e
         }
       }
-      if (delayMs > 0) 
-        Thread.sleep(delayMs)
+      Thread.sleep(delayMs)
     })
     throw lastException
   }
