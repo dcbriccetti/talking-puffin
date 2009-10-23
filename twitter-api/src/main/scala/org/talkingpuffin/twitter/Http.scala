@@ -23,14 +23,14 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   /**
   * Fetch an XML document from the given URL
   */
-  def get(url: URL): Node = retry {
+  def get(url: URL): Node = Http.run {
     logAction("GET", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
     getXML(conn)
   }
 
-  def delete(url: URL) = retry {
+  def delete(url: URL) = Http.run {
     logAction("DELETE", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
@@ -42,7 +42,7 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   * @param url the URL to post to
   * @param params a List of String tuples, the first entry being the param, the second being the value
   */
-  def post(url: URL, params: List[(String,String)]): Node = retry {
+  def post(url: URL, params: List[(String,String)]): Node = Http.run {
     logAction("POST", url, params.map(kv => kv._1.trim + "=" + kv._2.trim).mkString(" "))
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
@@ -64,26 +64,6 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
     getXML(conn)
   }
   
-  private def retry[T](f: => T): T = {
-    var lastException: TwitterException = null
-    List(0, 250, 2000, 2000, 5000, 10000, 60000, -1).foreach(delayMs => {
-      try {
-        return f
-      } catch {
-        case e: TwitterException if e.code < 500 => throw e
-        case e: TwitterException => {
-          if (delayMs >= 0)
-            log.warn(e.toString + ", retrying " + 
-                (if (delayMs == 0) "immediately " else "in " + delayMs + " ms"))
-          lastException = e
-        }
-      }
-      if (delayMs > 0) 
-        Thread.sleep(delayMs)
-    })
-    throw lastException
-  }
-
   private def actionAndUrl(action: String, url: URL) = user.getOrElse("") + " " + action + " " + url
   private def logAction(action: String, url: URL) = log.debug(actionAndUrl(action, url))
   private def logAction(action: String, url: URL, params: String) = 
@@ -123,15 +103,14 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   }
   
   private def publishRateLimitInfo(conn: HttpURLConnection) {
-    val hRemaining = conn.getHeaderField("X-RateLimit-Remaining")
-    val hLimit = conn.getHeaderField("X-RateLimit-Limit")
-    val hReset = conn.getHeaderField("X-RateLimit-Reset")
+    val rl = List("X-RateLimit-Remaining", "X-RateLimit-Limit", "X-RateLimit-Reset").
+        map(conn.getHeaderField).filter(_ != null).map(_.toInt)
 
-    if (hRemaining != null && hLimit != null && hReset != null) {
+    if (rl.length == 3) {
       publish(RateLimitStatusEvent(new TwitterRateLimitStatus {
-        remainingHits      = hRemaining.toInt
-        hourlyLimit        = hLimit.toInt
-        resetTimeInSeconds = hReset.toInt
+        remainingHits      = rl(0)
+        hourlyLimit        = rl(1)
+        resetTimeInSeconds = rl(2)
       }))
     }
   }
@@ -145,6 +124,12 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
       }
     }
   }
+}
+
+object Http {
+  val runner = new HttpRunner
+  
+  def run[T](f: => T) = runner.run(f)
 }
 
 case class RateLimitStatusEvent(status: TwitterRateLimitStatus) extends Event

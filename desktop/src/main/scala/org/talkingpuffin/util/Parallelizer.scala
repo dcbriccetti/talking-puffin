@@ -6,7 +6,7 @@ object Parallelizer {
   /**
    * Runs, in the number of threads requested, the function f, giving it each A of args, returning a List[T]
    */
-  def run[T,A,F](numThreads: Int, args: List[A], f: (A) => T): List[T] = {
+  def run[T,A](numThreads: Int, args: List[A], f: (A) => T): List[T] = {
     val pool = Executors.newFixedThreadPool(numThreads)
     val completionService = new ExecutorCompletionService[T](pool)
     args.foreach(arg => completionService.submit(new Callable[T] {def call = f(arg)}))
