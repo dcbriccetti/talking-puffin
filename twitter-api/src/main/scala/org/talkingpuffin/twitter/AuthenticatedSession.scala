@@ -231,7 +231,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   * @param friendId the user id <i>or</i> user name to create a friendship to
   */
   def createFriendship(friendId: String): TwitterUser = {
-    TwitterUser(http.post(url("friendships/create/" + friendId + ".xml"), Nil))
+    TwitterUser(http.post(url("friendships/create/" + friendId + ".xml")))
   }
   
   /**
@@ -250,7 +250,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
   
   def createFavorite(statusId: Long): TwitterStatus = {
-    TwitterStatus(http.post(url("favorites/create/" + statusId + ".xml"), Nil))
+    TwitterStatus(http.post(url("favorites/create/" + statusId + ".xml")))
   }
 
   def destroyFavorite(statusId: Long): TwitterStatus = {
@@ -258,19 +258,19 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
   
   def followNotifications(userId: String): TwitterUser = {
-    TwitterUser(http.post(url("notifications/follow/" + userId + ".xml"), Nil))
+    TwitterUser(http.post(url("notifications/follow/" + userId + ".xml")))
   }
 
   def leaveNotifications(userId: String): TwitterUser = {
-    TwitterUser(http.post(url("notifications/leave/" + userId + ".xml"), Nil))
+    TwitterUser(http.post(url("notifications/leave/" + userId + ".xml")))
   }
 
   def blockUser(userId: String): TwitterUser = {
-    TwitterUser(http.post(url("blocks/create/" + userId + ".xml"), Nil))
+    TwitterUser(http.post(url("blocks/create/" + userId + ".xml")))
   }
 
   def unblockUser(userId: String): TwitterUser = {
-    TwitterUser(http.post(url("blocks/destroy/" + userId + ".xml"), Nil))
+    TwitterUser(http.post(url("blocks/destroy/" + userId + ".xml")))
   }
 
   def reportSpam(userId: String): TwitterUser = {
@@ -286,7 +286,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
 
   def retweet(id:Long) = {
-    TwitterStatus(http.post(url("statuses/retweet/" + id + ".xml?source=talkingpuffin"), Nil))
+    TwitterStatus(http.post(url("statuses/retweet/" + id + ".xml?source=talkingpuffin")))
   }
 
   override protected def getHttp = http

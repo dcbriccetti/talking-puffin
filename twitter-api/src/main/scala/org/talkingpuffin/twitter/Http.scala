@@ -64,6 +64,8 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
     getXML(conn)
   }
   
+  def post(url: URL): Node = post(url, Nil)
+  
   private def actionAndUrl(action: String, url: URL) = user.getOrElse("") + " " + action + " " + url
   private def logAction(action: String, url: URL) = log.debug(actionAndUrl(action, url))
   private def logAction(action: String, url: URL, params: String) = 
