@@ -58,7 +58,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
         }
       }))
     add(userPic, new Constraints { grid = (0,0); gridheight=2})
-    add(session.status, new Constraints {
+    add(session.statusMsgLabel, new Constraints {
       grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
       })
     peer.add(mainToolBar, new Constraints {grid = (1,1); anchor=GridBagPanel.Anchor.West}.peer)
