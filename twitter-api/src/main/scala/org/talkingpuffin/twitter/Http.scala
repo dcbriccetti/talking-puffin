@@ -52,7 +52,7 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
 
     if(content != null){
       conn.setUseCaches(false)
-      conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+      conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
       conn.setDoOutput(true)
       val printout = new DataOutputStream(conn.getOutputStream())
       if(content != null){
@@ -73,7 +73,7 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
 
   private def setAuth(conn: HttpURLConnection) {
     if (encoding.isDefined) {
-      conn.setRequestProperty ("Authorization", "Basic " + encoding.get);
+      conn.setRequestProperty ("Authorization", "Basic " + encoding.get)
     }
   }
 
@@ -118,13 +118,7 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   }
 
   private def buildParams(params: List[(String,String)]): String = {
-    params match {
-      case Nil => null
-      case (param,value) :: rest => {
-        val end = buildParams(rest)
-        param + "=" + URLEncoder.encode(value, "UTF-8") + (if (end == null) "" else "&" + end)
-      }
-    }
+    params.map(pv => pv._1 + "=" + URLEncoder.encode(pv._2, "UTF-8")).mkString("&")
   }
 }
 
