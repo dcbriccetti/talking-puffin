@@ -22,10 +22,10 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
   def loadAll[T](f:(Int) => List[T]):List[T] = loadAll(1,f,List[T]())
 
   private def loadAll[T](page: Int, f:(Int) => List[T], listIn: List[T]):List[T] = {
-      f(page) match {
-          case Nil => listIn
-          case l => loadAll(page+1,f,listIn ::: l)
-      }
+    f(page) match {
+        case Nil => listIn
+        case l => loadAll(page+1,f,listIn ::: l)
+    }
   }
   
   def loadAllWithCursor[T](f: (Long) => XmlResult[T]): List[T] = loadAllWithCursor(-1,f,List[T]())

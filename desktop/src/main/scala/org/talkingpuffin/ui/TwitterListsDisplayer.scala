@@ -18,7 +18,7 @@ object TwitterListsDisplayer {
     val tsess = session.twitterSession
     
     def viewList(list: TwitterList, tiler: Option[Tiler]) = {
-      SwingInvoke.execSwingWorker({tsess.getListMembers(list)}, {
+      SwingInvoke.execSwingWorker({tsess.loadAllWithCursor(tsess.getListMembers(list))}, {
         members: List[TwitterUser] => {
           session.windows.peoplePaneCreator.createPeoplePane(list.longName, list.shortName,
             None, Some(members), None, true, tiler match {case Some(t) => Some(t.next) case _ => None})

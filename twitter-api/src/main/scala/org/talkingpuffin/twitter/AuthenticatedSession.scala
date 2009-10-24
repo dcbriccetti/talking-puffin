@@ -165,21 +165,17 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   
   def getListNamed(listName: String): Option[TwitterList] = getLists(user) find(_.name == listName)
   
-  def getListMembers(list: TwitterList): List[TwitterUser] = {
-    (http.get(url(list.owner.screenName, list.slug, "members.xml")) \ "users" \ "user").map(TwitterUser.apply).toList
+  def getListMembers(list: TwitterList)(cursor: Long): XmlResult[TwitterUser] = {
+    parse("/" + list.owner.screenName + "/" + list.slug + "/members.xml?cursor=" + cursor, 
+      TwitterUser.apply, "users", "user")
   }
   
-  def getListSlug(listName: String) = (getListNamed(listName) match {
-    case Some(list) => list
-    case None => createList(listName)
-  }).slug
-
   /**
    * Gets (or creates if it doesn’t exit) a list and its members.
    */
   def getListAndMembers(listName: String): Tuple2[TwitterList, List[TwitterUser]] = {
     getListNamed(listName) match { 
-      case Some(list) => (list, getListMembers(list))
+      case Some(list) => (list, loadAllWithCursor(getListMembers(list)))
       case None => (createList(listName), List[TwitterUser]())
     }
   }
