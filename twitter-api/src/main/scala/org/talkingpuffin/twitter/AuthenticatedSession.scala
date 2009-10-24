@@ -9,7 +9,7 @@ import scala.xml.Node
 */
 class AuthenticatedSession(val user: String, val password: String, val apiURL: String) extends UnauthenticatedSession(apiURL){
 
-  private val http = new Http(Some(user), Some(password))
+  private val http = new Http(Some(user), Some(password)) {suppressLogPrefix = apiURL}
 
   def this(user: String,password: String) = this(user,password,API.defaultURL)
 
@@ -169,19 +169,28 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     (http.get(url(list.owner.screenName, list.slug, "members.xml")) \ "users" \ "user").map(TwitterUser.apply).toList
   }
   
-  def addToList(listName: String, memberIds: List[Long]): Unit = {
-    val slug = getListSlug(listName)
-    memberIds.foreach(id => addToListWithSlug(slug)(id))
-  }
-  
   def getListSlug(listName: String) = (getListNamed(listName) match {
     case Some(list) => list
     case None => createList(listName)
-  }).slug 
+  }).slug
+
+  /**
+   * Gets (or creates if it doesn’t exit) a list and its members.
+   */
+  def getListAndMembers(listName: String): Tuple2[TwitterList, List[TwitterUser]] = {
+    getListNamed(listName) match { 
+      case Some(list) => (list, getListMembers(list))
+      case None => (createList(listName), List[TwitterUser]())
+    }
+  }
+
+  def addToList(list: TwitterList)(memberId: Long): Node = http.post(listMembersUrl(list, memberId))
+
+  def deleteFromList(list: TwitterList)(memberId: Long): Node = http.delete(listMembersUrl(list, memberId))
   
-  def addToListWithSlug(slug: String)(memberId: Long) = 
-      http.post(url(user, slug, "members.xml"), List(("id", memberId.toString)))
-  
+  private def listMembersUrl(list: TwitterList, memberId: Long) = 
+    url(user, list.slug, "members.xml?id=" + memberId)
+
   def getSentMessages(args: TwitterArgs): List[TwitterMessage] = {
     parse("/direct_messages/sent.xml" + args, TwitterMessage.apply, "direct_message").list
   }
@@ -222,11 +231,11 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   def destroyStatus(statusId: Long): TwitterStatus = {
     TwitterStatus(http.delete(url("statuses/destroy/" + statusId + ".xml")))
   }
-  
+
   /**
-  * @param recipient the user id <i>or</i> user name to send the message to
-  * @param text the body of the message
-  */
+   *  @param recipient the user id <i>or</i> user name to send the message to 
+   * @param text the body of the message
+   */
   def newDirectMessage(recipient: String, text: String): TwitterMessage = {
     TwitterMessage(http.post(url("direct_messages/new.xml"), List(("user", recipient), ("text", text))))
   }

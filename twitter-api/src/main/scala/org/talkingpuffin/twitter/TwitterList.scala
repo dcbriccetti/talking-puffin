@@ -8,6 +8,8 @@ class TwitterList(val xml: Node) {
   val longName = shortName + " from " + (xml \ "user" \ "name").text
   val owner = TwitterUser((xml \ "user")(0))
   val slug = (xml \ "slug").text
+  val subscriberCount = (xml \ "subscriber_count").text.toLong
+  val memberCount = (xml \ "member_count").text.toLong
 }
 
 object TwitterList {

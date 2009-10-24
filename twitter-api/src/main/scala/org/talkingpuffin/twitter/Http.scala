@@ -20,6 +20,8 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   else 
     None
   
+  var suppressLogPrefix = ""
+  
   /**
   * Fetch an XML document from the given URL
   */
@@ -30,25 +32,26 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
     getXML(conn)
   }
 
-  def delete(url: URL) = Http.run {
+  def delete(url: URL): Node = Http.run {
     logAction("DELETE", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
     conn.setRequestMethod("DELETE")
     getXML(conn)
   }
+
   /*
   * post to the specified URL with the given params, return an XML node built from the response
   * @param url the URL to post to
   * @param params a List of String tuples, the first entry being the param, the second being the value
   */
   def post(url: URL, params: List[(String,String)]): Node = Http.run {
-    logAction("POST", url, params.map(kv => kv._1.trim + "=" + kv._2.trim).mkString(" "))
+    val content = buildParams(params)
+    logAction("POST", url, content)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
     setAuth(conn)
     conn.setDoInput(true)
     conn.setRequestMethod("POST")
-    val content = buildParams(params)
 
     if(content != null){
       conn.setUseCaches(false)
@@ -66,7 +69,9 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   
   def post(url: URL): Node = post(url, Nil)
   
-  private def actionAndUrl(action: String, url: URL) = user.getOrElse("") + " " + action + " " + url
+  private def elide(url: String) = 
+    if (url startsWith suppressLogPrefix) url substring(suppressLogPrefix.length) else url
+  private def actionAndUrl(action: String, url: URL) = user.getOrElse("") + " " + action + " " + elide(url.toString)
   private def logAction(action: String, url: URL) = log.debug(actionAndUrl(action, url))
   private def logAction(action: String, url: URL, params: String) = 
       log.debug(actionAndUrl(action, url) + " " + params)

@@ -40,7 +40,7 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
   }
   
   /** utility class to connect to a URL and fetch XML. */
-  private val http = new Http(None, None)
+  private val http = new Http(None, None){suppressLogPrefix = apiURL}
   
   def httpPublisher = http
   
