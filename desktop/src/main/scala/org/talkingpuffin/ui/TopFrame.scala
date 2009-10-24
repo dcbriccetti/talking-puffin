@@ -87,17 +87,23 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   type Users = List[TwitterUser]
   
-  def updatePeople = rels.getUsers(twitterSession, mainToolBar)
+  def updatePeople = rels.getUsers(twitterSession, twitterSession.user, mainToolBar)
   
   private def createPeoplePane: Unit = {
     updatePeople
-    peoplePane = createPeoplePane("People You Follow and People Who Follow You", "People", None, 
+    peoplePane = createPeoplePane("People You Follow and People Who Follow You", "People", None, None, 
         Some(updatePeople _), false, None)
   }
   
-  def createPeoplePane(longTitle: String, shortTitle: String, users: Option[List[TwitterUser]], 
+  def createPeoplePane(longTitle: String, shortTitle: String, otherRels: Option[Relationships], 
+        users: Option[List[TwitterUser]], 
         updatePeople: Option[() => Unit], selectPane: Boolean, location: Option[Point]): PeoplePane = {
-    val model = if (users.isDefined) new UsersTableModel(users, tagUsers, rels) else streams.usersTableModel
+    def getRels = if (otherRels.isDefined) otherRels.get else rels
+    val model = 
+      if (users.isDefined || otherRels.isDefined) 
+        new UsersTableModel(users, tagUsers, getRels) 
+      else 
+        streams.usersTableModel
     val customRels = if (users.isDefined) {
       new Relationships {
         friends = rels.friends intersect users.get
@@ -105,7 +111,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
         followers = rels.followers intersect users.get
         followerIds = followers map(_.id)
       }
-    } else rels
+    } else getRels
     val peoplePane = new PeoplePane(longTitle, shortTitle, session, model, customRels, updatePeople)
     val peoplePage = new Page(shortTitle, peoplePane) {tip = longTitle}
     tabbedPane.pages += peoplePage

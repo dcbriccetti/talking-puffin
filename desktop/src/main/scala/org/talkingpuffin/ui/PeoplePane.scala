@@ -1,26 +1,29 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.event.EditDone
-import java.awt.event.{ActionListener, ActionEvent, KeyEvent}
 import java.awt.Dimension
 import javax.swing.KeyStroke.{getKeyStroke => ks}
 import javax.swing.{JButton, JTable, JToolBar, JToggleButton, JLabel}
 import scala.swing.GridBagPanel._
 import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
+import java.awt.event.{KeyEvent, ActionListener, ActionEvent}
 import org.talkingpuffin.util.{Loggable, PopupListener}
-import org.talkingpuffin.twitter.{TwitterUser}
 import org.talkingpuffin.Session
-import util.{Dockable, TableUtil, DesktopUtil}
+import util.{DesktopUtil, TableUtil, Dockable}
+import org.talkingpuffin.twitter.TwitterUser
 
 object UserColumns {
   val ARROWS = 0
   val PICTURE = 1
   val SCREEN_NAME = 2
   val NAME = 3
-  val TAGS = 4
-  val LOCATION = 5
-  val DESCRIPTION = 6
-  val STATUS = 7
+  val FRIENDS = 4
+  val FOLLOWERS = 5
+  val TAGS = 6
+  val LOCATION = 7
+  val DESCRIPTION = 8
+  val STATUS = 9
+  val Count = 10
 }
 
 /**
@@ -108,6 +111,8 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     mh.add(new NextTAction(comp))
     mh.add(new PrevTAction(comp))
     mh add(new TagAction(table, tableModel), ks(KeyEvent.VK_T,0))
+    mh add(Action("Show friends and followers") 
+        {userActions.showFriends(getSelectedScreenNames)}, UserActions.ShowFriendsAccel)
     mh add(Action("View lists…") {userActions.viewLists(getSelectedScreenNames, table)}, UserActions.ViewListAccel)
     mh.add(Action("Reply") { reply }, ks(KeyEvent.VK_R,0))
     mh.add(Action("Follow"  ) { userActions.follow(getSelectedScreenNames  ) }, UserActions.FollowAccel)

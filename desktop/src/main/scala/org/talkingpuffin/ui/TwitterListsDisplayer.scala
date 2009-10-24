@@ -21,7 +21,7 @@ object TwitterListsDisplayer {
       SwingInvoke.execSwingWorker({tsess.getListMembers(list)}, {
         members: List[TwitterUser] => {
           session.windows.peoplePaneCreator.createPeoplePane(list.longName, list.shortName,
-            Some(members), None, true, tiler match {case Some(t) => Some(t.next) case _ => None})
+            None, Some(members), None, true, tiler match {case Some(t) => Some(t.next) case _ => None})
         }
       })
     }

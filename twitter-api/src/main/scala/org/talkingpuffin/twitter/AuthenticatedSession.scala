@@ -1,6 +1,6 @@
 package org.talkingpuffin.twitter
 
-import scala.xml.{Node}
+import scala.xml.Node
 
 /**
 * Provides access to Twitter API methods that require authentication.
@@ -112,11 +112,19 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
 
   def getFriends(): XmlResult[TwitterUser] = getFriends(TwitterArgs())
   def getFriends(cursor: Long): XmlResult[TwitterUser] = getFriends(TwitterArgs.cursor(cursor))
+  def getFriendsFor(screenName: String)(cursor: Long): XmlResult[TwitterUser] = 
+      getFriends(csrSnArgs(screenName, cursor))
   def getFriends(args: TwitterArgs): XmlResult[TwitterUser] =  
       parse("/statuses/friends.xml" + args, TwitterUser.apply, "users", "user")
   
+  /** Builds TwitterArgs from screenName and cursor */
+  private def csrSnArgs(screenName: String, cursor: Long) = 
+      (if (screenName != user) TwitterArgs.screenName(screenName) else TwitterArgs()).cursor(cursor)
+  
   def getFollowers(): XmlResult[TwitterUser] = getFollowers(TwitterArgs())
   def getFollowers(cursor: Long): XmlResult[TwitterUser] = getFollowers(TwitterArgs.cursor(cursor))
+  def getFollowersFor(screenName: String)(cursor: Long): XmlResult[TwitterUser] = 
+      getFollowers(csrSnArgs(screenName, cursor))
   def getFollowers(args: TwitterArgs): XmlResult[TwitterUser] = 
     parse("/statuses/followers.xml" + args, TwitterUser.apply, "users", "user")
   
