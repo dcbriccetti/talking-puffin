@@ -34,8 +34,6 @@ object PictureFetcher {
 class PictureFetcher(scaleTo: Option[Int]) extends BackgroundResourceFetcher[String, ImageWithScaled] 
     with Cache[String,ImageWithScaled] with Loggable {
   
-  debug("starting")
-  
   def FetchImageRequest(url: String, id: Object, processFinishedImage: (PictureFetcher.ImageReady) => Unit) = 
       new FetchRequest[String,ImageWithScaled](url, id, processFinishedImage)
 

@@ -22,7 +22,6 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
   
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
-  log.info("Created")
 
   val unessentialCols = List("When", "Image", "From", "To") // Can be quickly hidden
   
