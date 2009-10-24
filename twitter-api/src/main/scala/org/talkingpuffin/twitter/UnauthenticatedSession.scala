@@ -45,31 +45,27 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
   def httpPublisher = http
   
   def getPublicTimeline(): List[TwitterStatus] = {
-    new Parser[TwitterStatus](new URL(apiURL + "/statuses/public_timeline.xml"),http,
-        TwitterStatus.apply).parseXMLList("status").list
+    parse("/statuses/public_timeline.xml", TwitterStatus.apply, "status").list
   }
 
   def getPublicTimeline(page: Int): List[TwitterStatus] = {
-    new Parser[TwitterStatus](new URL(apiURL + "/statuses/public_timeline.xml?page=" + page),http,
-        TwitterStatus.apply).parseXMLList("status").list
+    parse("/statuses/public_timeline.xml?page=" + page, TwitterStatus.apply, "status").list
   }
 
   def getStatus(id: Long): TwitterStatus = {
-    new Parser[TwitterStatus](new URL(apiURL + "/statuses/show/" + id.toString() + ".xml"),http,
+    new Parser[TwitterStatus](url("statuses/show/" + id.toString() + ".xml"), http,
         TwitterStatus.apply).parseXMLElement()
   }
   
   def getFeatured(): List[TwitterUser] = {
-    new Parser[TwitterUser](new URL(apiURL + "/statuses/featured.xml"),http,
-        TwitterUser.apply).parseXMLList("user").list
+    parse("/statuses/featured.xml", TwitterUser.apply, "user").list
   }
 
   /**
   * @param id the user id <i>or</i> user name to get favorites for
   */
   def getFavorites(id: String): List[TwitterStatus] = {
-    new Parser[TwitterStatus](new URL(apiURL + "/favorites/" + urlEncode(id) + ".xml"),http,
-        TwitterStatus.apply).parseXMLList("status").list
+    parse("/favorites/" + urlEncode(id) + ".xml", TwitterStatus.apply, "status").list
   }
   
   /**
@@ -77,8 +73,7 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
   * @param page the results page to fetch.
   */
   def getFavorites(id: String, page: Int): List[TwitterStatus] = {
-    new Parser[TwitterStatus](new URL(apiURL + "/favorites/" + urlEncode(id) + ".xml?page=" + 
-        page.toString()),http,TwitterStatus.apply).parseXMLList("status").list
+    parse("/favorites/" + urlEncode(id) + ".xml?page=" + page, TwitterStatus.apply, "status").list
   }
 
   protected def urlEncode(value: String) = URLEncoder.encode(value, "UTF-8")
@@ -88,5 +83,7 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
   }
   
   protected def getHttp = http
+
+  protected def url(parts: String*) = new URL((apiURL :: parts.toList).mkString("/"))
 }
 
