@@ -10,25 +10,25 @@ import org.apache.log4j._
 */
 class TwitterUser() extends Validated{
   /** the screen name of this user */
-  var screenName: String = ""
+  var screenName = ""
   /** the twitter user id of this user */
-  var id: Int = 0
+  var id = 0
   /** the natural name of this user */
-  var name: String = ""
+  var name = ""
   /** the location of this user (if specified) */
-  var location: String = ""
+  var location = ""
   /** the user's description (if specified) */
-  var description: String = ""
+  var description = ""
   /** the user's profile image URL (if specified) */
-  var profileImageURL: String = ""
+  var profileImageURL = ""
   /** the user's personal site URL (if specified) */
-  var url: String = ""
+  var url = ""
   /** a flag indicating whether or not updates from this user are protected */
-  var isProtected: Boolean = false
+  var isProtected = false
   /** the number of people who follow this user */
-  var followersCount: Int = 0
+  var followersCount = 0
   /** the number of people this user follows */
-  var friendsCount: Int = 0
+  var friendsCount = 0
   /** this user's last status, if available */
   var status: Option[TwitterStatus] = None
   

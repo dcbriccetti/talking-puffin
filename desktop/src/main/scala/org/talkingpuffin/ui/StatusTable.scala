@@ -242,6 +242,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     mh add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, 0))
     mh add(new OpenTwitterUserListsAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, SHIFT))
     
+    mh add(Action("Show friends and followers") 
+        {userActions.showFriends(getSelectedScreenNames)}, UserActions.ShowFriendsAccel)
     mh add(Action("View lists…") {userActions.viewLists(getSelectedScreenNames, this)}, UserActions.ViewListAccel)
     
     mh.menu.add(new JMenu("Mute") {

@@ -2,12 +2,11 @@ package org.talkingpuffin.ui
 
 import org.talkingpuffin.mac.QuitHandler
 import java.awt.Frame
-import org.talkingpuffin.util.Loggable
 
 /**
  * Keeps track of top-level frames.
  */
-object TopFrames extends Loggable {
+object TopFrames {
   private var frames = List[TopFrame]()
 
   QuitHandler register TopFrames.closeAll
@@ -28,20 +27,15 @@ object TopFrames extends Loggable {
   }
   def addFrame(f: TopFrame){
     frames = f :: frames
-    debug("Frame added. Number of frames is " + frames.size + ".")
   }
 
   def removeFrame(f: TopFrame){
     frames -= f
-    debug ("Frame removed. Number of frames is " + frames.size + ".")
     exitIfNoFrames
   }
 
   def exitIfNoFrames =
     if(frames == Nil){
-      debug("No more frames. Exiting.")
-      // it's kinda ugly to put the exit logic here, but not sure where
-      // else to put it.'
       System.exit(0)
     }
   

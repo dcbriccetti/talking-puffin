@@ -19,13 +19,13 @@ class Relationships extends Publisher with ErrorHandler {
    * Uses the provided AuthenticatedSession to get all friends and followers (doing the
    * fetches in parallel to be quicker), and publishes the results in the event-dispatching thread when done.
    */
-  def getUsers(twitterSession: AuthenticatedSession, longOpListener: LongOpListener) {
+  def getUsers(twitterSession: AuthenticatedSession, screenName: String, longOpListener: LongOpListener) {
     longOpListener.startOperation
     val pool = Executors.newFixedThreadPool(2)
     val friendsFuture = pool.submit(new Callable[List[TwitterUser]] {
-      def call = twitterSession.loadAllWithCursor(twitterSession.getFriends) })
+      def call = twitterSession.loadAllWithCursor(twitterSession.getFriendsFor(screenName)) })
     val followersFuture = pool.submit(new Callable[List[TwitterUser]] {
-      def call = twitterSession.loadAllWithCursor(twitterSession.getFollowers) })
+      def call = twitterSession.loadAllWithCursor(twitterSession.getFollowersFor(screenName)) })
 
     new SwingWorker[Tuple2[List[TwitterUser],List[TwitterUser]], Object] {
       def doInBackground = (friendsFuture.get, followersFuture.get)

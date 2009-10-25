@@ -93,7 +93,7 @@ class TweetDetailPanel(session: Session, table: JTable,
   val statusTableModel = table.getModel.asInstanceOf[StatusTableModel]
 
   def showStatusDetails(status: TwitterStatus) {
-    session.status.text = " "
+    session.statusMsg = " "
     setText(status)
     largeTweetScrollPane.setVisible(true)
     largeTweet.setText(HtmlFormatter.createTweetHtml(status.text,
@@ -107,7 +107,7 @@ class TweetDetailPanel(session: Session, table: JTable,
   }
   
   def clearStatusDetails {
-    session.status.text = " "
+    session.statusMsg = " "
     animator.stop
     showingUrl = null
     picLabel.icon = Thumbnail.transparentMedium

@@ -39,7 +39,6 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
   }
   
   def stop: Unit = {
-    log.debug("stopping")
     if (timer != null) 
       timer.stop
   }

@@ -9,7 +9,7 @@ import scala.xml.Node
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.Main
 import org.talkingpuffin.filter.TagUsers
-import org.talkingpuffin.util.{Loggable, Parallelizer}
+import org.talkingpuffin.util.{TwitterListUtils, Loggable}
 
 /**
  * Main menu bar
@@ -45,10 +45,8 @@ class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends Menu
       tagUsers.getTags.foreach(tag => {
         contents += new MenuItem(new Action(tag) {
           def apply = {
-            SwingInvoke.execSwingWorker({
-              Parallelizer.run(10, tagUsers.usersForTag(tag), 
-                tsess.addToListWithSlug(tsess.getListSlug(tag)))
-            }, (r: List[Node]) => {debug("Tag exported to list")})
+            SwingInvoke.execSwingWorker({TwitterListUtils.export(tsess, tag, tagUsers.usersForTag(tag))
+            }, (_: Unit) => {debug("Tag exported to list")})
           }
         })
       })

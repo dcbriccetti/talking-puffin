@@ -4,7 +4,6 @@ import com.google.common.collect.MapMaker
 import java.util.{Collections, HashSet}
 import org.talkingpuffin.ui.SwingInvoke
 import org.talkingpuffin.util.Loggable
-import org.talkingpuffin.cache.Cache
 import management.ManagementFactory
 import javax.management.ObjectName
 
@@ -17,7 +16,7 @@ trait BackgroundResourceFetcherMBean {
 /**
  * Fetches resources in the background, and calls a function in the Swing event thread when ready.
  */
-abstract class BackgroundResourceFetcher[K,V] extends Cache[K,V] with BackgroundResourceFetcherMBean with Loggable {
+abstract class BackgroundResourceFetcher[K,V] extends BackgroundResourceFetcherMBean with Loggable {
   val cache: java.util.Map[K,V] = new MapMaker().softValues().makeMap()
   val requestQueue = new LinkedBlockingQueue[FetchRequest[K,V]]
   val inProgress = Collections.synchronizedSet(new HashSet[K])
@@ -46,7 +45,7 @@ abstract class BackgroundResourceFetcher[K,V] extends Cache[K,V] with Background
                 var resource = cache.get(key)
                 if (resource == null) {
                   resource = getResourceFromSource(key)
-                  store(cache, key, resource)
+                  cache.put(key, resource)
                 }
 
                 SwingInvoke.later({fetchRequest.processResource(

@@ -1,14 +1,7 @@
 package org.talkingpuffin.twitter
 
-import junit.framework._;
-import Assert._;
-
-object TwitterStatusTest {
-  def suite: Test = {
-      val suite = new TestSuite(classOf[TwitterStatusTest]);
-      suite
-  }
-}
+import org.junit.Test
+import org.junit.Assert._
 
 class TwitterStatusTest {
   var statuses = List[TwitterStatus]()
@@ -117,30 +110,30 @@ class TwitterStatusTest {
   status = statuses.head
 
   // test status methods
-  def testLength() = assert(statuses.length == 2)
-  def testId() = assert(812465949 == status.id)
-  def testText() = assert("@niels hi" == status.text)
-  def testSource() = assert("im" == status.source)
-  def testTruncated() = assert(false == status.truncated)
-  def testReplyToStatusId() = assert(812463839 == status.inReplyToStatusId.get)
-  def testReplyToUserId() = assert(611763 == status.inReplyToUserId.get)
-  def testFavorited() = assert(true == status.favorited)
-  def testUserExists() = assert(status.user != null)
-  def testUserId() = assert(9160152 == status.user.id)
-  def testUserName() = assert("Mark McBride" == status.user.name)
-  def testUserScreenName() = assert("mcwong" == status.user.screenName)
-  def testLocation() = assert("Santa Clara, CA" == status.user.location)
-  def testDescription() = assert("Developer, Student, Manager" == status.user.description)
-  def testProfileImageURL() = assert("http://somewhere.com" == status.user.profileImageURL)
-  def testUrl() = assert("http://themcwongs.com" == status.user.url)
-  def testRetweet() = assert(statuses(1).retweeted != null)
-  def testRetweetTime() = assert(statuses(1).retweeted.retweetedAt != null)
-  def testRetweetUser() = assert(statuses(1).retweeted.name == "Marcel Molina")
-  def testGeo() = {
+  @Test def testLength() = assert(statuses.length == 2)
+  @Test def testId() = assert(812465949 == status.id)
+  @Test def testText() = assert("@niels hi" == status.text)
+  @Test def testSource() = assert("im" == status.source)
+  @Test def testTruncated() = assert(false == status.truncated)
+  @Test def testReplyToStatusId() = assert(812463839 == status.inReplyToStatusId.get)
+  @Test def testReplyToUserId() = assert(611763 == status.inReplyToUserId.get)
+  @Test def testFavorited() = assert(true == status.favorited)
+  @Test def testUserExists() = assert(status.user != null)
+  @Test def testUserId() = assert(9160152 == status.user.id)
+  @Test def testUserName() = assert("Mark McBride" == status.user.name)
+  @Test def testUserScreenName() = assert("mcwong" == status.user.screenName)
+  @Test def testLocation() = assert("Santa Clara, CA" == status.user.location)
+  @Test def testDescription() = assert("Developer, Student, Manager" == status.user.description)
+  @Test def testProfileImageURL() = assert("http://somewhere.com" == status.user.profileImageURL)
+  @Test def testUrl() = assert("http://themcwongs.com" == status.user.url)
+  @Test def testRetweet() = assert(statuses(1).retweeted != null)
+  @Test def testRetweetTime() = assert(statuses(1).retweeted.retweetedAt != null)
+  @Test def testRetweetUser() = assert(statuses(1).retweeted.name == "Marcel Molina")
+  @Test def testGeo() = {
     statuses(1).location match {
       case Some((lat,long)) => {
-        assertEquals(lat, 37.780300D)
-        assertEquals(long, -122.396900)
+        assertEquals(lat, 37.780300D, .000001)
+        assertEquals(long, -122.396900, .000001)
       }
       case _ => fail
     }

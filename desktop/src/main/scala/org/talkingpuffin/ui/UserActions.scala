@@ -5,6 +5,7 @@ import javax.swing._
 import org.talkingpuffin.Session
 import java.awt.{Toolkit}
 import org.talkingpuffin.util.Loggable
+import util.Tiler
 
 /**
  * Handles user actions like follow
@@ -31,6 +32,17 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
   def viewLists(selectedScreenNames: List[String], table: JTable) = 
       TwitterListsDisplayer.viewLists(session, selectedScreenNames, table)
   
+  def showFriends(selectedScreenNames: List[String]) = {
+    val tiler = new Tiler(selectedScreenNames.length)
+    selectedScreenNames.foreach(screenName => {
+      val rels = new Relationships
+      rels.getUsers(session.twitterSession, screenName, session.progress)
+      session.windows.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName, 
+        screenName,
+        Some(rels), None, None, false, Some(tiler.next))
+    })
+  }
+  
   private def process(names:List[String], action:((String) => Unit), actionName: String) = 
     names foreach {name => 
       try {
@@ -55,4 +67,5 @@ object UserActions {
   val UnblockAccel  = KeyStroke.getKeyStroke(KeyEvent.VK_B, shortcutKeyMask | Shift)  
   val ReportSpamAccel = KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcutKeyMask | Shift)  
   val ViewListAccel = KeyStroke.getKeyStroke(KeyEvent.VK_L, Shift)  
+  val ShowFriendsAccel = KeyStroke.getKeyStroke(KeyEvent.VK_H, Shift)  
 }
