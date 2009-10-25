@@ -19,8 +19,9 @@ import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.ui.table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.twitter.{TwitterStatus}
-import org.talkingpuffin.ui.util.{TableUtil, DesktopUtil}
 import org.talkingpuffin.Session
+import java.net.{HttpURLConnection, URL}
+import util.{ShortUrl, TableUtil, DesktopUtil}
 
 /**
  * Table of statuses.
@@ -125,6 +126,21 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     val status = getSelectedStatuses(0) 
     val name = "@" + status.user.screenName
     createSendMsgDialog(status, Some(name), Some(status.text)).visible = true
+  }
+  
+  private def browseLink(uri: String) = {
+    if (uri.contains("ff.im")) {
+      new Thread(new Runnable {
+        def run = {
+          debug("ff.im")
+          def processResult(short: String, long: String) {
+            DesktopUtil.browse(long)
+          }
+          ShortUrl.getExpandedUrls(uri, processResult)
+        }
+      }).start
+    } else 
+      DesktopUtil.browse(uri)
   }
 
   private def retweetNewWay = getSelectedStatuses.foreach(status => session.twitterSession.retweet(status.id))
@@ -238,7 +254,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     
     mh add(Action("Edit user properties…") {editUser}, ks(VK_P, SHORTCUT))
 
-    mh add(new OpenPageLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_L, 0))
+    mh add(new OpenPageLinksAction(getSelectedStatus, this, browseLink), ks(VK_L, 0))
     mh add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, 0))
     mh add(new OpenTwitterUserListsAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, SHIFT))
     
