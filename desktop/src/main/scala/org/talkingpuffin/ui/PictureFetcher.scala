@@ -1,6 +1,5 @@
 package org.talkingpuffin.ui
 
-import org.talkingpuffin.cache.Cache
 import java.awt.Image
 import javax.swing.{ImageIcon}
 import java.net.URL
@@ -32,7 +31,7 @@ object PictureFetcher {
  * can be called with its requestItem method to request pictures.
  */
 class PictureFetcher(scaleTo: Option[Int]) extends BackgroundResourceFetcher[String, ImageWithScaled] 
-    with Cache[String,ImageWithScaled] with Loggable {
+    with Loggable {
   
   def FetchImageRequest(url: String, id: Object, processFinishedImage: (PictureFetcher.ImageReady) => Unit) = 
       new FetchRequest[String,ImageWithScaled](url, id, processFinishedImage)
