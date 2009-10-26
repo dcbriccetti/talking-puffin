@@ -100,8 +100,18 @@ class TweetDetailPanel(session: Session, table: JTable,
         status.inReplyToStatusId, status.source))
     largeTweet setCaretPosition 0
 
-    if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) 
-      ShortUrl.substituteExpandedUrls(status.text, largeTweet)
+    if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
+      def replaceUrl(shortUrl: String, fullUrl: String) = {
+        val beforeText = largeTweet.getText
+        val afterText = beforeText.replace(shortUrl, fullUrl)
+        if (beforeText != afterText) {
+          largeTweet setText afterText
+          largeTweet setCaretPosition 0
+        }
+      }
+      
+      ShortUrl.getExpandedUrls(status.text, replaceUrl)
+    } 
     
     showMediumPicture(status.user.profileImageURL)
   }
