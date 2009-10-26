@@ -13,7 +13,7 @@ import org.talkingpuffin.util.Loggable
  * This log excerpt illustrates what happens:
  *
  * <pre> 
- * [Thread-5] DEBUG LinkUnIndirector  - http://ff.im/auf8d starts with ff.im
+ * [AWT-EventQueue-0] DEBUG LinkUnIndirector  - http://ff.im/auf8d starts with ff.im
  * [AWT-EventQueue-0] DEBUG LinkUnIndirector  - ff.im expands to http://friendfeed.com/
  * [SwingWorker-pool-1-thread-9] DEBUG LinkUnIndirector  - 
  *   Target link http://fupeg.blogspot.com/2009/10/social-technology-fail.html found in 
