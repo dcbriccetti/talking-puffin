@@ -48,6 +48,8 @@ object LinkUnIndirector extends Loggable {
               
               if (expandedUrl.startsWith(il.expandedUrlPart)) {
                 debug(il.shortenedUrlPart + " expands to " + il.expandedUrlPart)
+                // ShortUrl.getExpandedUrls has called us in the GUI event thread, so we need
+                // another thread here to fetch the HTML page.
                 SwingInvoke.execSwingWorker ({
                   Source.fromURL(expandedUrl).getLines.map(_.trim).mkString(" ") match {
                     case il.targetLinkRegex(realUrl) => 
