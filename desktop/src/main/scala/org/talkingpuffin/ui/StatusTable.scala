@@ -20,9 +20,7 @@ import org.talkingpuffin.ui.table.{EmphasizedStringCellRenderer, EmphasizedStrin
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.twitter.{TwitterStatus}
 import org.talkingpuffin.Session
-import java.net.{HttpURLConnection, URL}
-import io.Source
-import util.{LinkUnIndirector, ShortUrl, TableUtil, DesktopUtil}
+import util.{LinkUnIndirector, TableUtil, DesktopUtil}
 
 /**
  * Table of statuses.
@@ -129,8 +127,6 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     createSendMsgDialog(status, Some(name), Some(status.text)).visible = true
   }
   
-  private def browseLink(uri: String) = LinkUnIndirector.browse(uri) 
-
   private def retweetNewWay = getSelectedStatuses.foreach(status => session.twitterSession.retweet(status.id))
   
   private def createSendMsgDialog(status: TwitterStatus, names: Option[String], retweetMsg: Option[String]) =
@@ -242,7 +238,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     
     mh add(Action("Edit user properties…") {editUser}, ks(VK_P, SHORTCUT))
 
-    mh add(new OpenPageLinksAction(getSelectedStatus, this, browseLink), ks(VK_L, 0))
+    mh add(new OpenPageLinksAction(getSelectedStatus, this, LinkUnIndirector.browse), ks(VK_L, 0))
     mh add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, 0))
     mh add(new OpenTwitterUserListsAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, SHIFT))
     
