@@ -3,7 +3,7 @@ package org.talkingpuffin.ui.table
 import java.awt.Color
 import java.util.{Date, Comparator}
 import javax.swing.text.JTextComponent
-import org.talkingpuffin.ui.{AgeCellRenderer, HtmlFormatter, HtmlCellRenderer}
+import org.talkingpuffin.ui.{HtmlFormatter}
 import org.talkingpuffin.ui.util.ShortUrl
 
 /**

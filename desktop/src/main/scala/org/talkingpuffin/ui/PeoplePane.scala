@@ -23,7 +23,8 @@ object UserColumns {
   val LOCATION = 7
   val DESCRIPTION = 8
   val STATUS = 9
-  val Count = 10
+  val STATUS_DATE = 10
+  val Count = 11
 }
 
 /**

@@ -1,14 +1,15 @@
-package org.talkingpuffin.ui
+package org.talkingpuffin.ui.table
 
 import java.awt.{Component}
 import java.util.Date
 import javax.swing.border.EmptyBorder
 import javax.swing.table.{DefaultTableCellRenderer, TableCellRenderer}
 import javax.swing.{JTextPane, JTable}
-import org.talkingpuffin.time.TimeFormatter
 import org.joda.time.DateTime
-import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.joda.time.format.DateTimeFormat
+import org.talkingpuffin.time.TimeFormatter
+import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
+import org.talkingpuffin.ui.HtmlFormatter
 
 /**
  * Renderer for the Age column
