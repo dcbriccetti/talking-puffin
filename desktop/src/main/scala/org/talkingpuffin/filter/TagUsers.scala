@@ -28,6 +28,10 @@ class TagUsers(service: String, username: String) {
   
   def getTags: List[String] = itToList(tagUsers.keySet.iterator).sort(_ < _)
   
+  def getTagsWithCounts: List[Tuple2[String,Int]] = {
+    getTags map(tag => (tag, usersForTag(tag).length))
+  }
+  
   def tagsForUser(userId: Long): List[String] = {
     var tags = List[String]()
     val el = getEntriesAsList

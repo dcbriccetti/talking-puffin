@@ -7,13 +7,14 @@ import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.ui.table.EmphasizedString
 import org.talkingpuffin.twitter.TwitterUser
 import org.talkingpuffin.util.Loggable
+import java.util.Date
 
 class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers, 
     val relationships: Relationships) extends AbstractTableModel with TaggingSupport with Reactor with Loggable {
   
   val pcell = new PictureCell(this, 1)
-  private val colNames = List(" ", "Image", "Screen Name", "Name", "Friends", "Follwrs", "Tags", "Location", "Description", "Status")
-  private val elementNames = List("", "", "screen_name", "name", "friends_count", "followers_count", "", "location", "description", "")
+  private val colNames = List(" ", "Image", "Screen Name", "Name", "Friends", "Follwrs", 
+    "Tags", "Location", "Description", "Status", "St Date")
   var usersModel: UsersModel = _
   var lastIncludeFriends = true
   var lastIncludeFollowers = true
@@ -32,6 +33,7 @@ class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers,
       case UserColumns.PICTURE => classOf[Icon]
       case UserColumns.FRIENDS => classOf[Int]
       case UserColumns.FOLLOWERS => classOf[Int]
+      case UserColumns.STATUS_DATE => classOf[Date]
       case _ => classOf[String] 
     }
   }
@@ -53,6 +55,10 @@ class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers,
       case UserColumns.STATUS => user.status match {
         case Some(status) => status.text
         case None => ""
+      }
+      case UserColumns.STATUS_DATE => user.status match {
+        case Some(status) => status.createdAt.toDate
+        case None => new Date(0)
       }
       case UserColumns.TAGS => tagUsers.tagsForUser(user.id).mkString(", ")
       case _ => null

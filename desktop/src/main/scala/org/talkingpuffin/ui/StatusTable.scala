@@ -16,10 +16,10 @@ import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
-import org.talkingpuffin.ui.table.{EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.twitter.{TwitterStatus}
 import org.talkingpuffin.Session
+import table.{AgeCellRenderer, EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
 import util.{LinkUnIndirector, TableUtil, DesktopUtil}
 
 /**
