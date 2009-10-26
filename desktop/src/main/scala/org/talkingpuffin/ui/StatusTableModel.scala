@@ -31,7 +31,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   private var statuses = List[TwitterStatus]()
   
   /** Statuses, after filtering */
-  private var filteredStatuses_ = List[TwitterStatus]()
+  private var filteredStatuses_ = Array[TwitterStatus]()
   def filteredStatuses = filteredStatuses_
   
   var preChangeListener: PreChangeListener = _;
@@ -198,7 +198,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       preChangeListener.tableChanging
     }
     
-    filteredStatuses_ = filterSet.filter(statuses, relationships) 
+    filteredStatuses_ = filterSet.filter(statuses, relationships).toArray 
     publish(new TableContentsChanged(this, filteredStatuses_.length, statuses.length))
     fireTableDataChanged
   }
