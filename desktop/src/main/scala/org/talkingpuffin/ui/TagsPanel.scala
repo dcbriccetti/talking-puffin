@@ -12,8 +12,7 @@ import _root_.scala.swing.GridBagPanel._
 class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checkedValues: List[String]) 
     extends BorderPanel {
   border = BorderFactory.createEmptyBorder(5,5,5,5)
-  val checkBoxView = new CheckBoxView(
-      tagUsers.getTagsWithCounts map(tc => tc._1 + " (" + tc._2 + ")"), checkedValues)
+  val checkBoxView = new CheckBoxView(tagUsers.getTags, checkedValues)
   if (showTitle) add(new Label("Tags"), BorderPanel.Position.North)
   
   add(new GridBagPanel {
