@@ -13,8 +13,8 @@ import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.Session
-import util.{ResourceReady, FetchRequest, ShortUrl, TextChangingAnimator}
-import org.talkingpuffin.util.Loggable
+import util.{ResourceReady, FetchRequest, TextChangingAnimator}
+import org.talkingpuffin.util.{ShortUrl, Loggable}
 
 object Thumbnail {
   val THUMBNAIL_SIZE = 48

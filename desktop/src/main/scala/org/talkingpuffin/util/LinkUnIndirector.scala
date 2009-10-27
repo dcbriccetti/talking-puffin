@@ -1,9 +1,8 @@
-package org.talkingpuffin.ui.util
+package org.talkingpuffin.util
 
 import scala.util.matching.Regex
 import scala.io.Source
 import org.talkingpuffin.ui.SwingInvoke
-import org.talkingpuffin.util.Loggable
 import java.net.{HttpURLConnection, URL}
 
 /**
@@ -34,15 +33,15 @@ object LinkUnIndirector extends Loggable {
     IndirectedLink("ff.im", "http://friendfeed.com/", """.*<div class="text">.*?<a .*?href="(.*?)".*""".r),
     IndirectedLink("digg.com", "http://digg.com/", """.*<h1 id="title">.*?<a .*?href="(.*?)".*""".r)
   )
-
+  
   /**
    * Browse the specified URL, bypassing any “wrappers” like FriendFeed, Digg, and StumbleUpon.
    */
-  def browse(urlString: String) {
+  def findLinks(expandedFound: (String) => Unit, expandedNotFound: (String) => Unit)(urlString: String) {
     val url = new URL(urlString)
     
     if (ShortUrl.redirectionBypassesWrapper(url.getHost)) {
-      ShortUrl.getExpandedUrls(urlString, (_: String, expandedUrl: String) => DesktopUtil.browse(expandedUrl))
+      ShortUrl.getExpandedUrls(urlString, (_: String, expandedUrl: String) => expandedFound(expandedUrl))
     } else {
       indirectedLinks find(il => urlString.contains(il.shortenedUrlPart)) match {
         case Some(il) =>
@@ -51,20 +50,20 @@ object LinkUnIndirector extends Loggable {
           new Thread(new Runnable { // Can’t tie up GUI, so new thread here to look for HTTP redirect
             def run = {
               ShortUrl.getExpandedUrls(urlString, (shortUrl: String, expandedUrl: String) => {
-                DesktopUtil.browse(expandedUrl)
+                expandedFound(expandedUrl)
 
                 if (expandedUrl.startsWith(il.expandedUrlPart)) {
-                  findAndBrowseTarget(expandedUrl, il.targetLinkRegex)
+                  findTarget(expandedUrl, il.targetLinkRegex, expandedFound)
                 }
               })
             }
           }).start
-        case None => DesktopUtil.browse(urlString)
+        case None => expandedNotFound(urlString)
       }
     }
   }
   
-  private def findAndBrowseTarget(expandedUrl: String, regex: Regex): Unit = {
+  private def findTarget(expandedUrl: String, regex: Regex, expandedFound: (String) => Unit): Unit = {
     // ShortUrl.getExpandedUrls has called us in the GUI event thread, so we need
     // another thread here to fetch the HTML page.
     SwingInvoke.execSwingWorker ({
@@ -77,7 +76,7 @@ object LinkUnIndirector extends Loggable {
         case _ => None
       }
     }, {(url: Option[String]) => url match { 
-      case Some(u) => DesktopUtil.browse(u)
+      case Some(u) => expandedFound(u)
       case None =>
     }})
     

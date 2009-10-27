@@ -1,8 +1,7 @@
-package org.talkingpuffin.ui.util
+package org.talkingpuffin.util
 
 import java.net.{HttpURLConnection, URL}
 import org.talkingpuffin.ui.LinkExtractor
-import org.talkingpuffin.util.Loggable
 
 /**
  * URL shortening and expanding.
@@ -15,9 +14,9 @@ object ShortUrl extends Loggable {
   private val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + 
       LinkExtractor.urlCharClass + "*"
   private val redirectionCodes = List(301, 302)
-  private type LongUrlReady = ResourceReady[String,String]
+  private type LongUrlReady = BgResourceReady[String,String]
   
-  private val fetcher = new BackgroundResourceFetcher[String, String] {
+  private val fetcher = new BgResFetcher[String, String] {
     override def getResourceFromSource(urlString: String): String = {
       debug("Connecting to " + urlString)
       val url = new URL(urlString)
@@ -34,7 +33,7 @@ object ShortUrl extends Loggable {
         loc
       } else {
         debug(urlString + " does not redirect anywhere")
-        throw new NoSuchResource(urlString)
+        throw new BgNoSuchResource(urlString)
       }
     }
   }
@@ -56,15 +55,9 @@ object ShortUrl extends Loggable {
     val matcher = LinkExtractor.hyperlinkPattern.matcher(text)
     while (matcher.find) {
       val url = matcher.group(1)
-      debug(url)
       if (urlIsShortened(url)) {
-        fetcher.getCachedObject(url) match {
-          case Some(longUrl) => provideExpandedUrl(url, longUrl)
-          case None => fetcher.requestItem(new FetchRequest(url, url, 
-            (urlReady: LongUrlReady) => {
-              provideExpandedUrl(urlReady.key, urlReady.resource)
-            }))
-        }
+        fetcher.requestItem(new BgFetchRequest(url, None, (urlReady: LongUrlReady) => 
+          provideExpandedUrl(urlReady.key, urlReady.resource)))
       }
     }
   }
