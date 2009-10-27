@@ -36,39 +36,50 @@ object LinkUnIndirector extends Loggable {
   )
 
   /**
-   * Browse the specified URL, and, if it indirectly contains a “target” URL, browse that URL too.
+   * Browse the specified URL, bypassing any “wrappers” like FriendFeed, Digg, and StumbleUpon.
    */
-  def browse(url: String) {
-    indirectedLinks find(il => url.contains(il.shortenedUrlPart)) match {
-      case Some(il) =>
-        debug(url + " contains " + il.shortenedUrlPart)
-        
-        new Thread(new Runnable { // Can’t tie up GUI, so new thread here to look for HTTP redirect
-          def run = {
-            ShortUrl.getExpandedUrls(url, (shortUrl: String, expandedUrl: String) => {
-              DesktopUtil.browse(expandedUrl)
-              
-              if (expandedUrl.startsWith(il.expandedUrlPart)) {
-                // ShortUrl.getExpandedUrls has called us in the GUI event thread, so we need
-                // another thread here to fetch the HTML page.
-                SwingInvoke.execSwingWorker ({
-                  val conn = new URL(expandedUrl).openConnection.asInstanceOf[HttpURLConnection]
-                  conn.setRequestProperty("User-agent", "TalkingPuffin")
-                  Source.fromInputStream(conn.getInputStream).getLines.map(_.trim).mkString(" ") match {
-                    case il.targetLinkRegex(realUrl) => 
-                      debug("Target link " + realUrl + " found in " + expandedUrl)
-                      Some(realUrl)
-                    case _ => None
-                  }
-                }, {(url: Option[String]) => url match { 
-                  case Some(u) => DesktopUtil.browse(u)
-                  case None =>
-                }})
-              }
-            })
-          }
-        }).start
-      case None => DesktopUtil.browse(url)
+  def browse(urlString: String) {
+    val url = new URL(urlString)
+    
+    if (ShortUrl.redirectionBypassesWrapper(url.getHost)) {
+      ShortUrl.getExpandedUrls(urlString, (_: String, expandedUrl: String) => DesktopUtil.browse(expandedUrl))
+    } else {
+      indirectedLinks find(il => urlString.contains(il.shortenedUrlPart)) match {
+        case Some(il) =>
+          debug(urlString + " contains " + il.shortenedUrlPart)
+
+          new Thread(new Runnable { // Can’t tie up GUI, so new thread here to look for HTTP redirect
+            def run = {
+              ShortUrl.getExpandedUrls(urlString, (shortUrl: String, expandedUrl: String) => {
+                DesktopUtil.browse(expandedUrl)
+
+                if (expandedUrl.startsWith(il.expandedUrlPart)) {
+                  findAndBrowseTarget(expandedUrl, il.targetLinkRegex)
+                }
+              })
+            }
+          }).start
+        case None => DesktopUtil.browse(urlString)
+      }
     }
+  }
+  
+  private def findAndBrowseTarget(expandedUrl: String, regex: Regex): Unit = {
+    // ShortUrl.getExpandedUrls has called us in the GUI event thread, so we need
+    // another thread here to fetch the HTML page.
+    SwingInvoke.execSwingWorker ({
+      val conn = new URL(expandedUrl).openConnection.asInstanceOf[HttpURLConnection]
+      conn.setRequestProperty("User-agent", "TalkingPuffin")
+      Source.fromInputStream(conn.getInputStream).getLines.map(_.trim).mkString(" ") match {
+        case regex(realUrl) => 
+          debug("Target link " + realUrl + " found in " + expandedUrl)
+          Some(realUrl)
+        case _ => None
+      }
+    }, {(url: Option[String]) => url match { 
+      case Some(u) => DesktopUtil.browse(u)
+      case None =>
+    }})
+    
   }
 }

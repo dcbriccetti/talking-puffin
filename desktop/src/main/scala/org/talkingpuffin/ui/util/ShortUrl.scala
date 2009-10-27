@@ -38,6 +38,11 @@ object ShortUrl extends Loggable {
       }
     }
   }
+
+  /**
+   * If simply doing HTTP HEAD to get Location suffices to bypass the wrapper
+   */
+  def redirectionBypassesWrapper(host: String) = host == "su.pr"
   
   def substituteShortenedUrlWith(text: String, replacement: String) = {
     (regex :: shortenerRegexStrings).foldLeft(text)(_.replaceAll(_, replacement))
