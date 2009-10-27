@@ -24,7 +24,7 @@ class StatusCellRenderer extends HtmlCellRenderer {
         case None => ""
       }
       case None => ""
-    }) + cell.status.replaceAll(ShortUrl.regex, "⁕") + (cell.age match {
+    }) + ShortUrl.substituteShortenedUrlWith(cell.status, "⁕") + (cell.age match {
       case Some(age) => "<font size='-2'> " + AgeCellRenderer.formatAge(age) + 
           (if (AgeCellRenderer.showAsAge_?) " ago" else "") + "</font>"
       case None => ""

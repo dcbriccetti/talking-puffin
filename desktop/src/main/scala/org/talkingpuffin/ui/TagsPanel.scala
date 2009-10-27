@@ -12,8 +12,7 @@ import _root_.scala.swing.GridBagPanel._
 class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checkedValues: List[String]) 
     extends BorderPanel {
   border = BorderFactory.createEmptyBorder(5,5,5,5)
-  val checkBoxView = new CheckBoxView(
-      tagUsers.getTagsWithCounts map(tc => tc._1 + " (" + tc._2 + ")"), checkedValues)
+  val checkBoxView = new CheckBoxView(tagUsers.getTagsWithCounts, checkedValues)
   if (showTitle) add(new Label("Tags"), BorderPanel.Position.North)
   
   add(new GridBagPanel {
@@ -35,10 +34,7 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
   }
       
   def selectedTags: List[String] = {
-    var selectedTags = List[String]()
-    for (tag <- checkBoxView.getSelectedValues) {
-      selectedTags ::= tag.asInstanceOf[String].split(CheckBoxView.mnemonicSep)(1)
-    }
+    var selectedTags = checkBoxView.getSelectedValues
     if (showNew) {
       val newTagVal = newTag.text.trim
       if (newTagVal.length > 0) selectedTags ::= newTagVal
@@ -51,13 +47,16 @@ object CheckBoxView {
   val mnemonicSep = ": "
 }
 
-class CheckBoxView(values: List[String], checkedValues: List[String]) extends BoxPanel(Orientation.Vertical) {
-  private var checkBoxes = List[CheckBox]()
+class DecoratedCheckBox(value: String, val undecoratedValue: String) extends CheckBox(value) 
+
+class CheckBoxView(values: List[Tuple2[String,Int]], checkedValues: List[String]) extends BoxPanel(Orientation.Vertical) {
+  private var checkBoxes = List[DecoratedCheckBox]()
   for ((value, i) <- values.zipWithIndex) {
     val keyVal = KeyEvent.VK_A + i
-    val checkBox = new CheckBox("" + keyVal.toChar + CheckBoxView.mnemonicSep + value) {
+    val checkBox = new DecoratedCheckBox("" + keyVal.toChar + CheckBoxView.mnemonicSep + 
+        value._1 + " (" + value._2 + ")", value._1) {
       peer.setMnemonic(keyVal)
-      selected = checkedValues contains value
+      selected = checkedValues contains value._1
     }
     checkBoxes ::= checkBox
     contents += checkBox
@@ -65,11 +64,11 @@ class CheckBoxView(values: List[String], checkedValues: List[String]) extends Bo
   
   def selectAll(select: Boolean) = for (b <- checkBoxes) b.selected = select
   
-  def getSelectedValues: Seq[String] = {
+  def getSelectedValues: List[String] = {
     var values = List[String]()
-    for (child <- peer.getComponents) {
+    for (child <- contents) {
       child match {
-        case cb: JCheckBox => if (cb.isSelected) values = cb.getText :: values
+        case cb: DecoratedCheckBox => if (cb.selected) values = cb.undecoratedValue :: values
         case _ =>
       }
     }
