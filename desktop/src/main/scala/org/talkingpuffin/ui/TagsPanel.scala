@@ -34,10 +34,7 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
   }
       
   def selectedTags: List[String] = {
-    var selectedTags = List[String]()
-    for (tag <- checkBoxView.getSelectedValues) {
-      selectedTags ::= tag.asInstanceOf[String].split(CheckBoxView.mnemonicSep)(1)
-    }
+    var selectedTags = checkBoxView.getSelectedValues
     if (showNew) {
       val newTagVal = newTag.text.trim
       if (newTagVal.length > 0) selectedTags ::= newTagVal
@@ -59,7 +56,7 @@ class CheckBoxView(values: List[Tuple2[String,Int]], checkedValues: List[String]
     val checkBox = new DecoratedCheckBox("" + keyVal.toChar + CheckBoxView.mnemonicSep + 
         value._1 + " (" + value._2 + ")", value._1) {
       peer.setMnemonic(keyVal)
-      selected = checkedValues contains value
+      selected = checkedValues contains value._1
     }
     checkBoxes ::= checkBox
     contents += checkBox
@@ -67,7 +64,7 @@ class CheckBoxView(values: List[Tuple2[String,Int]], checkedValues: List[String]
   
   def selectAll(select: Boolean) = for (b <- checkBoxes) b.selected = select
   
-  def getSelectedValues: Seq[String] = {
+  def getSelectedValues: List[String] = {
     var values = List[String]()
     for (child <- contents) {
       child match {
