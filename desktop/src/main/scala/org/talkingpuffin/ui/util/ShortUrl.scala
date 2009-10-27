@@ -8,9 +8,11 @@ import org.talkingpuffin.util.Loggable
  * URL shortening and expanding.
  */
 object ShortUrl extends Loggable {
-  val shortenerDomains = List("bit.ly", "digg.com", "ff.im", "is.gd", "ping.fm", "short.ie", "su.pr", 
+  private val shortenerRegexStrings = List("""http://digg\.com/""" + LinkExtractor.urlCharClass + "{4,10}")
+  private val shortenerRegexes = shortenerRegexStrings.map(_.r)
+  private val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "ping.fm", "short.ie", "su.pr", 
     "tinyurl.com", "tr.im")
-  val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + 
+  private val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + 
       LinkExtractor.urlCharClass + "*"
   private val redirectionCodes = List(301, 302)
   private type LongUrlReady = ResourceReady[String,String]
@@ -31,10 +33,14 @@ object ShortUrl extends Loggable {
         debug("Redirected to " + loc)
         loc
       } else {
-        debug("No such")
+        debug(urlString + " does not redirect anywhere")
         throw new NoSuchResource(urlString)
       }
     }
+  }
+  
+  def substituteShortenedUrlWith(text: String, replacement: String) = {
+    (regex :: shortenerRegexStrings).foldLeft(text)(_.replaceAll(_, replacement))
   }
 
   /**
@@ -58,6 +64,7 @@ object ShortUrl extends Loggable {
     }
   }
   
-  private def urlIsShortened(url: String) = shortenerDomains.exists(url.contains(_))
+  private def urlIsShortened(url: String) = shortenerDomains.exists(url.contains(_)) ||
+    shortenerRegexes.exists(r => url match {case r() => true case _ => false})
   
 }
