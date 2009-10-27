@@ -5,6 +5,7 @@ import java.awt.{Desktop, Dimension, Color}
 import javax.swing.event.{HyperlinkListener, HyperlinkEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
 import javax.swing.{JTable, JTextPane, JPopupMenu}
+import util.LinkUnIndirector
 
 /**
  * A large version of the tweet, that can contain hyperlinks, and from which filters can be created.
@@ -19,7 +20,7 @@ class LargeTweet(filtersDialog: FiltersDialog, viewCreator: ViewCreator, table: 
     def hyperlinkUpdate(e: HyperlinkEvent) {
       if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
         if (Desktop.isDesktopSupported) {
-          Desktop.getDesktop.browse(e.getURL().toURI)
+          LinkUnIndirector.browse(e.getURL.toString)
         }
         table.requestFocusInWindow // Let user resume using keyboard to move through tweets
       }

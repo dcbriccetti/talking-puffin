@@ -4,6 +4,7 @@ import scala.util.matching.Regex
 import scala.io.Source
 import org.talkingpuffin.ui.SwingInvoke
 import org.talkingpuffin.util.Loggable
+import java.net.{HttpURLConnection, URL}
 
 /**
  * Browses a link, also browsing the “target” link for those cases like where a FriendFeed
@@ -30,7 +31,8 @@ object LinkUnIndirector extends Loggable {
   
   /** A list of all known IndirectedLinks */
   val indirectedLinks = List(
-    IndirectedLink("ff.im", "http://friendfeed.com/", """.*<div class="text">.*?<a .*?href="(.*?)".*""".r)
+    IndirectedLink("ff.im", "http://friendfeed.com/", """.*<div class="text">.*?<a .*?href="(.*?)".*""".r),
+    IndirectedLink("digg.com", "http://digg.com/", """.*<h1 id="title">.*?<a .*?href="(.*?)".*""".r)
   )
 
   /**
@@ -39,7 +41,7 @@ object LinkUnIndirector extends Loggable {
   def browse(url: String) {
     indirectedLinks find(il => url.contains(il.shortenedUrlPart)) match {
       case Some(il) =>
-        debug(url + " starts with " + il.shortenedUrlPart)
+        debug(url + " contains " + il.shortenedUrlPart)
         
         new Thread(new Runnable { // Can’t tie up GUI, so new thread here to look for HTTP redirect
           def run = {
@@ -51,7 +53,9 @@ object LinkUnIndirector extends Loggable {
                 // ShortUrl.getExpandedUrls has called us in the GUI event thread, so we need
                 // another thread here to fetch the HTML page.
                 SwingInvoke.execSwingWorker ({
-                  Source.fromURL(expandedUrl).getLines.map(_.trim).mkString(" ") match {
+                  val conn = new URL(expandedUrl).openConnection.asInstanceOf[HttpURLConnection]
+                  conn.setRequestProperty("User-agent", "TalkingPuffin")
+                  Source.fromInputStream(conn.getInputStream).getLines.map(_.trim).mkString(" ") match {
                     case il.targetLinkRegex(realUrl) => 
                       debug("Target link " + realUrl + " found in " + expandedUrl)
                       Some(realUrl)

@@ -2,24 +2,38 @@ package org.talkingpuffin.ui.util
 
 import java.net.{HttpURLConnection, URL}
 import org.talkingpuffin.ui.LinkExtractor
+import org.talkingpuffin.util.Loggable
 
 /**
  * URL shortening and expanding.
  */
-object ShortUrl {
-  val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "ping.fm", "short.ie", "su.pr", "tinyurl.com", "tr.im")
+object ShortUrl extends Loggable {
+  val shortenerDomains = List("bit.ly", "digg.com", "ff.im", "is.gd", "ping.fm", "short.ie", "su.pr", 
+    "tinyurl.com", "tr.im")
   val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + 
       LinkExtractor.urlCharClass + "*"
   private val redirectionCodes = List(301, 302)
   private type LongUrlReady = ResourceReady[String,String]
   
   private val fetcher = new BackgroundResourceFetcher[String, String] {
-    override def getResourceFromSource(url: String): String = {
-      val conn = (new URL(url)).openConnection.asInstanceOf[HttpURLConnection]
+    override def getResourceFromSource(urlString: String): String = {
+      debug("Connecting to " + urlString)
+      val url = new URL(urlString)
+      val conn = url.openConnection.asInstanceOf[HttpURLConnection]
       conn.setRequestMethod("HEAD")
       conn.setInstanceFollowRedirects(false)
-      if (redirectionCodes.contains(conn.getResponseCode)) conn.getHeaderField("Location") else 
-        throw new NoSuchResource(url)
+      conn.setRequestProperty("User-agent", "TalkingPuffin")
+      if (redirectionCodes.contains(conn.getResponseCode)) {
+        val loc = {
+          val locHeader = conn.getHeaderField("Location")
+          if (locHeader.startsWith("/")) (new URL(url.getProtocol, url.getHost, locHeader)).toString else locHeader
+        }
+        debug("Redirected to " + loc)
+        loc
+      } else {
+        debug("No such")
+        throw new NoSuchResource(urlString)
+      }
     }
   }
 
@@ -31,6 +45,7 @@ object ShortUrl {
     val matcher = LinkExtractor.hyperlinkPattern.matcher(text)
     while (matcher.find) {
       val url = matcher.group(1)
+      debug(url)
       if (urlIsShortened(url)) {
         fetcher.getCachedObject(url) match {
           case Some(longUrl) => provideExpandedUrl(url, longUrl)
