@@ -14,9 +14,9 @@ object ShortUrl extends Loggable {
   private val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + 
       LinkExtractor.urlCharClass + "*"
   private val redirectionCodes = List(301, 302)
-  private type LongUrlReady = BgResourceReady[String,String]
+  private type LongUrlReady = ResourceReady[String,String]
   
-  private val fetcher = new BgResFetcher[String, String]("URL") {
+  private val fetcher = new BackgroundResourceFetcher[String, String]("URL") {
     override def getResourceFromSource(urlString: String): String = {
       debug("Connecting to " + urlString)
       val url = new URL(urlString)
@@ -33,7 +33,7 @@ object ShortUrl extends Loggable {
         loc
       } else {
         debug(urlString + " does not redirect anywhere")
-        throw new BgNoSuchResource(urlString)
+        throw new NoSuchResource(urlString)
       }
     }
   }
@@ -55,11 +55,17 @@ object ShortUrl extends Loggable {
     val matcher = LinkExtractor.hyperlinkPattern.matcher(text)
     while (matcher.find) {
       val url = matcher.group(1)
+      debug(url)
       if (urlIsShortened(url)) {
-        fetcher.requestItem(new BgFetchRequest(url, None, (urlReady: LongUrlReady) => 
-          provideExpandedUrl(urlReady.key, urlReady.resource)))
+        fetcher.getCachedObject(url) match {
+          case Some(longUrl) => provideExpandedUrl(url, longUrl)
+          case None => fetcher.requestItem(new FetchRequest(url, url, 
+            (urlReady: LongUrlReady) => {
+              provideExpandedUrl(urlReady.key, urlReady.resource)
+            }))
       }
     }
+  }
   }
   
   private def urlIsShortened(url: String) = shortenerDomains.exists(url.contains(_)) ||

@@ -5,13 +5,12 @@ import javax.swing.{ImageIcon}
 import swing.TabbedPane.Page
 import swing.{Reactor, Frame, TabbedPane, Label, GridBagPanel}
 import org.talkingpuffin.filter.TagUsers
-import util.FetchRequest
 import org.talkingpuffin.{Main, Globals, Session}
-import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.state.{StateSaver}
 import java.text.NumberFormat
 import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, AuthenticatedSession}
 import java.awt.{Point, Dimension}
+import org.talkingpuffin.util.{FetchRequest, Loggable}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -50,7 +49,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   contents = new GridBagPanel {
     val userPic = new Label
-    val picFetcher = new PictureFetcher(None)
+    val picFetcher = new PictureFetcher("Frame picture", None)
     picFetcher.requestItem(new FetchRequest(twitterSession.getUserDetail().profileImageURL, null, 
       (imageReady: PictureFetcher.ImageReady) => {
         if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
