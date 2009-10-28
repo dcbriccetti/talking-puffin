@@ -49,7 +49,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   contents = new GridBagPanel {
     val userPic = new Label
-    val picFetcher = new PictureFetcher("Frame picture", None)
+    val picFetcher = new PictureFetcher("Frame picture " + hashCode, None)
     picFetcher.requestItem(new FetchRequest(twitterSession.getUserDetail().profileImageURL, null, 
       (imageReady: PictureFetcher.ImageReady) => {
         if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
