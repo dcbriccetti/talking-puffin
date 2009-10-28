@@ -16,7 +16,7 @@ object ShortUrl extends Loggable {
   private val redirectionCodes = List(301, 302)
   private type LongUrlReady = BgResourceReady[String,String]
   
-  private val fetcher = new BgResFetcher[String, String] {
+  private val fetcher = new BgResFetcher[String, String]("URL") {
     override def getResourceFromSource(urlString: String): String = {
       debug("Connecting to " + urlString)
       val url = new URL(urlString)

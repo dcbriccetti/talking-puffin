@@ -13,8 +13,8 @@ import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.Session
-import util.{ResourceReady, FetchRequest, TextChangingAnimator}
-import org.talkingpuffin.util.{ShortUrl, Loggable}
+import util.{TextChangingAnimator}
+import org.talkingpuffin.util.{BgResourceReady, BgFetchRequest, ShortUrl, Loggable}
 
 object Thumbnail {
   val THUMBNAIL_SIZE = 48
@@ -144,14 +144,7 @@ class TweetDetailPanel(session: Session, table: JTable,
         case None => GeoCoder.extractLatLong(rawLocationOfShowingItem) 
       }) match {
         case Some(latLong) =>
-          GeoCoder.getCachedObject(latLong) match {
-            case Some(location) => {
-              setText(user, location)
-              return
-            }
-            case None => GeoCoder.requestItem(new FetchRequest[String,String](latLong, user, 
-                processFinishedGeocodes)) 
-          }
+          GeoCoder.requestItem(new BgFetchRequest[String,String](latLong, Some(user), processFinishedGeocodes)) 
         case None =>
       }
     }
@@ -174,10 +167,11 @@ class TweetDetailPanel(session: Session, table: JTable,
         })
   }
 
-  private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = 
-    if (resourceReady.userData == showingUser) {
+  private def processFinishedGeocodes(resourceReady: BgResourceReady[String,String]): Unit = 
+    if (resourceReady.userData.getOrElse("") == showingUser) { 
       animator.stop
-      animator.run(showingUser.location, resourceReady.resource, (text: String) => setText(showingUser, text))
+      animator.run(showingUser.location, resourceReady.resource, 
+          (text: String) => setText(showingUser, text))
     }
   
   private def processFinishedPicture(imageReady: PictureFetcher.ImageReady) = {
