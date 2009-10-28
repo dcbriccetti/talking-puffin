@@ -13,8 +13,8 @@ import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.Session
-import util.{ResourceReady, FetchRequest, ShortUrl, TextChangingAnimator}
-import org.talkingpuffin.util.Loggable
+import util.{TextChangingAnimator}
+import org.talkingpuffin.util.{ResourceReady, FetchRequest, ShortUrl, Loggable}
 
 object Thumbnail {
   val THUMBNAIL_SIZE = 48
@@ -25,7 +25,7 @@ object Thumbnail {
     BufferedImage.TYPE_INT_ARGB))
 }
 
-object medThumbPicFetcher extends PictureFetcher(Some(Thumbnail.MEDIUM_SIZE))
+object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE))
 
 /**
  * Details of the currently-selected tweet.
@@ -177,7 +177,8 @@ class TweetDetailPanel(session: Session, table: JTable,
   private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = 
     if (resourceReady.userData == showingUser) {
       animator.stop
-      animator.run(showingUser.location, resourceReady.resource, (text: String) => setText(showingUser, text))
+      animator.run(showingUser.location, resourceReady.resource, 
+          (text: String) => setText(showingUser, text))
     }
   
   private def processFinishedPicture(imageReady: PictureFetcher.ImageReady) = {
@@ -202,8 +203,8 @@ class TweetDetailPanel(session: Session, table: JTable,
         case None => 
           medThumbPicFetcher.requestItem(medThumbPicFetcher.FetchImageRequest(fullSizeUrl, null, processFinishedPicture))
           ImageWithScaled(Thumbnail.transparentMedium, None)
-      })
-    }
+    })
+  }
   }
   
   private def setPicLabelIconAndBigPic(imageWithScaled: ImageWithScaled) {

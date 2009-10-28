@@ -3,12 +3,12 @@ package org.talkingpuffin.geo
 import java.net.URL
 import _root_.scala.xml.XML
 import com.google.common.collect.MapMaker
-import org.talkingpuffin.ui.util.{BackgroundResourceFetcher, ResourceReady}
+import org.talkingpuffin.util.BackgroundResourceFetcher
 
 /**
  * Geocoding.
  */
-object GeoCoder extends BackgroundResourceFetcher[String, String] {
+object GeoCoder extends BackgroundResourceFetcher[String, String]("Geo") {
   private val locationCache: java.util.Map[String, String] = new MapMaker().softValues().makeMap()
   private val num = """(-?\d+\.\d*)"""
   private val latLongRegex = ("""[^-\d]*""" + num + """,\s*""" + num).r

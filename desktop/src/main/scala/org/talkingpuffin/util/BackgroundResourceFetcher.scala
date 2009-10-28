@@ -1,11 +1,11 @@
-package org.talkingpuffin.ui.util
+package org.talkingpuffin.util
 import java.util.concurrent.{Executors, LinkedBlockingQueue}
 import com.google.common.collect.MapMaker
 import java.util.{Collections, HashSet}
 import org.talkingpuffin.ui.SwingInvoke
-import org.talkingpuffin.util.Loggable
 import management.ManagementFactory
 import javax.management.ObjectName
+import org.apache.log4j.Logger
 
 trait BackgroundResourceFetcherMBean {
   def getCacheSize: Int
@@ -16,7 +16,10 @@ trait BackgroundResourceFetcherMBean {
 /**
  * Fetches resources in the background, and calls a function in the Swing event thread when ready.
  */
-abstract class BackgroundResourceFetcher[K,V] extends BackgroundResourceFetcherMBean with Loggable {
+abstract class BackgroundResourceFetcher[K,V](val resourceName: String) extends BackgroundResourceFetcherMBean {
+
+  val fetcherName = resourceName + " fetcher"
+  val log = Logger.getLogger(fetcherName)
   val cache: java.util.Map[K,V] = new MapMaker().softValues().makeMap()
   val requestQueue = new LinkedBlockingQueue[FetchRequest[K,V]]
   val inProgress = Collections.synchronizedSet(new HashSet[K])
@@ -26,7 +29,7 @@ abstract class BackgroundResourceFetcher[K,V] extends BackgroundResourceFetcherM
   var misses = 0
 
   val mbs = ManagementFactory.getPlatformMBeanServer
-  mbs.registerMBean(this, new ObjectName("TalkingPuffin:name=" + getClass + " " + hashCode))
+  mbs.registerMBean(this, new ObjectName("TalkingPuffin:name=" + fetcherName))
   def getCacheSize = cache.size
   def getCacheHits = hits
   def getCacheMisses = misses
@@ -80,6 +83,20 @@ abstract class BackgroundResourceFetcher[K,V] extends BackgroundResourceFetcherM
     if (! cache.containsKey(request.key) && 
         ! requestQueue.contains(request) && ! inProgress.contains(request.key)) 
       requestQueue.put(request)
+  
+  /**
+   * Gets the item from the cache if present and calls the callback in the same thread, or
+   * submits a request for the item.
+   */
+  def get(provideExpandedUrl: (V) => Unit)(url: K): Unit = {
+    getCachedObject(url) match {
+      case Some(longUrl) => provideExpandedUrl(longUrl)
+      case None => requestItem(new FetchRequest(url, null, 
+        (urlReady: ResourceReady[K,V]) => {
+          provideExpandedUrl(urlReady.resource)
+        }))
+    }
+  }
   
   def stop = {
     if (running) {

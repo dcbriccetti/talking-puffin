@@ -16,11 +16,11 @@ import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
-import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.twitter.{TwitterStatus}
 import org.talkingpuffin.Session
 import table.{AgeCellRenderer, EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
-import util.{LinkUnIndirector, TableUtil, DesktopUtil}
+import util.{TableUtil, DesktopUtil}
+import org.talkingpuffin.util.{LinkUnIndirector, Loggable, PopupListener}
 
 /**
  * Table of statuses.
@@ -238,7 +238,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     
     mh add(Action("Edit user properties…") {editUser}, ks(VK_P, SHORTCUT))
 
-    mh add(new OpenPageLinksAction(getSelectedStatus, this, LinkUnIndirector.browse), ks(VK_L, 0))
+    mh add(new OpenPageLinksAction(getSelectedStatus, this, 
+      LinkUnIndirector.findLinks(DesktopUtil.browse, DesktopUtil.browse)), ks(VK_L, 0))
     mh add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, 0))
     mh add(new OpenTwitterUserListsAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, SHIFT))
     

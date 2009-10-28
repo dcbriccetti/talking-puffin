@@ -1,8 +1,7 @@
-package org.talkingpuffin.ui.util
+package org.talkingpuffin.util
 
 import java.net.{HttpURLConnection, URL}
 import org.talkingpuffin.ui.LinkExtractor
-import org.talkingpuffin.util.Loggable
 
 /**
  * URL shortening and expanding.
@@ -17,7 +16,7 @@ object ShortUrl extends Loggable {
   private val redirectionCodes = List(301, 302)
   private type LongUrlReady = ResourceReady[String,String]
   
-  private val fetcher = new BackgroundResourceFetcher[String, String] {
+  private val fetcher = new BackgroundResourceFetcher[String, String]("URL") {
     override def getResourceFromSource(urlString: String): String = {
       debug("Connecting to " + urlString)
       val url = new URL(urlString)
@@ -38,29 +37,33 @@ object ShortUrl extends Loggable {
       }
     }
   }
+
+  /**
+   * If simply doing HTTP HEAD to get Location suffices to bypass the wrapper
+   */
+  def redirectionBypassesWrapper(host: String) = host == "su.pr"
   
   def substituteShortenedUrlWith(text: String, replacement: String) = {
     (regex :: shortenerRegexStrings).foldLeft(text)(_.replaceAll(_, replacement))
   }
 
   /**
-   * Substitutes long forms for all cached shortened URLs found in text, and issues requests for any 
-   * not in the cache.
+   * Gets the long form, if there is one, for the specified URL.
    */
-  def getExpandedUrls(text: String, provideExpandedUrl: (String, String) => Unit) = {
+  def getExpandedUrl(url: String, provideExpandedUrl: (String) => Unit) = {
+    if (urlIsShortened(url)) {
+      fetcher.get(provideExpandedUrl)(url)
+    }
+  }
+  
+  /**
+   * Gets the long forms, if they exist, for all cached shortened URLs found in text.
+   */
+  def getExpandedUrls(text: String, provideSourceAndTargetUrl: (String, String) => Unit) = {
     val matcher = LinkExtractor.hyperlinkPattern.matcher(text)
     while (matcher.find) {
-      val url = matcher.group(1)
-      debug(url)
-      if (urlIsShortened(url)) {
-        fetcher.getCachedObject(url) match {
-          case Some(longUrl) => provideExpandedUrl(url, longUrl)
-          case None => fetcher.requestItem(new FetchRequest(url, url, 
-            (urlReady: LongUrlReady) => {
-              provideExpandedUrl(urlReady.key, urlReady.resource)
-            }))
-        }
-      }
+      val sourceUrl = matcher.group(1)
+      getExpandedUrl(sourceUrl, (targetUrl: String) => {provideSourceAndTargetUrl(sourceUrl, targetUrl)})
     }
   }
   
