@@ -28,7 +28,7 @@ object LinkUnIndirector extends Loggable {
    * Finds the target(s) of the specified URL, bypassing any “wrappers” 
    * like FriendFeed, Digg, and StumbleUpon. In the case of the 
    * <code>IndirectedLink</code>s (such as FriendFeed), the expandedFound 
-   * callback will be call twice: once for the intermediate page, and once 
+   * callback will be called twice: once for the intermediate page, and once 
    * for the target page.
    */
   def findLinks(expandedFound: (String) => Unit, expandedNotFound: (String) => Unit)(url: String) {
