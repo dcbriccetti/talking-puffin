@@ -48,24 +48,23 @@ object ShortUrl extends Loggable {
   }
 
   /**
-   * Substitutes long forms for all cached shortened URLs found in text, and issues requests for any 
-   * not in the cache.
+   * Gets the long form, if there is one, for the specified URL.
    */
-  def getExpandedUrls(text: String, provideExpandedUrl: (String, String) => Unit) = {
-    val matcher = LinkExtractor.hyperlinkPattern.matcher(text)
-    while (matcher.find) {
-      val url = matcher.group(1)
-      debug(url)
-      if (urlIsShortened(url)) {
-        fetcher.getCachedObject(url) match {
-          case Some(longUrl) => provideExpandedUrl(url, longUrl)
-          case None => fetcher.requestItem(new FetchRequest(url, url, 
-            (urlReady: LongUrlReady) => {
-              provideExpandedUrl(urlReady.key, urlReady.resource)
-            }))
-      }
+  def getExpandedUrl(url: String, provideExpandedUrl: (String) => Unit) = {
+    if (urlIsShortened(url)) {
+      fetcher.get(provideExpandedUrl)(url)
     }
   }
+  
+  /**
+   * Gets the long forms, if they exist, for all cached shortened URLs found in text.
+   */
+  def getExpandedUrls(text: String, provideSourceAndTargetUrl: (String, String) => Unit) = {
+    val matcher = LinkExtractor.hyperlinkPattern.matcher(text)
+    while (matcher.find) {
+      val sourceUrl = matcher.group(1)
+      getExpandedUrl(sourceUrl, (targetUrl: String) => {provideSourceAndTargetUrl(sourceUrl, targetUrl)})
+    }
   }
   
   private def urlIsShortened(url: String) = shortenerDomains.exists(url.contains(_)) ||

@@ -84,6 +84,20 @@ abstract class BackgroundResourceFetcher[K,V](val resourceName: String) extends 
         ! requestQueue.contains(request) && ! inProgress.contains(request.key)) 
       requestQueue.put(request)
   
+  /**
+   * Gets the item from the cache if present and calls the callback in the same thread, or
+   * submits a request for the item.
+   */
+  def get(provideExpandedUrl: (V) => Unit)(url: K): Unit = {
+    getCachedObject(url) match {
+      case Some(longUrl) => provideExpandedUrl(longUrl)
+      case None => requestItem(new FetchRequest(url, null, 
+        (urlReady: ResourceReady[K,V]) => {
+          provideExpandedUrl(urlReady.resource)
+        }))
+    }
+  }
+  
   def stop = {
     if (running) {
       running = false

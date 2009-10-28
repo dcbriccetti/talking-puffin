@@ -25,30 +25,31 @@ object LinkUnIndirector extends Loggable {
   )
   
   /**
-   * Browse the specified URL, bypassing any “wrappers” like FriendFeed, Digg, and StumbleUpon.
+   * Finds the target(s) of the specified URL, bypassing any “wrappers” 
+   * like FriendFeed, Digg, and StumbleUpon. In the case of the 
+   * <code>IndirectedLink</code>s (such as FriendFeed), the expandedFound 
+   * callback will be call twice: once for the intermediate page, and once 
+   * for the target page.
    */
-  def findLinks(expandedFound: (String) => Unit, expandedNotFound: (String) => Unit)(urlString: String) {
-    val url = new URL(urlString)
-    
-    if (ShortUrl.redirectionBypassesWrapper(url.getHost)) {
-      ShortUrl.getExpandedUrls(urlString, (_: String, expandedUrl: String) => expandedFound(expandedUrl))
+  def findLinks(expandedFound: (String) => Unit, expandedNotFound: (String) => Unit)(url: String) {
+    if (ShortUrl.redirectionBypassesWrapper(new URL(url).getHost)) {
+      ShortUrl.getExpandedUrl(url, (expandedUrl: String) => expandedFound(expandedUrl))
     } else {
-      indirectedLinks find(il => urlString.contains(il.shortenedUrlPart)) match {
+      indirectedLinks find(il => url.contains(il.shortenedUrlPart)) match {
         case Some(il) =>
-          debug(urlString + " contains " + il.shortenedUrlPart)
+          debug(url + " contains " + il.shortenedUrlPart)
 
-          new Thread(new Runnable { // Can’t tie up GUI, so new thread here to look for HTTP redirect
+          new Thread(new Runnable { // Can’t tie up GUI, so new thread here
             def run = {
-              ShortUrl.getExpandedUrls(urlString, (shortUrl: String, expandedUrl: String) => {
+              ShortUrl.getExpandedUrl(url, (expandedUrl: String) => {
                 expandedFound(expandedUrl)
-
                 if (expandedUrl.startsWith(il.expandedUrlPart)) {
                   findTarget(expandedUrl, il.targetLinkRegex, expandedFound)
                 }
               })
             }
           }).start
-        case None => expandedNotFound(urlString)
+        case None => expandedNotFound(url)
       }
     }
   }
@@ -69,6 +70,5 @@ object LinkUnIndirector extends Loggable {
       case Some(u) => expandedFound(u)
       case None =>
     }})
-    
   }
 }
