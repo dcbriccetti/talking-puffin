@@ -6,20 +6,10 @@ import org.talkingpuffin.ui.SwingInvoke
 import java.net.{HttpURLConnection, URL}
 
 /**
- * Browses a link, also browsing the “target” link for those cases like where a FriendFeed
- * post with a link twitters a ff.im/xx shortened link to FriendFeed. In many cases people 
- * will want to see the ultimate page without stopping at FriendFeed. 
- * 
- * This log excerpt illustrates what happens:
- *
- * <pre> 
- * [AWT-EventQueue-0] DEBUG LinkUnIndirector  - http://ff.im/auf8d starts with ff.im
- * [AWT-EventQueue-0] DEBUG LinkUnIndirector  - ff.im expands to http://friendfeed.com/
- * [SwingWorker-pool-1-thread-9] DEBUG LinkUnIndirector  - 
- *   Target link http://fupeg.blogspot.com/2009/10/social-technology-fail.html found in 
- *   http://friendfeed.com/michaelg/09a8d52e/social-technology-fail
- * </pre>
- */
+ * Browses the end link in what may be a chain of indirection from the likes of FriendFeed, Digg, and
+ * StumbleUpon. In many cases people will want to see the ultimate page without stopping at intermediate
+ * points, or having their desired page framed by some service. 
+ */ 
 object LinkUnIndirector extends Loggable {
   
   /**
