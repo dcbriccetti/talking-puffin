@@ -160,7 +160,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     TwitterList(http.post(url(user, "lists.xml"), List(("name", listName))))
   }
   
-  def getLists(screenName: String): List[TwitterList] = ((http.get(url(screenName, "lists.xml")) \ "list") map(
+  def getLists(screenName: String): List[TwitterList] = ((http.get(url(screenName, "lists.xml")) \\ "list") map(
       TwitterList.apply)).toList
   
   def getListNamed(listName: String): Option[TwitterList] = getLists(user) find(_.name == listName)

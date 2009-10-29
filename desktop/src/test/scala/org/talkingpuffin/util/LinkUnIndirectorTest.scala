@@ -16,6 +16,9 @@ class LinkUnIndirectorTest {
   @Test def friendFeed = testExpand("http://ff.im/auf8d",
     "http://fupeg.blogspot.com/2009/10/social-technology-fail.html")
   
+  @Test def hootSuite = testExpand("http://ow.ly/xdVE",
+    "http://www.meetup.com/TwitterMeetup/calendar/11708113/")
+  
   private def testExpand(startUrl: String, targetUrl: String) {
     var expanded = ""
     LinkUnIndirector.findLinks(
