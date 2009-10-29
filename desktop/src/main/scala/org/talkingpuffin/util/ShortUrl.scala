@@ -9,8 +9,9 @@ import org.talkingpuffin.ui.LinkExtractor
 object ShortUrl extends Loggable {
   private val shortenerRegexStrings = List("""http://digg\.com/""" + LinkExtractor.urlCharClass + "{4,10}")
   private val shortenerRegexes = shortenerRegexStrings.map(_.r)
+  private val redirBypassesWrapperHosts = List("su.pr", "ow.ly")
   private val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "ping.fm", "short.ie", "su.pr", 
-    "tinyurl.com", "tr.im")
+    "tinyurl.com", "tr.im") ::: redirBypassesWrapperHosts
   private val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + 
       LinkExtractor.urlCharClass + "*"
   private val redirectionCodes = List(301, 302)
@@ -41,7 +42,7 @@ object ShortUrl extends Loggable {
   /**
    * If simply doing HTTP HEAD to get Location suffices to bypass the wrapper
    */
-  def redirectionBypassesWrapper(host: String) = host == "su.pr"
+  def redirectionBypassesWrapper(host: String) = redirBypassesWrapperHosts contains host
   
   def substituteShortenedUrlWith(text: String, replacement: String) = {
     (regex :: shortenerRegexStrings).foldLeft(text)(_.replaceAll(_, replacement))
