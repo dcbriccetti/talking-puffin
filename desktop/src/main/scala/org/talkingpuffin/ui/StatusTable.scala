@@ -101,6 +101,12 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   private def viewUser = getSelectedScreenNames.foreach(screenName => 
     DesktopUtil.browse("http://twitter.com/" + screenName))
 
+  private def viewParent = getSelectedStatuses.foreach(status => 
+    LinkExtractor.getReplyToInfo(status.inReplyToStatusId, status.text) match {
+      case Some(info) => DesktopUtil.browse("http://twitter.com/" + info._1 + "/statuses/" + info._2)
+      case _ =>
+    })
+ 
   private def editUser = getSelectedStatuses.foreach(status => { 
     val userProperties = new UserPropertiesDialog(session.userPrefs, status)
     userProperties.visible = true  
@@ -234,6 +240,10 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
       mh add(Action("Status") {viewSelected}, this, ks(VK_V, 0))
       mh add(Action("Status source") {viewSourceSelected}, this, ks(VK_V, SHORTCUT | SHIFT))
       mh add(Action("Sender") {viewUser}, this, ks(VK_V, SHIFT))
+      mh add(new Action("Parent status") {
+        def apply = viewParent
+        specialMenuItems.replyOnly.list ::= this
+      }, this, ks(VK_A, 0))
     })
     
     mh add(Action("Edit user properties…") {editUser}, ks(VK_P, SHORTCUT))

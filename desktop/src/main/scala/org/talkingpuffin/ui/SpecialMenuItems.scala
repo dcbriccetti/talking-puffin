@@ -19,9 +19,11 @@ class SpecialMenuItems extends Loggable {
   var friendsOnly = new ActionsList
   /** Only applicable to those not being followed */
   var notFriendsOnly = new ActionsList
+  /** Only applicable to statuses that are a reply */
+  var replyOnly = new ActionsList
   /** All special actions */
   def all = oneStatusSelected.list ::: oneScreennameSelected.list ::: followersOnly.list ::: 
-      friendsOnly.list ::: notFriendsOnly.list
+      friendsOnly.list ::: notFriendsOnly.list ::: replyOnly.list
     
   def enableActions(selectedStatuses: List[TwitterStatus], numSelectedScreenNames: Int,
       friendIds: List[Long], followerIds: List[Long]) {
@@ -33,6 +35,7 @@ class SpecialMenuItems extends Loggable {
     followersOnly        .disableIf(selectedStatuses.exists(status => ! followerIds.contains(status.user.id)))
     friendsOnly          .disableIf(selectedStatuses.exists(status => ! friendIds  .contains(status.user.id)))
     notFriendsOnly       .disableIf(selectedStatuses.exists(status => friendIds.contains(status.user.id)))
+    replyOnly            .disableIf(! selectedStatuses.exists(_.inReplyToStatusId.isDefined))
   }
 }
   
