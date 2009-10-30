@@ -6,7 +6,7 @@ import org.talkingpuffin.util.Loggable
 /**
  * Extracts links from Twitter status
  */
-object LinkExtractor extends Loggable {
+object LinkExtractor {
   
   val urlCharClass = """[^'"()\[\]\s]"""
   val hyperlinkRegex = "(https?://" + urlCharClass + "+)"
@@ -124,7 +124,6 @@ object LinkExtractor extends Loggable {
     val m = hyperlinkPattern.matcher(text)
     while (m.find) {
       val item = stripTrailingPunctuation(m.group(1))
-      debug("item: " + item)
       val newItem = (item, item)
       if (! urls.contains(newItem))
         urls = urls ::: List(newItem)
@@ -140,7 +139,6 @@ object LinkExtractor extends Loggable {
     val m = userListPattern.matcher(text)
     while (m.find) {
       val item = stripTrailingPunctuation(m.group(1))
-      debug("item: " + item)
       val newItem = (item, "http://twitter.com/" + item)
       if (! urls.contains(newItem))
         urls = urls ::: List(newItem)
