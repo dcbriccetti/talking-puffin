@@ -21,7 +21,8 @@ object LinkUnIndirector extends Loggable {
   /** A list of all known IndirectedLinks */
   val indirectedLinks = List(
     IndirectedLink("ff.im", "http://friendfeed.com/", """.*<div class="text">.*?<a .*?href="(.*?)".*""".r),
-    IndirectedLink("digg.com", "http://digg.com/", """.*<h1 id="title">.*?<a .*?href="(.*?)".*""".r)
+    IndirectedLink("digg.com", "http://digg.com/", """.*<h1 id="title">.*?<a .*?href="(.*?)".*""".r),
+    IndirectedLink("bit.ly", "http://www.dzone.com/", """.*<div class="ldTitle">.*?<a .*?href="(.*?)".*""".r)
   )
   
   /**
@@ -64,7 +65,9 @@ object LinkUnIndirector extends Loggable {
         case regex(realUrl) => 
           debug("Target link " + realUrl + " found in " + expandedUrl)
           Some(realUrl)
-        case _ => None
+        case _ => 
+          debug("Target link not found in " + expandedUrl)
+          None
       }
     }, {(url: Option[String]) => url match { 
       case Some(u) => expandedFound(u)
