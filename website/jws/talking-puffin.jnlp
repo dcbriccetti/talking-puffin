@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <jnlp spec="1.0+" codebase="http://talkingpuffin.org/jws" href="talking-puffin.jnlp">
   <information>
-    <title>TalkingPuffin 0.73</title>
+    <title>TalkingPuffin 0.74</title>
     <vendor>Dave Briccetti Software Consulting</vendor>
     <homepage href="http://davebsoft.com"/>
     <description>TalkingPuffin Twitter Client</description>
-    <description kind="short">A Twitter client work in progress.</description>
+    <description kind="short">On open source Twitter client written in Scala.</description>
     <icon href="TalkingPuffin.png"/>
   </information>
   <shortcut>
@@ -15,7 +15,7 @@
   <security><all-permissions/></security>
   <resources>
     <j2se version="1.6+"/>
-    <jar href="talking-puffin-0.73-jar-with-dependencies.jar"/>
+    <jar href="talking-puffin-0.74-jar-with-dependencies.jar"/>
   </resources>
   <application-desc main-class="org.talkingpuffin.Main">
   </application-desc>

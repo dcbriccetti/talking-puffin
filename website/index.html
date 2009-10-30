@@ -29,79 +29,106 @@
 <div id="main">
     <h1>TalkingPuffin</h1>
 
-    <img src="media/TalkingPuffin.png" alt="TalkingPuffin Logo"/>
+    <img src="media/TalkingPuffin.png" alt="TalkingPuffin Logo" align="right"/>
     
-    <p>A powerful, open source Twitter client under development by <a href="http://davebsoft.com/">Dave 
+    <p>A powerful, open source Twitter client from <a href="http://davebsoft.com/">Dave 
         Briccetti Software Consulting</a> (<a href="http://twitter.com/dcbriccetti">@dcbriccetti</a>) and others. 
-        Formerly called “Simple Twitter Client.”</p>
-    
-    <p><strong>Run <a href="jws/talking-puffin.jnlp">TalkingPuffin</a></strong>
-        or <a href="http://github.com/dcbriccetti/talking-puffin/">build it from source</a>. 
+    It includes a Twitter API library originally contributed by Mark McBride 
+        (<a href="http://twitter.com/mccv">@mccv</a>) and
+    further developed by Dave Briccetti.</p>
+
+    <h2><a href="jws/talking-puffin.jnlp">Run TalkingPuffin</a> using Java Web Start</h2>
+    <p>Or <a href="http://github.com/dcbriccetti/talking-puffin/">build it from source</a>. 
         <a href="http://groups.google.com/group/talkingpuffin">Discuss</a> developing or using it.
     </p>
     <p>Some of the client’s features are available <a
             href="http://talkingpuffin.appspot.com/"><strong>in a web application</strong></a>.</p>
     
-    <h2>Features:</h2>
-    <ul>
-        <li>Support for new Twitter features</li>
-        <ul>
-            <li>Twitter lists</li>
-            <ul>
-                <li>Create lists from tagged users</li>
-                <li>View a list and follow all or some of its members</li>
-                <li>Easily view all lists of all selected people</li>
-            </ul>
-            <li>Report spam</li>
-            <li>Retweet</li>
-            <li>Tweet Geocoding</li>
-        </ul>
-        <li>Multiple accounts
-        <li>Support for Twitter-compatible services like identi.ca
-        <li>Multiple views of following or mentions
-        <li>Extensive filtering, including support for an external “noise tweets” repository
-        <li>Select text in a tweet to use as a filter</li>
-        <li>Mute users, retweets from specific users, and applications (like Foursquare)
-        <li>Delete all selected tweets, or all tweets by authors of all selected tweets</li>
-        <li>Tagging users with one or more tags
-        <li>Highly-configurable display of tweets
-        <li>Sort by age, from or to
-        <li>Undockable views
-        <li>Adjustable font size and table row size
-        <li>Easy display of large photos of twitterers
-        <li>Detailed view of followers and following, and how they overlap
-        <li>Decoding of latitude/longitude into readable locations (using user profile location and new geo info from Twitter)
-        <li>Following multiple links or users from a tweet with a single operation
-        <li>Shrink and expand URLs</li>
-        <li>Search for users to twitter to or mention</li>
-        <li>Keyboard operation: moving through the tweets, filtering, showing photos, following
-            links and users
-        <li>Attach notes to users
-        <li>Override user names (some people don’t provide a useful name)
-    </ul>
+    <table>
+        <tr>
+            <td>
+                <h2>Features:</h2>
+                <ul>
+                    <li>Support for new Twitter features</li>
+                    <ul>
+                        <li>Twitter lists</li>
+                        <ul>
+                            <li>Create lists from tagged users</li>
+                            <li>View a list and follow all or some of its members</li>
+                            <li>Easily view all lists of all selected people</li>
+                        </ul>
+                        <li>Report spam</li>
+                        <li>Retweet</li>
+                        <li>Decoding of latitude/longitude into readable locations (using user profile location 
+                            and new geographic info from Twitter)
+                    </ul>
+                    <li>Filtering and Organizing</li>
+                    <ul>
+                        <li>Select text in a tweet to use as a filter</li>
+                        <li>Tagging users with one or more tags
+                        <li>Sort by age, from or to
+                    </ul>
+                    <li>Removal of “noise” and “decorations”</li>
+                    <ul>
+                        <li>Mute users, retweets from specific users, and applications (like Foursquare)
+                        <li>Support for an external “noise tweets” repository
+                        <li>Bypass FriendFeed, StumbleUpon, HootSuite and Digg frames and intermediate pages 
+                        (<a href="http://briccetti.blogspot.com/2009/10/talkingpuffin-bypasses-friendfeed-digg.html">blog
+                            post with video</a>)</li>
+                    </ul>
+                    <li>Multiple accounts
+                    <li>Support for Twitter-compatible services like identi.ca
+                    <li>Multiple views of following or mentions
+                    <li>Delete all selected tweets, or all tweets by authors of all selected tweets</li>
+                    <li>Highly-configurable display of tweets
+                    <li>Undockable views
+                    <li>Adjustable font size and table row size
+                    <li>Easy display of large photos of twitterers
+                    <li>Detailed view of followers and following, and how they overlap
+                    <li>Following multiple links or users from a tweet with a single operation
+                    <li>Shrink and expand URLs</li>
+                    <li>Search for users to twitter to or mention</li>
+                    <li>Keyboard operation: moving through the tweets, filtering, showing photos, following
+                        links and users
+                    <li>Attach notes to users
+                    <li>Override user names (some people don’t provide a useful name)
+                </ul>
+            </td>
+            <td valign="top">
+                <h2>More information:</h2>
 
-    <p>More information:</p>
-
-    <ul>
-        <li><a href="http://www.flickr.com/photos/dcbriccetti/sets/72157621944502207/">Some screen shots</a></li>
-        <li><a href="media/tpuf-0.69-intro.mov">A video introduction showing basic operations</a></li>
-        <li><a href="media/tpuf-0.69-part2.mov">Video introduction, part two</a></li>
-        <li><a href="http://www.youtube.com/watch?v=NUVDP5sX2rA">A video showing easy display of Robert Scoble’s lists</a></li>
-        <li><a href="media/stc-intro1.mov">An older video introduction</a></li>
-        <li><a href="http://twitter.com/TalkingPuffin">TalkingPuffin</a> on Twitter<br/></li>
-        <li><a href="http://briccetti.blogspot.com/search/label/Twitter">Blog
-            postings</a> about Twitter and this client<br/></li>
-        <li><a href="http://TalkingPuffin.org:8080/jira/">Issue-tracking system</a></li>
-        <li>Old <a href="http://spreadsheets.google.com/ccc?key=pM9FCnZJ8sxy7TaFAPD9XbQ">To Do</a> list</li>
-        <li><a href="media/location-animation.mov">Video</a> showing how latitude/longitude is replaced with an
-            address<br/></li>
-    </ul>
+                <ul>
+                    <li>Media</li>
+                    <ul>
+                        <li><a href="http://www.flickr.com/photos/dcbriccetti/sets/72157621944502207/">Some screen shots</a></li>
+                        <li><a href="media/tpuf-0.69-intro.mov">A video introduction showing basic operations</a></li>
+                        <li><a href="media/tpuf-0.69-part2.mov">Video introduction, part two</a></li>
+                        <li><a href="http://www.youtube.com/watch?v=NUVDP5sX2rA">A video showing easy display of Robert Scoble’s lists</a></li>
+                        <li><a href="media/stc-intro1.mov">An older video introduction</a></li>
+                        <li><a href="media/location-animation.mov">Video</a> showing how latitude/longitude is replaced with an
+                            address<br/></li>
+                    </ul>
+                    <li><a href="http://twitter.com/TalkingPuffin">TalkingPuffin</a> on Twitter<br/></li>
+                    <li><a href="http://briccetti.blogspot.com/search/label/Twitter">Blog
+                        postings</a> about Twitter and this client<br/></li>
+                    <li><a href="http://TalkingPuffin.org:8080/jira/">Issue-tracking system</a></li>
+                    <li>Old <a href="http://spreadsheets.google.com/ccc?key=pM9FCnZJ8sxy7TaFAPD9XbQ">To Do</a> list</li>
+                </ul>
     
+                <h2>License</h2>
+                <p>TalkingPuffin is licensed under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>.</p>
+            </td>
+        </tr>
+    </table>
+
     <h2>News</h2>
+        
+    <div class="newsHead">Oct 29</div>
+    <div class="newsBody">Version 0.74</div>
         
     <div class="newsHead">Oct 21</div>
     <div class="newsBody">Blog post about 
-        <a href="http://briccetti.blogspot.com/2009/10/talkingpuffin-supports-new-twitter.html">Lists support</a>>
+        <a href="http://briccetti.blogspot.com/2009/10/talkingpuffin-supports-new-twitter.html">Lists support</a>
     </div>
         
     <div class="newsHead">Oct 20</div>
@@ -197,8 +224,6 @@
         <div class="newsBody">Dave Briccetti starts writing a simple Twitter client in 
             Scala (<a href="http://briccetti.blogspot.com/2009/02/scala-and-twitter-api.html">blog post</a>)</div>
     
-    <h2>License</h2>
-    <p>TalkingPuffin is licensed under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>.</p>
 </div>
 
 <script type="text/javascript">
