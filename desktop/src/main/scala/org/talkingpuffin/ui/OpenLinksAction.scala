@@ -30,7 +30,7 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], tabl
 
     getSelectedStatus match {
       case Some(status) =>
-        val urls = LinkExtractor.getLinks(status, users, pages, lists)
+        val urls = LinkExtractor.getLinks(status.text, status.inReplyToStatusId, users, pages, lists)
   
         if (urls.length == 1) {
           browse(urls(0)._2)
