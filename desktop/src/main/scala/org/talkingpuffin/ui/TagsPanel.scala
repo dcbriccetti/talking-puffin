@@ -2,7 +2,7 @@ package org.talkingpuffin.ui
 
 import org.talkingpuffin.filter.TagUsers
 import java.awt.event.KeyEvent
-import javax.swing.{BorderFactory, JCheckBox}
+import javax.swing.{BorderFactory}
 import swing._
 import _root_.scala.swing.GridBagPanel._
 
@@ -20,7 +20,7 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
       contents += new Button(Action("All" ) {checkBoxView.selectAll(true)})
       contents += new Button(Action("None") {checkBoxView.selectAll(false)})
     }, new Constraints {grid=(0,0)})
-    add(new ScrollPane(checkBoxView), new Constraints {grid=(0,1); fill=Fill.Both; weighty=1})
+    add(new ScrollPane(checkBoxView), new Constraints {grid=(0,1); fill=Fill.Both; weightx=1; weighty=1})
   }, BorderPanel.Position.Center)
 
   var newTag: TextField = _
@@ -49,7 +49,8 @@ object CheckBoxView {
 
 class DecoratedCheckBox(value: String, val undecoratedValue: String) extends CheckBox(value) 
 
-class CheckBoxView(values: List[Tuple2[String,Int]], checkedValues: List[String]) extends BoxPanel(Orientation.Vertical) {
+class CheckBoxView(values: List[Tuple2[String,Int]], checkedValues: List[String]) 
+    extends GridPanel((values.length.toDouble / 2).ceil.toInt, 2) {
   private var checkBoxes = List[DecoratedCheckBox]()
   for ((value, i) <- values.zipWithIndex) {
     val keyVal = KeyEvent.VK_A + i

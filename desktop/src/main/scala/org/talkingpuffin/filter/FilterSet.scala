@@ -3,23 +3,21 @@ package org.talkingpuffin.filter
 import _root_.scala.swing.event.Event
 import _root_.scala.collection.mutable.LinkedHashMap
 import _root_.scala.swing.Publisher
-import java.util.regex.Pattern
 import org.talkingpuffin.ui.{Relationships, User}
 import org.talkingpuffin.twitter.TwitterStatus
 import org.talkingpuffin.filter.RetweetDetector._
+import org.talkingpuffin.util.Loggable
 
 /**
  * A set of all filters, and logic to apply them
  */
-class FilterSet(tagUsers: TagUsers) extends Publisher {
+class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
   class InOutSet {
-    var textFilters = new TextFilters()
+    var cpdFilters = new CompoundFilters()
     var tags = List[String]()
     def tagMatches(userId: Long) = tags.exists(tagUsers.contains(_, userId))
   }
-  val mutedUsers = LinkedHashMap[Long,User]()
   val retweetMutedUsers = LinkedHashMap[Long,User]()
-  val mutedApps = LinkedHashMap[Long,User]()
   var excludeFriendRetweets: Boolean = false
   var excludeNonFollowers: Boolean = false
   var useNoiseFilters: Boolean = false
@@ -39,37 +37,41 @@ class FilterSet(tagUsers: TagUsers) extends Publisher {
       def tagFiltersInclude = includeSet.tags == Nil || includeSet.tagMatches(status.user.id)
       def excludedByTags = excludeSet.tagMatches(status.user.id)
     
-      def excludedByStringMatches: Boolean = { 
-        def matches(search: TextFilter) = 
-          if (search.isRegEx) 
-            Pattern.compile(search.text).matcher(status.text).find 
-          else 
-            status.text.toUpperCase.contains(search.text.toUpperCase)
-      
-        (includeSet.textFilters.list != Nil && ! includeSet.textFilters.list.exists(matches)) ||
-            excludeSet.textFilters.list.exists(matches)
+      def excludedByCompoundFilters: Boolean = {
+        (includeSet.cpdFilters.list != Nil && !includeSet.cpdFilters.matchesAll(status)) ||
+                excludeSet.cpdFilters.matchesAny(status)
       }
-  
-      ! mutedUsers.contains(status.user.id) &&
-          ! mutedApps.contains(status.sourceName.hashCode) &&
-          ! (retweetMutedUsers.contains(status.user.id) && status.isRetweet) &&
+
+      ! (retweetMutedUsers.contains(status.user.id) && status.isRetweet) &&
           tagFiltersInclude && ! excludedByTags && 
           ! (excludeFriendRetweets && status.isFromFriend(friendUsernames)) &&
           ! (excludeNonFollowers && ! rels.followerIds.contains(status.user.id)) &&
           ! (useNoiseFilters && NoiseFilter.isNoise(status.text)) &&
-          ! excludedByStringMatches
+          ! excludedByCompoundFilters
     }
 
     statuses.filter(includeStatus)
   }
+  
+  def muteApps(apps: List[String]) {
+    apps.foreach(app => excludeSet.cpdFilters.add(CompoundFilter(None, None, None, 
+      Some(SourceTextFilter(app, false)), None)))
+    publish
+  }
+
+  def muteSenders(senders: List[String]) {
+    senders.foreach(sender => excludeSet.cpdFilters.add(CompoundFilter(Some(FromTextFilter(sender, false)), 
+      None, None, None, None)))
+    publish
+  }
+
+  def muteRetweetUsers(senders: List[String]) {
+    senders.foreach(sender => excludeSet.cpdFilters.add(CompoundFilter(Some(FromTextFilter(sender, false)), 
+      None, None, None, Some(true))))
+    publish
+  }
 
 }
-
-class TextFilter (var text: String, var isRegEx: Boolean)
 
 case class FilterSetChanged(filterSet: FilterSet) extends Event
 
-class TextFilters {
-  var list = List[TextFilter]()
-  def clear = list = List[TextFilter]() 
-}

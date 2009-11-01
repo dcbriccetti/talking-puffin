@@ -1,7 +1,6 @@
 package org.talkingpuffin.ui
 
 import org.talkingpuffin.filter.TagUsers
-import java.awt.Dimension
 import javax.swing.JDialog
 import util.Cancelable
 import swing.{FlowPanel, Action, Button, BorderPanel}
@@ -29,7 +28,6 @@ class TagsDialog(owner: java.awt.Frame, tagUsers: TagUsers, checkedValues: List[
     }, BorderPanel.Position.South)
   }
   setContentPane(panel.peer)
-  setPreferredSize(new Dimension(200,450))
   pack
   setLocationRelativeTo(owner)
   
