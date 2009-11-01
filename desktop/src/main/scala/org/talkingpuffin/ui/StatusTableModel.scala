@@ -127,7 +127,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   }
 
   def muteSelectedSenderReceivers(rows: List[Int], andViceVersa: Boolean) = {
-    val senderReceivers = for{
+    val senderReceivers = for {
       row <- rows
       status = filteredStatuses_(row)
       sender = status.user.screenName
