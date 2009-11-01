@@ -5,8 +5,8 @@ import swing.GridBagPanel.Anchor
 import java.awt.Dimension
 import java.awt.event.KeyEvent
 import javax.swing.BorderFactory
-import org.talkingpuffin.filter.{CompoundFilter, TextTextFilter, FromTextFilter, ToTextFilter, SourceTextFilter}
 import util.Cancelable
+import org.talkingpuffin.filter._
 
 class CompoundFilterDialog(newCallback: (CompoundFilter) => Unit) extends Frame with Cancelable {
   title = "Filter"
@@ -50,12 +50,13 @@ class CompoundFilterDialog(newCallback: (CompoundFilter) => Unit) extends Frame 
       val okAction: Action = new Action("OK") {
         mnemonic = KeyEvent.VK_O
         def apply = {
-          def off(tf: TextField) = tf.text.trim.length == 0 
-          newCallback(CompoundFilter(
-            if (off(from))   None else Some(FromTextFilter(from.text, fromRegex.selected)), 
-            if (off(text))   None else Some(TextTextFilter(text.text, textRegex.selected)), 
-            if (off(to))     None else Some(ToTextFilter(to.text, toRegex.selected)), 
-            if (off(source)) None else Some(SourceTextFilter(source.text, sourceRegex.selected)),
+          def on(tf: TextField) = tf.text.trim.length > 0
+          var filters = List[TextFilter]()
+          if (on(from)) filters ::= FromTextFilter(from.text, fromRegex.selected)
+          if (on(text)) filters ::= TextTextFilter(text.text, textRegex.selected)
+          if (on(to))   filters ::= ToTextFilter(to.text, toRegex.selected)
+          if (on(source)) filters ::= SourceTextFilter(source.text, sourceRegex.selected)
+        newCallback(CompoundFilter(filters,
             if (! rtCb.selected) None else Some(true)))
           CompoundFilterDialog.this.visible = false
         }

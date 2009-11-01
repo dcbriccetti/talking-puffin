@@ -2,7 +2,7 @@ package org.talkingpuffin.ui
 
 import javax.swing.table.AbstractTableModel
 import swing.Reactor
-import org.talkingpuffin.filter.{CompoundFiltersChanged, CompoundFilters}
+import org.talkingpuffin.filter._
 
 class CompoundFilterModel(cpdFilters: CompoundFilters) extends AbstractTableModel with Reactor {
   private val colNames = List("From", "R", "To", "R", "Text", "R", "Source", "R", "RT")
@@ -18,41 +18,41 @@ class CompoundFilterModel(cpdFilters: CompoundFilters) extends AbstractTableMode
   override def getColumnClass(columnIndex: Int) = classOf[String] 
 
   override def getValueAt(rowIndex: Int, columnIndex: Int): Object = {
-    val row = cpdFilters.list(rowIndex)
+    val cpdFilter = cpdFilters.list(rowIndex)
     columnIndex match {
-      case 0 => row.from match {
+      case 0 => cpdFilter.textFilters.find(_.isInstanceOf[FromTextFilter]) match {
         case Some(cf) => cf.text
         case _ => ""
       }
-      case 1 => row.from match {
+      case 1 => cpdFilter.textFilters.find(_.isInstanceOf[FromTextFilter]) match {
         case Some(cf) => if (cf.isRegEx) "✓" else ""
         case _ => ""
       }
-      case 2 => row.to match {
+      case 2 => cpdFilter.textFilters.find(_.isInstanceOf[ToTextFilter]) match {
         case Some(cf) => cf.text
         case _ => ""
       }
-      case 3 => row.to match {
+      case 3 => cpdFilter.textFilters.find(_.isInstanceOf[ToTextFilter]) match {
         case Some(cf) => if (cf.isRegEx) "✓" else ""
         case _ => ""
       }
-      case 4 => row.text match {
+      case 4 => cpdFilter.textFilters.find(_.isInstanceOf[TextTextFilter]) match {
         case Some(cf) => cf.text
         case _ => ""
       }
-      case 5 => row.text match {
+      case 5 => cpdFilter.textFilters.find(_.isInstanceOf[TextTextFilter]) match {
         case Some(cf) => if (cf.isRegEx) "✓" else ""
         case _ => ""
       }
-      case 6 => row.source match {
+      case 6 => cpdFilter.textFilters.find(_.isInstanceOf[SourceTextFilter]) match {
         case Some(cf) => cf.text
         case _ => ""
       }
-      case 7 => row.source match {
+      case 7 => cpdFilter.textFilters.find(_.isInstanceOf[SourceTextFilter]) match {
         case Some(cf) => if (cf.isRegEx) "✓" else ""
         case _ => ""
       }
-      case 8 => if (row.retweet.getOrElse(false)) "✓" else ""
+      case 8 => if (cpdFilter.retweet.getOrElse(false)) "✓" else ""
     }
   }
 }

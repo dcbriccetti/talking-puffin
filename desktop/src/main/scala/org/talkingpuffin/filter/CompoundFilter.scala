@@ -22,23 +22,14 @@ class CompoundFilters extends Publisher {
 
 class CompoundFiltersChanged extends Event
 
-case class CompoundFilter(val from: Option[FromTextFilter], val text: Option[TextTextFilter], 
-    val to: Option[ToTextFilter], val source: Option[SourceTextFilter], val retweet: Option[Boolean]) 
-    extends Loggable {
+case class CompoundFilter(val textFilters: List[TextFilter], val retweet: Option[Boolean]) extends Loggable {
 
-  def getActive: List[TextFilter] = {
-    for {
-      tf <- List(from, text, to, source)
-      if tf.isDefined
-    } yield tf.get
-  }
-  
   def matches(status: TwitterStatus): Boolean = {
-    getActive.foreach(tf => {
+    textFilters.foreach(tf => {
       val elementMatches = if (tf.isRegEx)
-        Pattern.compile(tf.text).matcher(tf.compareWith(status)).find
+        Pattern.compile(tf.text).matcher(tf.getCompareWith(status)).find
       else
-        tf.compareWith(status).toUpperCase.contains(tf.text.toUpperCase)
+        tf.getCompareWith(status).toUpperCase.contains(tf.text.toUpperCase)
       if (! elementMatches) {
         return false
       }
@@ -50,18 +41,22 @@ case class CompoundFilter(val from: Option[FromTextFilter], val text: Option[Tex
   }
 }
 
-sealed abstract case class TextFilter (val text: String, val isRegEx: Boolean, compareWith: (TwitterStatus) => String)
+sealed abstract case class TextFilter (val text: String, val isRegEx: Boolean, 
+    getCompareWith: (TwitterStatus) => String)
 
 case class FromTextFilter(override val text: String, override val isRegEx: Boolean) 
-        extends TextFilter(text, isRegEx, (status) => status.user.screenName) 
+    extends TextFilter(text, isRegEx, (status) => status.user.screenName)
+
 case class TextTextFilter(override val text: String, override val isRegEx: Boolean) 
-        extends TextFilter(text, isRegEx, (status) => status.text) 
+    extends TextFilter(text, isRegEx, (status) => status.text)
+
 case class ToTextFilter(override val text: String, override val isRegEx: Boolean) 
-        extends TextFilter(text, isRegEx, 
-        (status) => LinkExtractor.getReplyToInfo(status.inReplyToStatusId, status.text) match {
-          case Some(screenNameAndId) => screenNameAndId._1
-          case _ => ""
-        }) 
+    extends TextFilter(text, isRegEx, 
+    (status) => LinkExtractor.getReplyToInfo(status.inReplyToStatusId, status.text) match {
+      case Some(screenNameAndId) => screenNameAndId._1
+      case _ => ""
+    }) 
+
 case class SourceTextFilter(override val text: String, override val isRegEx: Boolean) 
-        extends TextFilter(text, isRegEx, (status) => status.sourceName) 
+    extends TextFilter(text, isRegEx, (status) => status.sourceName) 
 
