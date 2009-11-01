@@ -214,7 +214,10 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   protected def buildActions {
     val SHORTCUT = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
     val SHIFT = java.awt.event.InputEvent.SHIFT_DOWN_MASK
+    val ALT = java.awt.event.InputEvent.ALT_DOWN_MASK
 
+    def smi = TableUtil.getSelectedModelIndexes(StatusTable.this)
+    
     mh add new NextTAction(this)
     mh add new PrevTAction(this)
     
@@ -258,12 +261,15 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     mh add(Action("View lists…") {userActions.viewLists(getSelectedScreenNames, this)}, UserActions.ViewListAccel)
     
     mh.menu.add(new JMenu("Mute") {
-      mh add(Action("User") {tableModel.muteSelectedUsers(
-        TableUtil.getSelectedModelIndexes(StatusTable.this))}, this, ks(VK_M, SHORTCUT))
+      mh add(Action("User") {tableModel.muteSelectedUsers(smi)}, this, ks(VK_M, SHORTCUT))
       mh add(Action("Retweets by user") {tableModel.muteSelectedUsersRetweets(
-        TableUtil.getSelectedModelIndexes(StatusTable.this))}, this, ks(VK_M, SHORTCUT | SHIFT))
+        smi)}, this, ks(VK_M, SHORTCUT | SHIFT))
+      mh add(Action("Sender to receiver") {tableModel.muteSelectedSenderReceivers(smi, false)}, 
+        this, ks(VK_M, SHORTCUT | ALT))
+      mh add(Action("Sender to receiver and vice versa") {tableModel.muteSelectedSenderReceivers(smi, true)}, 
+        this, ks(VK_M, SHORTCUT | ALT | SHIFT))
       mh add(Action("Application") {tableModel.muteSelectedApps(
-        TableUtil.getSelectedModelIndexes(StatusTable.this))}, this, ks(VK_A, SHORTCUT | SHIFT))
+        smi)}, this, ks(VK_A, SHORTCUT | SHIFT))
     })
     
     mh.menu.add(new JMenu("Size") {
@@ -286,7 +292,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     
     mh.menu.add(new JMenu("Delete") {
       mh add(Action("Selected tweets") {
-        tableModel removeStatuses TableUtil.getSelectedModelIndexes(StatusTable.this) 
+        tableModel removeStatuses smi 
       }, this, ks(VK_D, SHORTCUT), ks(VK_DELETE, 0), ks(VK_BACK_SPACE, 0))
   
       mh add(Action("All tweets from selected users") {

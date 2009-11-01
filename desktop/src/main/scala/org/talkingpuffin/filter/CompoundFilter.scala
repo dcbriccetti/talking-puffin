@@ -6,6 +6,7 @@ import swing.Publisher
 import swing.event.Event
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.filter.RetweetDetector._
+import org.talkingpuffin.ui.LinkExtractor
 
 class CompoundFilters extends Publisher {
   var list = List[CompoundFilter]()
@@ -13,7 +14,7 @@ class CompoundFilters extends Publisher {
   def matchesAll(status: TwitterStatus): Boolean = list.forall(_.matches(status))
   def matchesAny(status: TwitterStatus): Boolean = list.exists(_.matches(status))
   def add(cf: CompoundFilter) = {
-    list :::= List(cf)
+    list = list ::: List(cf)
     publish
   }
   def publish: Unit = publish(new CompoundFiltersChanged)
@@ -56,7 +57,11 @@ case class FromTextFilter(override val text: String, override val isRegEx: Boole
 case class TextTextFilter(override val text: String, override val isRegEx: Boolean) 
         extends TextFilter(text, isRegEx, (status) => status.text) 
 case class ToTextFilter(override val text: String, override val isRegEx: Boolean) 
-        extends TextFilter(text, isRegEx, (status) => status.inReplyToStatusId.toString) // TODO 
+        extends TextFilter(text, isRegEx, 
+        (status) => LinkExtractor.getReplyToInfo(status.inReplyToStatusId, status.text) match {
+          case Some(screenNameAndId) => screenNameAndId._1
+          case _ => ""
+        }) 
 case class SourceTextFilter(override val text: String, override val isRegEx: Boolean) 
         extends TextFilter(text, isRegEx, (status) => status.sourceName) 
 

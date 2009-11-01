@@ -71,6 +71,12 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
     publish
   }
 
+  def muteSenderReceivers(srs: List[(String, String)]) {
+    srs.foreach(sr => excludeSet.cpdFilters.add(CompoundFilter(Some(FromTextFilter(sr._1, false)), 
+      None, Some(ToTextFilter(sr._2, false)), None, None)))
+    publish
+  }
+
 }
 
 case class FilterSetChanged(filterSet: FilterSet) extends Event

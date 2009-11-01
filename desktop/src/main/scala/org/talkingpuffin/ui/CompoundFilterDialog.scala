@@ -5,7 +5,7 @@ import swing.GridBagPanel.Anchor
 import java.awt.Dimension
 import java.awt.event.KeyEvent
 import javax.swing.BorderFactory
-import org.talkingpuffin.filter.{CompoundFilter, TextTextFilter, FromTextFilter, SourceTextFilter}
+import org.talkingpuffin.filter.{CompoundFilter, TextTextFilter, FromTextFilter, ToTextFilter, SourceTextFilter}
 import util.Cancelable
 
 class CompoundFilterDialog(newCallback: (CompoundFilter) => Unit) extends Frame with Cancelable {
@@ -23,11 +23,17 @@ class CompoundFilterDialog(newCallback: (CompoundFilter) => Unit) extends Frame 
     val fromRegex = new Regex
     add(fromRegex, new Cns(2, 0))
 
-    add(new Label("Status Text"), new Cns(0, 1))
+    add(new Label("To Screen Name"), new Cns(0, 1))
+    val to = new TextField {columns = 20; minimumSize = new Dimension(200, preferredSize.height)}
+    add(to, new Cns(1, 1))
+    val toRegex = new Regex
+    add(toRegex, new Cns(2, 1))
+
+    add(new Label("Status Text"), new Cns(0, 2))
     val text = new TextField {columns = 40; minimumSize = new Dimension(200, preferredSize.height)}
-    add(text, new Cns(1, 1))
+    add(text, new Cns(1, 2))
     val textRegex = new Regex
-    add(textRegex, new Cns(2, 1))
+    add(textRegex, new Cns(2, 2))
 
     add(new Label("Application"), new Cns(0, 3))
     val source = new TextField {columns = 20; }
@@ -48,7 +54,7 @@ class CompoundFilterDialog(newCallback: (CompoundFilter) => Unit) extends Frame 
           newCallback(CompoundFilter(
             if (off(from))   None else Some(FromTextFilter(from.text, fromRegex.selected)), 
             if (off(text))   None else Some(TextTextFilter(text.text, textRegex.selected)), 
-            None, 
+            if (off(to))     None else Some(ToTextFilter(to.text, toRegex.selected)), 
             if (off(source)) None else Some(SourceTextFilter(source.text, sourceRegex.selected)),
             if (! rtCb.selected) None else Some(true)))
           CompoundFilterDialog.this.visible = false

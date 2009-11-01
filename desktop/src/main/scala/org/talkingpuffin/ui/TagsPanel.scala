@@ -13,13 +13,14 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
     extends BorderPanel {
   border = BorderFactory.createEmptyBorder(5,5,5,5)
   val checkBoxView = new CheckBoxView(tagUsers.getTagsWithCounts, checkedValues)
-  if (showTitle) add(new Label("Tags"), BorderPanel.Position.North)
+
+  add(new FlowPanel {
+    if (showTitle) contents += new Label("Tags")
+    contents += new Button(Action("All" ) {checkBoxView.selectAll(true)})
+    contents += new Button(Action("None") {checkBoxView.selectAll(false)})
+  }, BorderPanel.Position.North)
   
   add(new GridBagPanel {
-    add(new FlowPanel {
-      contents += new Button(Action("All" ) {checkBoxView.selectAll(true)})
-      contents += new Button(Action("None") {checkBoxView.selectAll(false)})
-    }, new Constraints {grid=(0,0)})
     add(new ScrollPane(checkBoxView), new Constraints {grid=(0,1); fill=Fill.Both; weightx=1; weighty=1})
   }, BorderPanel.Position.Center)
 

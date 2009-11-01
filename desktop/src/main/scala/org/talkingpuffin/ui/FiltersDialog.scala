@@ -81,9 +81,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
   }
 
   class InOutPane(textPrompt: String, textFilters: CompoundFilters) extends GridBagPanel {
-    val tagsPanel = new TagsPanel(true, false, tagUsers, List[String]()) {
-      minimumSize = new Dimension(180, 100)
-    }
+    val tagsPanel = new TagsPanel(true, false, tagUsers, List[String]())
   
     add(tagsPanel, new Constraints {grid=(0,0); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1})
 

@@ -121,26 +121,33 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
 
   private def mapToIdTuple(users: List[User]) = users.map(user => (user.id, user))
   
-  def muteSelectedUsers(rows: List[Int]) = muteUsers(getScreenNames(rows))
-
-  private def muteUsers(users: List[String]) {
-    filterSet.muteSenders(users)
+  def muteSelectedUsers(rows: List[Int]) = {
+    filterSet.muteSenders(getScreenNames(rows))
     filterAndNotify
   }
 
-  def muteSelectedUsersRetweets(rows: List[Int]) = muteRetweetUsers(getScreenNames(rows))
-
-  private def muteRetweetUsers(users: List[String]) {
-    filterSet.muteRetweetUsers(users)
+  def muteSelectedSenderReceivers(rows: List[Int], andViceVersa: Boolean) = {
+    val senderReceivers = for{
+      row <- rows
+      status = filteredStatuses_(row)
+      sender = status.user.screenName
+      rti = LinkExtractor.getReplyToInfo(status.inReplyToStatusId, status.text)
+      if rti.isDefined
+    } yield (sender, rti.get._1)
+    
+    filterSet.muteSenderReceivers(senderReceivers)
+    if (andViceVersa)
+      filterSet.muteSenderReceivers(senderReceivers map (t => (t._2, t._1)))
     filterAndNotify
   }
 
-  def muteSelectedApps(rows: List[Int]) = muteApps(getApps(rows))
+  def muteSelectedUsersRetweets(rows: List[Int]) = {
+    filterSet.muteRetweetUsers(getScreenNames(rows))
+    filterAndNotify
+  }
 
-  private def getApps(rows: List[Int]) = rows.map(i => filteredStatuses_(i).sourceName)
-  
-  private def muteApps(apps: List[String]) {
-    filterSet.muteApps(apps)
+  def muteSelectedApps(rows: List[Int]) = {
+    filterSet.muteApps(rows.map(i => filteredStatuses_(i).sourceName))
     filterAndNotify
   }
 
@@ -149,7 +156,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     new User(user.id, user.name)
   })
   
-  def getScreenNames(rows: List[Int]) = rows.map(i => filteredStatuses_(i).user.screenName)
+  private def getScreenNames(rows: List[Int]) = rows.map(i => filteredStatuses_(i).user.screenName)
   
   def getStatuses(rows: List[Int]): List[TwitterStatus] = rows.map(filteredStatuses_)
 

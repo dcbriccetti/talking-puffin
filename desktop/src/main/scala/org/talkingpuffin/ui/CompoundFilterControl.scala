@@ -22,7 +22,9 @@ class CompoundFilterControl(label: String, filters: CompoundFilters) extends Box
       peer.getColumnModel().getColumn(3).setMaxWidth(15)
       peer.getColumnModel().getColumn(4).setPreferredWidth(100)
       peer.getColumnModel().getColumn(5).setMaxWidth(15)
-      peer.getColumnModel().getColumn(6).setMaxWidth(30)
+      peer.getColumnModel().getColumn(6).setPreferredWidth(100)
+      peer.getColumnModel().getColumn(7).setMaxWidth(15)
+      peer.getColumnModel().getColumn(8).setMaxWidth(30)
 
       def addDelete {
         val delAction = Action("Delete") {

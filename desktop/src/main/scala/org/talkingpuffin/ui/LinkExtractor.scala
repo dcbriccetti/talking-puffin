@@ -1,7 +1,6 @@
 package org.talkingpuffin.ui
 
 import java.util.regex.Pattern
-import org.talkingpuffin.util.Loggable
 
 /**
  * Extracts links from Twitter status
@@ -66,7 +65,7 @@ object LinkExtractor {
   
   /**
    * Returns the Twitter handle and status ID of the user whose @handle appears at the beginning of 
-   * the tweet, None.
+   * the tweet, or None.
    */
   def getReplyToInfo(inReplyToStatusId: Option[Long], text: String): Option[(String,Long)] = 
     inReplyToStatusId match {
