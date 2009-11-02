@@ -1,7 +1,7 @@
 package org.talkingpuffin.filter
 
-import _root_.scala.swing.event.Event
-import _root_.scala.swing.Publisher
+import scala.swing.event.Event
+import scala.swing.Publisher
 import org.talkingpuffin.ui.{Relationships}
 import org.talkingpuffin.twitter.TwitterStatus
 import org.talkingpuffin.filter.RetweetDetector._
@@ -11,11 +11,13 @@ import org.talkingpuffin.util.Loggable
  * A set of all filters, and logic to apply them
  */
 class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
+  
   class InOutSet {
     var cpdFilters = new CompoundFilters()
     var tags = List[String]()
     def tagMatches(userId: Long) = tags.exists(tagUsers.contains(_, userId))
   }
+  
   var excludeFriendRetweets: Boolean = false
   var excludeNonFollowers: Boolean = false
   var useNoiseFilters: Boolean = false
@@ -70,10 +72,9 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
 
   def muteSelectedUsersCommentedRetweets(senders: List[String]) {
     senders.foreach(sender => {
-      excludeSet.cpdFilters.add(
-        CompoundFilter(List(FromTextFilter(sender, false)), Some(true), None))
-      excludeSet.cpdFilters.add(
-        CompoundFilter(List(FromTextFilter(sender, false)), None, Some(true)))
+      val filters = List(FromTextFilter(sender, false))
+      excludeSet.cpdFilters.add(CompoundFilter(filters, Some(true), None))
+      excludeSet.cpdFilters.add(CompoundFilter(filters, None, Some(true)))
     })
     publish
   }
@@ -87,4 +88,3 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
 }
 
 case class FilterSetChanged(filterSet: FilterSet) extends Event
-
