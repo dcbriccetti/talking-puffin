@@ -1,9 +1,8 @@
 package org.talkingpuffin.filter
 
 import _root_.scala.swing.event.Event
-import _root_.scala.collection.mutable.LinkedHashMap
 import _root_.scala.swing.Publisher
-import org.talkingpuffin.ui.{Relationships, User}
+import org.talkingpuffin.ui.{Relationships}
 import org.talkingpuffin.twitter.TwitterStatus
 import org.talkingpuffin.filter.RetweetDetector._
 import org.talkingpuffin.util.Loggable
@@ -17,7 +16,6 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
     var tags = List[String]()
     def tagMatches(userId: Long) = tags.exists(tagUsers.contains(_, userId))
   }
-  val retweetMutedUsers = LinkedHashMap[Long,User]()
   var excludeFriendRetweets: Boolean = false
   var excludeNonFollowers: Boolean = false
   var useNoiseFilters: Boolean = false
@@ -42,9 +40,8 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
                 excludeSet.cpdFilters.matchesAny(status)
       }
 
-      ! (retweetMutedUsers.contains(status.user.id) && status.isRetweet) &&
-          tagFiltersInclude && ! excludedByTags && 
-          ! (excludeFriendRetweets && status.isFromFriend(friendUsernames)) &&
+      tagFiltersInclude && ! excludedByTags && 
+          ! (excludeFriendRetweets && status.isRetweetOfStatusFromFriend(friendUsernames)) &&
           ! (excludeNonFollowers && ! rels.followerIds.contains(status.user.id)) &&
           ! (useNoiseFilters && NoiseFilter.isNoise(status.text)) &&
           ! excludedByCompoundFilters
@@ -54,8 +51,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
   }
   
   def muteApps(apps: List[String]) {
-    apps.foreach(app => excludeSet.cpdFilters.add(CompoundFilter( 
-      List(SourceTextFilter(app, false)), None)))
+    apps.foreach(app => excludeSet.cpdFilters.add(CompoundFilter(List(SourceTextFilter(app, false)), None)))
     publish
   }
 

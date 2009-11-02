@@ -22,9 +22,10 @@ class RetweetDetector(text: String) {
     case _ => false
   })
   
-  def isFromFriend(friendUsernames: List[String]) = RetweetDetector.regexes.exists(regex => text match {
-    case regex(_, username) => friendUsernames.contains(username)
-    case _ => false
-  })
+  def isRetweetOfStatusFromFriend(friendUsernames: List[String]) = 
+    RetweetDetector.regexes.exists(regex => text match {
+      case regex(_, username) => friendUsernames.contains(username)
+      case _ => false
+    })
 }
 

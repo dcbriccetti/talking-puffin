@@ -9,9 +9,9 @@ class RetweetDetectorTest extends JUnit4(RetweetDetectorSpec)
 object RetweetDetectorSpec extends Specification {
     
   "Retweets of friends are identified correctly" in {
-    assert("RT @dave Hi".isFromFriend(List("dave", "mary")))
-    assert("Hi (via @dave)".isFromFriend(List("dave", "mary")))
-    assert(! "Hi (via @dave2)".isFromFriend(List("dave", "mary")))
+    assert("RT @dave Hi".isRetweetOfStatusFromFriend(List("dave", "mary")))
+    assert("Hi (via @dave)".isRetweetOfStatusFromFriend(List("dave", "mary")))
+    assert(! "Hi (via @dave2)".isRetweetOfStatusFromFriend(List("dave", "mary")))
   }
 
   "Retweets are identified correctly" in {
