@@ -67,8 +67,8 @@ object TwitterUser{
     n.child foreach {(sub) => 
       sub match{
         case <id>{Text(text)}</id> => user.id = Integer.parseInt(text)
-        case <name>{Text(text)}</name> => user.name = text
-        case <screen_name>{Text(text)}</screen_name> => user.screenName = text
+        case <name>{Text(text)}</name> => user.name = text.trim // Trimming because of a user with a NL (0x0a)
+        case <screen_name>{Text(text)}</screen_name> => user.screenName = text.trim
         case <location/> => Nil
         case <location>{Text(text)}</location> => user.location = text
         case <description/> => Nil
