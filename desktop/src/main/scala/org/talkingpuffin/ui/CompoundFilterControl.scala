@@ -16,15 +16,17 @@ class CompoundFilterControl(label: String, filters: CompoundFilters) extends Box
   contents += new ScrollPane {
     contents = new Table {
       model = tableModel
-      peer.getColumnModel().getColumn(0).setPreferredWidth(100)
-      peer.getColumnModel().getColumn(1).setMaxWidth(15)
-      peer.getColumnModel().getColumn(2).setPreferredWidth(100)
-      peer.getColumnModel().getColumn(3).setMaxWidth(15)
-      peer.getColumnModel().getColumn(4).setPreferredWidth(100)
-      peer.getColumnModel().getColumn(5).setMaxWidth(15)
-      peer.getColumnModel().getColumn(6).setPreferredWidth(100)
-      peer.getColumnModel().getColumn(7).setMaxWidth(15)
-      peer.getColumnModel().getColumn(8).setMaxWidth(30)
+      val cm = peer.getColumnModel()
+      cm.getColumn(0).setPreferredWidth(100)
+      cm.getColumn(1).setMaxWidth(15)
+      cm.getColumn(2).setPreferredWidth(100)
+      cm.getColumn(3).setMaxWidth(15)
+      cm.getColumn(4).setPreferredWidth(100)
+      cm.getColumn(5).setMaxWidth(15)
+      cm.getColumn(6).setPreferredWidth(100)
+      cm.getColumn(7).setMaxWidth(15)
+      cm.getColumn(8).setMaxWidth(30)
+      cm.getColumn(9).setMaxWidth(30)
 
       def addDelete {
         val delAction = Action("Delete") {

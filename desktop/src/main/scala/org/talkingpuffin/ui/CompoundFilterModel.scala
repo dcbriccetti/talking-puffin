@@ -5,7 +5,7 @@ import swing.Reactor
 import org.talkingpuffin.filter._
 
 class CompoundFilterModel(cpdFilters: CompoundFilters) extends AbstractTableModel with Reactor {
-  private val colNames = List("From", "R", "To", "R", "Text", "R", "Source", "R", "RT")
+  private val colNames = List("From", "R", "To", "R", "Text", "R", "Source", "R", "RT", "CRT")
   
   listenTo(cpdFilters)
   reactions += {
@@ -13,7 +13,7 @@ class CompoundFilterModel(cpdFilters: CompoundFilters) extends AbstractTableMode
   }
   
   override def getColumnName(column: Int) = colNames(column)
-  def getColumnCount = 9
+  def getColumnCount = 10
   def getRowCount = cpdFilters.list.length
   override def getColumnClass(columnIndex: Int) = classOf[String] 
 
@@ -53,6 +53,7 @@ class CompoundFilterModel(cpdFilters: CompoundFilters) extends AbstractTableMode
         case _ => ""
       }
       case 8 => if (cpdFilter.retweet.getOrElse(false)) "✓" else ""
+      case 9 => if (cpdFilter.commentedRetweet.getOrElse(false)) "✓" else ""
     }
   }
 }

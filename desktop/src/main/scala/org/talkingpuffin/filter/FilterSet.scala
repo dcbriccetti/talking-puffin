@@ -51,25 +51,36 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
   }
   
   def muteApps(apps: List[String]) {
-    apps.foreach(app => excludeSet.cpdFilters.add(CompoundFilter(List(SourceTextFilter(app, false)), None)))
+    apps.foreach(app => excludeSet.cpdFilters.add(
+        CompoundFilter(List(SourceTextFilter(app, false)), None, None)))
     publish
   }
 
   def muteSenders(senders: List[String]) {
     senders.foreach(sender => excludeSet.cpdFilters.add(
-        CompoundFilter(List(FromTextFilter(sender, false)), None)))
+        CompoundFilter(List(FromTextFilter(sender, false)), None, None)))
     publish
   }
 
   def muteRetweetUsers(senders: List[String]) {
-    senders.foreach(sender => excludeSet.cpdFilters.add(CompoundFilter(List(FromTextFilter(sender, false)), 
-        Some(true))))
+    senders.foreach(sender => excludeSet.cpdFilters.add(
+        CompoundFilter(List(FromTextFilter(sender, false)), Some(true), None)))
+    publish
+  }
+
+  def muteSelectedUsersCommentedRetweets(senders: List[String]) {
+    senders.foreach(sender => {
+      excludeSet.cpdFilters.add(
+        CompoundFilter(List(FromTextFilter(sender, false)), Some(true), None))
+      excludeSet.cpdFilters.add(
+        CompoundFilter(List(FromTextFilter(sender, false)), None, Some(true)))
+    })
     publish
   }
 
   def muteSenderReceivers(srs: List[(String, String)]) {
-    srs.foreach(sr => excludeSet.cpdFilters.add(CompoundFilter(List(FromTextFilter(sr._1, false), 
-      ToTextFilter(sr._2, false)), None)))
+    srs.foreach(sr => excludeSet.cpdFilters.add(
+        CompoundFilter(List(FromTextFilter(sr._1, false), ToTextFilter(sr._2, false)), None, None)))
     publish
   }
 

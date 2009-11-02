@@ -264,6 +264,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
       mh add(Action("User") {tableModel.muteSelectedUsers(smi)}, this, ks(VK_M, SHORTCUT))
       mh add(Action("Retweets by user") {tableModel.muteSelectedUsersRetweets(
         smi)}, this, ks(VK_M, SHORTCUT | SHIFT))
+      mh add(Action("Commented retweets by user") {tableModel.muteSelectedUsersCommentedRetweets(
+        smi)}, this, ks(VK_C, SHORTCUT | SHIFT))
       mh add(Action("Sender to receiver") {tableModel.muteSelectedSenderReceivers(smi, false)}, 
         this, ks(VK_M, SHORTCUT | ALT))
       mh add(Action("Sender to receiver and vice versa") {tableModel.muteSelectedSenderReceivers(smi, true)}, 

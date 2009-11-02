@@ -41,10 +41,15 @@ class CompoundFilterDialog(newCallback: (CompoundFilter) => Unit) extends Frame 
     val sourceRegex = new Regex
     add(sourceRegex, new Cns(2, 3))
 
-    val rtCb = new CheckBox("RT") {
+    val rtCb = new CheckBox("Retweet") {
       tooltip = "Whether the tweet is a retweet"
     }
     add(rtCb, new Cns(0, 4))
+
+    val crtCb = new CheckBox("Commented Retweet") {
+      tooltip = "Whether the tweet is a commented retweet: [comment] RT [user] [tweet]"
+    }
+    add(crtCb, new Cns(0, 5))
 
     add(new FlowPanel {
       val okAction: Action = new Action("OK") {
@@ -57,14 +62,16 @@ class CompoundFilterDialog(newCallback: (CompoundFilter) => Unit) extends Frame 
           if (on(to))   filters ::= ToTextFilter(to.text, toRegex.selected)
           if (on(source)) filters ::= SourceTextFilter(source.text, sourceRegex.selected)
         newCallback(CompoundFilter(filters,
-            if (! rtCb.selected) None else Some(true)))
+            if (! rtCb.selected) None else Some(true),
+            if (! crtCb.selected) None else Some(true)
+          ))
           CompoundFilterDialog.this.visible = false
         }
       }
       val okButton = new Button(okAction)
       defaultButton = okButton
       contents += okButton
-    }, new Cns(0, 5) {gridwidth = 3})
+    }, new Cns(0, 6) {gridwidth = 3})
   }
   contents = panel
   

@@ -146,6 +146,11 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     filterAndNotify
   }
 
+  def muteSelectedUsersCommentedRetweets(rows: List[Int]) = {
+    filterSet.muteSelectedUsersCommentedRetweets(getScreenNames(rows))
+    filterAndNotify
+  }
+
   def muteSelectedApps(rows: List[Int]) = {
     filterSet.muteApps(rows.map(i => filteredStatuses_(i).sourceName))
     filterAndNotify

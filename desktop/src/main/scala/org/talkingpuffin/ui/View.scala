@@ -28,7 +28,7 @@ object View {
     val filterSet = new FilterSet(tagUsers)
     if (include.isDefined) {
       filterSet.includeSet.cpdFilters.list ::= new CompoundFilter( 
-        List(TextTextFilter(include.get, false)), None)
+        List(TextTextFilter(include.get, false)), None, None)
     }
     val sto = new StatusTableOptions(true, true, true)
     val model = dataProvider match {

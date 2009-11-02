@@ -22,7 +22,8 @@ class CompoundFilters extends Publisher {
 
 class CompoundFiltersChanged extends Event
 
-case class CompoundFilter(val textFilters: List[TextFilter], val retweet: Option[Boolean]) extends Loggable {
+case class CompoundFilter(val textFilters: List[TextFilter], val retweet: Option[Boolean], 
+    val commentedRetweet: Option[Boolean]) extends Loggable {
 
   def matches(status: TwitterStatus): Boolean = {
     textFilters.foreach(tf => {
@@ -34,10 +35,14 @@ case class CompoundFilter(val textFilters: List[TextFilter], val retweet: Option
         return false
       }
     })
-    retweet match {
+    (retweet match {
       case Some(rt) if rt => status.isRetweet
       case _ => true
-    }
+    }) && 
+    (commentedRetweet match {
+      case Some(rt) if rt => status.isCommentedRetweet
+      case _ => true
+    })  
   }
 }
 
