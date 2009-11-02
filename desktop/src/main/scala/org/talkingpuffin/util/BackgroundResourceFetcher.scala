@@ -16,14 +16,15 @@ trait BackgroundResourceFetcherMBean {
 /**
  * Fetches resources in the background, and calls a function in the Swing event thread when ready.
  */
-abstract class BackgroundResourceFetcher[K,V](val resourceName: String) extends BackgroundResourceFetcherMBean {
+abstract class BackgroundResourceFetcher[K,V](resourceName: String) 
+    extends BackgroundResourceFetcherMBean {
 
   val fetcherName = resourceName + " fetcher"
   val log = Logger.getLogger(fetcherName)
   val cache: java.util.Map[K,V] = new MapMaker().softValues().makeMap()
   val requestQueue = new LinkedBlockingQueue[FetchRequest[K,V]]
   val inProgress = Collections.synchronizedSet(new HashSet[K])
-  val threadPool = Executors.newFixedThreadPool(15)
+  val threadPool = Executors.newCachedThreadPool
   var running = true
   var hits = 0
   var misses = 0

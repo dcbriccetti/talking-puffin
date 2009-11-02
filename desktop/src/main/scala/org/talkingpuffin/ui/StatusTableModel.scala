@@ -121,51 +121,47 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
 
   private def mapToIdTuple(users: List[User]) = users.map(user => (user.id, user))
   
-  def muteSelectedUsers(rows: List[Int]) = muteUsers(getUsers(rows))
-
-  private def muteUsers(users: List[User]) {
-    filterSet.mutedUsers ++= mapToIdTuple(users)
+  def muteSelectedUsers(rows: List[Int]) = {
+    filterSet.muteSenders(getScreenNames(rows))
     filterAndNotify
   }
 
-  def unmuteUsers(userIds: List[Long]) {
-    filterSet.mutedUsers --= userIds
-    filterAndNotify
-  }
-  
-  def muteSelectedUsersRetweets(rows: List[Int]) = muteRetweetUsers(getUsers(rows))
-
-  private def muteRetweetUsers(users: List[User]) {
-    filterSet.retweetMutedUsers ++= mapToIdTuple(users)
-    filterAndNotify
-  }
-
-  def unmuteRetweetUsers(userIds: List[Long]) {
-    filterSet.retweetMutedUsers --= userIds
-    filterAndNotify
-  }
-  
-  def muteSelectedApps(rows: List[Int]) = muteApps(getApps(rows))
-
-  private def getApps(rows: List[Int]) = rows.map(i => {
-    val app = filteredStatuses_(i).sourceName
-    new User(app.hashCode, app)
-  })
-  
-  private def muteApps(apps: List[User]) {
-    filterSet.mutedApps ++= mapToIdTuple(apps)
+  def muteSelectedSenderReceivers(rows: List[Int], andViceVersa: Boolean) = {
+    val senderReceivers = for {
+      row <- rows
+      status = filteredStatuses_(row)
+      sender = status.user.screenName
+      rti = LinkExtractor.getReplyToInfo(status.inReplyToStatusId, status.text)
+      if rti.isDefined
+    } yield (sender, rti.get._1)
+    
+    filterSet.muteSenderReceivers(senderReceivers)
+    if (andViceVersa)
+      filterSet.muteSenderReceivers(senderReceivers map (t => (t._2, t._1)))
     filterAndNotify
   }
 
-  def unmuteApps(appIds: List[Long]) {
-    filterSet.mutedApps --= appIds
+  def muteSelectedUsersRetweets(rows: List[Int]) = {
+    filterSet.muteRetweetUsers(getScreenNames(rows))
     filterAndNotify
   }
-  
+
+  def muteSelectedUsersCommentedRetweets(rows: List[Int]) = {
+    filterSet.muteSelectedUsersCommentedRetweets(getScreenNames(rows))
+    filterAndNotify
+  }
+
+  def muteSelectedApps(rows: List[Int]) = {
+    filterSet.muteApps(rows.map(i => filteredStatuses_(i).sourceName))
+    filterAndNotify
+  }
+
   def getUsers(rows: List[Int]) = rows.map(i => {
     val user = filteredStatuses_(i).user
     new User(user.id, user.name)
   })
+  
+  private def getScreenNames(rows: List[Int]) = rows.map(i => filteredStatuses_(i).user.screenName)
   
   def getStatuses(rows: List[Int]): List[TwitterStatus] = rows.map(filteredStatuses_)
 

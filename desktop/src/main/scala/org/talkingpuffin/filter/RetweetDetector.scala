@@ -8,7 +8,9 @@ import org.talkingpuffin.twitter.TwitterStatus
  */
 object RetweetDetector {
   private val user = LinkExtractor.usernameRegex
-  private val rtUser = ("""(rt|RT|♺)\:? ?""" + user + ".*").r
+  private val rtUserString = """(rt|RT|♺)\:? ?""" + user + ".*"
+  private val rtUser = rtUserString.r
+  private val commentedRtUser = (".*? " + rtUserString).r
   private val viaUser = (""".*\((via|VIA|Via) +""" + user + """\)""").r
   private val regexes = List(rtUser, viaUser)
   
@@ -22,9 +24,15 @@ class RetweetDetector(text: String) {
     case _ => false
   })
   
-  def isFromFriend(friendUsernames: List[String]) = RetweetDetector.regexes.exists(regex => text match {
-    case regex(_, username) => friendUsernames.contains(username)
+  def isCommentedRetweet = text match {
+    case RetweetDetector.commentedRtUser(_, _) => true
     case _ => false
-  })
+  }
+  
+  def isRetweetOfStatusFromFriend(friendUsernames: List[String]) = 
+    RetweetDetector.regexes.exists(regex => text match {
+      case regex(_, username) => friendUsernames.contains(username)
+      case _ => false
+    })
 }
 

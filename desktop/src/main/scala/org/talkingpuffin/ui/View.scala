@@ -1,8 +1,8 @@
 package org.talkingpuffin.ui
 
-import org.talkingpuffin.filter.{TagUsers, FilterSet, TextFilter}
 import org.talkingpuffin.Session
 import swing.{Reactor, TabbedPane}
+import org.talkingpuffin.filter.{CompoundFilter, TagUsers, FilterSet, TextTextFilter}
 
 case class View(val model: StatusTableModel, val pane: StatusPane) extends Reactor {
   listenTo(model)
@@ -27,7 +27,8 @@ object View {
     val title = dataProvider.titleCreator.create
     val filterSet = new FilterSet(tagUsers)
     if (include.isDefined) {
-      filterSet.includeSet.textFilters.list ::= new TextFilter(include.get, false) 
+      filterSet.includeSet.cpdFilters.list ::= new CompoundFilter( 
+        List(TextTextFilter(include.get, false)), None, None)
     }
     val sto = new StatusTableOptions(true, true, true)
     val model = dataProvider match {

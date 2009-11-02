@@ -13,6 +13,9 @@ class LinkUnIndirectorTest {
   @Test def digg = testExpand("http://digg.com/d318HBo?t",
     "http://www.treehugger.com/files/2009/10/tesla-electric-car-accident-denmark-prius-suv.php")
   
+  @Test def dzone = testExpand("http://bit.ly/vO47k",
+    "http://www.pushing-pixels.org/?p=1499")
+  
   @Test def friendFeed = testExpand("http://ff.im/auf8d",
     "http://fupeg.blogspot.com/2009/10/social-technology-fail.html")
   

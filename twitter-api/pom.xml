@@ -6,7 +6,7 @@
     <parent>
       <groupId>org.talkingpuffin</groupId>
       <artifactId>talking-puffin-base</artifactId>
-      <version>0.73</version>
+      <version>0.75</version>
     </parent>
     <name>TalkingPuffin Twitter API</name>
     <url>http://TalkingPuffin.org/</url>
