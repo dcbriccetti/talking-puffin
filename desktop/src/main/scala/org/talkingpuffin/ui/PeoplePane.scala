@@ -39,6 +39,7 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     table = new PeopleTable(tableModel)
     peer.setViewportView(table)
   }
+  private val tweetDetailPanel = new TweetDetailPanel(session, table, None, None)
   private val userActions = new UserActions(session, rels)
   val mh = new PopupMenuHelper(table)
   private var specialMenuItems = new SpecialMenuItems(table, tableModel.relationships,
@@ -85,13 +86,19 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     
     addSeparator
     add(dockedButton)
+    add((new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
   }
   peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
   
   add(tableScrollPane, new Constraints { 
     grid=(0,1); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1 
   })
+  add(tweetDetailPanel, new Constraints{
+    grid = (0,2); fill = GridBagPanel.Fill.Horizontal;
+  })
   
+  tweetDetailPanel.connectToTable(table)
+
   reactions += {
     case e: UsersChanged => setLabels
   }
@@ -115,7 +122,8 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     mh.add(new PrevTAction(comp))
     mh add(new TagAction(table, tableModel), ks(KeyEvent.VK_T,0))
     mh.add(Action("Reply") { reply }, ks(KeyEvent.VK_R,0))
-    userActions.addCommonItems(mh, specialMenuItems, table, getSelectedScreenNames)
+    userActions.addCommonItems(mh, specialMenuItems, table, 
+        tweetDetailPanel.showBigPicture, getSelectedScreenNames)
   }
 
   private def getSelectedUsers:List[TwitterUser] = 

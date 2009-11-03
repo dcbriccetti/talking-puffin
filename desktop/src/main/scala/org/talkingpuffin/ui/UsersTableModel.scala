@@ -5,12 +5,13 @@ import javax.swing.Icon
 import swing.Reactor
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.ui.table.EmphasizedString
-import org.talkingpuffin.twitter.TwitterUser
 import org.talkingpuffin.util.Loggable
 import java.util.Date
+import org.talkingpuffin.twitter.{TwitterStatus, TwitterUser}
 
 class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers, 
-    val relationships: Relationships) extends AbstractTableModel with TaggingSupport with Reactor with Loggable {
+    val relationships: Relationships) 
+    extends UserAndStatusProvider with TaggingSupport with Reactor with Loggable {
   
   val pcell = new PictureCell(this, 1)
   private val colNames = List(" ", "Image", "Screen Name", "Name", "Friends", "Follwrs", 
@@ -67,6 +68,11 @@ class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers,
   override def getColumnName(column: Int) = colNames(column)
   
   def getRowAt(rowIndex: Int) = usersModel.users(rowIndex)
+  
+  def getUserAndStatusAt(rowIndex: Int): Tuple2[TwitterUser, Option[TwitterStatus]] = {
+    val user = getRowAt(rowIndex)
+    (user, user.status)
+  }
 
   def getUsers(rows: List[Int]): List[User] = 
     rows.map(rowIndex => {

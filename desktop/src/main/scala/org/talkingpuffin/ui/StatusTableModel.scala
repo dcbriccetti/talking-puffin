@@ -8,9 +8,9 @@ import javax.swing.table.{AbstractTableModel}
 import org.apache.log4j.Logger
 import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
 import org.talkingpuffin.state.{PreferencesFactory, GlobalPrefs, PrefKeys}
-import org.talkingpuffin.twitter.{TwitterMessage, TwitterStatus}
 import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
+import org.talkingpuffin.twitter.{TwitterUser, TwitterMessage, TwitterStatus}
 
 /**
  * Model providing status data to the JTable
@@ -19,7 +19,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     val relationships: Relationships,
     screenNameToUserNameMap: Map[String, String], filterSet: FilterSet, service: String, 
     username: String, val tagUsers: TagUsers) 
-    extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
+    extends UserAndStatusProvider with TaggingSupport with Publisher with Reactor {
   
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
 
@@ -106,6 +106,11 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
 
   def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses_(rowIndex)
   
+  def getUserAndStatusAt(rowIndex: Int): Tuple2[TwitterUser, Option[TwitterStatus]] = {
+    val status = getStatusAt(rowIndex)
+    (status.user, Some(status))
+  }
+
   override def getColumnClass(col: Int) = List(
     classOf[java.util.Date], 
     classOf[Icon], 

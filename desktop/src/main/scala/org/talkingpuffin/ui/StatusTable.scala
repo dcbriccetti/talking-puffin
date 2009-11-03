@@ -229,11 +229,6 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     }, ks(VK_E, 0))
     mh add(Action("Retweet new way") { retweetNewWay }, ks(VK_E, SHORTCUT))
     
-    mh add(new Action("Show larger image") { 
-      def apply = showBigPicture
-      specialMenuItems.oneStatusSelected.list ::= this
-    }, ks(VK_I, 0))
-    
     mh.menu.add(new JMenu("View in browser") {
       mh add(Action("Status") {viewSelected}, this, ks(VK_V, 0))
       mh add(Action("Status source") {viewSourceSelected}, this, ks(VK_V, SHORTCUT | SHIFT))
@@ -272,7 +267,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
       mh add(Action("Decrease Row Height") { changeRowHeight(-8) }, this)
     })
 
-    userActions.addCommonItems(mh, specialMenuItems, this, getSelectedScreenNames)
+    userActions.addCommonItems(mh, specialMenuItems, this, showBigPicture, getSelectedScreenNames)
     
     mh.menu.add(new JMenu("Delete") {
       mh add(Action("Selected tweets") {

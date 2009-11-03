@@ -60,25 +60,23 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     }, UserActions.UnfollowAccel)
   }
   
-  def reportSpamAK(getSelectedScreenNames: => List[String]) = {
-    new ActionAndKeys(Action("Report Spam") {reportSpam(getSelectedScreenNames)},
-      UserActions.ReportSpamAccel)
-  }
-  
-  def blockAK(getSelectedScreenNames: => List[String]) = {
-    new ActionAndKeys(Action("Block") { block(getSelectedScreenNames) }, UserActions.BlockAccel)
-  }
-  
   def addCommonItems(mh: PopupMenuHelper, specialMenuItems: SpecialMenuItems, 
-      table: JTable, getSelectedScreenNames: => List[String]) {
+      table: JTable, showBigPicture: => Unit, getSelectedScreenNames: => List[String]) {
+
+    mh add(new Action("Show larger image") { 
+      def apply = showBigPicture
+      specialMenuItems.oneStatusSelected.list ::= this
+    }, ks(VK_I, 0))
+    
     mh add(Action("Show friends and followers") 
         {showFriends(getSelectedScreenNames)}, UserActions.ShowFriendsAccel)
     mh add(Action("View lists…") {viewLists(getSelectedScreenNames, table)}, UserActions.ViewListAccel)
     mh add(new TagAction(table, table.getModel.asInstanceOf[TaggingSupport]), ks(VK_T, 0))
     mh.add(followAK(specialMenuItems, getSelectedScreenNames))
     mh.add(unfollowAK(specialMenuItems, getSelectedScreenNames))
-    mh.add(blockAK(getSelectedScreenNames))
-    mh.add(reportSpamAK(getSelectedScreenNames))
+    mh.add(new ActionAndKeys(Action("Block") { block(getSelectedScreenNames) }, UserActions.BlockAccel))
+    mh.add(new ActionAndKeys(Action("Report Spam") {reportSpam(getSelectedScreenNames)},
+      UserActions.ReportSpamAccel))
   }
   
   private def process(names:List[String], action:((String) => Unit), actionName: String) = 
