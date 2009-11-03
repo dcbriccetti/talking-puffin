@@ -33,8 +33,11 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
   
   def reportSpam(names: List[String]) = process(names, tsess.reportSpam, "report spam")
   
-  def viewLists(selectedScreenNames: List[String], table: JTable) = 
-      TwitterListsDisplayer.viewLists(session, selectedScreenNames, table)
+  def viewLists(selectedScreenNames: List[String], table: JTable) = {
+    val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
+    TwitterListsDisplayer.viewLists(session, selectedScreenNames, table, 
+        menuLoc.getX().toInt, menuLoc.getY().toInt)
+}
   
   def showFriends(selectedScreenNames: List[String]) = {
     val tiler = new Tiler(selectedScreenNames.length)

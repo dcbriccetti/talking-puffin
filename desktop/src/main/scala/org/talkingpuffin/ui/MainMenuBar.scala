@@ -5,7 +5,6 @@ import javax.swing.KeyStroke
 import java.awt.event.KeyEvent
 import java.awt.Toolkit
 import swing.event.{Event, ButtonClicked}
-import scala.xml.Node
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.Main
 import org.talkingpuffin.filter.TagUsers
@@ -51,6 +50,16 @@ class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends Menu
         })
       })
     }
+    contents += new MenuItem(new Action("Display your lists") {
+      def apply = {
+        TopFrames.findCurrentWindow match {
+          case Some(topFrame) =>
+            TwitterListsDisplayer.viewLists(topFrame.session, 
+              List(topFrame.session.twitterSession.user), MainMenuBar.this.peer, 0, 0)
+          case _ =>
+        }
+      }
+    })
   }
   
   contents += new Menu("Options") {

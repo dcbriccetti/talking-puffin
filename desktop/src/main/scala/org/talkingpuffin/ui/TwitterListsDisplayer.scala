@@ -1,11 +1,11 @@
 package org.talkingpuffin.ui
 
 import org.talkingpuffin.Session
-import javax.swing.{JPopupMenu, JTable}
 import org.talkingpuffin.ui.util.Tiler
 import swing.{Action, MenuItem}
 import org.talkingpuffin.twitter.{TwitterUser, TwitterList}
 import org.talkingpuffin.util.Parallelizer
+import javax.swing.{JComponent, JPopupMenu, JTable}
 
 object TwitterListsDisplayer {
 
@@ -13,7 +13,7 @@ object TwitterListsDisplayer {
    * Presents a pop-up menu of lists belonging to users with the specified screen names. One or
    * all lists can be selected. Each list is launched in a new PeoplePane.
    */
-  def viewLists(session: Session, screenNames: List[String], table: JTable) {
+  def viewLists(session: Session, screenNames: List[String], parent: JComponent, menuX: Int, menuY: Int) {
 
     val tsess = session.twitterSession
     
@@ -50,8 +50,7 @@ object TwitterListsDisplayer {
               viewList(twitterList, Some(tiler))})}).peer) }
 
           if (numMenuItems > 0) {
-            val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
-            menu.show(table, menuLoc.getX().toInt, menuLoc.getY().toInt)
+            menu.show(parent, menuX, menuY)
           }
         }
       }

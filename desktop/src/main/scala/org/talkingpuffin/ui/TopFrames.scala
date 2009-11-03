@@ -11,8 +11,10 @@ object TopFrames {
 
   QuitHandler register TopFrames.closeAll
 
-  def closeCurrentWindow(){
-    frames.find(_.peer.isFocused) match{
+  def findCurrentWindow = frames.find(_.peer.isFocused)
+
+  def closeCurrentWindow() {
+    findCurrentWindow match {
       case Some(frame) => frame.close
       case _ => closeOtherFrame()
     }
@@ -25,6 +27,7 @@ object TopFrames {
       case _ => // noop
     }
   }
+  
   def addFrame(f: TopFrame){
     frames = f :: frames
   }
