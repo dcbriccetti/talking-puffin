@@ -25,12 +25,14 @@ class NextTAction(comp: Component) extends KeyTriggeredAction(new NextAction(com
 class PrevTAction(comp: Component) extends KeyTriggeredAction(new PrevAction(comp), 
   ks(VK_P, 0), KeyStroke.getKeyStroke(VK_P, java.awt.event.InputEvent.CTRL_DOWN_MASK))
 
+case class ActionAndKeys(val action: Action, val keys: KeyStroke*)
+
 class PopupMenuHelper(comp: JComponent) {
   val menu = new JPopupMenu
   
-  def add(action: Action, keys: KeyStroke*) {
-    add(action, menu, keys: _*)
-  }
+  def add(action: Action, keys: KeyStroke*): Unit = add(action, menu, keys: _*)
+  
+  def add(ak: ActionAndKeys): Unit = add(ak.action, ak.keys: _*)
   
   def add(action: Action, menu: JComponent, keys: KeyStroke*) {
     if (keys.length > 0) action.accelerator = Some(keys(0))
