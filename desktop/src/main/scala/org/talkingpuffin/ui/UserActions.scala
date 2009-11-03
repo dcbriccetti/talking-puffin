@@ -2,6 +2,7 @@ package org.talkingpuffin.ui
 
 import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent._
+import java.awt.event.InputEvent.SHIFT_DOWN_MASK
 import javax.swing._
 import javax.swing.KeyStroke.{getKeyStroke => ks}
 import org.talkingpuffin.Session
@@ -50,14 +51,14 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     new ActionAndKeys(new Action("Follow") { 
       def apply = follow(getSelectedScreenNames)
       smi.notFriendsOnly.list ::= this
-    }, UserActions.FollowAccel)
+    }, ks(VK_F, UserActions.shortcutKeyMask))
   }
   
   def unfollowAK(smi: SpecialMenuItems, getSelectedScreenNames: => List[String]) = {
     new ActionAndKeys(new Action("Unfollow") {
       def apply = unfollow(getSelectedScreenNames)
       smi.friendsOnly.list ::= this
-    }, UserActions.UnfollowAccel)
+    }, ks(VK_F, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
   }
   
   def addCommonItems(mh: PopupMenuHelper, specialMenuItems: SpecialMenuItems, 
@@ -69,14 +70,15 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     }, ks(VK_I, 0))
     
     mh add(Action("Show friends and followers") 
-        {showFriends(getSelectedScreenNames)}, UserActions.ShowFriendsAccel)
-    mh add(Action("View lists…") {viewLists(getSelectedScreenNames, table)}, UserActions.ViewListAccel)
+        {showFriends(getSelectedScreenNames)}, ks(VK_H, SHIFT_DOWN_MASK))
+    mh add(Action("View lists…") {viewLists(getSelectedScreenNames, table)}, ks(VK_L, SHIFT_DOWN_MASK))
     mh add(new TagAction(table, table.getModel.asInstanceOf[TaggingSupport]), ks(VK_T, 0))
     mh.add(followAK(specialMenuItems, getSelectedScreenNames))
     mh.add(unfollowAK(specialMenuItems, getSelectedScreenNames))
-    mh.add(new ActionAndKeys(Action("Block") { block(getSelectedScreenNames) }, UserActions.BlockAccel))
+    mh.add(new ActionAndKeys(Action("Block") { block(getSelectedScreenNames) }, 
+        ks(VK_B, UserActions.shortcutKeyMask)))
     mh.add(new ActionAndKeys(Action("Report Spam") {reportSpam(getSelectedScreenNames)},
-      UserActions.ReportSpamAccel))
+        ks(VK_S, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK)))
   }
   
   private def process(names:List[String], action:((String) => Unit), actionName: String) = 
@@ -94,15 +96,7 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
 }
 
 object UserActions {
-  private val Shift = java.awt.event.InputEvent.SHIFT_DOWN_MASK
   private val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
 
-  val FollowAccel   = ks(VK_F, shortcutKeyMask)
-  val UnfollowAccel = ks(VK_F, shortcutKeyMask | Shift)
-  val BlockAccel    = ks(VK_B, shortcutKeyMask)  
-  val UnblockAccel  = ks(VK_B, shortcutKeyMask | Shift)  
-  val ReportSpamAccel = ks(VK_S, shortcutKeyMask | Shift)  
-  val ViewListAccel = ks(VK_L, Shift)  
-  val ShowFriendsAccel = ks(VK_H, Shift)
-  
+  val UnblockAccel  = ks(VK_B, shortcutKeyMask | SHIFT_DOWN_MASK)  
 }

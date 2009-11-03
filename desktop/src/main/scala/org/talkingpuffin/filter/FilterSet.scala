@@ -13,7 +13,7 @@ import org.talkingpuffin.util.Loggable
 class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
   
   class InOutSet {
-    var cpdFilters = new CompoundFilters()
+    var cpdFilters = new CompoundFilters
     var tags = List[String]()
     def tagMatches(userId: Long) = tags.exists(tagUsers.contains(_, userId))
   }
@@ -24,8 +24,6 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
   val includeSet = new InOutSet
   val excludeSet = new InOutSet
   
-  def publish: Unit = publish(new FilterSetChanged(this))
-
   /**
    * Filter the given list of statuses, returning a list of only those that pass the filters
    * in this set.
@@ -85,6 +83,8 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
     publish
   }
 
+  def publish: Unit = publish(new FilterSetChanged(this))
 }
 
 case class FilterSetChanged(filterSet: FilterSet) extends Event
+
