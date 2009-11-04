@@ -1,18 +1,23 @@
 package org.talkingpuffin.filter
 
+import scala.collection.mutable.Map
 import com.google.common.collect.{Multimap, HashMultimap}
-import java.util.ArrayList
 import org.talkingpuffin.state.PreferencesFactory
 
 /**
  * Repository of tag -> user mappings, stored within a service/user
  */
 class TagUsers(service: String, username: String) {
-  private val prefs = PreferencesFactory.prefsForUser(service, username).node("tags")
+  private val tagsPrefs = PreferencesFactory.prefsForUser(service, username).node("tags")
+  private val tagDescPrefs = PreferencesFactory.prefsForUser(service, username).node("tagDescs")
   private val tagUsers: Multimap[String,Long] = HashMultimap.create()
-  prefs.keys.foreach(tag => prefs.get(tag, null).split("\t").foreach(userId => add(tag, userId.toLong)))
+  private val tagDescs = Map[String,String]()
+  tagsPrefs.keys.foreach(tag => tagsPrefs.get(tag, null).split("\t").foreach(userId => add(tag, userId.toLong)))
+  tagDescPrefs.keys.foreach(tag => tagDescs(tag) = tagDescPrefs.get(tag, null))
   
   def add(tag: String, userId: Long) = tagUsers.put(tag, userId)
+  
+  def addDescription(tag: String, desc: String) = tagDescs(tag) = desc
   
   def contains(tag: String, userId: Long) = tagUsers.get(tag).contains(userId)
   
@@ -33,28 +38,25 @@ class TagUsers(service: String, username: String) {
   }
   
   def tagsForUser(userId: Long): List[String] = {
-    var tags = List[String]()
-    val el = getEntriesAsList
-    for (i <- 0 until el.size) {
-      val tu = el.get(i)
-      if (tu.getValue == userId) tags ::= tu.getKey
-    }
-    tags
+    for (tagUser <- itToList(tagUsers.entries.iterator)
+      if (tagUser.getValue == userId)
+    ) yield tagUser.getKey
   }
   
   def usersForTag(tag: String): List[Long] = itToList(tagUsers.get(tag).iterator)
   
-  def save {
-    prefs.clear
-    val el = getKeysAsList
-    for (i <- 0 until el.size) {
-      val tag = el.get(i)
-      val users = new ArrayList[Long](tagUsers.get(tag))
-      val sb = new StringBuilder
-      for (j <- 0 until users.size) {
-        sb.append(users.get(j)).append("\t")
+  def save: Unit = {
+    tagsPrefs.clear
+    tagDescPrefs.clear
+    for {
+      tag <- itToList(tagUsers.keys.iterator)
+      str = itToList(tagUsers.get(tag).iterator).mkString("\t")
+    } {
+      tagsPrefs.put(tag, str)
+      tagDescs.get(tag) match {
+        case Some(desc) => tagDescPrefs.put(tag, desc)
+        case _ =>
       }
-      prefs.put(tag, sb.toString)
     }
   }
   
@@ -66,7 +68,4 @@ class TagUsers(service: String, username: String) {
     l.reverse
   } 
   
-  private def getEntriesAsList = new ArrayList[java.util.Map.Entry[String,Long]](tagUsers.entries) 
-  private def getKeysAsList = new ArrayList[String](tagUsers.keys) 
-
 }

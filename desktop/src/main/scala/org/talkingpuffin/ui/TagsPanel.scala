@@ -25,12 +25,15 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
   }, BorderPanel.Position.Center)
 
   var newTag: TextField = _
+  var newTagDesc: TextField = _
   
   if (showNew) {
     add(new BoxPanel(Orientation.Horizontal) {
-      contents += new Label("New: ")
+      contents += new Label("New tag name and description: ")
       newTag = new TextField(15)
       contents += newTag
+      newTagDesc = new TextField(25)
+      contents += newTagDesc
     }, BorderPanel.Position.South)
   }
       
@@ -38,7 +41,12 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
     var selectedTags = checkBoxView.getSelectedValues
     if (showNew) {
       val newTagVal = newTag.text.trim
-      if (newTagVal.length > 0) selectedTags ::= newTagVal
+      if (newTagVal.length > 0) {
+        selectedTags ::= newTagVal
+        val newTagDescVal = newTagDesc.text.trim
+        if (newTagDescVal.length > 0)
+          tagUsers.addDescription(newTagVal, newTagDescVal)
+      } 
     }
     selectedTags        
   }
