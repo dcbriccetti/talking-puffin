@@ -89,13 +89,10 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   * This path also reads from conn.getErrorStream() to populate the twitterMessage field
   * in the thrown exception.
   */
-  private def getXML(conn: HttpURLConnection): Node = {
+  protected def getXML(conn: HttpURLConnection): Node = {
     val response = conn.getResponseCode()
     response match {
-      case 200 => {
-        publishRateLimitInfo(conn)
-        XML.load(conn.getInputStream())
-      }
+      case 200 => processOkResponse(conn)
       case _ => throw TwitterException({
           var errMsg = ""
           val reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))
@@ -107,6 +104,11 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
           errMsg  
         },response)
     }
+  }
+  
+  protected def processOkResponse(conn: HttpURLConnection): Node = {
+    publishRateLimitInfo(conn)
+    XML.load(conn.getInputStream)
   }
   
   private def publishRateLimitInfo(conn: HttpURLConnection) {
