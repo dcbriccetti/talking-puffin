@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import java.awt.Color
+import java.awt.{Color, Insets}
 import scala.swing.{ComboBox, CheckBox, Label, Button, Frame, PasswordField, Publisher,
 FlowPanel, GridBagPanel, TextField}
 import scala.swing.GridBagPanel.Anchor.West
@@ -54,26 +54,27 @@ class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession
   
   contents = new GridBagPanel {
     border = scala.swing.Swing.EmptyBorder(5, 5, 5, 5)
+    val ins = new Insets(5, 5, 0, 0)
     add(if (comboBox != null) comboBox else usernameTextField, 
       new Constraints {grid = (0, 0); gridwidth=2; anchor=West})
     add(new Label("Service Name"),
                                 new Constraints {grid=(0,1); anchor=West})
-    add(accountNameTextField,   new Constraints {grid=(1,1); anchor=West})
+    add(accountNameTextField,   new Constraints {grid=(1,1); anchor=West; insets=ins})
     add(new Label("User Name"), new Constraints {grid=(0,2); anchor=West})
-    add(usernameTextField,      new Constraints {grid=(1,2); anchor=West})
+    add(usernameTextField,      new Constraints {grid=(1,2); anchor=West; insets=ins})
     add(new Label("Password"),  new Constraints {grid=(0,3); anchor=West})
-    add(passwordTextField,      new Constraints {grid=(1,3); anchor=West})
+    add(passwordTextField,      new Constraints {grid=(1,3); anchor=West; insets=ins})
     add(new Label("URL"),       new Constraints {grid=(0,4); anchor=West})
-    add(apiUrlTextField,        new Constraints {grid=(1,4); anchor=West})
+    add(apiUrlTextField,        new Constraints {grid=(1,4); anchor=West; insets=ins})
     
     add(new FlowPanel {
       contents += logInButton
       // TODO  if (up.users.length > 1) contents += logInAllButton
       contents += cancelButton
       contents += saveUserInfoCheckBox
-    }, new Constraints {grid=(0,5); gridwidth=2})
+    }, new Constraints {grid=(0,5); gridwidth=2; insets=ins})
     
-    add(infoLabel, new Constraints {grid=(0,6); gridwidth=2; anchor=West})
+    add(infoLabel, new Constraints {grid=(0,6); gridwidth=2; anchor=West; insets=ins})
 
     reactions += {
       case ButtonClicked(`logInButton`) => {storeUserInfoIfSet(); handleLogin}
