@@ -5,6 +5,8 @@ import java.awt.event.KeyEvent
 import javax.swing.{BorderFactory}
 import swing._
 import _root_.scala.swing.GridBagPanel._
+import java.awt.Insets
+
 
 /**
  * A panel displaying and allowing selection of tags.
@@ -12,7 +14,7 @@ import _root_.scala.swing.GridBagPanel._
 class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checkedValues: List[String]) 
     extends BorderPanel {
   border = BorderFactory.createEmptyBorder(5,5,5,5)
-  val checkBoxView = new CheckBoxView(tagUsers.getTagsWithCounts, checkedValues)
+  private val checkBoxView = new CheckBoxView(tagUsers, checkedValues)
 
   add(new FlowPanel {
     if (showTitle) contents += new Label("Tags")
@@ -28,12 +30,14 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
   var newTagDesc: TextField = _
   
   if (showNew) {
-    add(new BoxPanel(Orientation.Horizontal) {
-      contents += new Label("New tag name and description: ")
+    add(new GridBagPanel {
+      val ins = new Insets(5,5,0,0)
+      add(new Label("Check one of the above, or add a new tag name and description: "), 
+          new Constraints{anchor=Anchor.West; grid=(0,0); gridwidth=2; insets=ins})
       newTag = new TextField(15)
-      contents += newTag
+      add(newTag, new Constraints{anchor=Anchor.West; grid=(0,1); insets=ins}) 
       newTagDesc = new TextField(25)
-      contents += newTagDesc
+      add(newTagDesc, new Constraints{anchor=Anchor.West; grid=(1,1); insets=ins})
     }, BorderPanel.Position.South)
   }
       
@@ -56,21 +60,28 @@ object CheckBoxView {
   val mnemonicSep = ": "
 }
 
-class DecoratedCheckBox(value: String, val undecoratedValue: String) extends CheckBox(value) 
+private class DecoratedCheckBox(value: String, val undecoratedValue: String) extends CheckBox(value) 
 
-class CheckBoxView(values: List[Tuple2[String,Int]], checkedValues: List[String]) 
-    extends GridPanel((values.length.toDouble / 2).ceil.toInt, 2) {
+private class CheckBoxView(tagUsers: TagUsers, checkedValues: List[String]) extends GridBagPanel {
+  private val values = tagUsers.getTagsWithCounts
+  private val cols = 3
+  private val rows = (values.length.toDouble / cols).ceil.toInt
   private var checkBoxes = List[DecoratedCheckBox]()
-  for ((value, i) <- values.zipWithIndex) {
+  for (((tag, count), i) <- values.zipWithIndex) {
     val keyVal = KeyEvent.VK_A + i
     val checkBox = new DecoratedCheckBox("" + keyVal.toChar + CheckBoxView.mnemonicSep + 
-        value._1 + " (" + value._2 + ")", value._1) {
+        tag + " (" + count + ")", tag) {
       peer.setMnemonic(keyVal)
-      selected = checkedValues contains value._1
+      tagUsers.getDescription(tag) match {
+        case Some(desc) => tooltip = desc
+        case _ =>
+      }
+      selected = checkedValues contains tag
     }
     checkBoxes ::= checkBox
-    contents += checkBox
+    add(checkBox, new Constraints{anchor=Anchor.West; grid=(i / rows, i % rows)})
   }
+  add(new Label(""), new Constraints{fill=Fill.Both; weightx=1; weighty=1; grid=(cols, rows)}) 
   
   def selectAll(select: Boolean) = for (b <- checkBoxes) b.selected = select
   

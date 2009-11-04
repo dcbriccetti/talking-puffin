@@ -19,6 +19,8 @@ class TagUsers(service: String, username: String) {
   
   def addDescription(tag: String, desc: String) = tagDescs(tag) = desc
   
+  def getDescription(tag: String): Option[String] = tagDescs.get(tag)
+  
   def contains(tag: String, userId: Long) = tagUsers.get(tag).contains(userId)
   
   def removeForUser(userId: Long) {
