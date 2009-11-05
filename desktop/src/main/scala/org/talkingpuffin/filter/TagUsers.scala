@@ -33,26 +33,26 @@ class TagUsers(service: String, username: String) {
     }
   }
   
-  def getTags: List[String] = itToList(tagUsers.keySet.iterator).sort(_ < _)
+  def getTags: List[String] = itToList(tagUsers.keySet).sort(_ < _)
   
   def getTagsWithCounts: List[Tuple2[String,Int]] = {
     getTags map(tag => (tag, usersForTag(tag).length))
   }
   
   def tagsForUser(userId: Long): List[String] = {
-    for (tagUser <- itToList(tagUsers.entries.iterator)
+    for (tagUser <- itToList(tagUsers.entries)
       if (tagUser.getValue == userId)
     ) yield tagUser.getKey
   }
   
-  def usersForTag(tag: String): List[Long] = itToList(tagUsers.get(tag).iterator)
+  def usersForTag(tag: String): List[Long] = itToList(tagUsers.get(tag))
   
   def save: Unit = {
     tagsPrefs.clear
     tagDescPrefs.clear
     for {
-      tag <- itToList(tagUsers.keys.iterator)
-      str = itToList(tagUsers.get(tag).iterator).mkString("\t")
+      tag <- itToList(tagUsers.keys)
+      str = itToList(tagUsers.get(tag)).mkString("\t")
     } {
       tagsPrefs.put(tag, str)
       tagDescs.get(tag) match {
@@ -61,6 +61,8 @@ class TagUsers(service: String, username: String) {
       }
     }
   }
+  
+  private def itToList[T](it: java.lang.Iterable[T]): List[T] = itToList(it.iterator)
   
   private def itToList[T](it: java.util.Iterator[T]): List[T] = {
     var l = List[T]()

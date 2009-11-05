@@ -1,14 +1,13 @@
 package org.talkingpuffin.ui
 
 import java.util.prefs.Preferences
-import org.talkingpuffin.state.PrefKeys
+import org.talkingpuffin.state.PrefKeys._
 import org.talkingpuffin.twitter.AuthenticatedSession
 
 class DataProviders(val twitterSession: AuthenticatedSession, prefs: Preferences, progress: LongOpListener) {
-  val prefKeys = List(PrefKeys.HIGHEST_ID, PrefKeys.HIGHEST_MENTION_ID, PrefKeys.HIGHEST_RECEIVED_DM_ID, 
-    PrefKeys.HIGHEST_SENT_DM_ID)
+  val prefKeys = List(HIGHEST_ID, HIGHEST_MENTION_ID, HIGHEST_RECEIVED_DM_ID, HIGHEST_SENT_DM_ID)
 
-  private def getHighest(idx: Int) = 
+  private def getHighest(idx: Int): Option[Long] = 
     prefs.get(prefKeys(idx), null) match {case null => None; case v => Some(v.toLong)} 
 
   val followingProvider = new FollowingProvider(twitterSession, getHighest(0), progress)

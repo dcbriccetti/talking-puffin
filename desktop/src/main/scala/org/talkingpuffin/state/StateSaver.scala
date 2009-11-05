@@ -13,13 +13,10 @@ object StateSaver {
   }
   
   private def saveProviderHighIds(provs: DataProviders, prefs: Preferences) {
-    provs.providersAndPrefKeys.foreach(pk => {
-      val (p, k) = pk
-      p.getHighestId match {
-        case Some(id) => prefs.put(k, id.toString())
-        case _ =>
-      }
-    })
+    for {(provider, key) <- provs.providersAndPrefKeys
+      id = provider.getHighestId
+      if id.isDefined
+    } prefs.put(key, id.get.toString)
   }
 
 }

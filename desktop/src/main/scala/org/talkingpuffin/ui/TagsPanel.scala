@@ -7,7 +7,6 @@ import swing._
 import _root_.scala.swing.GridBagPanel._
 import java.awt.Insets
 
-
 /**
  * A panel displaying and allowing selection of tags.
  */
@@ -32,7 +31,7 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
   if (showNew) {
     add(new GridBagPanel {
       val ins = new Insets(5,5,0,0)
-      add(new Label("Check one of the above, or add a new tag name and description: "), 
+      add(new Label("Check above, and/or add a new tag name and description: "), 
           new Constraints{anchor=Anchor.West; grid=(0,0); gridwidth=2; insets=ins})
       newTag = new TextField(15)
       add(newTag, new Constraints{anchor=Anchor.West; grid=(0,1); insets=ins}) 
