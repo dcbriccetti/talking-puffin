@@ -160,13 +160,16 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     TwitterList(http.post(url(user, "lists.xml"), List(("name", listName))))
   }
   
-  def getLists(screenName: String): List[TwitterList] = ((http.get(url(screenName, "lists.xml")) \\ "list") map(
-      TwitterList.apply)).toList
+  def getLists(screenName: String): List[TwitterList] = extractLists(http.get(url(screenName, "lists.xml")))
   
+  def getListMemberships(screenName: String)(cursor: Long): XmlResult[TwitterList] = 
+    parse("/" + screenName + "/lists/memberships.xml?count=200&cursor=" + cursor, 
+      TwitterList.apply, "lists", "list")
+      
   def getListNamed(listName: String): Option[TwitterList] = getLists(user) find(_.name == listName)
   
   def getListMembers(list: TwitterList)(cursor: Long): XmlResult[TwitterUser] = {
-    parse("/" + list.owner.screenName + "/" + list.slug + "/members.xml?cursor=" + cursor, 
+    parse("/" + list.owner.screenName + "/" + list.slug + "/members.xml?count=200&cursor=" + cursor, 
       TwitterUser.apply, "users", "user")
   }
   
@@ -186,6 +189,8 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   
   private def listMembersUrl(list: TwitterList, memberId: Long) = 
     url(user, list.slug, "members.xml?id=" + memberId)
+  
+  private def extractLists(xml: Node): List[TwitterList] = ((xml \\ "list") map(TwitterList.apply)).toList
 
   def getSentMessages(args: TwitterArgs): List[TwitterMessage] = {
     parse("/direct_messages/sent.xml" + args, TwitterMessage.apply, "direct_message").list

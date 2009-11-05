@@ -35,8 +35,8 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
   
   def viewLists(selectedScreenNames: List[String], table: JTable) = {
     val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
-    TwitterListsDisplayer.viewLists(session, selectedScreenNames, table, 
-        menuLoc.getX().toInt, menuLoc.getY().toInt)
+    TwitterListsDisplayer.viewLists(session, selectedScreenNames, 
+        MenuPos(table, menuLoc.getX().toInt, menuLoc.getY().toInt))
 }
   
   def showFriends(selectedScreenNames: List[String]) = {

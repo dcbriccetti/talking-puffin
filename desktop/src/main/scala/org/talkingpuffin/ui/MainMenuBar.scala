@@ -55,7 +55,17 @@ class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends Menu
         TopFrames.findCurrentWindow match {
           case Some(topFrame) =>
             TwitterListsDisplayer.viewLists(topFrame.session, 
-              List(topFrame.session.twitterSession.user), MainMenuBar.this.peer, 0, 0)
+              List(topFrame.session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
+          case _ =>
+        }
+      }
+    })
+    contents += new MenuItem(new Action("Display lists you are on") {
+      def apply = {
+        TopFrames.findCurrentWindow match {
+          case Some(topFrame) =>
+            TwitterListsDisplayer.viewListsContaining(topFrame.session, 
+              List(topFrame.session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
           case _ =>
         }
       }
