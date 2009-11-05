@@ -6,12 +6,13 @@ import javax.swing.border.EmptyBorder
 import scala.swing.GridBagPanel._
 import swing._
 import org.talkingpuffin.filter.{CompoundFilter, CompoundFilters, NoiseFilter, TextTextFilter, TagUsers, FilterSet}
+import org.talkingpuffin.util.Loggable
 
 /**
  * Dialog for setting filters
  */
 class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: FilterSet, 
-    tagUsers: TagUsers) extends Frame {
+    tagUsers: TagUsers) extends Frame with Loggable {
   
   title = paneTitle + " Filters"
   preferredSize = new Dimension(600, 600)
@@ -57,6 +58,12 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
       val okButton = new Button(okAction) 
       defaultButton = okButton
       contents += okButton
+      val saveAction = new Action("Save") {
+        mnemonic = KeyEvent.VK_S
+        def apply = {debug(filterSet.excludeSet.cpdFilters.toString)}
+      }
+      val saveButton = new Button(saveAction) 
+      // Not ready     contents += saveButton
     }
   }
   peer.setLocationRelativeTo(null)

@@ -18,6 +18,7 @@ class CompoundFilters extends Publisher {
     publish
   }
   def publish: Unit = publish(new CompoundFiltersChanged)
+  override def toString = list.map(_.toString).mkString("↑")
 }
 
 class CompoundFiltersChanged extends Event
@@ -44,10 +45,15 @@ case class CompoundFilter(val textFilters: List[TextFilter], val retweet: Option
       case _ => true
     })  
   }
+  
+  override def toString = 
+    List(textFilters.map(_.toString).mkString("⇅"), retweet.toString, commentedRetweet.toString).mkString("↕")
 }
 
 sealed abstract case class TextFilter (val text: String, val isRegEx: Boolean, 
-    getCompareWith: (TwitterStatus) => String)
+    getCompareWith: (TwitterStatus) => String) {
+  override def toString = List(getClass.getName, text, isRegEx.toString).mkString("↓")
+}
 
 case class FromTextFilter(override val text: String, override val isRegEx: Boolean) 
     extends TextFilter(text, isRegEx, (status) => status.user.screenName)
