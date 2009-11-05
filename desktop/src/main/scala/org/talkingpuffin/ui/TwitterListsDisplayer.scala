@@ -17,7 +17,7 @@ object TwitterListsDisplayer {
    */
   def viewLists(session: Session, screenNames: List[String], menuPos: MenuPos) {
     SwingInvoke.execSwingWorker({getLists(session, screenNames)}, 
-        {processLists(screenNames, session, menuPos)}) 
+        {processLists(screenNames.length > 1, session, menuPos)}) 
   }
   
   /**
@@ -26,7 +26,7 @@ object TwitterListsDisplayer {
    */
   def viewListsContaining(session: Session, screenNames: List[String], menuPos: MenuPos) {
     SwingInvoke.execSwingWorker({getListsContaining(session, screenNames)}, 
-        {processLists(screenNames, session, menuPos)}) 
+        {processLists(true, session, menuPos)}) 
   }
   
   private def viewList(list: TwitterList, session: Session, tiler: Option[Tiler]) = {
@@ -50,7 +50,7 @@ object TwitterListsDisplayer {
     Parallelizer.run(20, screenNames, getAllMembershipsForScreenName) filter(_ != Nil)
   }
     
-  private def processLists(screenNames: List[String], session: Session, menuPos: MenuPos)(allListsOfLists: 
+  private def processLists(showLongName: Boolean, session: Session, menuPos: MenuPos)(allListsOfLists: 
       List[List[TwitterList]]) = {
     if (allListsOfLists != Nil) {
       var numMenuItems = 0
@@ -58,8 +58,8 @@ object TwitterListsDisplayer {
       var combinedList = List[TwitterList]()
       allListsOfLists filter(_ != Nil) foreach(lists => {
         lists.foreach(twitterList => {
-          menu.add(new MenuItem(Action(if (screenNames.length == 1) 
-              twitterList.shortName else twitterList.longName) {viewList(twitterList, session, None)}).peer)
+          menu.add(new MenuItem(Action(if (showLongName) 
+              twitterList.longName else twitterList.shortName) {viewList(twitterList, session, None)}).peer)
           numMenuItems += 1
         })
         combinedList :::= lists

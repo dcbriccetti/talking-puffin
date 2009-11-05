@@ -37,7 +37,13 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
     TwitterListsDisplayer.viewLists(session, selectedScreenNames, 
         MenuPos(table, menuLoc.getX().toInt, menuLoc.getY().toInt))
-}
+  }
+  
+  def viewListsOn(selectedScreenNames: List[String], table: JTable) = {
+    val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
+    TwitterListsDisplayer.viewListsContaining(session, selectedScreenNames, 
+        MenuPos(table, menuLoc.getX().toInt, menuLoc.getY().toInt))
+  }
   
   def showFriends(selectedScreenNames: List[String]) = {
     val tiler = new Tiler(selectedScreenNames.length)
@@ -75,6 +81,8 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     mh add(Action("Show friends and followers") 
         {showFriends(getSelectedScreenNames)}, ks(VK_H, SHIFT_DOWN_MASK))
     mh add(Action("View lists…") {viewLists(getSelectedScreenNames, table)}, ks(VK_L, SHIFT_DOWN_MASK))
+    mh add(Action("View lists on…") {viewListsOn(getSelectedScreenNames, table)}, 
+        ks(VK_L, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
     mh add(new TagAction(table, table.getModel.asInstanceOf[TaggingSupport]), ks(VK_T, 0))
     mh.add(followAK(specialMenuItems, getSelectedScreenNames))
     mh.add(unfollowAK(specialMenuItems, getSelectedScreenNames))

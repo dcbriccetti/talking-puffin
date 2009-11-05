@@ -60,7 +60,7 @@ class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends Menu
         }
       }
     })
-    contents += new MenuItem(new Action("Display lists you are on") {
+    contents += new MenuItem(new Action("Display lists you are in") {
       def apply = {
         TopFrames.findCurrentWindow match {
           case Some(topFrame) =>
