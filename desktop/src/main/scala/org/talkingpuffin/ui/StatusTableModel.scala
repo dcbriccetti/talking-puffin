@@ -65,7 +65,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   private val pictureCell = new PictureCell(this, 0)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
-    val status = filteredStatuses_(rowIndex)
+    val status = getStatusAt(rowIndex)
     
     def senderName(status: TwitterStatus) = 
       if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) 
@@ -104,7 +104,13 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   
   def getStatusText(status: TwitterStatus, username: String): String = status.text
 
-  def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses_(rowIndex)
+  def getStatusAt(rowIndex: Int): TwitterStatus = {
+    val st = filteredStatuses_(rowIndex)
+    st.retweeted match {
+      case Some(rt) => rt
+      case None => st
+    }
+  }
   
   def getUserAndStatusAt(rowIndex: Int): Tuple2[TwitterUser, Option[TwitterStatus]] = {
     val status = getStatusAt(rowIndex)
