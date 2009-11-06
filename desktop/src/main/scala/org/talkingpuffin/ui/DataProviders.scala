@@ -12,17 +12,17 @@ class DataProviders(val twitterSession: AuthenticatedSession, prefs: Preferences
   private def getHighest(idx: Int): Option[Long] = 
     prefs.get(prefKeys(idx), null) match {case null => None; case v => Some(v.toLong)} 
 
-  val followingProvider = new FollowingProvider(twitterSession, getHighest(0), progress)
-  val mentionsProvider  = new MentionsProvider (twitterSession, getHighest(1), progress)
-  val retweetsOfMeProvider  = new RetweetsOfMeProvider (twitterSession, getHighest(2), progress)
-  val retweetedByMeProvider  = new RetweetedByMeProvider (twitterSession, getHighest(3), progress)
-  val retweetedToMeProvider  = new RetweetedToMeProvider (twitterSession, getHighest(4), progress)
-  val dmsReceivedProvider = new DmsReceivedProvider (twitterSession, getHighest(5), progress)
-  val dmsSentProvider = new DmsSentProvider (twitterSession, getHighest(6), progress)
+  val following     = new FollowingProvider    (twitterSession, getHighest(0), progress)
+  val mentions      = new MentionsProvider     (twitterSession, getHighest(1), progress)
+  val retweetsOfMe  = new RetweetsOfMeProvider (twitterSession, getHighest(2), progress)
+  val retweetedByMe = new RetweetedByMeProvider(twitterSession, getHighest(3), progress)
+  val retweetedToMe = new RetweetedToMeProvider(twitterSession, getHighest(4), progress)
+  val dmsReceived   = new DmsReceivedProvider  (twitterSession, getHighest(5), progress)
+  val dmsSent       = new DmsSentProvider      (twitterSession, getHighest(6), progress)
 
-  val providers = List(followingProvider, mentionsProvider, retweetsOfMeProvider, 
-    retweetedByMeProvider, retweetedToMeProvider, dmsReceivedProvider, dmsSentProvider)
-  val autoStartProviders = List(followingProvider, mentionsProvider, dmsReceivedProvider)
+  val providers = List(following, mentions, retweetsOfMe, retweetedByMe, 
+    retweetedToMe, dmsReceived, dmsSent)
+  val autoStartProviders = List(following, mentions, dmsReceived)
   val providersAndPrefKeys = providers zip prefKeys
   
   def stop = providers.foreach(_.stop)

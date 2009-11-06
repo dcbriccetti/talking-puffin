@@ -47,7 +47,7 @@ class LargeTweet(filtersDialog: Option[FiltersDialog], viewCreator: Option[ViewC
           viewCreator match {
             case Some(vc) =>
               popup.add(new MenuItem(Action("Create a new stream for “" + text + "”")
-                  {vc.createView(vc.providers.followingProvider, Some(text))}).peer)
+                  {vc.createView(vc.providers.following, Some(text))}).peer)
             case _ =>
           }
           if (popup.getComponentCount > 0)
