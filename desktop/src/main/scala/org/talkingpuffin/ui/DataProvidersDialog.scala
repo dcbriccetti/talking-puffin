@@ -33,7 +33,7 @@ class DataProvidersDialog(owner: java.awt.Frame, streams: Streams) extends Frame
         val i = p._2 + 1
         add(new Label(provider.providerName), new Constraints {grid=(0,i); anchor=Anchor.West})
         add(new RefreshCombo(provider, assortedTimes), new Constraints {grid=(1,i); anchor=Anchor.West})
-        val nextLoadLabel = new Label(formatTime(firstReloadTime))
+        val nextLoadLabel = new Label(if (provider.isActive) formatTime(firstReloadTime) else "")
         add(nextLoadLabel, new Constraints {grid=(2,i); anchor=Anchor.West})
         new Reactor {
           listenTo(provider)

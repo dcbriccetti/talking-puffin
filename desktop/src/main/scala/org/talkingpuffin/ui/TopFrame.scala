@@ -46,6 +46,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     case e: NewViewEvent => 
       streams.createView(e.provider, None)
       e.provider.loadNewData
+    case e: NewPeoplePaneEvent => createPeoplePane 
   }
   listenTo(menuBar)
 
@@ -72,8 +73,18 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
 
   peer.setLocationRelativeTo(null)
+  listenTo(rels)
+  reactions += {
+    case ic: IdsChanged => 
+      if (peoplePane == null && 
+              (rels.followerIds.length + rels.friendIds.length < Globals.MaxPeopleForAutoPaneCreation)) {
+        debug("Not too many people, so automatically creating people pane")
+        createPeoplePane
+      } else {
+        debug("Too many people, so not automatically creating people pane")
+      }
+  }
   rels.getIds(twitterSession, mainToolBar)
-  createPeoplePane
 
   def setFocus = streams.views.last.pane.requestFocusForTable
   
@@ -88,8 +99,8 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   type Users = List[TwitterUser]
   
-  def updatePeople = rels.getUsers(twitterSession, twitterSession.user, mainToolBar)
-  
+  private def updatePeople = rels.getUsers(twitterSession, twitterSession.user, mainToolBar)
+          
   private def createPeoplePane: Unit = {
     updatePeople
     peoplePane = createPeoplePane("People You Follow and People Who Follow You", "People", None, None, 

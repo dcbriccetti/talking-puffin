@@ -24,13 +24,16 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
   private var timer: Timer = _
   
   def getHighestId = highestId
+  
+  def isActive = timer != null && timer.isRunning
 
   /**
    * Sets the update frequency, in seconds.
    */
   def setUpdateFrequency(updateFrequencySecs: Int) {
     updateIntervalMs = updateFrequencySecs * 1000
-    restartTimer
+    if (timer != null) 
+      restartTimer                                                 
   }
 
   def loadNewData {

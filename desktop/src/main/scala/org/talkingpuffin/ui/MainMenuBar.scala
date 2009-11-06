@@ -31,12 +31,16 @@ class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends Menu
   }
   
   contents += new Menu("Views") {
-    dataProviders.providers.foreach(provider => {
-      contents += new MenuItem(new Action("New " + provider.providerName) {
-        toolTip = "Creates a new " + provider.providerName + " view"
-        def apply = MainMenuBar.this.publish(NewViewEvent(provider))
+    contents += new Menu("New") {
+      def newItem(name: String, event: Event) = new MenuItem(new Action(name) {
+        toolTip = "Creates a new " + name + " view"
+        def apply = MainMenuBar.this.publish(event)
       })
-    })
+      dataProviders.providers.foreach(provider => {
+        contents += newItem(provider.providerName, NewViewEvent(provider))
+      })
+      contents += newItem("People", NewPeoplePaneEvent())
+    }
   }
   
   contents += new Menu("Lists") {
@@ -104,3 +108,4 @@ class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends Menu
 }
 
 case class NewViewEvent(val provider: DataProvider) extends Event
+case class NewPeoplePaneEvent() extends Event
