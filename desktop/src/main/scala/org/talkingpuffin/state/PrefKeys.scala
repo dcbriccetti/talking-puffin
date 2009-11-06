@@ -16,6 +16,9 @@ object PrefKeys {
   
   val HIGHEST_ID        = "highestId"
   val HIGHEST_MENTION_ID= "highestMentionId"
+  val HIGHEST_RETWEET_OF_ME_ID= "highestRetweetOfMeId"
+  val HIGHEST_RETWEET_BY_ME_ID= "highestRetweetByMeId"
+  val HIGHEST_RETWEET_TO_ME_ID= "highestRetweetToMeId"
   val HIGHEST_RECEIVED_DM_ID = "highestReceivedDmId"
   val HIGHEST_SENT_DM_ID     = "highestSentDmId"
   

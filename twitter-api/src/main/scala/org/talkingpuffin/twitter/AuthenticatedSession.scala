@@ -15,11 +15,13 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
 
   override def httpPublisher = http
   
+  implicit def page2TwitterArgs(page: Int) = TwitterArgs.page(page) 
+
+  
   /**
   * @param id the user id <i>or</i> user name of the desired friends timeline
   */
   def getFriendsTimeline(id: String): List[TwitterStatus] = getFriendsTimeline(id,TwitterArgs())
-  def getFriendsTimeline(id: String,page: Int): List[TwitterStatus] = getFriendsTimeline(id,TwitterArgs.page(page))
 
   def getFriendsTimeline(id: String, args:TwitterArgs): List[TwitterStatus] = {
     parse("/statuses/friends_timeline/" + urlEncode(id) + ".xml" + args, 
@@ -27,14 +29,12 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
 
   def getFriendsTimeline(): List[TwitterStatus] = getFriendsTimeline(user,TwitterArgs())
-  def getFriendsTimeline(page: Int): List[TwitterStatus] = getFriendsTimeline(user,TwitterArgs.page(page))
   def getFriendsTimeline(args:TwitterArgs): List[TwitterStatus] = getFriendsTimeline(user,args)
 
   /**
   * @param id the user id <i>or</i> user name of the desired user's timeline
   */
   def getUserTimeline(id: String): List[TwitterStatus] = getUserTimeline(id,TwitterArgs())
-  def getUserTimeline(id: String, page: Int): List[TwitterStatus] = getUserTimeline(id,TwitterArgs.page(page))
 
   def getUserTimeline(id: String, args: TwitterArgs): List[TwitterStatus] = {
     parse("/statuses/user_timeline/" + urlEncode(id) + ".xml" + args,  
@@ -45,7 +45,6 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   * @param id the user id <i>or</i> user name of the desired user's timeline with retweets
   */
   def getHomeTimeline(id: String): List[TwitterStatus] = getHomeTimeline(id,TwitterArgs())
-  def getHomeTimeline(id: String, page: Int): List[TwitterStatus] = getHomeTimeline(id,TwitterArgs.page(page))
 
   def getHomeTimeline(id: String, args: TwitterArgs): List[TwitterStatus] = {
     parse("/statuses/home_timeline/" + urlEncode(id) + ".xml" + args, TwitterStatus.apply,
@@ -65,21 +64,18 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
 
   def getRetweetedByMe(): List[TwitterStatus] = getRetweetedByMe(TwitterArgs())
-  def getRetweetedByMe(page: Int): List[TwitterStatus] = getRetweetedByMe(TwitterArgs.page(page))
 
   def getRetweetedByMe(args: TwitterArgs): List[TwitterStatus] = {
     parse("/statuses/retweeted_by_me.xml" + args, TwitterStatus.apply, "status").list
   }
 
   def getRetweetedToMe(): List[TwitterStatus] = getRetweetedToMe(TwitterArgs())
-  def getRetweetedToMe(page: Int): List[TwitterStatus] = getRetweetedToMe(TwitterArgs.page(page))
 
   def getRetweetedToMe(args: TwitterArgs): List[TwitterStatus] = {
     parse("/statuses/retweeted_to_me.xml" + args, TwitterStatus.apply, "status").list
   }
-
+  
   def getRetweetsOfMe(): List[TwitterStatus] = getRetweetsOfMe(TwitterArgs())
-  def getRetweetsOfMe(page: Int): List[TwitterStatus] = getRetweetsOfMe(TwitterArgs.page(page))
 
   def getRetweetsOfMe(args: TwitterArgs): List[TwitterStatus] = {
     parse("/statuses/retweets_of_me.xml" + args, TwitterStatus.apply, "status").list
@@ -93,21 +89,14 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
         TwitterUser.apply).parseXMLElement()
   }
 
-  def getUserDetail(): TwitterUser = {
-    getUserDetail(user)
-  }
+  def getUserDetail(): TwitterUser = getUserDetail(user)
   
   def getReplies(): List[TwitterStatus] = {
     parse("/statuses/replies.xml", TwitterStatus.apply, "status").list
   }
   
-  def getReplies(page: Int): List[TwitterStatus] = {
-    getReplies(TwitterArgs.page(page))
-  }
-
   def getReplies(args: TwitterArgs): List[TwitterStatus] = {
-    parse("/statuses/replies.xml" + args,
-        TwitterStatus.apply, "status").list
+    parse("/statuses/replies.xml" + args, TwitterStatus.apply, "status").list
   }
 
   def getFriends(): XmlResult[TwitterUser] = getFriends(TwitterArgs())
@@ -138,13 +127,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   def getFollowersIds(args: TwitterArgs): XmlResult[TwitterUserId] = 
       parse("/followers/ids.xml" + args, TwitterUserId.apply, "ids", "id")
   
-  def getDirectMessages(): List[TwitterMessage] = {
-    getDirectMessages(TwitterArgs())
-  }
-
-  def getDirectMessages(page: Int): List[TwitterMessage] = {
-    getDirectMessages(TwitterArgs.page(page))
-  }
+  def getDirectMessages(): List[TwitterMessage] = getDirectMessages(TwitterArgs())
 
   def getDirectMessages(args: TwitterArgs): List[TwitterMessage] = {
     parse("/direct_messages.xml" + args, TwitterMessage.apply, "direct_message").list

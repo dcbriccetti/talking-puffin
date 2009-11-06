@@ -17,7 +17,7 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
   
   var views = List[View]()
   
-  providers.providers.foreach(provider => {
+  providers.autoStartProviders.foreach(provider => {
     createView(provider, None)
     provider.loadNewData
   })

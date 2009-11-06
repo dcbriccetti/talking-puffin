@@ -43,7 +43,9 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   title = Main.title + " - " + service + " " + twitterSession.user
   menuBar = new MainMenuBar(streams.providers, tagUsers)
   reactions += {
-    case e: NewViewEvent => streams.createView(e.provider, None)
+    case e: NewViewEvent => 
+      streams.createView(e.provider, None)
+      e.provider.loadNewData
   }
   listenTo(menuBar)
 
