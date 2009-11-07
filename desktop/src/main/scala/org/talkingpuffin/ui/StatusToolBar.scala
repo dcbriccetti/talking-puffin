@@ -5,6 +5,7 @@ import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
 import scala.swing.{Label, Action}
 import org.talkingpuffin.Session
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
+import org.talkingpuffin.ui.filter.FiltersDialog
 import util.{ToolBarHelpers}
 
 /**

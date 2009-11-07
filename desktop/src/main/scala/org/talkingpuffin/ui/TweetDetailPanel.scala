@@ -12,10 +12,10 @@ import event.{ListSelectionListener, ListSelectionEvent}
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
-import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.Session
 import util.{TextChangingAnimator}
 import org.talkingpuffin.util.{ResourceReady, FetchRequest, ShortUrl, Loggable}
+import org.talkingpuffin.ui.filter.FiltersDialog
 
 object Thumbnail {
   val THUMBNAIL_SIZE = 48

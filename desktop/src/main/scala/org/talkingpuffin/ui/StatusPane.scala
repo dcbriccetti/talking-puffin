@@ -4,6 +4,7 @@ import java.awt.{Dimension}
 import javax.swing.event._
 import swing.{ScrollPane, GridBagPanel}
 import org.talkingpuffin.filter.{TagUsers, FilterSet}
+import org.talkingpuffin.ui.filter.FiltersDialog
 import org.talkingpuffin.twitter.TwitterStatus
 import org.talkingpuffin.Session
 import util.{Dockable}

@@ -6,6 +6,7 @@ import javax.swing.event.{HyperlinkListener, HyperlinkEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
 import util.{DesktopUtil}
 import org.talkingpuffin.util.LinkUnIndirector
+import filter.FiltersDialog
 import javax.swing.{JComponent, JTextPane, JPopupMenu}
 
 /**
