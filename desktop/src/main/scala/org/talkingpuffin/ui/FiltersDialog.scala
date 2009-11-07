@@ -21,6 +21,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     border = new EmptyBorder(5, 5, 0, 5)
 
     val excludeFriendRetweets = new CheckBox("Exclude retweets of statuses of people you follow") {
+      tooltip = "Requires a People view to have been created, which is not recommended for huge sets of following/followers"
       peer.setMnemonic(KeyEvent.VK_R) // TODO find out why the pure scala.swing attempt caused assertion failure
     }
     class Cns(row: Int) extends Constraints {grid=(0,row); gridwidth=3; anchor=Anchor.West}
