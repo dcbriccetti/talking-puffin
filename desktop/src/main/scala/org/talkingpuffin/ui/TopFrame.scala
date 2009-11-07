@@ -1,15 +1,15 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.event.{WindowClosing}
+import java.awt.{Point, Dimension}
+import java.text.NumberFormat
 import javax.swing.{ImageIcon}
+import scala.swing.event.{WindowClosing}
 import swing.TabbedPane.Page
 import swing.{Reactor, Frame, TabbedPane, Label, GridBagPanel}
+import org.talkingpuffin.{Main, Globals, Session, Constants}
 import org.talkingpuffin.filter.TagUsers
-import org.talkingpuffin.{Main, Globals, Session}
-import org.talkingpuffin.state.{StateSaver}
-import java.text.NumberFormat
+import org.talkingpuffin.state.StateSaver
 import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, AuthenticatedSession}
-import java.awt.{Point, Dimension}
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 
 /**
@@ -77,7 +77,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   reactions += {
     case ic: IdsChanged => 
       if (peoplePane == null && 
-              (rels.followerIds.length + rels.friendIds.length < Globals.MaxPeopleForAutoPaneCreation)) {
+              (rels.followerIds.length + rels.friendIds.length < Constants.MaxPeopleForAutoPaneCreation)) {
         debug("Not too many people, so automatically creating people pane")
         createPeoplePane
       } else {

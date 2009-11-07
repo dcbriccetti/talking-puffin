@@ -1,6 +1,5 @@
 package org.talkingpuffin.filter
 
-import scala.swing.event.Event
 import scala.swing.Publisher
 import org.talkingpuffin.ui.{Relationships}
 import org.talkingpuffin.twitter.TwitterStatus
@@ -12,17 +11,14 @@ import org.talkingpuffin.util.Loggable
  */
 class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
   
-  class InOutSet {
-    var cpdFilters = new CompoundFilters
-    var tags = List[String]()
-    def tagMatches(userId: Long) = tags.exists(tagUsers.contains(_, userId))
-  }
-  
   var excludeFriendRetweets: Boolean = false
   var excludeNonFollowers: Boolean = false
   var useNoiseFilters: Boolean = false
-  val includeSet = new InOutSet
-  val excludeSet = new InOutSet
+  
+  val includeSet = new InOutFilters(tagUsers)
+  val excludeSet = new InOutFilters(tagUsers)
+  
+  val adder = new FilterAdder(this)
   
   /**
    * Filter the given list of statuses, returning a list of only those that pass the filters
@@ -50,41 +46,6 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
     statuses.filter(includeStatus)
   }
   
-  def muteApps(apps: List[String]) {
-    apps.foreach(app => excludeSet.cpdFilters.add(
-        CompoundFilter(List(SourceTextFilter(app, false)), None, None)))
-    publish
-  }
-
-  def muteSenders(senders: List[String]) {
-    senders.foreach(sender => excludeSet.cpdFilters.add(
-        CompoundFilter(List(FromTextFilter(sender, false)), None, None)))
-    publish
-  }
-
-  def muteRetweetUsers(senders: List[String]) {
-    senders.foreach(sender => excludeSet.cpdFilters.add(
-        CompoundFilter(List(FromTextFilter(sender, false)), Some(true), None)))
-    publish
-  }
-
-  def muteSelectedUsersCommentedRetweets(senders: List[String]) {
-    senders.foreach(sender => {
-      val filters = List(FromTextFilter(sender, false))
-      excludeSet.cpdFilters.add(CompoundFilter(filters, Some(true), None))
-      excludeSet.cpdFilters.add(CompoundFilter(filters, None, Some(true)))
-    })
-    publish
-  }
-
-  def muteSenderReceivers(srs: List[(String, String)]) {
-    srs.foreach(sr => excludeSet.cpdFilters.add(
-        CompoundFilter(List(FromTextFilter(sr._1, false), ToTextFilter(sr._2, false)), None, None)))
-    publish
-  }
-
   def publish: Unit = publish(new FilterSetChanged(this))
 }
-
-case class FilterSetChanged(filterSet: FilterSet) extends Event
 

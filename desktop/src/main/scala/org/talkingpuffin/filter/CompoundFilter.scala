@@ -1,73 +1,45 @@
 package org.talkingpuffin.filter
 
 import org.talkingpuffin.twitter.TwitterStatus
-import java.util.regex.Pattern
-import swing.Publisher
-import swing.event.Event
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.filter.RetweetDetector._
-import org.talkingpuffin.ui.LinkExtractor
 
-class CompoundFilters extends Publisher {
-  var list = List[CompoundFilter]()
-  def clear = list = List[CompoundFilter]()
-  def matchesAll(status: TwitterStatus): Boolean = list.forall(_.matches(status))
-  def matchesAny(status: TwitterStatus): Boolean = list.exists(_.matches(status))
-  def add(cf: CompoundFilter) = {
-    list = list ::: List(cf)
-    publish
-  }
-  def publish: Unit = publish(new CompoundFiltersChanged)
-  override def toString = list.map(_.toString).mkString("↑")
-}
+/**
+ * Used to match a tweet against a set of TextFilters and retweet options.
+ */
+case class CompoundFilter(val textFilters: List[TextFilter], 
+    val retweet: Option[Boolean], val commentedRetweet: Option[Boolean]) 
+    extends Loggable {
 
-class CompoundFiltersChanged extends Event
-
-case class CompoundFilter(val textFilters: List[TextFilter], val retweet: Option[Boolean], 
-    val commentedRetweet: Option[Boolean]) extends Loggable {
-
+  /**
+   * Whether the specified tweet matches all the elements of this CompoundFilter.
+   */
   def matches(status: TwitterStatus): Boolean = {
-    textFilters.foreach(tf => {
-      val elementMatches = if (tf.isRegEx)
-        Pattern.compile(tf.text).matcher(tf.getCompareWith(status)).find
+
+    def allTextFiltersMatch = textFilters.forall(tf => {
+      val text = tf.text
+      val compareWith = tf.getCompareWith(status)
+      
+      if (tf.isRegEx)
+        text.r.findFirstIn(compareWith).isDefined
       else
-        tf.getCompareWith(status).toUpperCase.contains(tf.text.toUpperCase)
-      if (! elementMatches) {
-        return false
-      }
+        compareWith.toUpperCase.contains(text.toUpperCase)
     })
-    (retweet match {
-      case Some(rt) if rt => status.isRetweet
+
+    def retweetFilterMatches = booleanFilterMatches(retweet, status.isRetweet)
+
+    def commentedRetweetFilterMatches = booleanFilterMatches(
+        commentedRetweet, status.isCommentedRetweet)
+
+    def booleanFilterMatches(filter: Option[Boolean], value: Boolean) = filter match {
+      case Some(f) => f == value
       case _ => true
-    }) && 
-    (commentedRetweet match {
-      case Some(rt) if rt => status.isCommentedRetweet
-      case _ => true
-    })  
+    }
+
+    allTextFiltersMatch && retweetFilterMatches && commentedRetweetFilterMatches
   }
   
-  override def toString = 
-    List(textFilters.map(_.toString).mkString("⇅"), retweet.toString, commentedRetweet.toString).mkString("↕")
+  override def toString = List(textFilters.map(_.toString).mkString("⇅"), 
+    retweet.toString, commentedRetweet.toString).mkString("↕")
 }
-
-sealed abstract case class TextFilter (val text: String, val isRegEx: Boolean, 
-    getCompareWith: (TwitterStatus) => String) {
-  override def toString = List(getClass.getName, text, isRegEx.toString).mkString("↓")
-}
-
-case class FromTextFilter(override val text: String, override val isRegEx: Boolean) 
-    extends TextFilter(text, isRegEx, (status) => status.user.screenName)
-
-case class TextTextFilter(override val text: String, override val isRegEx: Boolean) 
-    extends TextFilter(text, isRegEx, (status) => status.text)
-
-case class ToTextFilter(override val text: String, override val isRegEx: Boolean) 
-    extends TextFilter(text, isRegEx, 
-    (status) => LinkExtractor.getReplyToInfo(status.inReplyToStatusId, status.text) match {
-      case Some(screenNameAndId) => screenNameAndId._1
-      case _ => ""
-    }) 
-
-case class SourceTextFilter(override val text: String, override val isRegEx: Boolean) 
-    extends TextFilter(text, isRegEx, (status) => status.sourceName) 
 

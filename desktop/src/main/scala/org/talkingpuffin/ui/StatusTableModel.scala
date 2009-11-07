@@ -132,7 +132,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   private def mapToIdTuple(users: List[User]) = users.map(user => (user.id, user))
   
   def muteSelectedUsers(rows: List[Int]) = {
-    filterSet.muteSenders(getScreenNames(rows))
+    filterSet.adder.muteSenders(getScreenNames(rows))
     filterAndNotify
   }
 
@@ -145,24 +145,24 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       if rti.isDefined
     } yield (sender, rti.get._1)
     
-    filterSet.muteSenderReceivers(senderReceivers)
+    filterSet.adder.muteSenderReceivers(senderReceivers)
     if (andViceVersa)
-      filterSet.muteSenderReceivers(senderReceivers map (t => (t._2, t._1)))
+      filterSet.adder.muteSenderReceivers(senderReceivers map (t => (t._2, t._1)))
     filterAndNotify
   }
 
   def muteSelectedUsersRetweets(rows: List[Int]) = {
-    filterSet.muteRetweetUsers(getScreenNames(rows))
+    filterSet.adder.muteRetweetUsers(getScreenNames(rows))
     filterAndNotify
   }
 
   def muteSelectedUsersCommentedRetweets(rows: List[Int]) = {
-    filterSet.muteSelectedUsersCommentedRetweets(getScreenNames(rows))
+    filterSet.adder.muteSelectedUsersCommentedRetweets(getScreenNames(rows))
     filterAndNotify
   }
 
   def muteSelectedApps(rows: List[Int]) = {
-    filterSet.muteApps(rows.map(i => filteredStatuses_(i).sourceName))
+    filterSet.adder.muteApps(rows.map(i => filteredStatuses_(i).sourceName))
     filterAndNotify
   }
 
