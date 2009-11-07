@@ -4,10 +4,9 @@ import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
 import org.talkingpuffin.filter.{FilterSet, FilterSetChanged, TagUsers}
 import javax.swing._
-import javax.swing.table.{AbstractTableModel}
 import org.apache.log4j.Logger
 import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
-import org.talkingpuffin.state.{PreferencesFactory, GlobalPrefs, PrefKeys}
+import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 import org.talkingpuffin.twitter.{TwitterUser, TwitterMessage, TwitterStatus}
@@ -25,7 +24,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
 
   val unessentialCols = List("When", "Image", "From", "To") // Can be quickly hidden
   
-  private val userPrefs = PreferencesFactory.prefsForUser(service, username)
+  private val userPrefs = GlobalPrefs.prefsForUser(service, username)
 
   /** All loaded statuses */
   private var statuses = List[TwitterStatus]()

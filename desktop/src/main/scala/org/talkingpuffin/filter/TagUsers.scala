@@ -2,18 +2,19 @@ package org.talkingpuffin.filter
 
 import scala.collection.mutable.Map
 import com.google.common.collect.{Multimap, HashMultimap}
-import org.talkingpuffin.state.PreferencesFactory
+import org.talkingpuffin.state.GlobalPrefs.prefsForUser
 
 /**
  * Repository of tag -> user mappings, stored within a service/user
  */
 class TagUsers(service: String, username: String) {
-  private val tagsPrefs = PreferencesFactory.prefsForUser(service, username).node("tags")
-  private val tagDescPrefs = PreferencesFactory.prefsForUser(service, username).node("tagDescs")
+  private val userPrefs = prefsForUser(service, username)
+  private val tagsPrefs = userPrefs.node("tags")
+  private val tagDescPrefs = userPrefs.node("tagDescs")
   private val tagUsers: Multimap[String,Long] = HashMultimap.create()
   private val tagDescs = Map[String,String]()
-  tagsPrefs.keys.foreach(tag => tagsPrefs.get(tag, null).split("\t").foreach(userId => add(tag, userId.toLong)))
-  tagDescPrefs.keys.foreach(tag => tagDescs(tag) = tagDescPrefs.get(tag, null))
+  
+  load()
   
   def add(tag: String, userId: Long) = tagUsers.put(tag, userId)
   
@@ -62,6 +63,14 @@ class TagUsers(service: String, username: String) {
     }
   }
   
+  private def load() {
+    tagsPrefs.keys.foreach(tag => 
+      tagsPrefs.get(tag, null).split("\t").foreach(userId => 
+        add(tag, userId.toLong)))
+    tagDescPrefs.keys.foreach(tag => 
+      tagDescs(tag) = tagDescPrefs.get(tag, null))
+  }
+  
   private def itToList[T](it: java.lang.Iterable[T]): List[T] = itToList(it.iterator)
   
   private def itToList[T](it: java.util.Iterator[T]): List[T] = {
@@ -70,6 +79,6 @@ class TagUsers(service: String, username: String) {
       l ::= it.next
     }
     l.reverse
-  } 
-  
+  }
+
 }
