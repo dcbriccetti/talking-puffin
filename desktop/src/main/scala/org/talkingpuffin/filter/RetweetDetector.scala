@@ -15,7 +15,8 @@ object RetweetDetector {
   private val regexes = List(rtUser, viaUser)
   
   implicit def string2RetweetDetector(text: String) = new RetweetDetector(text)
-  implicit def status2RetweetDetector(status: TwitterStatus) = new RetweetDetector(status.text)
+  implicit def status2RetweetDetector(status: TwitterStatus) = 
+      new RetweetDetector(status.text)
 }
   
 class RetweetDetector(text: String) {

@@ -43,3 +43,15 @@ case class CompoundFilter(val textFilters: List[TextFilter],
     retweet.toString, commentedRetweet.toString).mkString("↕")
 }
 
+object CompoundFilter {
+  def muteRtSender(sender: String) = 
+      CompoundFilter(List(FromTextFilter(sender, false)), Some(true), None)
+
+  def muteCRtSender(sender: String) = 
+      CompoundFilter(List(FromTextFilter(sender, false)), None, Some(true))
+  
+  def muteApp(app: String) = CompoundFilter(List(SourceTextFilter(app, false)), None, None)
+  
+  def muteSender(sender: String) = CompoundFilter(List(FromTextFilter(sender, false)), None, None)
+}
+
