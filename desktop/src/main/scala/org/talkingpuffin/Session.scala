@@ -1,5 +1,6 @@
 package org.talkingpuffin
 
+import filter.TagUsers
 import java.util.prefs.Preferences
 import twitter.AuthenticatedSession
 import ui.{Windows, LongOpListener}
@@ -12,5 +13,6 @@ class Session(val serviceName: String, val twitterSession: AuthenticatedSession)
   def statusMsg = statusMsgLabel.text
   var progress: LongOpListener = null
   def userPrefs: Preferences = windows.streams.prefs
+  def tagUsers: TagUsers = windows.streams.tagUsers
 }
 

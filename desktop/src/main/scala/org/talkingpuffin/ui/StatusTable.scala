@@ -57,7 +57,9 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   configureColumns
 
   private val mh = new PopupMenuHelper(this)
-  private var specialMenuItems = new SpecialMenuItems
+  private var specialMenuItems = new SpecialMenuItems(this, tableModel.relationships,
+      getSelectedStatuses map(_.user.id), getSelectedScreenNames, 
+      {getSelectedStatuses.exists(_.inReplyToStatusId.isDefined)})
   buildActions
 
   new Reactor {
@@ -72,12 +74,6 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
   addMouseListener(new PopupListener(this, mh.menu))
   addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = if (e.getClickCount == 2) reply
-  })
-  getSelectionModel.addListSelectionListener(new ListSelectionListener {
-    def valueChanged(event: ListSelectionEvent) = 
-      if (! event.getValueIsAdjusting) 
-        specialMenuItems.enableActions(getSelectedStatuses, getSelectedScreenNames.length, 
-          tableModel.relationships.friendIds, tableModel.relationships.followerIds)
   })
   
   def saveState {
@@ -233,12 +229,6 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     }, ks(VK_E, 0))
     mh add(Action("Retweet new way") { retweetNewWay }, ks(VK_E, SHORTCUT))
     
-    mh add(new TagAction(this, tableModel), ks(VK_T, 0))
-    mh add(new Action("Show larger image") { 
-      def apply = showBigPicture
-      specialMenuItems.oneStatusSelected.list ::= this
-    }, ks(VK_I, 0))
-    
     mh.menu.add(new JMenu("View in browser") {
       mh add(Action("Status") {viewSelected}, this, ks(VK_V, 0))
       mh add(Action("Status source") {viewSourceSelected}, this, ks(VK_V, SHORTCUT | SHIFT))
@@ -255,10 +245,6 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
       LinkUnIndirector.findLinks(DesktopUtil.browse, DesktopUtil.browse)), ks(VK_L, 0))
     mh add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, 0))
     mh add(new OpenTwitterUserListsAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, SHIFT))
-    
-    mh add(Action("Show friends and followers") 
-        {userActions.showFriends(getSelectedScreenNames)}, UserActions.ShowFriendsAccel)
-    mh add(Action("View lists…") {userActions.viewLists(getSelectedScreenNames, this)}, UserActions.ViewListAccel)
     
     mh.menu.add(new JMenu("Mute") {
       mh add(Action("User") {tableModel.muteSelectedUsers(smi)}, this, ks(VK_M, SHORTCUT))
@@ -280,17 +266,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
       mh add(Action("Increase Row Height") { changeRowHeight(8) }, this)
       mh add(Action("Decrease Row Height") { changeRowHeight(-8) }, this)
     })
-    
-    mh add(new Action("Follow") { 
-      def apply = userActions.follow(getSelectedScreenNames)
-      specialMenuItems.notFriendsOnly.list ::= this
-    }, UserActions.FollowAccel)
-    mh add(new Action("Unfollow") {
-      def apply = userActions.unfollow(getSelectedScreenNames)
-      specialMenuItems.friendsOnly.list ::= this
-    }, UserActions.UnfollowAccel)
-    mh add(Action("Block") { userActions.block(getSelectedScreenNames) }, UserActions.BlockAccel)
-    mh.add(Action("Report Spam") { userActions.reportSpam(getSelectedScreenNames) }, UserActions.ReportSpamAccel)
+
+    userActions.addCommonItems(mh, specialMenuItems, this, showBigPicture, getSelectedScreenNames)
     
     mh.menu.add(new JMenu("Delete") {
       mh add(Action("Selected tweets") {

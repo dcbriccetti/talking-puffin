@@ -9,8 +9,8 @@ import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
 import java.awt.event.{KeyEvent, ActionListener, ActionEvent}
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.Session
-import util.{DesktopUtil, TableUtil, Dockable}
-import org.talkingpuffin.twitter.TwitterUser
+import util.{Dockable, DesktopUtil, TableUtil}
+import org.talkingpuffin.twitter.{TwitterStatus, TwitterUser}
 
 object UserColumns {
   val ARROWS = 0
@@ -39,8 +39,11 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     table = new PeopleTable(tableModel)
     peer.setViewportView(table)
   }
+  private val tweetDetailPanel = new TweetDetailPanel(session, table, None, None)
   private val userActions = new UserActions(session, rels)
   val mh = new PopupMenuHelper(table)
+  private var specialMenuItems = new SpecialMenuItems(table, tableModel.relationships,
+    {getSelectedUsers map(_.id)}, getSelectedScreenNames, {false})
   buildActions(mh, table)
   table.addMouseListener(new PopupListener(table, mh.menu))
 
@@ -83,13 +86,19 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     
     addSeparator
     add(dockedButton)
+    add((new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
   }
   peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
   
   add(tableScrollPane, new Constraints { 
     grid=(0,1); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1 
   })
+  add(tweetDetailPanel, new Constraints{
+    grid = (0,2); fill = GridBagPanel.Fill.Horizontal;
+  })
   
+  tweetDetailPanel.connectToTable(table)
+
   reactions += {
     case e: UsersChanged => setLabels
   }
@@ -112,22 +121,15 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     mh.add(new NextTAction(comp))
     mh.add(new PrevTAction(comp))
     mh add(new TagAction(table, tableModel), ks(KeyEvent.VK_T,0))
-    mh add(Action("Show friends and followers") 
-        {userActions.showFriends(getSelectedScreenNames)}, UserActions.ShowFriendsAccel)
-    mh add(Action("View lists…") {userActions.viewLists(getSelectedScreenNames, table)}, UserActions.ViewListAccel)
     mh.add(Action("Reply") { reply }, ks(KeyEvent.VK_R,0))
-    mh.add(Action("Follow"  ) { userActions.follow(getSelectedScreenNames  ) }, UserActions.FollowAccel)
-    mh.add(Action("Unfollow") { userActions.unfollow(getSelectedScreenNames) }, UserActions.UnfollowAccel)
-    mh.add(Action("Block"   ) { userActions.block(getSelectedScreenNames   ) }, UserActions.BlockAccel)
-    mh.add(Action("Report Spam") { userActions.reportSpam(getSelectedScreenNames) }, UserActions.ReportSpamAccel)
+    userActions.addCommonItems(mh, specialMenuItems, table, 
+        tweetDetailPanel.showBigPicture, getSelectedScreenNames)
   }
 
   private def getSelectedUsers:List[TwitterUser] = 
     TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
   
-  def getSelectedScreenNames: List[String] = {
-    getSelectedUsers.map(user => user.screenName)
-  }
+  def getSelectedScreenNames: List[String] = getSelectedUsers.map(user => user.screenName)
 
   private def viewSelected = getSelectedUsers.foreach(u => DesktopUtil.browse("http://twitter.com/" + 
       u.screenName))

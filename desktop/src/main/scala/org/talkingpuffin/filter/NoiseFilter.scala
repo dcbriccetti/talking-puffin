@@ -2,49 +2,52 @@ package org.talkingpuffin.filter
 
 import scala.util.matching.Regex
 import scala.io.Source
+import org.talkingpuffin.Constants
 import org.talkingpuffin.util.Loggable
 
+/**
+ * Loads noise filters from a repository and finds noisy tweets.
+ */
 object NoiseFilter extends Loggable {
-  var exprs = List[Regex]()
-  var loadError: Exception = _
-  
+  var expressions = List[Regex]()
+  var loadError: Option[Exception] = None
+
+  /**
+   * Returns whether the provided tweet is noise.
+   */
   def isNoise(text: String): Boolean = {
     if (needsLoading) 
       load
     
     val textOneLine = text.replaceAll("(\n|\r)", "") // Easier to match text all on one line
     
-    exprs.exists(e => {
-      textOneLine match {
-        case e() => {
-          debug(textOneLine + " matched " + e)
-          true
-        }
-        case _ => false
-      }
-    })
+    val noise = expressions.exists(_.findFirstIn(textOneLine).isDefined)
+    if (noise)
+      debug(textOneLine + " matched")
+    noise
   }
-  
+
+  /**
+   * Loads noise-matching regular expressions from an external repository.
+   */
   def load {
     try {
-      val regExStrings = Source.fromURL("http://talkingpuffin.appspot.com/filters/noise").getLines.
+      val regExStrings = Source.fromURL(Constants.NoiseRepository).getLines.
           map(_.trim).toList.filter(_.length > 0)
       info("Loaded " + regExStrings)
-      exprs = regExStrings.map(_.r)
-      loadError = null
+      expressions = regExStrings.map(_.r)
+      loadError = None
     } catch {
       case e: Exception => {
-        loadError = e
+        loadError = Some(e)
         error(e.toString) 
       }
     }
   }
   
   private def needsLoading: Boolean = {
-    exprs == Nil /* None loaded */ && loadError == null /* We didn’t previously fail on loading */
+    expressions == Nil /* None loaded */ && 
+        ! loadError.isDefined /* We didn’t previously fail on loading */
   }
   
-  private def loadSamples {
-    exprs = List(".*web.*", ".*Twitter.*").map(_.r)
-  }
 }

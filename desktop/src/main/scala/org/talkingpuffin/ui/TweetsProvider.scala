@@ -25,6 +25,24 @@ class MentionsProvider(session: AuthenticatedSession, startingId: Option[Long],
   override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getReplies
 }
 
+class RetweetsOfMeProvider(session: AuthenticatedSession, startingId: Option[Long], 
+    longOpListener: LongOpListener)
+    extends TweetsProvider(session, startingId, "RTs of Me", longOpListener) {
+  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getRetweetsOfMe
+}
+
+class RetweetedByMeProvider(session: AuthenticatedSession, startingId: Option[Long], 
+    longOpListener: LongOpListener)
+    extends TweetsProvider(session, startingId, "RTs by Me", longOpListener) {
+  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getRetweetedByMe
+}
+
+class RetweetedToMeProvider(session: AuthenticatedSession, startingId: Option[Long], 
+    longOpListener: LongOpListener)
+    extends TweetsProvider(session, startingId, "RTs to Me", longOpListener) {
+  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getRetweetedToMe
+}
+
 class DmsReceivedProvider(session: AuthenticatedSession, startingId: Option[Long], 
     longOpListener: LongOpListener)
     extends DataProvider(session, startingId, "DMs Rcvd", longOpListener) {

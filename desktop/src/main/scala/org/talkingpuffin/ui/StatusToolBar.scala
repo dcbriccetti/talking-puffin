@@ -5,6 +5,7 @@ import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
 import scala.swing.{Label, Action}
 import org.talkingpuffin.Session
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
+import org.talkingpuffin.ui.filter.FiltersDialog
 import util.{ToolBarHelpers}
 
 /**
@@ -81,14 +82,6 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
     def apply = showMaxColumns(true)
   }
 
-  var detailsButton: JToggleButton = _ 
-  val showDetailsAction = new Action("Details") {
-    toolTip = "Shows or hides the details panel"
-    def apply = tweetDetailPanel.visible = detailsButton.isSelected
-  }
-  detailsButton = new JToggleButton(showDetailsAction.peer)
-  detailsButton.setSelected(true)
-
   setFloatable(false)
   addComponentsToToolBar
   
@@ -99,7 +92,7 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
     add(new Label("Cols: ").peer)
     aa(showMinColsAction, showMaxColsAction)
     addSeparator
-    ac(statusPane.dockedButton, detailsButton)
+    ac(statusPane.dockedButton, (new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
   }
   
   private def clearAndOptionallyLoad(all: Boolean) {

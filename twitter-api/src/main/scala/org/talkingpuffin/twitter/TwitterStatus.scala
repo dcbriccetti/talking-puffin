@@ -20,7 +20,7 @@ class TwitterStatus() extends Validated{
   var inReplyToStatusId: Option[Long] = None
   var inReplyToUserId: Option[Long] = None
   var favorited: Boolean = false
-  var retweeted: Retweet = null
+  var retweeted: Option[TwitterStatus] = None
   var location: Option[(Double, Double)] = None
 
   def isValid() = {
@@ -80,10 +80,6 @@ class TwitterStatus() extends Validated{
   }
 }
 
-class Retweet extends TwitterUser{
-  var retweetedAt: DateTime = null
-}
-
 /**
  * 
  * The TwitterStatus object is used to construct TwitterStatus instances from XML fragments
@@ -116,7 +112,7 @@ object TwitterStatus{
               Some(text.toLong)
           case <favorited>{Text(text)}</favorited> => status.favorited = java.lang.Boolean.valueOf(text).booleanValue
           case <user>{ _* }</user> => status.user = TwitterUser(sub)
-          case <retweet_details>{ _* }</retweet_details> => status.retweeted = Retweet(sub)
+          case <retweeted_status>{ _* }</retweeted_status> => status.retweeted = Some(TwitterStatus(sub))
           case <geo>{ _* }</geo> => status.extractLocation(sub)
           case _ => Nil
         }
@@ -129,56 +125,3 @@ object TwitterStatus{
   
 }
 
-/**
-*
-* The Retweet object is used to construct Retweet instances from XML fragments
-* The only method available is apply, which allows you to use the object as follows
-* <tt><pre>
-* val xml = getXML()
-* val retweet = Retweet(xml)
-* </pre></tt>
-*/
-object Retweet{
-  val logger = Logger.getLogger("twitter")
-  val fmt = DateTimeFormats.fmt1
-
-  /**
-  * construct a TwitterStatus object from an XML node
-  */
-  def apply(n: Node):Retweet = {
-    val retweet = new Retweet()
-    n.child foreach {(sub) =>
-      try {
-        sub match {
-          case <retweeting_user>{ _* }</retweeting_user> => {
-            sub.child foreach {(child) =>
-              child match {
-                case <id>{Text(text)}</id> => retweet.id = Integer.parseInt(text)
-                case <name>{Text(text)}</name> => retweet.name = text
-                case <screen_name>{Text(text)}</screen_name> => retweet.screenName = text
-                case <location/> => Nil
-                case <location>{Text(text)}</location> => retweet.location = text
-                case <description/> => Nil
-                case <description>{Text(text)}</description> => retweet.description = text
-                case <profile_image_url>{Text(text)}</profile_image_url> => retweet.profileImageURL = text
-                case <url/> => Nil
-                case <url>{Text(text)}</url> => retweet.url = text
-                case <protected>{Text(text)}</protected> => retweet.isProtected = java.lang.Boolean.valueOf(text).booleanValue
-                case <followers_count>{Text(text)}</followers_count> => retweet.followersCount = Integer.parseInt(text)
-                case <friends_count>{Text(text)}</friends_count> => retweet.friendsCount = Integer.parseInt(text)
-                case <status>{ _* }</status> => retweet.status = Some(TwitterStatus(sub))
-                case _ => Nil
-              }
-            }
-          }
-          case <retweeted_at>{Text(text)}</retweeted_at> => retweet.retweetedAt = fmt.parseDateTime(text)
-          case _ => Nil
-        }
-      } catch {
-        case e: NumberFormatException => logger.error(e + " " + sub + " " + n)
-        case e: IllegalArgumentException => logger.error(e + " " + sub + " " + n)
-      }
-    }
-    return retweet
-  }
-}

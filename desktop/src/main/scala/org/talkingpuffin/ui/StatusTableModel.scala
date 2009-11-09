@@ -4,13 +4,12 @@ import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
 import org.talkingpuffin.filter.{FilterSet, FilterSetChanged, TagUsers}
 import javax.swing._
-import javax.swing.table.{AbstractTableModel}
 import org.apache.log4j.Logger
 import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
-import org.talkingpuffin.state.{PreferencesFactory, GlobalPrefs, PrefKeys}
-import org.talkingpuffin.twitter.{TwitterMessage, TwitterStatus}
+import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
+import org.talkingpuffin.twitter.{TwitterUser, TwitterMessage, TwitterStatus}
 
 /**
  * Model providing status data to the JTable
@@ -19,13 +18,13 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     val relationships: Relationships,
     screenNameToUserNameMap: Map[String, String], filterSet: FilterSet, service: String, 
     username: String, val tagUsers: TagUsers) 
-    extends AbstractTableModel with TaggingSupport with Publisher with Reactor {
+    extends UserAndStatusProvider with TaggingSupport with Publisher with Reactor {
   
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
 
   val unessentialCols = List("When", "Image", "From", "To") // Can be quickly hidden
   
-  private val userPrefs = PreferencesFactory.prefsForUser(service, username)
+  private val userPrefs = GlobalPrefs.prefsForUser(service, username)
 
   /** All loaded statuses */
   private var statuses = List[TwitterStatus]()
@@ -65,7 +64,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   private val pictureCell = new PictureCell(this, 0)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
-    val status = filteredStatuses_(rowIndex)
+    val status = getStatusAt(rowIndex)
     
     def senderName(status: TwitterStatus) = 
       if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) 
@@ -104,8 +103,19 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   
   def getStatusText(status: TwitterStatus, username: String): String = status.text
 
-  def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses_(rowIndex)
+  def getStatusAt(rowIndex: Int): TwitterStatus = {
+    val st = filteredStatuses_(rowIndex)
+    st.retweeted match {
+      case Some(rt) => rt
+      case None => st
+    }
+  }
   
+  def getUserAndStatusAt(rowIndex: Int): Tuple2[TwitterUser, Option[TwitterStatus]] = {
+    val status = getStatusAt(rowIndex)
+    (status.user, Some(status))
+  }
+
   override def getColumnClass(col: Int) = List(
     classOf[java.util.Date], 
     classOf[Icon], 
@@ -122,7 +132,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
   private def mapToIdTuple(users: List[User]) = users.map(user => (user.id, user))
   
   def muteSelectedUsers(rows: List[Int]) = {
-    filterSet.muteSenders(getScreenNames(rows))
+    filterSet.adder.muteSenders(getScreenNames(rows))
     filterAndNotify
   }
 
@@ -135,24 +145,24 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       if rti.isDefined
     } yield (sender, rti.get._1)
     
-    filterSet.muteSenderReceivers(senderReceivers)
+    filterSet.adder.muteSenderReceivers(senderReceivers)
     if (andViceVersa)
-      filterSet.muteSenderReceivers(senderReceivers map (t => (t._2, t._1)))
+      filterSet.adder.muteSenderReceivers(senderReceivers map (t => (t._2, t._1)))
     filterAndNotify
   }
 
   def muteSelectedUsersRetweets(rows: List[Int]) = {
-    filterSet.muteRetweetUsers(getScreenNames(rows))
+    filterSet.adder.muteRetweetUsers(getScreenNames(rows))
     filterAndNotify
   }
 
   def muteSelectedUsersCommentedRetweets(rows: List[Int]) = {
-    filterSet.muteSelectedUsersCommentedRetweets(getScreenNames(rows))
+    filterSet.adder.muteSelectedUsersCommentedRetweets(getScreenNames(rows))
     filterAndNotify
   }
 
   def muteSelectedApps(rows: List[Int]) = {
-    filterSet.muteApps(rows.map(i => filteredStatuses_(i).sourceName))
+    filterSet.adder.muteApps(rows.map(i => filteredStatuses_(i).sourceName))
     filterAndNotify
   }
 

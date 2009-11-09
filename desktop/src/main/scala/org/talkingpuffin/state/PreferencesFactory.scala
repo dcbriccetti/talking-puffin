@@ -7,17 +7,15 @@ import swing.Publisher
 /**
  * Provides Preferences.
  */
-object PreferencesFactory {
-  def prefsForUser(service: String, username: String) =
-    Preferences.userRoot.node("/org/talkingpuffin/streams/" + service.toLowerCase + "/" + username)
-}
-
 object GlobalPrefs {
   val prefs = Preferences.userRoot.node("/org/talkingpuffin/all")
   val publisher = new Publisher {}
   
   case class PrefChangedEvent(val key: String, val value: Any) extends Event
   
+  def prefsForUser(service: String, username: String) =
+    Preferences.userRoot.node("/org/talkingpuffin/streams/" + service.toLowerCase + "/" + username)
+
   def put(key: String, value: Boolean) = {
     prefs.putBoolean(key, value)
     publisher.publish(new PrefChangedEvent(key, value))

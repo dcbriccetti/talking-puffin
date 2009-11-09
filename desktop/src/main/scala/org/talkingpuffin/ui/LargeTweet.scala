@@ -1,18 +1,19 @@
 package org.talkingpuffin.ui
 
 import _root_.scala.swing.{MenuItem, Action}
-import java.awt.{Desktop, Dimension, Color}
+import java.awt.{Desktop, Color}
 import javax.swing.event.{HyperlinkListener, HyperlinkEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
-import javax.swing.{JTable, JTextPane, JPopupMenu}
 import util.{DesktopUtil}
 import org.talkingpuffin.util.LinkUnIndirector
+import filter.FiltersDialog
+import javax.swing.{JComponent, JTextPane, JPopupMenu}
 
 /**
  * A large version of the tweet, that can contain hyperlinks, and from which filters can be created.
  */
-class LargeTweet(filtersDialog: FiltersDialog, viewCreator: ViewCreator, table: JTable, 
-    backgroundColor: Color) extends JTextPane {
+class LargeTweet(filtersDialog: Option[FiltersDialog], viewCreator: Option[ViewCreator], 
+    focusAfterHyperlinkClick: JComponent, backgroundColor: Color) extends JTextPane {
   setBackground(backgroundColor)
   setContentType("text/html");
   setEditable(false);
@@ -23,7 +24,7 @@ class LargeTweet(filtersDialog: FiltersDialog, viewCreator: ViewCreator, table: 
         if (Desktop.isDesktopSupported) {
           LinkUnIndirector.findLinks(DesktopUtil.browse, DesktopUtil.browse)(e.getURL.toString)
         }
-        table.requestFocusInWindow // Let user resume using keyboard to move through tweets
+        focusAfterHyperlinkClick.requestFocusInWindow // Let user resume using keyboard to move through tweets
       }
     }
   });
@@ -36,17 +37,22 @@ class LargeTweet(filtersDialog: FiltersDialog, viewCreator: ViewCreator, table: 
         val text = getSelectedText
         if (text != null) {
           val popup = new JPopupMenu
-          val filterIn = new MenuItem(
-            Action("Include tweets containing “" + text + "”")
-            {filtersDialog.addIncludeMatching(text)})
-          val filterOut = new MenuItem(Action("Exclude tweets containing “" + text + "”")
-            {filtersDialog.addExcludeMatching(text)})
-          val newStream = new MenuItem(Action("Create a new stream for “" + text + "”")
-            {viewCreator.createView(viewCreator.providers.followingProvider, Some(text))})
-          popup.add(filterIn.peer)
-          popup.add(filterOut.peer)
-          popup.add(newStream.peer)
-          popup.show(LargeTweet.this, e.getX, e.getY)
+          filtersDialog match {
+            case Some(fd) =>
+              popup.add(new MenuItem(Action("Include tweets containing “" + text + "”")
+                  {fd.addIncludeMatching(text)}).peer)
+              popup.add(new MenuItem(Action("Exclude tweets containing “" + text + "”")
+                  {fd.addExcludeMatching(text)}).peer)
+            case _ =>
+          }
+          viewCreator match {
+            case Some(vc) =>
+              popup.add(new MenuItem(Action("Create a new stream for “" + text + "”")
+                  {vc.createView(vc.providers.following, Some(text))}).peer)
+            case _ =>
+          }
+          if (popup.getComponentCount > 0)
+            popup.show(LargeTweet.this, e.getX, e.getY)
         }
       }
     }

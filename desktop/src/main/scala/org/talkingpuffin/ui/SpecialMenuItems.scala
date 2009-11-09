@@ -2,9 +2,19 @@ package org.talkingpuffin.ui
 
 import swing.Action
 import org.talkingpuffin.util.Loggable
-import org.talkingpuffin.twitter.TwitterStatus
+import javax.swing.JTable
+import javax.swing.event.{ListSelectionEvent, ListSelectionListener}
 
-class SpecialMenuItems extends Loggable {
+class SpecialMenuItems(table: JTable, rels: Relationships,
+      getSelectedUserIds: => List[Long], getSelectedScreenNames: => List[String],
+      getReplyIsSelected: => Boolean) extends Loggable {
+
+  table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
+    def valueChanged(event: ListSelectionEvent) = 
+      if (! event.getValueIsAdjusting) 
+        enableActions(getSelectedUserIds, getSelectedScreenNames.length)
+  })
+  
   class ActionsList {
     var list = List[Action]()
     def disableIf(value: Boolean) = if (value) list.foreach(action => action.enabled = false)
@@ -22,20 +32,19 @@ class SpecialMenuItems extends Loggable {
   /** Only applicable to statuses that are a reply */
   var replyOnly = new ActionsList
   /** All special actions */
-  def all = oneStatusSelected.list ::: oneScreennameSelected.list ::: followersOnly.list ::: 
-      friendsOnly.list ::: notFriendsOnly.list ::: replyOnly.list
+  def all = List(oneStatusSelected.list, oneScreennameSelected.list, followersOnly.list, 
+      friendsOnly.list, notFriendsOnly.list, replyOnly.list)
     
-  def enableActions(selectedStatuses: List[TwitterStatus], numSelectedScreenNames: Int,
-      friendIds: List[Long], followerIds: List[Long]) {
+  def enableActions(selIds: List[Long], numSelectedScreenNames: Int) {
     
-    all foreach(_.enabled = true)
+    all foreach(_.foreach(_.enabled = true))
     
-    oneStatusSelected    .disableIf(selectedStatuses.length != 1) 
-    oneScreennameSelected.disableIf(numSelectedScreenNames != 1)
-    followersOnly        .disableIf(selectedStatuses.exists(status => ! followerIds.contains(status.user.id)))
-    friendsOnly          .disableIf(selectedStatuses.exists(status => ! friendIds  .contains(status.user.id)))
-    notFriendsOnly       .disableIf(selectedStatuses.exists(status => friendIds.contains(status.user.id)))
-    replyOnly            .disableIf(! selectedStatuses.exists(_.inReplyToStatusId.isDefined))
+    oneStatusSelected     disableIf(selIds.length != 1) 
+    oneScreennameSelected disableIf(numSelectedScreenNames != 1)
+    followersOnly         disableIf(selIds.exists(id => ! rels.followerIds.contains(id)))
+    friendsOnly           disableIf(selIds.exists(id => ! rels.friendIds  .contains(id)))
+    notFriendsOnly        disableIf(selIds.exists(id =>   rels.friendIds  .contains(id)))
+    replyOnly             disableIf(! getReplyIsSelected)
   }
 }
   

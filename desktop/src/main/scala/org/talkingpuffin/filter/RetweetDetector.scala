@@ -15,20 +15,28 @@ object RetweetDetector {
   private val regexes = List(rtUser, viaUser)
   
   implicit def string2RetweetDetector(text: String) = new RetweetDetector(text)
-  implicit def status2RetweetDetector(status: TwitterStatus) = new RetweetDetector(status.text)
+  implicit def status2RetweetDetector(status: TwitterStatus) = 
+      new RetweetDetector(status.text)
 }
   
 class RetweetDetector(text: String) {
-  def isRetweet = RetweetDetector.regexes.exists(regex => text match {
-    case regex(_, _) => true
-    case _ => false
-  })
+
+  /**
+   * Returns whether text contains a retweet.
+   */
+  def isRetweet = RetweetDetector.regexes.exists(_.findFirstIn(text).isDefined)
   
-  def isCommentedRetweet = text match {
-    case RetweetDetector.commentedRtUser(_, _) => true
-    case _ => false
-  }
-  
+  /**
+   * Returns whether text contains a “commented retweet,” which we define as a 
+   * retweet with a comment before it. For example: <code>Great stuff! RT @joe We won</code>
+   * is a retweet of @joe’s tweet with a comment before it.
+   */
+  def isCommentedRetweet = RetweetDetector.commentedRtUser.findFirstIn(text).isDefined
+
+  /**
+   *  Returns whether the text matches one of the known retweet patterns and the  
+   * “retweet of” username matches one of the names provided.
+   */
   def isRetweetOfStatusFromFriend(friendUsernames: List[String]) = 
     RetweetDetector.regexes.exists(regex => text match {
       case regex(_, username) => friendUsernames.contains(username)
