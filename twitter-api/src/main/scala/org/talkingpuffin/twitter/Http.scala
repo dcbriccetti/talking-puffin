@@ -4,6 +4,7 @@ import scala.xml.{Node, XML}
 import swing.Publisher
 import java.net.{URL, HttpURLConnection, URLEncoder}
 import java.io.{DataOutputStream, BufferedReader, InputStreamReader}
+import java.util.zip.GZIPInputStream
 import org.apache.commons.codec.binary.Base64
 import org.apache.log4j.Logger
 import swing.event.Event
@@ -28,14 +29,14 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   def get(url: URL): Node = Http.run {
     logAction("GET", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    setAuth(conn)
+    setHeaders(conn)
     getXML(conn)
   }
 
   def delete(url: URL): Node = Http.run {
     logAction("DELETE", url)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    setAuth(conn)
+    setHeaders(conn)
     conn.setRequestMethod("DELETE")
     getXML(conn)
   }
@@ -49,7 +50,7 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
     val content = buildParams(params)
     logAction("POST", url, content)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
-    setAuth(conn)
+    setHeaders(conn)
     conn.setDoInput(true)
     conn.setRequestMethod("POST")
 
@@ -76,10 +77,11 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   private def logAction(action: String, url: URL, params: String) = 
       log.debug(actionAndUrl(action, url) + " " + params)
 
-  private def setAuth(conn: HttpURLConnection) {
+  private def setHeaders(conn: HttpURLConnection) {
     if (encoding.isDefined) {
       conn.setRequestProperty ("Authorization", "Basic " + encoding.get)
     }
+    conn.setRequestProperty("Accept-Encoding", "gzip")
   }
 
   /*
@@ -108,7 +110,9 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   
   protected def processOkResponse(conn: HttpURLConnection): Node = {
     publishRateLimitInfo(conn)
-    XML.load(conn.getInputStream)
+    val is = conn.getInputStream
+    val ce = conn.getHeaderField("Content-Encoding")
+    XML.load(if (ce == "gzip") new GZIPInputStream(is) else is)
   }
   
   private def publishRateLimitInfo(conn: HttpURLConnection) {
