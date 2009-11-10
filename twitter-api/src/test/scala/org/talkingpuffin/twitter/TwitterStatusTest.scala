@@ -126,9 +126,6 @@ class TwitterStatusTest {
   @Test def testDescription() = assert("Developer, Student, Manager" == status.user.description)
   @Test def testProfileImageURL() = assert("http://somewhere.com" == status.user.profileImageURL)
   @Test def testUrl() = assert("http://themcwongs.com" == status.user.url)
-  @Test def testRetweet() = assert(statuses(1).retweeted != null)
-  @Test def testRetweetTime() = assert(statuses(1).retweeted.retweetedAt != null)
-  @Test def testRetweetUser() = assert(statuses(1).retweeted.name == "Marcel Molina")
   @Test def testGeo() = {
     statuses(1).location match {
       case Some((lat,long)) => {
