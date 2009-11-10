@@ -19,6 +19,7 @@ class TwitterStatus() extends Validated{
   var truncated: Boolean = false
   var inReplyToStatusId: Option[Long] = None
   var inReplyToUserId: Option[Long] = None
+  var inReplyToScreenName: Option[String] = None
   var favorited: Boolean = false
   var retweeted: Option[TwitterStatus] = None
   var location: Option[(Double, Double)] = None
@@ -110,6 +111,8 @@ object TwitterStatus{
               Some(text.toLong)
           case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => status.inReplyToUserId = 
               Some(text.toLong)
+          case <in_reply_to_screen_name>{Text(text)}</in_reply_to_screen_name> => 
+              status.inReplyToScreenName = Some(text)
           case <favorited>{Text(text)}</favorited> => status.favorited = java.lang.Boolean.valueOf(text).booleanValue
           case <user>{ _* }</user> => status.user = TwitterUser(sub)
           case <retweeted_status>{ _* }</retweeted_status> => status.retweeted = Some(TwitterStatus(sub))

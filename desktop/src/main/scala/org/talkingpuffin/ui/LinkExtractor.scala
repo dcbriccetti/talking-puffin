@@ -64,8 +64,8 @@ object LinkExtractor {
   private val replyToUserRegex = (".*?" + usernameRegex + ".*").r
   
   /**
-   * Returns the Twitter handle and status ID of the user whose @handle appears at the beginning of 
-   * the tweet, or None.
+   * Returns the Twitter handle of the user whose @handle appears at the beginning of 
+   * the tweet, or None, and the status ID.
    */
   def getReplyToInfo(inReplyToStatusId: Option[Long], text: String): Option[(String,Long)] = 
     inReplyToStatusId match {

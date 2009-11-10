@@ -1,7 +1,6 @@
 package org.talkingpuffin.filter
 
 import org.talkingpuffin.twitter.TwitterStatus
-import org.talkingpuffin.ui.LinkExtractor
 
 /**
  * A base class for filters that match based on a string or regular expression.
@@ -30,11 +29,7 @@ case class TextTextFilter(override val text: String, override val isRegEx: Boole
  * To filter.
  */
 case class ToTextFilter(override val text: String, override val isRegEx: Boolean) 
-    extends TextFilter(text, isRegEx, 
-    (status) => LinkExtractor.getReplyToInfo(status.inReplyToStatusId, status.text) match {
-      case Some(screenNameAndId) => screenNameAndId._1
-      case _ => ""
-    })
+    extends TextFilter(text, isRegEx, (status) => status.inReplyToScreenName.getOrElse(""))
 
 /**
  * Source (the application that created the tweet) filter.
