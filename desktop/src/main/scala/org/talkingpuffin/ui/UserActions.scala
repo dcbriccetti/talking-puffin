@@ -3,13 +3,14 @@ package org.talkingpuffin.ui
 import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent._
 import java.awt.event.InputEvent.SHIFT_DOWN_MASK
-import javax.swing._
+import swing.Action
 import javax.swing.KeyStroke.{getKeyStroke => ks}
-import org.talkingpuffin.Session
+import javax.swing.{JOptionPane, JTable}
 import java.awt.{Toolkit}
+import org.talkingpuffin.twitter.TwitterArgs
+import org.talkingpuffin.Session
 import org.talkingpuffin.util.Loggable
 import util.Tiler
-import swing.Action
 
 /**
  * Handles user actions like follow
@@ -56,6 +57,15 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     })
   }
   
+  def showFavorites(selectedScreenNames: List[String]) = {
+    val tiler = new Tiler(selectedScreenNames.length)
+    selectedScreenNames.foreach(screenName => {
+      val favorites = new FavoritesProvider(session.twitterSession, screenName, None, session.progress)
+      session.windows.streams.createView(favorites, None, Some(tiler.next))
+      favorites.loadAndPublishData(TwitterArgs(), false)
+    })
+  }
+  
   def followAK(smi: SpecialMenuItems, getSelectedScreenNames: => List[String]) = {
     new ActionAndKeys(new Action("Follow") { 
       def apply = follow(getSelectedScreenNames)
@@ -80,6 +90,8 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     
     mh add(Action("Show friends and followers") 
         {showFriends(getSelectedScreenNames)}, ks(VK_H, SHIFT_DOWN_MASK))
+    mh add(Action("Show favorites") 
+        {showFavorites(getSelectedScreenNames)}, ks(VK_H, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
     mh add(Action("View lists…") {viewLists(getSelectedScreenNames, table)}, ks(VK_L, SHIFT_DOWN_MASK))
     mh add(Action("View lists on…") {viewListsOn(getSelectedScreenNames, table)}, 
         ks(VK_L, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))

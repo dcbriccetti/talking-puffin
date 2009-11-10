@@ -1,5 +1,6 @@
 package org.talkingpuffin.ui
 
+import java.awt.Point
 import org.talkingpuffin.filter.{TagUsers}
 import org.talkingpuffin.state.GlobalPrefs
 import org.talkingpuffin.twitter.AuthenticatedSession
@@ -18,13 +19,13 @@ class Streams(val service: String, val twitterSession: AuthenticatedSession,
   var views = List[View]()
   
   providers.autoStartProviders.foreach(provider => {
-    createView(provider, None)
-    provider.loadNewData
+    createView(provider, None, None)
+    provider.loadContinually()
   })
   
-  def createView(dataProvider: DataProvider, include: Option[String]): View = {
+  def createView(dataProvider: DataProvider, include: Option[String], location: Option[Point]): View = {
     val view = View.create(dataProvider, usersTableModel.usersModel.screenNameToUserNameMap, service, 
-      twitterSession.user, tagUsers, session, include, this, relationships)
+      twitterSession.user, tagUsers, session, include, this, relationships, location)
     views ::= view
     view
   }

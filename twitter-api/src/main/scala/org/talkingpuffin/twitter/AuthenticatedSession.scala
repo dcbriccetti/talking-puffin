@@ -51,8 +51,10 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
         "status").list
   }
   
-  def getHomeTimeline(args: TwitterArgs): List[TwitterStatus] = { getHomeTimeline(user,args)}
+  def getHomeTimeline(args: TwitterArgs): List[TwitterStatus] = getHomeTimeline(user,args)
 
+  def getFavorites(args: TwitterArgs): List[TwitterStatus] = getFavorites(user,args)
+  
   /**
   * @param id the user id <i>or</i> user name who was mentioned
   */

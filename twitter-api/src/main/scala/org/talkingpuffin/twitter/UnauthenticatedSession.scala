@@ -61,11 +61,13 @@ class UnauthenticatedSession(apiURL: String) extends TwitterSession{
     parse("/statuses/featured.xml", TwitterUser.apply, "user").list
   }
 
-  /**
-  * @param id the user id <i>or</i> user name to get favorites for
-  */
-  def getFavorites(id: String): List[TwitterStatus] = {
-    parse("/favorites/" + urlEncode(id) + ".xml", TwitterStatus.apply, "status").list
+  def getFavoritesFor(id: String)(args: TwitterArgs) = getFavorites(id, args)
+
+  def getFavorites(id: String): List[TwitterStatus] = getFavorites(id,TwitterArgs())
+
+  def getFavorites(id: String, args: TwitterArgs): List[TwitterStatus] = {
+    parse("/favorites/" + urlEncode(id) + ".xml" + args, TwitterStatus.apply,
+        "status").list
   }
   
   /**
