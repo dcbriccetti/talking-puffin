@@ -3,11 +3,11 @@ package org.talkingpuffin.twitter
 import scala.xml.{Node, XML}
 import swing.Publisher
 import java.net.{URL, HttpURLConnection, URLEncoder}
-import java.io.{DataOutputStream, BufferedReader, InputStreamReader}
 import java.util.zip.GZIPInputStream
 import org.apache.commons.codec.binary.Base64
 import org.apache.log4j.Logger
 import swing.event.Event
+import java.io.{InputStream, DataOutputStream, BufferedReader, InputStreamReader}
 
 /**
 * Handles HTTP requests.
@@ -97,7 +97,7 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
       case 200 => processOkResponse(conn)
       case _ => throw TwitterException({
           var errMsg = ""
-          val reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))
+          val reader = new BufferedReader(new InputStreamReader(getUnzipStream(conn.getErrorStream(), conn)))
           var line = reader.readLine()
           while(line != null){
             errMsg += line
@@ -110,10 +110,11 @@ class Http(user: Option[String], password: Option[String]) extends Publisher {
   
   protected def processOkResponse(conn: HttpURLConnection): Node = {
     publishRateLimitInfo(conn)
-    val is = conn.getInputStream
-    val ce = conn.getHeaderField("Content-Encoding")
-    XML.load(if (ce == "gzip") new GZIPInputStream(is) else is)
+    XML.load(getUnzipStream(conn.getInputStream, conn)) 
   }
+  
+  private def getUnzipStream(is: InputStream, conn: HttpURLConnection) = 
+      if (conn.getHeaderField("Content-Encoding") == "gzip") new GZIPInputStream(is) else is 
   
   private def publishRateLimitInfo(conn: HttpURLConnection) {
     val rl = List("X-RateLimit-Remaining", "X-RateLimit-Limit", "X-RateLimit-Reset").

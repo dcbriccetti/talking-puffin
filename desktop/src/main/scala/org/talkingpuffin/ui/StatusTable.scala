@@ -98,10 +98,10 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     DesktopUtil.browse("http://twitter.com/" + screenName))
 
   private def viewParent = getSelectedStatuses.foreach(status => 
-    LinkExtractor.getReplyToInfo(status.inReplyToStatusId, status.text) match {
-      case Some(info) => DesktopUtil.browse("http://twitter.com/" + info._1 + "/statuses/" + info._2)
-      case _ =>
-    })
+    if (status.inReplyToScreenName.isDefined && status.inReplyToStatusId.isDefined)
+      DesktopUtil.browse("http://twitter.com/" + status.inReplyToScreenName.get + 
+          "/statuses/" + status.inReplyToStatusId.get)
+  )
  
   private def editUser = getSelectedStatuses.foreach(status => { 
     val userProperties = new UserPropertiesDialog(session.userPrefs, status)

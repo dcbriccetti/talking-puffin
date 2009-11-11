@@ -1,7 +1,8 @@
 package org.talkingpuffin.ui
 
-import org.talkingpuffin.Session
+import java.awt.Point
 import swing.{Reactor, TabbedPane}
+import org.talkingpuffin.Session
 import org.talkingpuffin.filter.{CompoundFilter, TagUsers, FilterSet, TextTextFilter}
 
 case class View(val model: StatusTableModel, val pane: StatusPane) extends Reactor {
@@ -21,9 +22,9 @@ case class View(val model: StatusTableModel, val pane: StatusPane) extends React
 
 object View {
   def create(dataProvider: DataProvider, screenNameToUserNameMap: Map[String, String], 
-                service: String, user: String, 
-                tagUsers: TagUsers, session: Session, include: Option[String], viewCreator: ViewCreator,
-                relationships: Relationships): View = {
+      service: String, user: String, 
+      tagUsers: TagUsers, session: Session, include: Option[String], viewCreator: ViewCreator,
+      relationships: Relationships, location: Option[Point]): View = {
     val title = dataProvider.titleCreator.create
     val filterSet = new FilterSet(tagUsers)
     if (include.isDefined) {
@@ -41,6 +42,8 @@ object View {
     }
     val pane = new StatusPane(session, title, title, model, filterSet, tagUsers, viewCreator)
     session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
+    if (location.isDefined) 
+      pane.undock(location)
     new View(model, pane)
   }
 }

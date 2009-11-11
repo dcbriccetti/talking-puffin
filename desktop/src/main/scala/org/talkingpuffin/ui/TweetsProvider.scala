@@ -57,4 +57,10 @@ class DmsSentProvider(session: AuthenticatedSession, startingId: Option[Long],
   override def getResponseId(response: TwitterDataWithId): Long = response.id
 }
 
+class FavoritesProvider(session: AuthenticatedSession, id: String, startingId: Option[Long], 
+    longOpListener: LongOpListener)
+    extends TweetsProvider(session, startingId, id + " Favorites", longOpListener) {
+  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getFavoritesFor(id)
+}
+
 case class TweetsArrived(tweets: NodeSeq) extends Event

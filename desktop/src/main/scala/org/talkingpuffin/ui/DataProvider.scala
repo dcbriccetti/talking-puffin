@@ -19,7 +19,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
   val titleCreator = new TitleCreator(providerName)
 
   /** How often, in ms, to fetch and load new data */
-  private var updateIntervalMs = DataProvidersDialog.DefaultRefreshSecs * 1000;
+  private var updateFrequencyMs = DataProvidersDialog.DefaultRefreshSecs * 1000;
   
   private var timer: Timer = _
   
@@ -31,22 +31,42 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
    * Sets the update frequency, in seconds.
    */
   def setUpdateFrequency(updateFrequencySecs: Int) {
-    updateIntervalMs = updateFrequencySecs * 1000
+    updateFrequencyMs = updateFrequencySecs * 1000
     if (timer != null) 
       restartTimer                                                 
   }
 
-  def loadNewData {
+  def loadContinually() {
     loadNewDataInternal
     restartTimer
   }
   
+  def loadAndPublishData(args: TwitterArgs, clear: Boolean): Unit = {
+    longOpListener.startOperation
+    new SwingWorker[List[TwitterDataWithId], Object] {
+      val sendClear = clear
+      override def doInBackground: List[TwitterDataWithId] = {
+        val data = updateFunc(args)
+        highestId = computeHighestId(data, getHighestId)
+        data
+      }
+      override def done {
+        longOpListener.stopOperation
+        doAndHandleError(() => {
+          val statuses = get
+          if (statuses != Nil)
+            DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
+          }, "Error fetching " + providerName + " data for " + session.user)
+      }
+    }.execute
+  }
+
   def stop: Unit = {
     if (timer != null) 
       timer.stop
   }
   
-  def loadLastBlockOfTweets = loadData(TwitterArgs.maxResults(200), true)
+  def loadLastBlockOfTweets() = loadAndPublishData(TwitterArgs.maxResults(200), true)
 
   type TwitterDataWithId = {def id: Long} 
 
@@ -68,54 +88,34 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
   }
   
   private def restartTimer {
-    def publishNext = publish(NextLoadAt(new DateTime((new Date).getTime + updateIntervalMs)))
+    def publishNextLoadTime = publish(NextLoadAt(new DateTime((new Date).getTime + updateFrequencyMs)))
 
     if (timer != null && timer.isRunning) {
       timer.stop
     }
   
-    if (updateIntervalMs > 0) {
-      timer = new Timer(updateIntervalMs, new ActionListener() {
+    if (updateFrequencyMs > 0) {
+      timer = new Timer(updateFrequencyMs, new ActionListener() {
         def actionPerformed(event: ActionEvent) = {
           loadNewDataInternal
-          publishNext
+          publishNextLoadTime
         }
       })
       timer.start
-      publishNext
+      publishNextLoadTime
     }
     
   }
 
-  private def loadNewDataInternal = loadData(addSince(TwitterArgs.maxResults(200)), false)
-
-  private def loadData(args: TwitterArgs, clear: Boolean): Unit = {
-    longOpListener.startOperation
-    new SwingWorker[List[TwitterDataWithId], Object] {
-      val sendClear = clear
-      override def doInBackground: List[TwitterDataWithId] = {
-        val data = updateFunc(args)
-        highestId = computeHighestId(data, getHighestId)
-        data
-      }
-      override def done {
-        longOpListener.stopOperation
-        doAndHandleError(() => {
-          val statuses = get
-          if (statuses != Nil)
-            DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
-          }, "Error fetching " + providerName + " data for " + session.user)
-      }
-    }.execute
-  }
+  private def loadNewDataInternal = loadAndPublishData(addSince(TwitterArgs.maxResults(200)), false)
 
 }
 
 case class NextLoadAt(val when: DateTime) extends Event
 
 abstract class BaseProvider(val providerName: String) extends Publisher {
-  def loadNewData
-  def loadLastBlockOfTweets
+  def loadContinually()
+  def loadLastBlockOfTweets()
   def setUpdateFrequency(updateFrequencySecs: Int)
 }
 

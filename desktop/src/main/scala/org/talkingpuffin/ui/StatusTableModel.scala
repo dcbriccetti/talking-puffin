@@ -1,10 +1,10 @@
 package org.talkingpuffin.ui
 
+import javax.swing.Icon
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
-import org.talkingpuffin.filter.{FilterSet, FilterSetChanged, TagUsers}
-import javax.swing._
 import org.apache.log4j.Logger
+import org.talkingpuffin.filter.{FilterSet, FilterSetChanged, TagUsers}
 import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
@@ -74,15 +74,13 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
     def senderNameEs(status: TwitterStatus): EmphasizedString = 
       new EmphasizedString(Some(senderName(status)), relationships.followerIds.contains(status.user.id))
 
-    def toName(status: TwitterStatus) = 
-        LinkExtractor.getReplyToInfo(status.inReplyToStatusId, getStatusText(status, username)) match {
-      case Some((u,id)) => {
-         if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) {
-           Some(screenNameToUserNameMap.getOrElse(u, u))
-         } else {
-           Some(u)
-         }
-      }
+    def toName(status: TwitterStatus) = status.inReplyToScreenName match {
+      case Some(screenName) => Some(
+        if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) {
+          screenNameToUserNameMap.getOrElse(screenName, screenName)
+        } else {
+          screenName
+        })
       case None => None 
     }
     
@@ -141,9 +139,8 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       row <- rows
       status = filteredStatuses_(row)
       sender = status.user.screenName
-      rti = LinkExtractor.getReplyToInfo(status.inReplyToStatusId, status.text)
-      if rti.isDefined
-    } yield (sender, rti.get._1)
+      if status.inReplyToScreenName.isDefined
+    } yield (sender, status.inReplyToScreenName.get)
     
     filterSet.adder.muteSenderReceivers(senderReceivers)
     if (andViceVersa)

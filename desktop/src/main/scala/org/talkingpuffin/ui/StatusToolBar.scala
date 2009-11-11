@@ -55,7 +55,7 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
   val loadNewAction = new Action("Load New") {
     toolTip = "Loads any new items"
     mnemonic = KeyEvent.VK_N
-    def apply = tweetsProvider.loadNewData
+    def apply = tweetsProvider.loadContinually()
   }
   
   val last200Action = new Action("Last 200") {
@@ -98,7 +98,7 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
   private def clearAndOptionallyLoad(all: Boolean) {
     clearTweets(all)
     if (GlobalPrefs.isOn(PrefKeys.NEW_AFTER_CLEAR))
-      tweetsProvider.loadNewData
+      tweetsProvider.loadContinually()
   }
 }
 
