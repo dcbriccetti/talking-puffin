@@ -43,6 +43,11 @@ class MainMenuBar(session: Session, dataProviders: DataProviders,
       })
       contents += newItem("People", NewPeoplePaneEvent(session))
     }
+    contents += new MenuItem(new Action("Tile") {
+      def apply = {
+        eventDistributor.publish(TileViewsEvent(session))
+      }
+    })
   }
   
   contents += new Menu("Lists") {
@@ -58,22 +63,14 @@ class MainMenuBar(session: Session, dataProviders: DataProviders,
     }
     contents += new MenuItem(new Action("Display your lists") {
       def apply = {
-        TopFrames.findCurrentWindow match {
-          case Some(topFrame) =>
-            TwitterListsDisplayer.viewLists(topFrame.session, 
-              List(topFrame.session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
-          case _ =>
-        }
+        TwitterListsDisplayer.viewLists(session, 
+          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
       }
     })
     contents += new MenuItem(new Action("Display lists you are in") {
       def apply = {
-        TopFrames.findCurrentWindow match {
-          case Some(topFrame) =>
-            TwitterListsDisplayer.viewListsContaining(topFrame.session, 
-              List(topFrame.session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
-          case _ =>
-        }
+        TwitterListsDisplayer.viewListsContaining(session, 
+          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
       }
     })
   }
@@ -111,3 +108,4 @@ class MainMenuBar(session: Session, dataProviders: DataProviders,
 
 case class NewViewEvent(override val session: Session, val provider: DataProvider) extends AppEvent(session)
 case class NewPeoplePaneEvent(override val session: Session) extends AppEvent(session)
+case class TileViewsEvent(override val session: Session) extends AppEvent(session)

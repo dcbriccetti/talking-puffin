@@ -5,7 +5,8 @@ import org.talkingpuffin.Session
 import org.talkingpuffin.filter.{CompoundFilter, TagUsers, FilterSet, TextTextFilter}
 import swing.{Reactor}
 
-case class View(val model: StatusTableModel, val pane: StatusPane) extends Reactor 
+case class View(val model: StatusTableModel, val pane: StatusPane, val frame: Option[TitledStatusFrame]) 
+    extends Reactor 
 
 object View {
   def create(dataProviders: DataProviders, dataProvider: DataProvider, 
@@ -31,7 +32,7 @@ object View {
     val frame = new TitledStatusFrame(title, session, dataProviders, tagUsers, model, pane)
     if (location.isDefined) 
       frame.location = location.get
-    new View(model, pane)
+    new View(model, pane, Some(frame))
   }
 }
 

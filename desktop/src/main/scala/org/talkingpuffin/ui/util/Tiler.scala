@@ -10,7 +10,7 @@ class Tiler(numTiles: Int) {
   val screenSize = Toolkit.getDefaultToolkit().getScreenSize()
   private val cols = Math.sqrt(numTiles.toDouble).ceil.toInt
   private val tileHeight = screenSize.height / cols
-  private val tileWidth = screenSize.width / cols
+  val tileWidth = screenSize.width / cols
   protected val nextTileIndex = new AtomicInteger(0)
     
   def next: Point = {
@@ -22,6 +22,8 @@ class Tiler(numTiles: Int) {
 }
 
 class ColTiler(numCols: Int) extends Tiler(numCols) {
+  override val tileWidth = screenSize.width / numCols
+
   override def next: Point = {
     new Point(nextTileIndex.getAndIncrement * screenSize.width / numCols, 0)
   }  

@@ -30,7 +30,9 @@ object TwitterListsDisplayer {
   }
   
   private def viewList(list: TwitterList, session: Session, tiler: Option[Tiler]) = {
-    SwingInvoke.execSwingWorker({session.twitterSession.loadAllWithCursor(session.twitterSession.getListMembers(list))}, {
+    SwingInvoke.execSwingWorker({
+      val tsess = session.twitterSession
+      tsess.loadAllWithCursor(tsess.getListMembers(list))}, {
       members: List[TwitterUser] => {
         session.windows.peoplePaneCreator.createPeoplePane(list.longName, 
           None, Some(members), None, true, tiler match {case Some(t) => Some(t.next) case _ => None})
@@ -66,8 +68,10 @@ object TwitterListsDisplayer {
       })
       if (numMenuItems > 1) {
         val tiler = new Tiler(combinedList.length)
-        menu.add(new MenuItem(Action("All") {combinedList.foreach(twitterList => {
-          viewList(twitterList, session, Some(tiler))})}).peer) }
+        menu.add(new MenuItem(Action("All") {
+          combinedList.foreach(twitterList => viewList(twitterList, session, Some(tiler)))
+        }).peer) 
+      }
 
       if (numMenuItems > 0) {
         menu.show(menuPos.parent, menuPos.menuX, menuPos.menuY)

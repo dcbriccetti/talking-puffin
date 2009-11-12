@@ -10,7 +10,7 @@ import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, AuthenticatedSession}
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
-import util.{AppEvent, eventDistributor}
+import util.{ColTiler, AppEvent, eventDistributor}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -46,6 +46,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
       streams.createView(e.provider, None, None)
       e.provider.loadContinually()
     case e: NewPeoplePaneEvent => createPeoplePane 
+    case e: TileViewsEvent => tileViews 
   }
   listenTo(eventDistributor)
 
@@ -73,12 +74,9 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   listenTo(rels)
   reactions += {
     case ic: IdsChanged => 
-      if (peoplePane == null && 
-              (rels.followerIds.length + rels.friendIds.length < Constants.MaxPeopleForAutoPaneCreation)) {
-        debug("Not too many people, so automatically creating people pane")
-        createPeoplePane
-      } else {
-        debug("Too many people, so not automatically creating people pane")
+      if ((rels.followers.isEmpty && rels.friends.isEmpty) && 
+          (rels.followerIds.length + rels.friendIds.length < Constants.MaxPeopleForAutoPaneCreation)) {
+        updatePeople
       }
   }
   rels.getIds(twitterSession, mainToolBar)
@@ -123,10 +121,13 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     peoplePane
   }
 
-  private def updatePeople = rels.getUsers(twitterSession, twitterSession.user, mainToolBar)
+  private def updatePeople = {
+    debug("updatePeople")
+    rels.getUsers(twitterSession, twitterSession.user, mainToolBar)
+  }
           
   private def createPeoplePane: Unit = {
-    updatePeople
+    debug("createPeoplePane")
     peoplePane = createPeoplePane("People You Follow and People Who Follow You", None, None, 
         Some(updatePeople _), false, None)
   }
@@ -141,6 +142,19 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
 
   private def getProviders = streams.providers
+  
+  private def tileViews {
+    val views = session.windows.streams.views
+    val tiler = new ColTiler(views.length)
+    views.foreach(v => {
+      v.frame match {
+        case Some(frame) => {
+          frame.location = tiler.next
+          frame.peer.setSize(tiler.tileWidth, tiler.screenSize.height)
+        }
+      }
+    })
+  }
 }
 
   
