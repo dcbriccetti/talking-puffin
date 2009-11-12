@@ -10,6 +10,7 @@ import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, AuthenticatedSession}
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
+import util.{AppEvent, eventDistributor}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -33,19 +34,20 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   val prefs = GlobalPrefs.prefsForUser(service, twitterSession.user)
   val providers = new DataProviders(twitterSession, prefs, session.progress)
-  menuBar = new MainMenuBar(twitterSession, providers, tagUsers)
+  menuBar = new MainMenuBar(session, providers, tagUsers)
   val streams = new Streams(service, twitterSession, prefs, providers, session, tagUsers, rels)
   session.windows.streams = streams
   mainToolBar.init(streams)
     
   title = Main.title + " - " + service + " " + twitterSession.user
   reactions += {
+    case e: AppEvent if e.session != session => 
     case e: NewViewEvent => 
       streams.createView(e.provider, None, None)
       e.provider.loadContinually()
     case e: NewPeoplePaneEvent => createPeoplePane 
   }
-  listenTo(menuBar)
+  listenTo(eventDistributor)
 
   contents = new GridBagPanel {
     val userPic = new Label
@@ -113,7 +115,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     val peoplePane = new PeoplePane(session, model, customRels, updatePeople)
     new Frame {
       title = longTitle
-      menuBar = new MainMenuBar(twitterSession, providers, tagUsers)
+      menuBar = new MainMenuBar(session, providers, tagUsers)
       contents = peoplePane
       visible = true
       peer.setLocationRelativeTo(null)

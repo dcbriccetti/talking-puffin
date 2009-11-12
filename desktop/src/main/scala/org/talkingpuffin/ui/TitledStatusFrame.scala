@@ -1,17 +1,17 @@
 package org.talkingpuffin.ui
 
 import swing.Frame
-import org.talkingpuffin.twitter.AuthenticatedSession
 import org.talkingpuffin.filter.TagUsers
+import org.talkingpuffin.Session
 
 /**
  * A frame for status panes, including a custom title and menu.
  */
-class TitledStatusFrame(baseTitle: String, twitterSession: AuthenticatedSession, 
+class TitledStatusFrame(baseTitle: String, session: Session, 
                         providers: DataProviders, tagUsers: TagUsers,
                         val model: StatusTableModel, val pane: StatusPane) extends Frame {
   title = baseTitle
-  menuBar = new MainMenuBar(twitterSession, providers, tagUsers)
+  menuBar = new MainMenuBar(session, providers, tagUsers)
   listenTo(model)
   reactions += {
     case TableContentsChanged(model, filtered, total) =>

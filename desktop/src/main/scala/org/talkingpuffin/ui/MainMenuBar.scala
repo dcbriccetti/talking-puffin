@@ -1,21 +1,22 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.{MenuItem, MenuBar, Menu, CheckMenuItem, Action}
 import javax.swing.KeyStroke
 import java.awt.event.KeyEvent
 import java.awt.Toolkit
+import scala.swing.{MenuItem, MenuBar, Menu, CheckMenuItem, Action}
 import swing.event.{Event, ButtonClicked}
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
-import org.talkingpuffin.Main
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.util.{TwitterListUtils, Loggable}
-import org.talkingpuffin.twitter.AuthenticatedSession
+import org.talkingpuffin.{Session, Main}
+import util.{eventDistributor, AppEvent}
 
 /**
  * Main menu bar
  */
-class MainMenuBar(tsess: AuthenticatedSession, dataProviders: DataProviders, 
+class MainMenuBar(session: Session, dataProviders: DataProviders, 
                   tagUsers: TagUsers) extends MenuBar with Loggable {
+  val tsess = session.twitterSession
   val prefs = GlobalPrefs.prefs
 
   val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
@@ -35,12 +36,12 @@ class MainMenuBar(tsess: AuthenticatedSession, dataProviders: DataProviders,
     contents += new Menu("New") {
       def newItem(name: String, event: Event) = new MenuItem(new Action(name) {
         toolTip = "Creates a new " + name + " view"
-        def apply = MainMenuBar.this.publish(event)
+        def apply = eventDistributor.publish(event)
       })
       dataProviders.providers.foreach(provider => {
-        contents += newItem(provider.providerName, NewViewEvent(provider))
+        contents += newItem(provider.providerName, NewViewEvent(session, provider))
       })
-      contents += newItem("People", NewPeoplePaneEvent())
+      contents += newItem("People", NewPeoplePaneEvent(session))
     }
   }
   
@@ -108,5 +109,5 @@ class MainMenuBar(tsess: AuthenticatedSession, dataProviders: DataProviders,
   
 }
 
-case class NewViewEvent(val provider: DataProvider) extends Event
-case class NewPeoplePaneEvent() extends Event
+case class NewViewEvent(override val session: Session, val provider: DataProvider) extends AppEvent(session)
+case class NewPeoplePaneEvent(override val session: Session) extends AppEvent(session)

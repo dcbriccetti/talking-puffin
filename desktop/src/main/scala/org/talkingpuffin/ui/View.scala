@@ -28,7 +28,7 @@ object View {
         filterSet, service, user, tagUsers)
     }
     val pane = new StatusPane(session, title, model, filterSet, tagUsers, viewCreator)
-    val frame = new TitledStatusFrame(title, session.twitterSession, dataProviders, tagUsers, model, pane)
+    val frame = new TitledStatusFrame(title, session, dataProviders, tagUsers, model, pane)
     if (location.isDefined) 
       frame.location = location.get
     new View(model, pane)
