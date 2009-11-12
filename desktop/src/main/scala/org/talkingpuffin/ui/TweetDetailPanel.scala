@@ -1,29 +1,19 @@
 package org.talkingpuffin.ui
 
-import scala.swing.{Label, GridBagPanel, TextArea, BorderPanel}
-import scala.swing.GridBagPanel._
 import javax.swing.event.{ListSelectionListener, ListSelectionEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
-import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Font}
-import javax.swing.{JScrollPane, ImageIcon, JComponent, BorderFactory, JTable}
+import java.text.NumberFormat
+import javax.swing.{JScrollPane, JComponent, BorderFactory, JTable}
+import scala.swing.{Label, GridBagPanel, TextArea}
+import scala.swing.GridBagPanel._
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
 import org.talkingpuffin.Session
-import util.{TextChangingAnimator}
-import org.talkingpuffin.util.{ResourceReady, FetchRequest, ShortUrl, Loggable}
 import org.talkingpuffin.ui.filter.FiltersDialog
-import java.text.NumberFormat
-
-object Thumbnail {
-  val THUMBNAIL_SIZE = 48
-  val transparentThumbnail = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, 
-    BufferedImage.TYPE_INT_ARGB))
-  val MEDIUM_SIZE = 200
-  val transparentMedium = new ImageIcon(new BufferedImage(MEDIUM_SIZE, MEDIUM_SIZE, 
-    BufferedImage.TYPE_INT_ARGB))
-}
+import util.{CenteredPicture, TextChangingAnimator}
+import org.talkingpuffin.util._
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE))
 
@@ -61,19 +51,14 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
   }
   peer.add(largeTweetScrollPane, new Constraints {
     insets = new Insets(5,1,5,1)
-    grid = (1,0); gridwidth=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
+    grid = (1,0); fill = GridBagPanel.Fill.Horizontal; weightx = 1; 
   }.peer)
 
   picLabel.peer.addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = if (showingUrl != null) bigPic.showBigPicture(showingUrl, peer)
   })
-  add(new BorderPanel {
-    val s = new Dimension(Thumbnail.MEDIUM_SIZE + 6, Thumbnail.MEDIUM_SIZE + 6)
-    minimumSize = s
-    maximumSize = s
-    preferredSize = s
-    add(picLabel, BorderPanel.Position.Center)
-  }, new CustomConstraints { grid = (0,0); gridheight = 3; insets = new Insets(3, 3, 3, 3)})
+  add(new CenteredPicture(picLabel), 
+    new CustomConstraints { grid = (0,0); gridheight = 2; insets = new Insets(3, 3, 3, 3)})
 
   class UserDescription extends TextArea {
     font = new Font("SansSerif", Font.PLAIN, 14)
@@ -99,7 +84,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
       setVisible(false)
     }
     peer.add(userDescScrollPane, new CustomConstraints {
-      grid = (1,1); gridheight=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
+      grid = (1,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; 
     }.peer)
   }
   
