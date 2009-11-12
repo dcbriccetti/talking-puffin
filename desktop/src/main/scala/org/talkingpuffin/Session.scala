@@ -3,8 +3,8 @@ package org.talkingpuffin
 import filter.TagUsers
 import java.util.prefs.Preferences
 import twitter.AuthenticatedSession
-import ui.{Windows, LongOpListener}
 import swing.Label
+import ui.{Windows, LongOpListener}
 
 class Session(val serviceName: String, val twitterSession: AuthenticatedSession) {
   val windows = new Windows

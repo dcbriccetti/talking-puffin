@@ -32,7 +32,7 @@ object TwitterListsDisplayer {
   private def viewList(list: TwitterList, session: Session, tiler: Option[Tiler]) = {
     SwingInvoke.execSwingWorker({session.twitterSession.loadAllWithCursor(session.twitterSession.getListMembers(list))}, {
       members: List[TwitterUser] => {
-        session.windows.peoplePaneCreator.createPeoplePane(list.longName, list.shortName,
+        session.windows.peoplePaneCreator.createPeoplePane(list.longName, 
           None, Some(members), None, true, tiler match {case Some(t) => Some(t.next) case _ => None})
       }
     })

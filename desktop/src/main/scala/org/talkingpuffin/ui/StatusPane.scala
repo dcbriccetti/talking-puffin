@@ -7,15 +7,13 @@ import org.talkingpuffin.filter.{TagUsers, FilterSet}
 import org.talkingpuffin.ui.filter.FiltersDialog
 import org.talkingpuffin.twitter.TwitterStatus
 import org.talkingpuffin.Session
-import util.{Dockable}
 
 /**
  * Displays friend statuses
  */
-class StatusPane(val session: Session, val longTitle: String, val shortTitle: String, 
-    tableModel: StatusTableModel, 
+class StatusPane(val session: Session, val longTitle: String, tableModel: StatusTableModel, 
     filterSet: FilterSet, tagUsers: TagUsers, viewCreator: ViewCreator) 
-    extends GridBagPanel with TableModelListener with PreChangeListener with Dockable {
+    extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
   private var lastSelectedRows: List[TwitterStatus] = Nil
   private var lastRowSelected: Boolean = _

@@ -92,7 +92,7 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
     add(new Label("Cols: ").peer)
     aa(showMinColsAction, showMaxColsAction)
     addSeparator
-    ac(statusPane.dockedButton, (new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
+    ac((new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
   }
   
   private def clearAndOptionallyLoad(all: Boolean) {
