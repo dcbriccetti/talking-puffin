@@ -9,13 +9,14 @@ import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.Main
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.util.{TwitterListUtils, Loggable}
+import org.talkingpuffin.twitter.AuthenticatedSession
 
 /**
  * Main menu bar
  */
-class MainMenuBar(dataProviders: DataProviders, tagUsers: TagUsers) extends MenuBar with Loggable {
+class MainMenuBar(tsess: AuthenticatedSession, dataProviders: DataProviders, 
+                  tagUsers: TagUsers) extends MenuBar with Loggable {
   val prefs = GlobalPrefs.prefs
-  val tsess = dataProviders.twitterSession
 
   val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
   

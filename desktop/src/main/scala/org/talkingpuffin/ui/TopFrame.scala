@@ -4,13 +4,12 @@ import java.awt.{Point, Dimension}
 import java.text.NumberFormat
 import javax.swing.{ImageIcon}
 import scala.swing.event.{WindowClosing}
-import swing.TabbedPane.Page
-import swing.{Reactor, Frame, TabbedPane, Label, GridBagPanel}
+import swing.{Reactor, Frame, Label, GridBagPanel}
 import org.talkingpuffin.{Main, Globals, Session, Constants}
 import org.talkingpuffin.filter.TagUsers
-import org.talkingpuffin.state.StateSaver
 import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, AuthenticatedSession}
 import org.talkingpuffin.util.{FetchRequest, Loggable}
+import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -23,10 +22,6 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   Globals.sessions ::= session
   iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
     
-  val tabbedPane = new TabbedPane() {
-    preferredSize = new Dimension(900, 600)
-  }
-  session.windows.tabbedPane = tabbedPane
   session.windows.peoplePaneCreator = this
   private var peoplePane: PeoplePane = _
 
@@ -36,12 +31,14 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   val rels = new Relationships()
   
-  val streams = new Streams(service, twitterSession, session, tagUsers, rels)
+  val prefs = GlobalPrefs.prefsForUser(service, twitterSession.user)
+  val providers = new DataProviders(twitterSession, prefs, session.progress)
+  menuBar = new MainMenuBar(twitterSession, providers, tagUsers)
+  val streams = new Streams(service, twitterSession, prefs, providers, session, tagUsers, rels)
   session.windows.streams = streams
   mainToolBar.init(streams)
     
   title = Main.title + " - " + service + " " + twitterSession.user
-  menuBar = new MainMenuBar(streams.providers, tagUsers)
   reactions += {
     case e: NewViewEvent => 
       streams.createView(e.provider, None, None)
@@ -64,8 +61,6 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
       grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
       })
     peer.add(mainToolBar, new Constraints {grid = (1,1); anchor=GridBagPanel.Anchor.West}.peer)
-    add(tabbedPane, new Constraints {
-      grid = (0,2); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; gridwidth=2})
   }
 
   reactions += {
@@ -99,16 +94,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   type Users = List[TwitterUser]
   
-  private def updatePeople = rels.getUsers(twitterSession, twitterSession.user, mainToolBar)
-          
-  private def createPeoplePane: Unit = {
-    updatePeople
-    peoplePane = createPeoplePane("People You Follow and People Who Follow You", "People", None, None, 
-        Some(updatePeople _), false, None)
-  }
-  
-  def createPeoplePane(longTitle: String, shortTitle: String, otherRels: Option[Relationships], 
-        users: Option[List[TwitterUser]], 
+  def createPeoplePane(longTitle: String, otherRels: Option[Relationships], users: Option[Users], 
         updatePeople: Option[() => Unit], selectPane: Boolean, location: Option[Point]): PeoplePane = {
     def getRels = if (otherRels.isDefined) otherRels.get else rels
     val model = 
@@ -124,16 +110,25 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
         followerIds = followers map(_.id)
       }
     } else getRels
-    val peoplePane = new PeoplePane(longTitle, shortTitle, session, model, customRels, updatePeople)
-    val peoplePage = new Page(shortTitle, peoplePane) {tip = longTitle}
-    tabbedPane.pages += peoplePage
-    if (selectPane)
-      tabbedPane.selection.page = peoplePage
-    if (location.isDefined) 
-      peoplePane.undock(location)
+    val peoplePane = new PeoplePane(session, model, customRels, updatePeople)
+    new Frame {
+      title = longTitle
+      menuBar = new MainMenuBar(twitterSession, providers, tagUsers)
+      contents = peoplePane
+      visible = true
+      peer.setLocationRelativeTo(null)
+    }
     peoplePane
   }
 
+  private def updatePeople = rels.getUsers(twitterSession, twitterSession.user, mainToolBar)
+          
+  private def createPeoplePane: Unit = {
+    updatePeople
+    peoplePane = createPeoplePane("People You Follow and People Who Follow You", None, None, 
+        Some(updatePeople _), false, None)
+  }
+  
   private def setUpUserStatusReactor {
     reactions += {
       case e: RateLimitStatusEvent => SwingInvoke.later {
@@ -143,6 +138,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     listenTo(twitterSession.httpPublisher)
   }
 
+  private def getProviders = streams.providers
 }
 
   

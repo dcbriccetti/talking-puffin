@@ -3,7 +3,6 @@ package org.talkingpuffin.twitter
 import management.ManagementFactory
 import javax.management.ObjectName
 import org.apache.log4j.Logger
-import java.security.AccessControlException
 
 trait HttpRunnerMBean {
   /** A request is a single HTTP request, counted only once even if retries are necessary. */

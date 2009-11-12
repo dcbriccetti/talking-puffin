@@ -1,28 +1,15 @@
 package org.talkingpuffin.ui
 
 import java.awt.Point
-import swing.{Reactor, TabbedPane}
 import org.talkingpuffin.Session
 import org.talkingpuffin.filter.{CompoundFilter, TagUsers, FilterSet, TextTextFilter}
+import swing.{Reactor}
 
-case class View(val model: StatusTableModel, val pane: StatusPane) extends Reactor {
-  listenTo(model)
-  reactions += {
-    case TableContentsChanged(model, filtered, total) =>
-      pane.titleSuffix = if (total == 0) 
-        "" 
-      else 
-        "(" + (if (total == filtered) 
-          total 
-        else 
-          filtered + "/" + total) + ")"
-  }
-  
-}
+case class View(val model: StatusTableModel, val pane: StatusPane) extends Reactor 
 
 object View {
-  def create(dataProvider: DataProvider, screenNameToUserNameMap: Map[String, String], 
-      service: String, user: String, 
+  def create(dataProviders: DataProviders, dataProvider: DataProvider, 
+      screenNameToUserNameMap: Map[String, String], service: String, user: String, 
       tagUsers: TagUsers, session: Session, include: Option[String], viewCreator: ViewCreator,
       relationships: Relationships, location: Option[Point]): View = {
     val title = dataProvider.titleCreator.create
@@ -40,10 +27,10 @@ object View {
       case p: BaseProvider => new StatusTableModel(sto, p, relationships, screenNameToUserNameMap,
         filterSet, service, user, tagUsers)
     }
-    val pane = new StatusPane(session, title, title, model, filterSet, tagUsers, viewCreator)
-    session.windows.tabbedPane.pages += new TabbedPane.Page(title, pane)
+    val pane = new StatusPane(session, title, model, filterSet, tagUsers, viewCreator)
+    val frame = new TitledStatusFrame(title, session.twitterSession, dataProviders, tagUsers, model, pane)
     if (location.isDefined) 
-      pane.undock(location)
+      frame.location = location.get
     new View(model, pane)
   }
 }

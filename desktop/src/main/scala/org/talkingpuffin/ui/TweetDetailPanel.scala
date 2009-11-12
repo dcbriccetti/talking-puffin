@@ -1,14 +1,12 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.{Label, GridBagPanel, TextArea, BorderPanel}
-import _root_.scala.swing.GridBagPanel._
+import scala.swing.{Label, GridBagPanel, TextArea, BorderPanel}
+import scala.swing.GridBagPanel._
+import javax.swing.event.{ListSelectionListener, ListSelectionEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
 import java.awt.image.BufferedImage
 import java.awt.{Dimension, Insets, Font}
-import java.text.NumberFormat
-import java.util.prefs.Preferences
-import javax.swing._
-import event.{ListSelectionListener, ListSelectionEvent}
+import javax.swing.{JScrollPane, ImageIcon, JComponent, BorderFactory, JTable}
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
@@ -16,12 +14,13 @@ import org.talkingpuffin.Session
 import util.{TextChangingAnimator}
 import org.talkingpuffin.util.{ResourceReady, FetchRequest, ShortUrl, Loggable}
 import org.talkingpuffin.ui.filter.FiltersDialog
+import java.text.NumberFormat
 
 object Thumbnail {
   val THUMBNAIL_SIZE = 48
   val transparentThumbnail = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, 
     BufferedImage.TYPE_INT_ARGB))
-  val MEDIUM_SIZE = 150
+  val MEDIUM_SIZE = 200
   val transparentMedium = new ImageIcon(new BufferedImage(MEDIUM_SIZE, MEDIUM_SIZE, 
     BufferedImage.TYPE_INT_ARGB))
 }
@@ -34,6 +33,8 @@ object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.
 class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent, 
     filtersDialog: Option[FiltersDialog], viewCreator: Option[ViewCreator]) 
     extends GridBagPanel with Loggable {
+  
+  border = BorderFactory.createEmptyBorder(4, 4, 4, 4)
   private val animator = new TextChangingAnimator
 
   private var picLabel: Label = new Label {
@@ -51,7 +52,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
   }
   
   val largeTweetScrollPane = new JScrollPane {
-    val dim = new Dimension(500, 100)
+    val dim = new Dimension(400, 110)
     setMinimumSize(dim)
     setPreferredSize(dim)
     setViewportView(largeTweet)
@@ -60,7 +61,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
   }
   peer.add(largeTweetScrollPane, new Constraints {
     insets = new Insets(5,1,5,1)
-    grid = (1,0); gridwidth=2; fill = GridBagPanel.Fill.Both;
+    grid = (1,0); gridwidth=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
   }.peer)
 
   picLabel.peer.addMouseListener(new MouseAdapter {
@@ -83,13 +84,23 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
   }
   addFreshUserDescription
   
+  var userDescScrollPane: JScrollPane = _
+  
   /** Recreate the entire control as a defense against Hebrew characters which break the control */
   def addFreshUserDescription {
-    if (userDescription != null) TweetDetailPanel.this.peer.remove(userDescription.peer)
+    if (userDescScrollPane != null) TweetDetailPanel.this.peer.remove(userDescScrollPane)
     userDescription = new UserDescription
-    add(userDescription, new CustomConstraints {
+    userDescScrollPane = new JScrollPane {
+      val dim = new Dimension(400, 90)
+      setMinimumSize(dim)
+      setPreferredSize(dim)
+      setViewportView(userDescription.peer)
+      setBorder(null)
+      setVisible(false)
+    }
+    peer.add(userDescScrollPane, new CustomConstraints {
       grid = (1,1); gridheight=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
-    })
+    }.peer)
   }
   
   def connectToTable(table: JTable) {
@@ -129,6 +140,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
     session.statusMsg = " "
     setText(user, status)
     largeTweetScrollPane.setVisible(true)
+    userDescScrollPane.setVisible(true)
     status match {
       case None => largeTweet.setText(null) 
       case Some(st) =>
@@ -161,6 +173,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
     userDescription.text = null
     largeTweet.setText(null)
     largeTweetScrollPane.setVisible(false)
+    userDescScrollPane.setVisible(false)
   }
   
   def showBigPicture = bigPic.showBigPicture(showingUrl, peer)

@@ -9,7 +9,7 @@ import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
 import java.awt.event.{KeyEvent, ActionListener, ActionEvent}
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.Session
-import util.{Dockable, DesktopUtil, TableUtil}
+import util.{DesktopUtil, TableUtil}
 import org.talkingpuffin.twitter.{TwitterStatus, TwitterUser}
 
 object UserColumns {
@@ -30,10 +30,9 @@ object UserColumns {
 /**
  * Displays a list of friends or followers
  */
-class PeoplePane(val longTitle: String, val shortTitle: String, val session: Session, 
-    tableModel: UsersTableModel, rels: Relationships, 
+class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relationships, 
     updateCallback: Option[() => Unit]) extends GridBagPanel 
-    with Loggable with Reactor with Dockable {
+    with Loggable with Reactor {
   var table: JTable = _
   val tableScrollPane = new ScrollPane {
     table = new PeopleTable(tableModel)
@@ -85,7 +84,6 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     add(searchText.peer)
     
     addSeparator
-    add(dockedButton)
     add((new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
   }
   peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
