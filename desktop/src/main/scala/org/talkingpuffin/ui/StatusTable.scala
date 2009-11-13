@@ -149,6 +149,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     ageCol.setMaxWidth(100)
     ageCol.setCellRenderer(new AgeCellRenderer)
     
+    imageCol.setMinWidth(Thumbnail.THUMBNAIL_SIZE)
     imageCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
     imageCol.setSortable(false)
     

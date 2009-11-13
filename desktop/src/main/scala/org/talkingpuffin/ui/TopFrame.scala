@@ -17,6 +17,7 @@ import util.{ColTiler, AppEvent, eventDistributor}
  */
 class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable 
     with PeoplePaneCreator with Reactor {
+  val prefs = GlobalPrefs.prefsForUser(service, twitterSession.user)
   val tagUsers = new TagUsers(service, twitterSession.user)
   TopFrames.addFrame(this)
   val session = new Session(service, twitterSession)
@@ -32,11 +33,11 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   val rels = new Relationships()
   
-  val prefs = GlobalPrefs.prefsForUser(service, twitterSession.user)
   val providers = new DataProviders(twitterSession, prefs, session.progress)
-  menuBar = new MainMenuBar(session, providers, tagUsers)
-  val streams = new Streams(service, prefs, providers, session, tagUsers, rels)
+  session.dataProviders = providers
+  val streams = new Streams(service, prefs, session, tagUsers, rels)
   session.windows.streams = streams
+  menuBar = new MainMenuBar(session, tagUsers)
   mainToolBar.init(streams)
     
   title = Main.title + " - " + service + " " + twitterSession.user
@@ -46,6 +47,8 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     case e: NewViewEvent => createView(e.provider, e.include, None) 
     case e: NewPeoplePaneEvent => createPeoplePane 
     case e: TileViewsEvent => tileViews(e.heightFactor) 
+    case e: SendStatusEvent => (new SendMsgDialog(session, null, None, None, None, false)).visible = true 
+    case e: SendDirectMessageEvent => (new SendMsgDialog(session, null, None, None, None, true)).visible = true
   }
   listenTo(eventDistributor)
 
@@ -112,7 +115,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     val peoplePane = new PeoplePane(session, model, customRels, updatePeople)
     new Frame {
       title = longTitle
-      menuBar = new MainMenuBar(session, providers, tagUsers)
+      menuBar = new MainMenuBar(session, tagUsers)
       contents = peoplePane
       peer.setLocationRelativeTo(null)
       visible = true
@@ -140,14 +143,16 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     listenTo(twitterSession.httpPublisher)
   }
 
-  private def getProviders = streams.providers
-  
   private def tileViews(heightFactor: Double) {
     val views = session.windows.streams.views
     val tiler = new ColTiler(views.length, heightFactor)
     for {v <- views
       if v.frame.isDefined
-    } v.frame.get.peer.setBounds(tiler.next)
+    } {
+      val peer = v.frame.get.peer
+      peer.setBounds(tiler.next)
+      peer.requestFocusInWindow
+    }
   }
 
   private def createView(provider: DataProvider, include: Option[String], location: Option[Rectangle]) {

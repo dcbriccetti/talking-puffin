@@ -10,7 +10,7 @@ class TitledStatusFrame(val pane: StatusPane,
                         providers: DataProviders, tagUsers: TagUsers,
                         val model: StatusTableModel) extends Frame {
   title = pane.longTitle
-  menuBar = new MainMenuBar(pane.session, providers, tagUsers)
+  menuBar = new MainMenuBar(pane.session, tagUsers)
   listenTo(model)
   reactions += {
     case TableContentsChanged(model, filtered, total) =>

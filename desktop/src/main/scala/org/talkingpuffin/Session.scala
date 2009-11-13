@@ -4,7 +4,7 @@ import filter.TagUsers
 import java.util.prefs.Preferences
 import twitter.AuthenticatedSession
 import swing.Label
-import ui.{Windows, LongOpListener}
+import ui.{DataProviders, Windows, LongOpListener}
 
 class Session(val serviceName: String, val twitterSession: AuthenticatedSession) {
   val windows = new Windows
@@ -12,6 +12,7 @@ class Session(val serviceName: String, val twitterSession: AuthenticatedSession)
   def statusMsg_=(text: String) = statusMsgLabel.text = text
   def statusMsg = statusMsgLabel.text
   var progress: LongOpListener = null
+  var dataProviders: DataProviders = _
   def userPrefs: Preferences = windows.streams.prefs
   def tagUsers: TagUsers = windows.streams.tagUsers
 }

@@ -28,28 +28,16 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
     }
   }
 
-  val clearAction = new Action("Clear") {
+  val clearAction = new Action("Clr") {
     toolTip = "Removes all tweets (except filtered-out ones) from the view"
     mnemonic = KeyEvent.VK_C
     def apply = clearAndOptionallyLoad(false)
   }
 
-  val clearAllAction = new Action("Clear All") {
+  val clearAllAction = new Action("Clr All") {
     toolTip = "Removes all tweets (including filtered-out ones) from the view"
     mnemonic = KeyEvent.VK_L
     def apply = clearAndOptionallyLoad(true)
-  }
-
-  val sendAction = new Action("Send") {
-    toolTip = "Opens a window from which you can send a tweet"
-    mnemonic = KeyEvent.VK_S
-    def apply = (new SendMsgDialog(session, null, None, None, None, false)).visible = true
-  }
-
-  val dmAction = new Action("DM") {
-    toolTip = "Opens a window from which you can send a direct message"
-    mnemonic = KeyEvent.VK_D
-    def apply = (new SendMsgDialog(session, null, None, None, None, true)).visible = true
   }
 
   val loadNewAction = new Action("Load New") {
@@ -58,7 +46,7 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
     def apply = tweetsProvider.loadContinually()
   }
   
-  val last200Action = new Action("Last 200") {
+  val last200Action = new Action("200") {
     toolTip = "Fetches the last 200 items"
     mnemonic = KeyEvent.VK_2
     def apply = tweetsProvider.loadLastBlockOfTweets
@@ -86,7 +74,7 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
   addComponentsToToolBar
   
   private def addComponentsToToolBar {
-    aa(sendAction, dmAction, showFiltersAction, clearAction, clearAllAction, loadNewAction)
+    aa(showFiltersAction, clearAction, clearAllAction, loadNewAction)
     aa(last200Action, wordsAction)
     addSeparator
     add(new Label("Cols: ").peer)

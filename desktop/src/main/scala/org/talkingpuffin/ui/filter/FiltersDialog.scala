@@ -24,9 +24,9 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
   
   contents = new BoxPanel(Orientation.Vertical) {
     contents += new TabbedPane {
-      pages += new TabbedPane.Page("General", generalPane)
       pages += new TabbedPane.Page("Include", includePane)
       pages += new TabbedPane.Page("Exclude", excludePane)
+      pages += new TabbedPane.Page("General", generalPane)
     }
     contents += new FlowPanel {
       val applyAction = Action("Apply") {applyChanges}

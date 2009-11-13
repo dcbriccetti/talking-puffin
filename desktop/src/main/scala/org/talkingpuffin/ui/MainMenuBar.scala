@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent
 import java.awt.Toolkit
 import scala.swing.{MenuItem, MenuBar, Menu, CheckMenuItem, Action}
 import swing.event.{Event, ButtonClicked}
+import java.awt.event.InputEvent.ALT_DOWN_MASK
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.util.{TwitterListUtils, Loggable}
@@ -14,8 +15,7 @@ import util.{eventDistributor, AppEvent}
 /**
  * Main menu bar
  */
-class MainMenuBar(session: Session, dataProviders: DataProviders, 
-                  tagUsers: TagUsers) extends MenuBar with Loggable {
+class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Loggable {
   val tsess = session.twitterSession
   val prefs = GlobalPrefs.prefs
 
@@ -32,13 +32,24 @@ class MainMenuBar(session: Session, dataProviders: DataProviders,
     })
   }
   
+  contents += new Menu("Send") {
+    contents += new MenuItem(new Action("Status...") {
+      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_S, ALT_DOWN_MASK))
+      def apply = eventDistributor.publish(SendStatusEvent(session)) 
+    })
+    contents += new MenuItem(new Action("Direct message...") {
+      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_D, ALT_DOWN_MASK))
+      def apply = eventDistributor.publish(SendDirectMessageEvent(session))
+    })
+  }
+  
   contents += new Menu("Views") {
     contents += new Menu("New") {
       def newItem(name: String, event: Event) = new MenuItem(new Action(name) {
         toolTip = "Creates a new " + name + " view"
         def apply = eventDistributor.publish(event)
       })
-      dataProviders.providers.foreach(provider => {
+      session.dataProviders.providers.foreach(provider => {
         contents += newItem(provider.providerName, NewViewEvent(session, provider, None))
       })
       contents += newItem("People", NewPeoplePaneEvent(session))
@@ -114,3 +125,5 @@ case class NewViewEvent(override val session: Session, val provider: DataProvide
 case class NewFollowingViewEvent(override val session: Session, include: Option[String]) extends AppEvent(session)
 case class NewPeoplePaneEvent(override val session: Session) extends AppEvent(session)
 case class TileViewsEvent(override val session: Session, val heightFactor: Double) extends AppEvent(session)
+case class SendStatusEvent(override val session: Session) extends AppEvent(session)
+case class SendDirectMessageEvent(override val session: Session) extends AppEvent(session)
