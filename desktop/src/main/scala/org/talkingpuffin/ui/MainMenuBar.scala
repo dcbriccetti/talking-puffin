@@ -70,6 +70,12 @@ class MainMenuBar(session: Session, dataProviders: DataProviders,
           List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
       }
     })
+    contents += new MenuItem(new Action("Display statuses from your lists") {
+      def apply = {
+        TwitterListsDisplayer.viewListsStatuses(session, 
+          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
+      }
+    })
   }
   
   contents += new Menu("Options") {

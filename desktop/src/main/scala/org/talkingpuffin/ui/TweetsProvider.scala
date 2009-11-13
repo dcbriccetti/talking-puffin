@@ -63,4 +63,10 @@ class FavoritesProvider(session: AuthenticatedSession, id: String, startingId: O
   override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getFavoritesFor(id)
 }
 
+class ListStatusesProvider(session: AuthenticatedSession, userId: String, listId: String, 
+    startingId: Option[Long], longOpListener: LongOpListener)
+    extends TweetsProvider(session, startingId, userId + " " + listId + " List", longOpListener) {
+  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.getListStatusesFor(userId, listId)
+}
+
 case class TweetsArrived(tweets: NodeSeq) extends Event

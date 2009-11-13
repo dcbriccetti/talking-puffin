@@ -23,7 +23,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   */
   def getFriendsTimeline(id: String): List[TwitterStatus] = getFriendsTimeline(id,TwitterArgs())
 
-  def getFriendsTimeline(id: String, args:TwitterArgs): List[TwitterStatus] = {
+  def getFriendsTimeline(id: String, args: TwitterArgs): List[TwitterStatus] = {
     parse("/statuses/friends_timeline/" + urlEncode(id) + ".xml" + args, 
         TwitterStatus.apply, "status").list
   }
@@ -167,6 +167,16 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
       case None => (createList(listName), List[TwitterUser]())
     }
   }
+  
+  def getListStatusesFor(user: String, listId: String)(args: TwitterArgs): List[TwitterStatus] = 
+    getListStatuses(user, listId, args)
+  
+  def getListStatuses(user: String, listId: String): List[TwitterStatus] = 
+    getListStatuses(user, listId, TwitterArgs())
+  
+  def getListStatuses(user: String, listId: String, args: TwitterArgs): List[TwitterStatus] = {
+    parse("/" + user + "/lists/" + listId + "/statuses.xml" + args, TwitterStatus.apply, "status").list
+  } 
 
   def addToList(list: TwitterList)(memberId: Long): Node = http.post(listMembersUrl(list, memberId))
 
