@@ -21,8 +21,7 @@ object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.
  * Details of the currently-selected tweet.
  */
 class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent, 
-    filtersDialog: Option[FiltersDialog], viewCreator: Option[ViewCreator]) 
-    extends GridBagPanel with Loggable {
+    filtersDialog: Option[FiltersDialog]) extends GridBagPanel with Loggable {
   
   border = BorderFactory.createEmptyBorder(4, 4, 4, 4)
   private val animator = new TextChangingAnimator
@@ -33,7 +32,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
 
   private val bigPic = new BigPictureDisplayer(medThumbPicFetcher)
   private var userDescription: TextArea = _
-  private var largeTweet = new LargeTweet(filtersDialog, viewCreator, focusAfterHyperlinkClick, background)
+  private var largeTweet = new LargeTweet(session, filtersDialog, focusAfterHyperlinkClick, background)
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
           

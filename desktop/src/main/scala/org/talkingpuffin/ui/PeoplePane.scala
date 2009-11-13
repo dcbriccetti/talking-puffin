@@ -38,7 +38,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
     table = new PeopleTable(tableModel)
     peer.setViewportView(table)
   }
-  private val tweetDetailPanel = new TweetDetailPanel(session, table, None, None)
+  private val tweetDetailPanel = new TweetDetailPanel(session, table, None)
   private val userActions = new UserActions(session, rels)
   val mh = new PopupMenuHelper(table)
   private var specialMenuItems = new SpecialMenuItems(table, tableModel.relationships,

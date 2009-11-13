@@ -2,16 +2,15 @@ package org.talkingpuffin.ui
 
 import swing.Frame
 import org.talkingpuffin.filter.TagUsers
-import org.talkingpuffin.Session
 
 /**
  * A frame for status panes, including a custom title and menu.
  */
-class TitledStatusFrame(baseTitle: String, session: Session, 
+class TitledStatusFrame(val pane: StatusPane,  
                         providers: DataProviders, tagUsers: TagUsers,
-                        val model: StatusTableModel, val pane: StatusPane) extends Frame {
-  title = baseTitle
-  menuBar = new MainMenuBar(session, providers, tagUsers)
+                        val model: StatusTableModel) extends Frame {
+  title = pane.longTitle
+  menuBar = new MainMenuBar(pane.session, providers, tagUsers)
   listenTo(model)
   reactions += {
     case TableContentsChanged(model, filtered, total) =>
@@ -29,6 +28,6 @@ class TitledStatusFrame(baseTitle: String, session: Session,
   visible = true
 
   private def withSuffix(titleSuffix: String) = 
-    if (titleSuffix.length == 0) baseTitle else baseTitle + " " + titleSuffix
+    if (titleSuffix.length == 0) pane.longTitle else pane.longTitle + " " + titleSuffix
 }
 

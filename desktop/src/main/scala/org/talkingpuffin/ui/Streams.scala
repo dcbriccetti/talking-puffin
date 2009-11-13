@@ -1,39 +1,62 @@
 package org.talkingpuffin.ui
 
-import java.awt.Point
-import org.talkingpuffin.filter.{TagUsers}
-import org.talkingpuffin.twitter.AuthenticatedSession
-import org.talkingpuffin.Session
+import java.awt.Rectangle
 import java.util.prefs.Preferences
 import util.ColTiler
 import swing.Reactor
 import swing.event.WindowClosing
+import org.talkingpuffin.util.Loggable
+import org.talkingpuffin.Session
+import org.talkingpuffin.filter.{FilterSet, CompoundFilter, TextTextFilter, TagUsers}
 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
  */
-class Streams(val service: String, val twitterSession: AuthenticatedSession,
-    val prefs: Preferences, val providers: DataProviders,
+class Streams(val service: String, val prefs: Preferences, val providers: DataProviders,
     session: Session, val tagUsers: TagUsers, val relationships: Relationships) 
-    extends ViewCreator with Reactor {
+    extends Reactor with Loggable {
   val usersTableModel = new UsersTableModel(None, tagUsers, relationships)
   
   var views = List[View]()
   
-  val tiler = new ColTiler(providers.autoStartProviders.length)
+  val tiler = new ColTiler(providers.autoStartProviders.length, 1d)
   providers.autoStartProviders.foreach(provider => {
     createView(provider, None, Some(tiler.next))
     provider.loadContinually()
   })
   
-  def createView(dataProvider: DataProvider, include: Option[String], location: Option[Point]): View = {
-    val view = View.create(providers, dataProvider, usersTableModel.usersModel.screenNameToUserNameMap, service, 
-      twitterSession.user, tagUsers, session, include, this, relationships, location)
+  def createView(dataProvider: DataProvider, include: Option[String], location: Option[Rectangle]): View = {
+    val screenNameToUserNameMap = usersTableModel.usersModel.screenNameToUserNameMap
+    val user = session.twitterSession.user
+    val sto = new StatusTableOptions(true, true, true)
+    val filterSet = new FilterSet(tagUsers)
+    val model = dataProvider match {
+      case p: MentionsProvider => new StatusTableModel(sto, p, relationships, screenNameToUserNameMap,
+        filterSet, service, user, tagUsers) with Mentions
+      case p: DmsSentProvider => new StatusTableModel(sto, p, relationships, screenNameToUserNameMap,
+        filterSet, service, user, tagUsers) with DmsSent
+      case p: BaseProvider => new StatusTableModel(sto, p, relationships, screenNameToUserNameMap,
+        filterSet, service, user, tagUsers)
+    }
+    val title = dataProvider.titleCreator.create
+    if (include.isDefined) {
+      filterSet.includeSet.cpdFilters.list ::= new CompoundFilter( 
+        List(TextTextFilter(include.get, false)), None, None)
+    }
+    val pane = new StatusPane(session, title, model, filterSet, tagUsers)
+    val frame = new TitledStatusFrame(pane, providers, tagUsers, model)
+    if (location.isDefined) {
+      frame.peer.setBounds(location.get)
+    }
+    val view = new View(model, pane, Some(frame))
     views ::= view
     if (view.frame.isDefined)
       listenTo(view.frame.get)
     reactions += {
-      case wc: WindowClosing => views = views.filter(_.frame.get != wc.source)
+      case wc: WindowClosing => {
+        debug(wc.toString)
+        views = views.filter(_.frame.get != wc.source)
+      }
     }
     view
   }

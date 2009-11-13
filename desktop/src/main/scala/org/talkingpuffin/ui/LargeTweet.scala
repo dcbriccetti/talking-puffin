@@ -4,15 +4,16 @@ import _root_.scala.swing.{MenuItem, Action}
 import java.awt.{Desktop, Color}
 import javax.swing.event.{HyperlinkListener, HyperlinkEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
-import util.{DesktopUtil}
 import org.talkingpuffin.util.LinkUnIndirector
 import filter.FiltersDialog
 import javax.swing.{JComponent, JTextPane, JPopupMenu}
+import org.talkingpuffin.Session
+import util.{eventDistributor, AppEvent, DesktopUtil}
 
 /**
  * A large version of the tweet, that can contain hyperlinks, and from which filters can be created.
  */
-class LargeTweet(filtersDialog: Option[FiltersDialog], viewCreator: Option[ViewCreator], 
+class LargeTweet(session: Session, filtersDialog: Option[FiltersDialog], 
     focusAfterHyperlinkClick: JComponent, backgroundColor: Color) extends JTextPane {
   setBackground(backgroundColor)
   setContentType("text/html");
@@ -45,12 +46,9 @@ class LargeTweet(filtersDialog: Option[FiltersDialog], viewCreator: Option[ViewC
                   {fd.addExcludeMatching(text)}).peer)
             case _ =>
           }
-          viewCreator match {
-            case Some(vc) =>
-              popup.add(new MenuItem(Action("Create a new stream for “" + text + "”")
-                  {vc.createView(vc.providers.following, Some(text), None)}).peer)
-            case _ =>
-          }
+          popup.add(new MenuItem(Action("Create a new stream for “" + text + "”") {
+            eventDistributor.publish(NewFollowingViewEvent(session, Some(text)))
+          }).peer)
           if (popup.getComponentCount > 0)
             popup.show(LargeTweet.this, e.getX, e.getY)
         }
@@ -59,3 +57,4 @@ class LargeTweet(filtersDialog: Option[FiltersDialog], viewCreator: Option[ViewC
   })
   
 }
+

@@ -12,7 +12,7 @@ import org.talkingpuffin.Session
  * Displays friend statuses
  */
 class StatusPane(val session: Session, val longTitle: String, tableModel: StatusTableModel, 
-    filterSet: FilterSet, tagUsers: TagUsers, viewCreator: ViewCreator) 
+    filterSet: FilterSet, tagUsers: TagUsers) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
   private var lastSelectedRows: List[TwitterStatus] = Nil
@@ -35,7 +35,7 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   
   private val cursorSetter = new AfterFilteringCursorSetter(table)
   
-  private val tweetDetailPanel = new TweetDetailPanel(session, table, Some(filtersDialog), Some(viewCreator))
+  private val tweetDetailPanel = new TweetDetailPanel(session, table, Some(filtersDialog))
   add(tweetDetailPanel, new Constraints{
     grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
   })

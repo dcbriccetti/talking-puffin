@@ -39,15 +39,12 @@ class MainMenuBar(session: Session, dataProviders: DataProviders,
         def apply = eventDistributor.publish(event)
       })
       dataProviders.providers.foreach(provider => {
-        contents += newItem(provider.providerName, NewViewEvent(session, provider))
+        contents += newItem(provider.providerName, NewViewEvent(session, provider, None))
       })
       contents += newItem("People", NewPeoplePaneEvent(session))
     }
-    contents += new MenuItem(new Action("Tile") {
-      def apply = {
-        eventDistributor.publish(TileViewsEvent(session))
-      }
-    })
+    contents += new MenuItem(Action("Tile full height") {eventDistributor.publish(TileViewsEvent(session, 1D))})
+    contents += new MenuItem(Action("Tile half height") {eventDistributor.publish(TileViewsEvent(session, .5D))})
   }
   
   contents += new Menu("Lists") {
@@ -106,6 +103,8 @@ class MainMenuBar(session: Session, dataProviders: DataProviders,
   
 }
 
-case class NewViewEvent(override val session: Session, val provider: DataProvider) extends AppEvent(session)
+case class NewViewEvent(override val session: Session, val provider: DataProvider, include: Option[String]) 
+    extends AppEvent(session)
+case class NewFollowingViewEvent(override val session: Session, include: Option[String]) extends AppEvent(session)
 case class NewPeoplePaneEvent(override val session: Session) extends AppEvent(session)
-case class TileViewsEvent(override val session: Session) extends AppEvent(session)
+case class TileViewsEvent(override val session: Session, val heightFactor: Double) extends AppEvent(session)

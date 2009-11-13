@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import java.awt.{Point, Dimension}
+import java.awt.{Rectangle}
 import java.text.NumberFormat
 import javax.swing.{ImageIcon}
 import scala.swing.event.{WindowClosing}
@@ -35,18 +35,17 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   val prefs = GlobalPrefs.prefsForUser(service, twitterSession.user)
   val providers = new DataProviders(twitterSession, prefs, session.progress)
   menuBar = new MainMenuBar(session, providers, tagUsers)
-  val streams = new Streams(service, twitterSession, prefs, providers, session, tagUsers, rels)
+  val streams = new Streams(service, prefs, providers, session, tagUsers, rels)
   session.windows.streams = streams
   mainToolBar.init(streams)
     
   title = Main.title + " - " + service + " " + twitterSession.user
   reactions += {
-    case e: AppEvent if e.session != session => 
-    case e: NewViewEvent => 
-      streams.createView(e.provider, None, None)
-      e.provider.loadContinually()
+    case e: AppEvent if e.session != session =>  // Ignore all from other sessions 
+    case e: NewFollowingViewEvent => createView(providers.following, e.include, None) 
+    case e: NewViewEvent => createView(e.provider, e.include, None) 
     case e: NewPeoplePaneEvent => createPeoplePane 
-    case e: TileViewsEvent => tileViews 
+    case e: TileViewsEvent => tileViews(e.heightFactor) 
   }
   listenTo(eventDistributor)
 
@@ -95,7 +94,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   type Users = List[TwitterUser]
   
   def createPeoplePane(longTitle: String, otherRels: Option[Relationships], users: Option[Users], 
-        updatePeople: Option[() => Unit], selectPane: Boolean, location: Option[Point]): PeoplePane = {
+        updatePeople: Option[() => Unit], selectPane: Boolean, location: Option[Rectangle]): PeoplePane = {
     def getRels = if (otherRels.isDefined) otherRels.get else rels
     val model = 
       if (users.isDefined || otherRels.isDefined) 
@@ -115,8 +114,8 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
       title = longTitle
       menuBar = new MainMenuBar(session, providers, tagUsers)
       contents = peoplePane
-      visible = true
       peer.setLocationRelativeTo(null)
+      visible = true
     }
     peoplePane
   }
@@ -143,17 +142,17 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   private def getProviders = streams.providers
   
-  private def tileViews {
+  private def tileViews(heightFactor: Double) {
     val views = session.windows.streams.views
-    val tiler = new ColTiler(views.length)
-    views.foreach(v => {
-      v.frame match {
-        case Some(frame) => {
-          frame.location = tiler.next
-          frame.peer.setSize(tiler.tileWidth, tiler.screenSize.height)
-        }
-      }
-    })
+    val tiler = new ColTiler(views.length, heightFactor)
+    for {v <- views
+      if v.frame.isDefined
+    } v.frame.get.peer.setBounds(tiler.next)
+  }
+
+  private def createView(provider: DataProvider, include: Option[String], location: Option[Rectangle]) {
+    streams.createView(provider, include, location)
+    provider.loadContinually()
   }
 }
 
