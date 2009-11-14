@@ -60,7 +60,7 @@ object TwitterListsDisplayer {
     val provider = new ListStatusesProvider(session.twitterSession, 
       list.owner.screenName, list.slug, None, session.progress)
     session.windows.streams.createView(session.desktopPane, provider, None, tilerNext(tiler))
-    provider.loadAndPublishData(TwitterArgs.maxResults(Constants.MaxItemsPerRequest), false)
+    provider.loadContinually
   }
     
   private def getLists(session: Session, screenNames: List[String]): LLTL = {
