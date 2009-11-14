@@ -126,12 +126,10 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
 
   private def updatePeople = {
-    debug("updatePeople")
     rels.getUsers(twitterSession, twitterSession.user, mainToolBar)
   }
           
   private def createPeoplePane: Unit = {
-    debug("createPeoplePane")
     peoplePane = createPeoplePane("People You Follow and People Who Follow You", None, None, 
         Some(updatePeople _), false, None)
   }
