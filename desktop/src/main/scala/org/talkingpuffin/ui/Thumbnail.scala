@@ -8,7 +8,7 @@ object Thumbnail {
   val transparentThumbnail = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, 
     BufferedImage.TYPE_INT_ARGB))
 
-  val MEDIUM_SIZE = 160
+  val MEDIUM_SIZE = 220
   val transparentMedium = new ImageIcon(new BufferedImage(MEDIUM_SIZE, MEDIUM_SIZE, 
     BufferedImage.TYPE_INT_ARGB))
 }

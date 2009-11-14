@@ -14,7 +14,7 @@ import util.{eventDistributor, DesktopUtil}
  * A large version of the tweet, that can contain hyperlinks, and from which filters can be created.
  */
 class LargeTweet(session: Session, filtersDialog: Option[FiltersDialog], 
-    focusAfterHyperlinkClick: JComponent, backgroundColor: Color) extends JTextPane {
+    backgroundColor: Color) extends JTextPane {
   setBackground(backgroundColor)
   setContentType("text/html");
   setEditable(false);
@@ -25,7 +25,7 @@ class LargeTweet(session: Session, filtersDialog: Option[FiltersDialog],
         if (Desktop.isDesktopSupported) {
           LinkUnIndirector.findLinks(DesktopUtil.browse, DesktopUtil.browse)(e.getURL.toString)
         }
-        focusAfterHyperlinkClick.requestFocusInWindow // Let user resume using keyboard to move through tweets
+        //TODO focusAfterHyperlinkClick.requestFocusInWindow // Let user resume using keyboard to move through tweets
       }
     }
   });

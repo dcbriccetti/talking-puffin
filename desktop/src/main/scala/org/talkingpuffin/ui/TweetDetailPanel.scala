@@ -4,7 +4,7 @@ import javax.swing.event.{ListSelectionListener, ListSelectionEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
 import java.awt.{Dimension, Insets, Font}
 import java.text.NumberFormat
-import javax.swing.{JScrollPane, JComponent, BorderFactory, JTable}
+import javax.swing.{JScrollPane, BorderFactory, JTable}
 import scala.swing.{Label, GridBagPanel, TextArea}
 import scala.swing.GridBagPanel._
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
@@ -20,9 +20,10 @@ object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.
 /**
  * Details of the currently-selected tweet.
  */
-class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent, 
+class TweetDetailPanel(session: Session,  
     filtersDialog: Option[FiltersDialog]) extends GridBagPanel with Loggable {
   
+  preferredSize = new Dimension(600, 400)
   border = BorderFactory.createEmptyBorder(4, 4, 4, 4)
   private val animator = new TextChangingAnimator
 
@@ -32,7 +33,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
 
   private val bigPic = new BigPictureDisplayer(medThumbPicFetcher)
   private var userDescription: TextArea = _
-  private var largeTweet = new LargeTweet(session, filtersDialog, focusAfterHyperlinkClick, background)
+  private var largeTweet = new LargeTweet(session, filtersDialog, background)
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
           
@@ -41,7 +42,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
   }
   
   val largeTweetScrollPane = new JScrollPane {
-    val dim = new Dimension(400, 90)
+    val dim = new Dimension(600, 140)
     setMinimumSize(dim)
     setPreferredSize(dim)
     setViewportView(largeTweet)
@@ -50,14 +51,14 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
   }
   peer.add(largeTweetScrollPane, new Constraints {
     insets = new Insets(5,1,5,1)
-    grid = (1,0); fill = GridBagPanel.Fill.Horizontal; weightx = 1; 
+    grid = (0,0); gridwidth = 2; fill = GridBagPanel.Fill.Horizontal; weightx = 1; 
   }.peer)
 
   picLabel.peer.addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = if (showingUrl != null) bigPic.showBigPicture(showingUrl, peer)
   })
   add(new CenteredPicture(picLabel), 
-    new CustomConstraints { grid = (0,0); gridheight = 2; insets = new Insets(3, 3, 3, 3)})
+    new CustomConstraints { grid = (0,1); gridheight = 2; insets = new Insets(3, 3, 3, 3)})
 
   class UserDescription extends TextArea {
     font = new Font("SansSerif", Font.PLAIN, 14)
@@ -75,7 +76,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
     if (userDescScrollPane != null) TweetDetailPanel.this.peer.remove(userDescScrollPane)
     userDescription = new UserDescription
     userDescScrollPane = new JScrollPane {
-      val dim = new Dimension(400, 85)
+      val dim = new Dimension(400, 180)
       setMinimumSize(dim)
       setPreferredSize(dim)
       setViewportView(userDescription.peer)

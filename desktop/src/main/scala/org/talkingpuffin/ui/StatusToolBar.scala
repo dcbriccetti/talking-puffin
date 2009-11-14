@@ -1,8 +1,8 @@
 package org.talkingpuffin.ui
 
 import java.awt.event.KeyEvent
-import javax.swing.{JToolBar, JToggleButton, JFrame, SwingUtilities}
-import scala.swing.{Label, Action}
+import javax.swing.{JToolBar, JFrame, SwingUtilities}
+import scala.swing.{Action}
 import org.talkingpuffin.Session
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.ui.filter.FiltersDialog
@@ -77,7 +77,6 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
     aa(showFiltersAction, clearAction, clearAllAction, loadNewAction)
     aa(last200Action, wordsAction)
     aa(showMinColsAction, showMaxColsAction)
-    ac((new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
   }
   
   private def clearAndOptionallyLoad(all: Boolean) {

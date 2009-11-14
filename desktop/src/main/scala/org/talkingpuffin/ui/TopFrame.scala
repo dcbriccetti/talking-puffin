@@ -46,7 +46,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     case e: NewFollowingViewEvent => createView(providers.following, e.include, None) 
     case e: NewViewEvent => createView(e.provider, e.include, None) 
     case e: NewPeoplePaneEvent => createPeoplePane 
-    case e: TileViewsEvent => tileViews(e.heightFactor) 
+    case e: TileViewsEvent => tileViews 
     case e: SendStatusEvent => (new SendMsgDialog(session, null, None, None, None, false)).visible = true 
     case e: SendDirectMessageEvent => (new SendMsgDialog(session, null, None, None, None, true)).visible = true
   }
@@ -143,13 +143,15 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     listenTo(twitterSession.httpPublisher)
   }
 
-  private def tileViews(heightFactor: Double) {
+  private def tileViews() {
     val frames = (for {
       v <- session.windows.streams.views
       if v.frame.isDefined && ! v.frame.get.isIcon
     } yield v.frame.get) sort(_.getLocation().x < _.getLocation().x)
-    val tiler = new ColTiler(session.desktopPane.getSize, frames.length, heightFactor)
-    frames.foreach(_.setBounds(tiler.next))
+    if (frames != Nil) {
+      val tiler = new ColTiler(session.desktopPane.getSize, frames.length, 0.75)
+      frames.foreach(_.setBounds(tiler.next))
+    }
   }
 
   private def createView(provider: DataProvider, include: Option[String], location: Option[Rectangle]) {

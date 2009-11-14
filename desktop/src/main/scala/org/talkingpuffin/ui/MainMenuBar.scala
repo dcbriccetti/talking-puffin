@@ -54,7 +54,7 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
       })
       contents += newItem("People", NewPeoplePaneEvent(session))
     }
-    contents += new MenuItem(Action("Tile") {eventDistributor.publish(TileViewsEvent(session, 1D))})
+    contents += new MenuItem(Action("Tile") {eventDistributor.publish(TileViewsEvent(session))})
   }
   
   contents += new Menu("Lists") {
@@ -123,6 +123,6 @@ case class NewViewEvent(override val session: Session, val provider: DataProvide
     extends AppEvent(session)
 case class NewFollowingViewEvent(override val session: Session, include: Option[String]) extends AppEvent(session)
 case class NewPeoplePaneEvent(override val session: Session) extends AppEvent(session)
-case class TileViewsEvent(override val session: Session, val heightFactor: Double) extends AppEvent(session)
+case class TileViewsEvent(override val session: Session) extends AppEvent(session)
 case class SendStatusEvent(override val session: Session) extends AppEvent(session)
 case class SendDirectMessageEvent(override val session: Session) extends AppEvent(session)
