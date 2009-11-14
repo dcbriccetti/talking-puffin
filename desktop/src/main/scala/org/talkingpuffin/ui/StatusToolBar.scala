@@ -76,10 +76,7 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
   private def addComponentsToToolBar {
     aa(showFiltersAction, clearAction, clearAllAction, loadNewAction)
     aa(last200Action, wordsAction)
-    addSeparator
-    add(new Label("Cols: ").peer)
     aa(showMinColsAction, showMaxColsAction)
-    addSeparator
     ac((new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
   }
   

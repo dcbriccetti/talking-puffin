@@ -148,13 +148,14 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   def getLists(screenName: String): List[TwitterList] = extractLists(http.get(url(screenName, "lists.xml")))
   
   def getListMemberships(screenName: String)(cursor: Long): XmlResult[TwitterList] = 
-    parse("/" + screenName + "/lists/memberships.xml?count=200&cursor=" + cursor, 
+    parse("/" + screenName + "/lists/memberships.xml?count=" + Constants.MaxItemsPerRequest + "&cursor=" + cursor, 
       TwitterList.apply, "lists", "list")
       
   def getListNamed(listName: String): Option[TwitterList] = getLists(user) find(_.name == listName)
   
   def getListMembers(list: TwitterList)(cursor: Long): XmlResult[TwitterUser] = {
-    parse("/" + list.owner.screenName + "/" + list.slug + "/members.xml?count=200&cursor=" + cursor, 
+    parse("/" + list.owner.screenName + "/" + list.slug + "/members.xml?count=" + 
+      Constants.MaxItemsPerRequest + "&cursor=" + cursor, 
       TwitterUser.apply, "users", "user")
   }
   
@@ -172,7 +173,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
     getListStatuses(user, listId, args)
   
   def getListStatuses(user: String, listId: String): List[TwitterStatus] = 
-    getListStatuses(user, listId, TwitterArgs())
+    getListStatuses(user, listId, TwitterArgs.maxResults(Constants.MaxItemsPerRequest))
   
   def getListStatuses(user: String, listId: String, args: TwitterArgs): List[TwitterStatus] = {
     parse("/" + user + "/lists/" + listId + "/statuses.xml" + args, TwitterStatus.apply, "status").list

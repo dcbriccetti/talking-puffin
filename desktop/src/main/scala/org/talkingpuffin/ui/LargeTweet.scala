@@ -1,14 +1,14 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.{MenuItem, Action}
+import scala.swing.{MenuItem, Action}
 import java.awt.{Desktop, Color}
 import javax.swing.event.{HyperlinkListener, HyperlinkEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
+import javax.swing.{JComponent, JTextPane, JPopupMenu}
 import org.talkingpuffin.util.LinkUnIndirector
 import filter.FiltersDialog
-import javax.swing.{JComponent, JTextPane, JPopupMenu}
 import org.talkingpuffin.Session
-import util.{eventDistributor, AppEvent, DesktopUtil}
+import util.{eventDistributor, DesktopUtil}
 
 /**
  * A large version of the tweet, that can contain hyperlinks, and from which filters can be created.

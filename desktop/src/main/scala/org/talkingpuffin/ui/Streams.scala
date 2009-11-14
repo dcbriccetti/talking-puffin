@@ -2,12 +2,13 @@ package org.talkingpuffin.ui
 
 import java.awt.Rectangle
 import java.util.prefs.Preferences
+import javax.swing.JDesktopPane
 import util.ColTiler
 import swing.Reactor
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.Session
 import org.talkingpuffin.filter.{FilterSet, CompoundFilter, TextTextFilter, TagUsers}
-import swing.event.{WindowEvent, WindowClosing}
+import javax.swing.event.{InternalFrameEvent, InternalFrameAdapter}
 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
@@ -18,14 +19,19 @@ class Streams(val service: String, val prefs: Preferences,
   val usersTableModel = new UsersTableModel(None, tagUsers, relationships)
   
   var views = List[View]()
-  
-  val tiler = new ColTiler(session.dataProviders.autoStartProviders.length, 1d)
+
+  val dpSize = {
+    val s1 = session.desktopPane.size
+    if (s1.width > 0 && s1.height > 0) s1 else session.desktopPane.preferredSize 
+  }
+  val tiler = new ColTiler(dpSize, session.dataProviders.autoStartProviders.length, 1d)
   session.dataProviders.autoStartProviders.foreach(provider => {
-    createView(provider, None, Some(tiler.next))
+    createView(session.desktopPane, provider, None, Some(tiler.next))
     provider.loadContinually()
   })
   
-  def createView(dataProvider: DataProvider, include: Option[String], location: Option[Rectangle]): View = {
+  def createView(desktopPane: JDesktopPane, dataProvider: DataProvider, 
+                 include: Option[String], location: Option[Rectangle]): View = {
     val screenNameToUserNameMap = usersTableModel.usersModel.screenNameToUserNameMap
     val user = session.twitterSession.user
     val sto = new StatusTableOptions(true, true, true)
@@ -45,19 +51,21 @@ class Streams(val service: String, val prefs: Preferences,
     }
     val pane = new StatusPane(session, title, model, filterSet, tagUsers)
     val frame = new TitledStatusFrame(pane, session.dataProviders, tagUsers, model)
+    desktopPane.add(frame)
     if (location.isDefined) {
-      frame.peer.setBounds(location.get)
+      frame.setBounds(location.get)
+    } else {
+      frame.setBounds(0, 0, 300, 500)
     }
+    frame.moveToFront
     val view = new View(model, pane, Some(frame))
     views ::= view
-    if (view.frame.isDefined)
-      listenTo(view.frame.get)
-    reactions += {
-      case wc: WindowClosing => 
-        debug(wc.toString)
-        views = views.filter(_.frame.get != wc.source)
-      case e: WindowEvent => debug(e.toString)
-    }
+    frame.addInternalFrameListener(new InternalFrameAdapter {
+      override def internalFrameClosing(e: InternalFrameEvent) = {
+        debug(e.toString)
+        views = views.filter(_.frame.get != e.getSource)
+      }
+    })
     view
   }
   

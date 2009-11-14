@@ -20,7 +20,7 @@ class TwitterArgs(val sinceId:Option[Long], val maxId:Option[Long], val count:Op
   }
 
   def maxResults(count:Int):TwitterArgs = {
-    if(count > 0 && count <= 200){
+    if(count > 0 && count <= Constants.MaxItemsPerRequest){
       new TwitterArgs(sinceId,maxId,Some(count),page,cursor,screenName)
     } else {
       this

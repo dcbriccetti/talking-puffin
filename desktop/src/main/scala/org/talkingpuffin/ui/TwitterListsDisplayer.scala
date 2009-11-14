@@ -5,8 +5,8 @@ import org.talkingpuffin.ui.util.Tiler
 import swing.{Action, MenuItem}
 import org.talkingpuffin.util.Parallelizer
 import javax.swing.{JComponent, JPopupMenu, JTable}
-import org.talkingpuffin.twitter.{TwitterArgs, TwitterUser, TwitterList}
 import java.awt.Rectangle
+import org.talkingpuffin.twitter.{Constants, TwitterArgs, TwitterUser, TwitterList}
 
 case class MenuPos(parent: JComponent, menuX: Int, menuY: Int)
 
@@ -23,7 +23,7 @@ object TwitterListsDisplayer {
   
   /**
    * Presents a pop-up menu of lists belonging to users with the specified screen names. One or
-   * all lists can be selected. Each list is launched in a new PeoplePane.
+   * all lists can be selected. The statuses of each list is launched in a new StatusPane.
    */
   def viewListsStatuses(session: Session, screenNames: List[String], menuPos: MenuPos): Unit = 
     viewLists(session, screenNames, menuPos, processLists(viewListStatuses))
@@ -59,8 +59,8 @@ object TwitterListsDisplayer {
   private def viewListStatuses(list: TwitterList, session: Session, tiler: Option[Tiler]) = {
     val provider = new ListStatusesProvider(session.twitterSession, 
       list.owner.screenName, list.slug, None, session.progress)
-    session.windows.streams.createView(provider, None, tilerNext(tiler))
-    provider.loadAndPublishData(TwitterArgs(), false)
+    session.windows.streams.createView(session.desktopPane, provider, None, tilerNext(tiler))
+    provider.loadAndPublishData(TwitterArgs.maxResults(Constants.MaxItemsPerRequest), false)
   }
     
   private def getLists(session: Session, screenNames: List[String]): LLTL = {

@@ -41,7 +41,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
   }
   
   val largeTweetScrollPane = new JScrollPane {
-    val dim = new Dimension(400, 110)
+    val dim = new Dimension(400, 90)
     setMinimumSize(dim)
     setPreferredSize(dim)
     setViewportView(largeTweet)
@@ -75,7 +75,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
     if (userDescScrollPane != null) TweetDetailPanel.this.peer.remove(userDescScrollPane)
     userDescription = new UserDescription
     userDescScrollPane = new JScrollPane {
-      val dim = new Dimension(400, 90)
+      val dim = new Dimension(400, 85)
       setMinimumSize(dim)
       setPreferredSize(dim)
       setViewportView(userDescription.peer)

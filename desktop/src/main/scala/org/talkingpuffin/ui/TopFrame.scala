@@ -2,7 +2,6 @@ package org.talkingpuffin.ui
 
 import java.awt.{Rectangle}
 import java.text.NumberFormat
-import javax.swing.{ImageIcon}
 import scala.swing.event.{WindowClosing}
 import swing.{Reactor, Frame, Label, GridBagPanel}
 import org.talkingpuffin.{Main, Globals, Session, Constants}
@@ -11,6 +10,7 @@ import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, Authenticat
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
 import util.{ColTiler, AppEvent, eventDistributor}
+import javax.swing.{ImageIcon}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -66,6 +66,8 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
       grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
       })
     peer.add(mainToolBar, new Constraints {grid = (1,1); anchor=GridBagPanel.Anchor.West}.peer)
+    peer.add(session.desktopPane, new Constraints {grid = (0,2); gridwidth=2; 
+      fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1}.peer)
   }
 
   reactions += {
@@ -144,19 +146,16 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
 
   private def tileViews(heightFactor: Double) {
-    val views = session.windows.streams.views
-    val tiler = new ColTiler(views.length, heightFactor)
-    for {v <- views
-      if v.frame.isDefined
-    } {
-      val peer = v.frame.get.peer
-      peer.setBounds(tiler.next)
-      peer.requestFocusInWindow
-    }
+    val frames = for {
+      v <- session.windows.streams.views
+      if v.frame.isDefined && ! v.frame.get.isIcon
+    } yield v.frame.get
+    val tiler = new ColTiler(session.desktopPane.getSize, frames.length, heightFactor)
+    frames.foreach(_.setBounds(tiler.next))
   }
 
   private def createView(provider: DataProvider, include: Option[String], location: Option[Rectangle]) {
-    streams.createView(provider, include, location)
+    streams.createView(session.desktopPane, provider, include, location)
     provider.loadContinually()
   }
 }

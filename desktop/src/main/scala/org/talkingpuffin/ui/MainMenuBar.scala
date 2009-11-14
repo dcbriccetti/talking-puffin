@@ -54,8 +54,7 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
       })
       contents += newItem("People", NewPeoplePaneEvent(session))
     }
-    contents += new MenuItem(Action("Tile full height") {eventDistributor.publish(TileViewsEvent(session, 1D))})
-    contents += new MenuItem(Action("Tile half height") {eventDistributor.publish(TileViewsEvent(session, .5D))})
+    contents += new MenuItem(Action("Tile") {eventDistributor.publish(TileViewsEvent(session, 1D))})
   }
   
   contents += new Menu("Lists") {

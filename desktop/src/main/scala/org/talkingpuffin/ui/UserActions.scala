@@ -67,7 +67,7 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     val tiler = new Tiler(selectedScreenNames.length)
     selectedScreenNames.foreach(screenName => {
       val favorites = new FavoritesProvider(session.twitterSession, screenName, None, session.progress)
-      session.windows.streams.createView(favorites, None, Some(tiler.next))
+      session.windows.streams.createView(session.desktopPane, favorites, None, Some(tiler.next))
       favorites.loadAndPublishData(TwitterArgs(), false)
     })
   }

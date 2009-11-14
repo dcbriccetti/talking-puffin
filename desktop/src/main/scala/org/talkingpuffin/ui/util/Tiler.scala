@@ -1,7 +1,7 @@
 package org.talkingpuffin.ui.util
 
 import java.util.concurrent.atomic.AtomicInteger
-import java.awt.{Rectangle, Toolkit}
+import java.awt.{Dimension, Rectangle, Toolkit}
 
 /**
  * A very simple way to position windows in a grid.
@@ -21,13 +21,13 @@ class Tiler(numTiles: Int) {
   } 
 }
 
-class ColTiler(numCols: Int, heightFactor: Double) extends Tiler(numCols) {
-  override val tileWidth = screenSize.width / numCols
+class ColTiler(size: Dimension, numCols: Int, heightFactor: Double) extends Tiler(numCols) {
+  override val tileWidth = size.width / numCols
 
   override def next: Rectangle = {
-    val colWidth = screenSize.width / numCols
+    val colWidth = size.width / numCols
     new Rectangle(nextTileIndex.getAndIncrement * colWidth, 0, colWidth, 
-      (heightFactor * screenSize.height).toInt)
+      (heightFactor * size.height).toInt)
   }  
 }
 
