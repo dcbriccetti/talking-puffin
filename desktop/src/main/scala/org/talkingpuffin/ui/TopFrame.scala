@@ -146,10 +146,10 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
 
   private def tileViews(heightFactor: Double) {
-    val frames = for {
+    val frames = (for {
       v <- session.windows.streams.views
       if v.frame.isDefined && ! v.frame.get.isIcon
-    } yield v.frame.get
+    } yield v.frame.get) sort(_.getLocation().x < _.getLocation().x)
     val tiler = new ColTiler(session.desktopPane.getSize, frames.length, heightFactor)
     frames.foreach(_.setBounds(tiler.next))
   }
