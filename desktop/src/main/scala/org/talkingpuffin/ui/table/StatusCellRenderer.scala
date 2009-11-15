@@ -5,6 +5,7 @@ import java.util.{Date, Comparator}
 import javax.swing.text.JTextComponent
 import org.talkingpuffin.ui.{HtmlFormatter}
 import org.talkingpuffin.util.ShortUrl
+import org.talkingpuffin.time.TimeUtil
 
 /**
  * Status cell renderer.
@@ -25,8 +26,8 @@ class StatusCellRenderer extends HtmlCellRenderer {
       }
       case None => ""
     }) + ShortUrl.substituteShortenedUrlWith(cell.status, "⁕") + (cell.age match {
-      case Some(age) => "<font size='-2'> " + AgeCellRenderer.formatAge(age) + 
-          (if (AgeCellRenderer.showAsAge_?) " ago" else "") + "</font>"
+      case Some(age) => "<font size='-2'> " + TimeUtil.formatAge(age) +
+          (if (TimeUtil.showAsAge_?) " ago" else "") + "</font>"
       case None => ""
     }) + "</font>"
 }
