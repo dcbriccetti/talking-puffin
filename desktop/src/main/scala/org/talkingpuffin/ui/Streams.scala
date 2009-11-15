@@ -37,12 +37,12 @@ class Streams(val service: String, val prefs: Preferences,
     val sto = new StatusTableOptions(true, true, true)
     val filterSet = new FilterSet(tagUsers)
     val model = dataProvider match {
-      case p: MentionsProvider => new StatusTableModel(sto, p, relationships, screenNameToUserNameMap,
-        filterSet, service, user, tagUsers) with Mentions
-      case p: DmsSentProvider => new StatusTableModel(sto, p, relationships, screenNameToUserNameMap,
-        filterSet, service, user, tagUsers) with DmsSent
-      case p: BaseProvider => new StatusTableModel(sto, p, relationships, screenNameToUserNameMap,
-        filterSet, service, user, tagUsers)
+      case p: MentionsProvider => new StatusTableModel(session, sto, p, relationships, screenNameToUserNameMap,
+        filterSet, service, tagUsers) with Mentions
+      case p: DmsSentProvider => new StatusTableModel(session, sto, p, relationships, screenNameToUserNameMap,
+        filterSet, service, tagUsers) with DmsSent
+      case p: BaseProvider => new StatusTableModel(session, sto, p, relationships, screenNameToUserNameMap,
+        filterSet, service, tagUsers)
     }
     val title = dataProvider.titleCreator.create
     if (include.isDefined) {

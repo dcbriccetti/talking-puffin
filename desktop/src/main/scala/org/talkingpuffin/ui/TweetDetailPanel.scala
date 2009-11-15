@@ -2,11 +2,11 @@ package org.talkingpuffin.ui
 
 import javax.swing.event.{ListSelectionListener, ListSelectionEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
-import java.awt.{Dimension, Insets, Font}
 import java.text.NumberFormat
 import javax.swing.{JScrollPane, BorderFactory, JTable}
 import scala.swing.{Label, GridBagPanel, TextArea}
 import scala.swing.GridBagPanel._
+import scala.swing.GridBagPanel.Anchor._
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
@@ -14,6 +14,7 @@ import org.talkingpuffin.Session
 import org.talkingpuffin.ui.filter.FiltersDialog
 import util.{CenteredPicture, TextChangingAnimator}
 import org.talkingpuffin.util._
+import java.awt.{Color, Dimension, Insets, Font}
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE))
 
@@ -24,7 +25,7 @@ class TweetDetailPanel(session: Session,
     filtersDialog: Option[FiltersDialog]) extends GridBagPanel with Loggable {
   
   preferredSize = new Dimension(600, 360)
-  border = BorderFactory.createEmptyBorder(4, 4, 4, 4)
+  border = BorderFactory.createEmptyBorder(8, 8, 8, 8)
   private val animator = new TextChangingAnimator
 
   private var picLabel: Label = new Label {
@@ -37,32 +38,27 @@ class TweetDetailPanel(session: Session,
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
           
-  private class CustomConstraints extends Constraints {
-    gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
-  }
-  
   val largeTweetScrollPane = new JScrollPane {
-    val dim = new Dimension(600, 120)
-    setMinimumSize(dim)
-    setPreferredSize(dim)
+    val dim = new Dimension(600, 140); setMinimumSize(dim); setPreferredSize(dim)
     setViewportView(largeTweet)
     setBorder(null)
+    setBackground(Color.WHITE)
     setVisible(false)
   }
   peer.add(largeTweetScrollPane, new Constraints {
     insets = new Insets(5,1,5,1)
-    grid = (0,0); gridwidth = 2; fill = GridBagPanel.Fill.Horizontal; weightx = 1; 
+    grid = (0,0); gridwidth = 2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1 
   }.peer)
 
   picLabel.peer.addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = if (showingUrl != null) bigPic.showBigPicture(showingUrl, peer)
   })
   val picture = new CenteredPicture(picLabel) {visible = false}
-  add(picture, new CustomConstraints { grid = (0,1); gridheight = 2; insets = new Insets(3, 3, 3, 3)})
+  add(picture, new Constraints { anchor = SouthWest; grid = (0,1)})
 
   class UserDescription extends TextArea {
-    font = new Font("SansSerif", Font.PLAIN, 14)
-    background = TweetDetailPanel.this.background
+    font = new Font("Georgia", Font.PLAIN, 16)
+    background = Color.WHITE
     lineWrap = true
     wordWrap = true
     editable = false
@@ -74,13 +70,13 @@ class TweetDetailPanel(session: Session,
   private def addUserDescription {
     userDescription = new UserDescription
     userDescScrollPane = new JScrollPane {
-      val dim = new Dimension(400, Thumbnail.MEDIUM_SIZE)
-      setMinimumSize(dim)
-      setPreferredSize(dim)
+      val dim = new Dimension(400, Thumbnail.MEDIUM_SIZE); setMinimumSize(dim); setPreferredSize(dim)
       setViewportView(userDescription.peer)
+      setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4))
       setVisible(false)
     }
-    peer.add(userDescScrollPane, new CustomConstraints {
+    peer.add(userDescScrollPane, new Constraints {
+      anchor = SouthWest; insets = new Insets(0, 8, 0, 0); 
       grid = (1,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; 
     }.peer)
   }

@@ -10,16 +10,18 @@ import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 import org.talkingpuffin.twitter.{TwitterUser, TwitterMessage, TwitterStatus}
+import org.talkingpuffin.Session
 
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: BaseProvider,
+class StatusTableModel(session: Session, val options: StatusTableOptions, val tweetsProvider: BaseProvider,
     val relationships: Relationships,
     screenNameToUserNameMap: Map[String, String], filterSet: FilterSet, service: String, 
-    username: String, val tagUsers: TagUsers) 
+    val tagUsers: TagUsers) 
     extends UserAndStatusProvider with TaggingSupport with Publisher with Reactor {
   
+  private val username = session.twitterSession.user
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
 
   val unessentialCols = List("When", "Image", "From", "To") // Can be quickly hidden
@@ -49,7 +51,7 @@ class StatusTableModel(val options: StatusTableOptions, val tweetsProvider: Base
       log.info("Tweets Arrived: " + listAny.length)
       if (e.clear) clear(true)
       val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
-        e.data.asInstanceOf[List[TwitterStatus]]
+        session.duplicatesFilter.filter(e.data.asInstanceOf[List[TwitterStatus]])
       else
         adaptDmsToTweets(e.data.asInstanceOf[List[TwitterMessage]])
       processStatuses(newTweets)
