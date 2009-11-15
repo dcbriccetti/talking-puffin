@@ -24,7 +24,7 @@ object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.
 class TweetDetailPanel(session: Session,  
     filtersDialog: Option[FiltersDialog]) extends GridBagPanel with Loggable {
   
-  preferredSize = new Dimension(600, 360)
+  preferredSize = new Dimension(600, 380)
   border = BorderFactory.createEmptyBorder(8, 8, 8, 8)
   private val animator = new TextChangingAnimator
 
