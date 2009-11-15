@@ -57,7 +57,6 @@ class Streams(val service: String, val prefs: Preferences,
     } else {
       frame.setBounds(0, 0, 300, 500)
     }
-    frame.moveToFront
     val view = new View(model, pane, Some(frame))
     views ::= view
     frame.addInternalFrameListener(new InternalFrameAdapter {

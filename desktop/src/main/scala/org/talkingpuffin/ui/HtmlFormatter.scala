@@ -15,7 +15,7 @@ object HtmlFormatter extends Loggable {
               
     val r = LinkExtractor.createLinks(text)
 
-    htmlAround(arrowLinkToParent + fontAround(r, "135%") + fontAround(" from " + source, "80%"))
+    htmlAround(arrowLinkToParent + fontAround(r, "190%") + fontAround(" from " + source, "80%"))
   }
   
   def fontAround(s: String, size: String) = 

@@ -1,17 +1,18 @@
 package org.talkingpuffin.ui.util
 
 import swing.{Label, BorderPanel}
-import java.awt.Dimension
 import org.talkingpuffin.ui.Thumbnail
+import java.awt.{Color, Dimension}
 
 /**
  * Centers pictures of different shapes.
  */
 class CenteredPicture(picLabel: Label) extends BorderPanel {
-  val s = new Dimension(Thumbnail.MEDIUM_SIZE + 6, Thumbnail.MEDIUM_SIZE + 6)
+  val s = new Dimension(Thumbnail.MEDIUM_SIZE, Thumbnail.MEDIUM_SIZE)
   minimumSize = s
   maximumSize = s
   preferredSize = s
+  background = Color.WHITE
   add(picLabel, BorderPanel.Position.Center)
 }
 
