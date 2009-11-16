@@ -6,9 +6,9 @@ import swing.event.Event
 import swing.Publisher
 import org.apache.log4j.Logger
 import util.TitleCreator
-import org.talkingpuffin.twitter.{TwitterArgs, AuthenticatedSession}
 import org.joda.time.DateTime
 import javax.swing.{Timer, SwingWorker}
+import org.talkingpuffin.twitter.{Constants, TwitterArgs, AuthenticatedSession}
 
 abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
@@ -66,7 +66,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
       timer.stop
   }
   
-  def loadLastBlockOfTweets() = loadAndPublishData(TwitterArgs.maxResults(200), true)
+  def loadLastBlockOfTweets() = loadAndPublishData(TwitterArgs.maxResults(Constants.MaxItemsPerRequest), true)
 
   type TwitterDataWithId = {def id: Long} 
 
@@ -107,7 +107,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
     
   }
 
-  private def loadNewDataInternal = loadAndPublishData(addSince(TwitterArgs.maxResults(200)), false)
+  private def loadNewDataInternal = loadAndPublishData(addSince(TwitterArgs.maxResults(Constants.MaxItemsPerRequest)), false)
 
 }
 

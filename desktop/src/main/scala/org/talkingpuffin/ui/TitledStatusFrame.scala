@@ -1,17 +1,16 @@
 package org.talkingpuffin.ui
 
-import swing.Frame
-import org.talkingpuffin.twitter.AuthenticatedSession
 import org.talkingpuffin.filter.TagUsers
+import javax.swing.JInternalFrame
+import swing.Reactor
 
 /**
  * A frame for status panes, including a custom title and menu.
  */
-class TitledStatusFrame(baseTitle: String, twitterSession: AuthenticatedSession, 
+class TitledStatusFrame(val pane: StatusPane,  
                         providers: DataProviders, tagUsers: TagUsers,
-                        val model: StatusTableModel, val pane: StatusPane) extends Frame {
-  title = baseTitle
-  menuBar = new MainMenuBar(twitterSession, providers, tagUsers)
+                        val model: StatusTableModel) extends JInternalFrame(pane.longTitle,
+                        true, true, true, true) with Reactor {
   listenTo(model)
   reactions += {
     case TableContentsChanged(model, filtered, total) =>
@@ -22,13 +21,13 @@ class TitledStatusFrame(baseTitle: String, twitterSession: AuthenticatedSession,
           total 
         else 
           filtered + "/" + total) + ")"
-      title = withSuffix(titleSuffix)
+      setTitle(withSuffix(titleSuffix))
   }
 
-  contents = pane
-  visible = true
+  setContentPane(pane.peer)
+  setVisible(true)
 
   private def withSuffix(titleSuffix: String) = 
-    if (titleSuffix.length == 0) baseTitle else baseTitle + " " + titleSuffix
+    if (titleSuffix.length == 0) pane.longTitle else pane.longTitle + " " + titleSuffix
 }
 

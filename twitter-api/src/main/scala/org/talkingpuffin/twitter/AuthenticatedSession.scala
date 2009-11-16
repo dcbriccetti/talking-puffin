@@ -23,7 +23,7 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   */
   def getFriendsTimeline(id: String): List[TwitterStatus] = getFriendsTimeline(id,TwitterArgs())
 
-  def getFriendsTimeline(id: String, args:TwitterArgs): List[TwitterStatus] = {
+  def getFriendsTimeline(id: String, args: TwitterArgs): List[TwitterStatus] = {
     parse("/statuses/friends_timeline/" + urlEncode(id) + ".xml" + args, 
         TwitterStatus.apply, "status").list
   }
@@ -148,13 +148,14 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   def getLists(screenName: String): List[TwitterList] = extractLists(http.get(url(screenName, "lists.xml")))
   
   def getListMemberships(screenName: String)(cursor: Long): XmlResult[TwitterList] = 
-    parse("/" + screenName + "/lists/memberships.xml?count=200&cursor=" + cursor, 
+    parse("/" + screenName + "/lists/memberships.xml?count=" + Constants.MaxItemsPerRequest + "&cursor=" + cursor, 
       TwitterList.apply, "lists", "list")
       
   def getListNamed(listName: String): Option[TwitterList] = getLists(user) find(_.name == listName)
   
   def getListMembers(list: TwitterList)(cursor: Long): XmlResult[TwitterUser] = {
-    parse("/" + list.owner.screenName + "/" + list.slug + "/members.xml?count=200&cursor=" + cursor, 
+    parse("/" + list.owner.screenName + "/" + list.slug + "/members.xml?count=" + 
+      Constants.MaxItemsPerRequest + "&cursor=" + cursor, 
       TwitterUser.apply, "users", "user")
   }
   
@@ -167,6 +168,16 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
       case None => (createList(listName), List[TwitterUser]())
     }
   }
+  
+  def getListStatusesFor(user: String, listId: String)(args: TwitterArgs): List[TwitterStatus] = 
+    getListStatuses(user, listId, args)
+  
+  def getListStatuses(user: String, listId: String): List[TwitterStatus] = 
+    getListStatuses(user, listId, TwitterArgs.maxResults(Constants.MaxItemsPerRequest))
+  
+  def getListStatuses(user: String, listId: String, args: TwitterArgs): List[TwitterStatus] = {
+    parse("/" + user + "/lists/" + listId + "/statuses.xml" + args, TwitterStatus.apply, "status").list
+  } 
 
   def addToList(list: TwitterList)(memberId: Long): Node = http.post(listMembersUrl(list, memberId))
 

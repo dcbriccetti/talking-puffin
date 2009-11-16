@@ -12,7 +12,7 @@ import org.talkingpuffin.Session
  * Displays friend statuses
  */
 class StatusPane(val session: Session, val longTitle: String, tableModel: StatusTableModel, 
-    filterSet: FilterSet, tagUsers: TagUsers, viewCreator: ViewCreator) 
+    filterSet: FilterSet, tagUsers: TagUsers) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
   private var lastSelectedRows: List[TwitterStatus] = Nil
@@ -24,7 +24,7 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   
   val statusToolBar = new StatusToolBar(session, tableModel.tweetsProvider, 
     filtersDialog, this, showWordCloud, clearTweets, showMaxColumns)
-  peer.add(statusToolBar, new Constraints{grid=(0,0); gridwidth=3}.peer)
+  peer.add(statusToolBar, new Constraints{grid=(0,0); gridwidth=3; anchor=GridBagPanel.Anchor.West}.peer)
   
   add(new ScrollPane {
     table = newTable
@@ -35,18 +35,11 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   
   private val cursorSetter = new AfterFilteringCursorSetter(table)
   
-  private val tweetDetailPanel = new TweetDetailPanel(session, table, Some(filtersDialog), Some(viewCreator))
-  add(tweetDetailPanel, new Constraints{
-    grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
-  })
-  
-  statusToolBar.tweetDetailPanel = tweetDetailPanel
-  
-  tweetDetailPanel.connectToTable(table)
+  session.tweetDetailPanel.connectToTable(table)
 
   def saveState = table.saveState
   
-  def newTable = new StatusTable(session, tableModel, tweetDetailPanel.showBigPicture)
+  def newTable = new StatusTable(session, tableModel, session.tweetDetailPanel.showBigPicture)
   
   def tableChanging = {
     lastRowSelected = false
@@ -89,7 +82,7 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   private def clearTweets(all: Boolean) {
     clearSelection
     tableModel.clear(all)
-    tweetDetailPanel.clearStatusDetails
+    session.tweetDetailPanel.clearStatusDetails
   }
 
   private def showWordCloud {

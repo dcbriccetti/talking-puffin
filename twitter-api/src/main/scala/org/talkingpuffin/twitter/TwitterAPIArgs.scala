@@ -20,7 +20,7 @@ class TwitterArgs(val sinceId:Option[Long], val maxId:Option[Long], val count:Op
   }
 
   def maxResults(count:Int):TwitterArgs = {
-    if(count > 0 && count <= 200){
+    if(count > 0 && count <= Constants.MaxItemsPerRequest){
       new TwitterArgs(sinceId,maxId,Some(count),page,cursor,screenName)
     } else {
       this
@@ -42,6 +42,7 @@ class TwitterArgs(val sinceId:Option[Long], val maxId:Option[Long], val count:Op
   
   override def toString():String = {
     Map("since_id" -> sinceId, "max_id" -> maxId, "count" -> count, 
+        "per_page" -> count, // list status method uses this instead of count 
         "page" -> page, "cursor" -> cursor, "screen_name" -> screenName).
         filter(_._2.isDefined).map((pv) => pv._1 + "=" + pv._2.get).mkString("?","&","")
   }

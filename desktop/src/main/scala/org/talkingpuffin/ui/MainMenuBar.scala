@@ -1,21 +1,22 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.{MenuItem, MenuBar, Menu, CheckMenuItem, Action}
 import javax.swing.KeyStroke
 import java.awt.event.KeyEvent
 import java.awt.Toolkit
+import scala.swing.{MenuItem, MenuBar, Menu, CheckMenuItem, Action}
 import swing.event.{Event, ButtonClicked}
+import java.awt.event.InputEvent.ALT_DOWN_MASK
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
-import org.talkingpuffin.Main
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.util.{TwitterListUtils, Loggable}
-import org.talkingpuffin.twitter.AuthenticatedSession
+import org.talkingpuffin.{Session, Main}
+import util.{eventDistributor, AppEvent}
 
 /**
  * Main menu bar
  */
-class MainMenuBar(tsess: AuthenticatedSession, dataProviders: DataProviders, 
-                  tagUsers: TagUsers) extends MenuBar with Loggable {
+class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Loggable {
+  val tsess = session.twitterSession
   val prefs = GlobalPrefs.prefs
 
   val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
@@ -31,17 +32,29 @@ class MainMenuBar(tsess: AuthenticatedSession, dataProviders: DataProviders,
     })
   }
   
+  contents += new Menu("Send") {
+    contents += new MenuItem(new Action("Status...") {
+      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_S, ALT_DOWN_MASK))
+      def apply = eventDistributor.publish(SendStatusEvent(session)) 
+    })
+    contents += new MenuItem(new Action("Direct message...") {
+      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_D, ALT_DOWN_MASK))
+      def apply = eventDistributor.publish(SendDirectMessageEvent(session))
+    })
+  }
+  
   contents += new Menu("Views") {
     contents += new Menu("New") {
       def newItem(name: String, event: Event) = new MenuItem(new Action(name) {
         toolTip = "Creates a new " + name + " view"
-        def apply = MainMenuBar.this.publish(event)
+        def apply = eventDistributor.publish(event)
       })
-      dataProviders.providers.foreach(provider => {
-        contents += newItem(provider.providerName, NewViewEvent(provider))
+      session.dataProviders.providers.foreach(provider => {
+        contents += newItem(provider.providerName, NewViewEvent(session, provider, None))
       })
-      contents += newItem("People", NewPeoplePaneEvent())
+      contents += newItem("People", NewPeoplePaneEvent(session))
     }
+    contents += new MenuItem(Action("Tile") {eventDistributor.publish(TileViewsEvent(session))})
   }
   
   contents += new Menu("Lists") {
@@ -57,22 +70,20 @@ class MainMenuBar(tsess: AuthenticatedSession, dataProviders: DataProviders,
     }
     contents += new MenuItem(new Action("Display your lists") {
       def apply = {
-        TopFrames.findCurrentWindow match {
-          case Some(topFrame) =>
-            TwitterListsDisplayer.viewLists(topFrame.session, 
-              List(topFrame.session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
-          case _ =>
-        }
+        TwitterListsDisplayer.viewLists(session, 
+          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
       }
     })
     contents += new MenuItem(new Action("Display lists you are in") {
       def apply = {
-        TopFrames.findCurrentWindow match {
-          case Some(topFrame) =>
-            TwitterListsDisplayer.viewListsContaining(topFrame.session, 
-              List(topFrame.session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
-          case _ =>
-        }
+        TwitterListsDisplayer.viewListsContaining(session, 
+          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
+      }
+    })
+    contents += new MenuItem(new Action("Display statuses from your lists") {
+      def apply = {
+        TwitterListsDisplayer.viewListsStatuses(session, 
+          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
       }
     })
   }
@@ -108,5 +119,10 @@ class MainMenuBar(tsess: AuthenticatedSession, dataProviders: DataProviders,
   
 }
 
-case class NewViewEvent(val provider: DataProvider) extends Event
-case class NewPeoplePaneEvent() extends Event
+case class NewViewEvent(override val session: Session, val provider: DataProvider, include: Option[String]) 
+    extends AppEvent(session)
+case class NewFollowingViewEvent(override val session: Session, include: Option[String]) extends AppEvent(session)
+case class NewPeoplePaneEvent(override val session: Session) extends AppEvent(session)
+case class TileViewsEvent(override val session: Session) extends AppEvent(session)
+case class SendStatusEvent(override val session: Session) extends AppEvent(session)
+case class SendDirectMessageEvent(override val session: Session) extends AppEvent(session)

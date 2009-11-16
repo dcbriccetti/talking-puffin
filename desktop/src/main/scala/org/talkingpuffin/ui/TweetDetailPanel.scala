@@ -1,40 +1,31 @@
 package org.talkingpuffin.ui
 
-import scala.swing.{Label, GridBagPanel, TextArea, BorderPanel}
-import scala.swing.GridBagPanel._
 import javax.swing.event.{ListSelectionListener, ListSelectionEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
-import java.awt.image.BufferedImage
-import java.awt.{Dimension, Insets, Font}
-import javax.swing.{JScrollPane, ImageIcon, JComponent, BorderFactory, JTable}
+import java.text.NumberFormat
+import javax.swing.{JScrollPane, BorderFactory, JTable}
+import scala.swing.{Label, GridBagPanel, TextArea}
+import scala.swing.GridBagPanel._
+import scala.swing.GridBagPanel.Anchor._
 import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
 import org.talkingpuffin.Session
-import util.{TextChangingAnimator}
-import org.talkingpuffin.util.{ResourceReady, FetchRequest, ShortUrl, Loggable}
 import org.talkingpuffin.ui.filter.FiltersDialog
-import java.text.NumberFormat
-
-object Thumbnail {
-  val THUMBNAIL_SIZE = 48
-  val transparentThumbnail = new ImageIcon(new BufferedImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE, 
-    BufferedImage.TYPE_INT_ARGB))
-  val MEDIUM_SIZE = 200
-  val transparentMedium = new ImageIcon(new BufferedImage(MEDIUM_SIZE, MEDIUM_SIZE, 
-    BufferedImage.TYPE_INT_ARGB))
-}
+import util.{CenteredPicture, TextChangingAnimator}
+import org.talkingpuffin.util._
+import java.awt.{Color, Dimension, Insets, Font}
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE))
 
 /**
  * Details of the currently-selected tweet.
  */
-class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent, 
-    filtersDialog: Option[FiltersDialog], viewCreator: Option[ViewCreator]) 
-    extends GridBagPanel with Loggable {
+class TweetDetailPanel(session: Session,  
+    filtersDialog: Option[FiltersDialog]) extends GridBagPanel with Loggable {
   
-  border = BorderFactory.createEmptyBorder(4, 4, 4, 4)
+  preferredSize = new Dimension(600, 380)
+  border = BorderFactory.createEmptyBorder(8, 8, 8, 8)
   private val animator = new TextChangingAnimator
 
   private var picLabel: Label = new Label {
@@ -43,63 +34,50 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
 
   private val bigPic = new BigPictureDisplayer(medThumbPicFetcher)
   private var userDescription: TextArea = _
-  private var largeTweet = new LargeTweet(filtersDialog, viewCreator, focusAfterHyperlinkClick, background)
+  private var largeTweet = new LargeTweet(session, filtersDialog, background)
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
           
-  private class CustomConstraints extends Constraints {
-    gridy = 0; anchor = Anchor.SouthWest; insets = new Insets(0, 4, 0, 0)
-  }
-  
   val largeTweetScrollPane = new JScrollPane {
-    val dim = new Dimension(400, 110)
-    setMinimumSize(dim)
-    setPreferredSize(dim)
+    val dim = new Dimension(600, 140); setMinimumSize(dim); setPreferredSize(dim)
     setViewportView(largeTweet)
-    setBorder(BorderFactory.createEtchedBorder)
+    setBorder(null)
+    setBackground(Color.WHITE)
     setVisible(false)
   }
   peer.add(largeTweetScrollPane, new Constraints {
     insets = new Insets(5,1,5,1)
-    grid = (1,0); gridwidth=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
+    grid = (0,0); gridwidth = 2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1 
   }.peer)
 
   picLabel.peer.addMouseListener(new MouseAdapter {
     override def mouseClicked(e: MouseEvent) = if (showingUrl != null) bigPic.showBigPicture(showingUrl, peer)
   })
-  add(new BorderPanel {
-    val s = new Dimension(Thumbnail.MEDIUM_SIZE + 6, Thumbnail.MEDIUM_SIZE + 6)
-    minimumSize = s
-    maximumSize = s
-    preferredSize = s
-    add(picLabel, BorderPanel.Position.Center)
-  }, new CustomConstraints { grid = (0,0); gridheight = 3; insets = new Insets(3, 3, 3, 3)})
+  val picture = new CenteredPicture(picLabel) {visible = false}
+  add(picture, new Constraints { anchor = SouthWest; grid = (0,1)})
 
   class UserDescription extends TextArea {
-    font = new Font("SansSerif", Font.PLAIN, 14)
-    background = TweetDetailPanel.this.background
+    font = new Font("Georgia", Font.PLAIN, 16)
+    background = Color.WHITE
     lineWrap = true
     wordWrap = true
     editable = false
   }
-  addFreshUserDescription
+  addUserDescription
   
   var userDescScrollPane: JScrollPane = _
   
-  /** Recreate the entire control as a defense against Hebrew characters which break the control */
-  def addFreshUserDescription {
-    if (userDescScrollPane != null) TweetDetailPanel.this.peer.remove(userDescScrollPane)
+  private def addUserDescription {
     userDescription = new UserDescription
     userDescScrollPane = new JScrollPane {
-      val dim = new Dimension(400, 90)
-      setMinimumSize(dim)
-      setPreferredSize(dim)
+      val dim = new Dimension(400, Thumbnail.MEDIUM_SIZE); setMinimumSize(dim); setPreferredSize(dim)
       setViewportView(userDescription.peer)
-      setBorder(null)
+      setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4))
       setVisible(false)
     }
-    peer.add(userDescScrollPane, new CustomConstraints {
-      grid = (1,1); gridheight=2; fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1;
+    peer.add(userDescScrollPane, new Constraints {
+      anchor = SouthWest; insets = new Insets(0, 8, 0, 0); 
+      grid = (1,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; 
     }.peer)
   }
   
@@ -141,6 +119,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
     setText(user, status)
     largeTweetScrollPane.setVisible(true)
     userDescScrollPane.setVisible(true)
+    picture.visible = true
     status match {
       case None => largeTweet.setText(null) 
       case Some(st) =>
@@ -174,6 +153,7 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
     largeTweet.setText(null)
     largeTweetScrollPane.setVisible(false)
     userDescScrollPane.setVisible(false)
+    picture.visible = false
   }
   
   def showBigPicture = bigPic.showBigPicture(showingUrl, peer)
@@ -190,7 +170,6 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
           (status.location match {
             case Some(location) => {
               val key = GeoCoder.formatLatLongKey(location)
-              debug("New geo loc found: " + key)
               Some(key)
             }
             case None => GeoCoder.extractLatLong(rawLocationOfShowingItem)
@@ -201,8 +180,9 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
                   setText(user, location)
                   return
                 }
-                case None => GeoCoder.requestItem(new FetchRequest[String,String](latLong, user,
-                  processFinishedGeocodes))
+                case None =>
+                  GeoCoder.requestItem(new FetchRequest[String,String](latLong, user,
+                    processFinishedGeocodes))
               }
             case None =>
           }
@@ -212,27 +192,27 @@ class TweetDetailPanel(session: Session, focusAfterHyperlinkClick: JComponent,
   }
   
   private def setText(user: TwitterUser, location: String) {
-    addFreshUserDescription
-
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
 
     userDescription.text = UserProperties.overriddenUserName(session.userPrefs, user) + 
-        " (" + user.screenName + ") • " +
-        location + " • " + user.description  + " • " +
+        " (" + user.screenName + ")\n" +
+        location + "\n\n" + 
+        user.description  + "\n\n" +
         fmt(user.followersCount) + " followers, following " +
         fmt(user.friendsCount) +
         (session.tagUsers.tagsForUser(user.id) match { 
           case Nil => "" 
-          case tags => " • Tags: " + tags.mkString(", ")
+          case tags => "\n\nTags: " + tags.mkString(", ")
         })
   }
 
-  private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = 
+  private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
     if (resourceReady.userData == showingUser) {
       animator.stop
       animator.run(showingUser.location, resourceReady.resource, 
           (text: String) => setText(showingUser, text))
     }
+  }
   
   private def processFinishedPicture(imageReady: PictureFetcher.ImageReady) = {
     if (imageReady.key.equals(showingUrl)) {

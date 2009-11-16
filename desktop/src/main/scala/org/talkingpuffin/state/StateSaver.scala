@@ -7,9 +7,10 @@ import org.talkingpuffin.ui.{DataProviders, Streams}
 object StateSaver {
 
   def save(streams: Streams, prefs: Preferences, tagUsers: TagUsers) {
-    saveProviderHighIds(streams.providers, prefs)
+    saveProviderHighIds(streams.session.dataProviders, prefs)
     tagUsers.save
-    streams.views.last.pane.saveState // TODO instead save the order of the last status pane changed
+    if (streams.views != Nil)
+      streams.views.last.pane.saveState // TODO instead save the order of the last status pane changed
   }
   
   private def saveProviderHighIds(provs: DataProviders, prefs: Preferences) {
