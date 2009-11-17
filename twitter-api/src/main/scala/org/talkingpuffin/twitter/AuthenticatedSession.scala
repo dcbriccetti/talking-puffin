@@ -129,6 +129,10 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   def getFollowersIds(args: TwitterArgs): XmlResult[TwitterUserId] = 
       parse("/followers/ids.xml" + args, TwitterUserId.apply, "ids", "id")
   
+  def findPeople(search: String): List[TwitterUser] = {
+    parse("/users/search.xml?q=" + search, TwitterUser.apply, "user").list
+  }
+  
   def getDirectMessages(): List[TwitterMessage] = getDirectMessages(TwitterArgs())
 
   def getDirectMessages(args: TwitterArgs): List[TwitterMessage] = {
