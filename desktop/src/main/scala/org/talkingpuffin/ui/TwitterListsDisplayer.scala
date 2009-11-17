@@ -48,7 +48,7 @@ object TwitterListsDisplayer {
       tsess.loadAllWithCursor(tsess.getListMembers(list))}, {
       members: List[TwitterUser] => {
         session.windows.peoplePaneCreator.createPeoplePane(list.longName, 
-          None, Some(members), None, true, tilerNext(tiler))
+          None, Some(members), None, tilerNext(tiler))
       }
     })
   }

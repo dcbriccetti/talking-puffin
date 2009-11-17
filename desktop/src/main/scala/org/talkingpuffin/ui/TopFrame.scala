@@ -99,7 +99,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   type Users = List[TwitterUser]
   
   def createPeoplePane(longTitle: String, otherRels: Option[Relationships], users: Option[Users], 
-        updatePeople: Option[() => Unit], selectPane: Boolean, location: Option[Rectangle]): PeoplePane = {
+        updatePeople: Option[() => Unit], location: Option[Rectangle]): PeoplePane = {
     def getRels = if (otherRels.isDefined) otherRels.get else rels
     val model = 
       if (users.isDefined || otherRels.isDefined) 
@@ -131,7 +131,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
           
   private def createPeoplePane: Unit = {
     peoplePane = createPeoplePane("People You Follow and People Who Follow You", None, None, 
-        Some(updatePeople _), false, None)
+        Some(updatePeople _), None)
   }
   
   private def setUpUserStatusReactor {

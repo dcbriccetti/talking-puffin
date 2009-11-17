@@ -56,10 +56,13 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
   var followersButton = new FriendFollowButton("")
   var overlapLabel = new JLabel("")
   val searchText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
+  val findPeopleText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
   reactions += {
     case EditDone(`searchText`) => buildModelData
+    case EditDone(`findPeopleText`) => findPeople
   }
   listenTo(searchText)
+  listenTo(findPeopleText)
 
   val toolbar = new JToolBar {
     setFloatable(false)
@@ -81,6 +84,11 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
 
     add(new JLabel("Search user name: "))
     add(searchText.peer)
+
+    addSeparator
+
+    add(new JLabel("Find people on Twitter: "))
+    add(findPeopleText.peer)
   }
   peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
   
@@ -106,6 +114,13 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
       case 0 => None
       case _ => Some(searchText.text)
     }))
+  
+  private def findPeople: Unit = {
+    val people = session.twitterSession.findPeople(findPeopleText.text)
+    debug("Found people: " + people)
+    session.windows.peoplePaneCreator.createPeoplePane(findPeopleText.text, 
+      None, Some(people), None, None)
+  }
 
   private def buildActions(mh: PopupMenuHelper, comp: java.awt.Component) = {
     mh.add(Action("View in Browser") {viewSelected}, ks(KeyEvent.VK_V,0))

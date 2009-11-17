@@ -59,7 +59,7 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
       val rels = new Relationships
       rels.getUsers(session.twitterSession, screenName, session.progress)
       session.windows.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName, 
-        Some(rels), None, None, false, Some(tiler.next))
+        Some(rels), None, None, Some(tiler.next))
     })
   }
   

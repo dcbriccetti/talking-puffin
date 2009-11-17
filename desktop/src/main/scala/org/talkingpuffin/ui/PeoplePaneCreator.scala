@@ -6,5 +6,5 @@ import java.awt.Rectangle
 trait PeoplePaneCreator {
   def createPeoplePane(longTitle: String, otherRels: Option[Relationships],
       users: Option[List[TwitterUser]],
-      updatePeople: Option[() => Unit], selectPane: Boolean, location: Option[Rectangle]): PeoplePane
+      updatePeople: Option[() => Unit], location: Option[Rectangle]): PeoplePane
 }
