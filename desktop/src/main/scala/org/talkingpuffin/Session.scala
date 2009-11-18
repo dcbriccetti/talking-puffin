@@ -11,10 +11,12 @@ import javax.swing.{JInternalFrame, JDesktopPane}
 class Session(val serviceName: String, val twitterSession: AuthenticatedSession) {
   val tweetDetailPanel = new TweetDetailPanel(this, None) // TODO Some(filtersDialog))
   val desktopPane = new JDesktopPane {
+    setDragMode(JDesktopPane.OUTLINE_DRAG_MODE)
     val screenSize = Toolkit.getDefaultToolkit.getScreenSize
     val desktopSize = new Dimension(screenSize.width * 4 / 5, screenSize.height * 4 / 5)
     setPreferredSize(desktopSize)
     add(new JInternalFrame("Status Details", true, false, false, true) {
+      setLayer(10)
       setContentPane(tweetDetailPanel.peer)
       pack
       setLocation(desktopSize.width / 2 - tweetDetailPanel.preferredSize.width / 2, 

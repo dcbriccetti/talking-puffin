@@ -10,7 +10,7 @@ import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, Authenticat
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
 import util.{ColTiler, AppEvent, eventDistributor}
-import javax.swing.{ImageIcon}
+import javax.swing.{JInternalFrame, ImageIcon}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -115,13 +115,13 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
       }
     } else getRels
     val peoplePane = new PeoplePane(session, model, customRels, updatePeople)
-    new Frame {
-      title = longTitle
-      menuBar = new MainMenuBar(session, tagUsers)
-      contents = peoplePane
-      peer.setLocationRelativeTo(null)
-      visible = true
-    }
+    session.desktopPane.add(
+      new JInternalFrame(longTitle, true, true, true, true) {
+        setLayer(3)
+        setContentPane(peoplePane.peer)
+        pack()
+        setVisible(true)
+      })
     peoplePane
   }
 
@@ -149,7 +149,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
       if v.frame.isDefined && ! v.frame.get.isIcon
     } yield v.frame.get) sort(_.getLocation().x < _.getLocation().x)
     if (frames != Nil) {
-      val tiler = new ColTiler(session.desktopPane.getSize, frames.length, 0.75)
+      val tiler = new ColTiler(session.desktopPane.getSize, frames.length)
       frames.foreach(_.setBounds(tiler.next))
     }
   }

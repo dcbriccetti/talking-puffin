@@ -24,7 +24,7 @@ class Streams(val service: String, val prefs: Preferences,
     val s1 = session.desktopPane.size
     if (s1.width > 0 && s1.height > 0) s1 else session.desktopPane.preferredSize 
   }
-  val tiler = new ColTiler(dpSize, session.dataProviders.autoStartProviders.length, 1d)
+  val tiler = new ColTiler(dpSize, session.dataProviders.autoStartProviders.length)
   session.dataProviders.autoStartProviders.foreach(provider => {
     createView(session.desktopPane, provider, None, Some(tiler.next))
     provider.loadContinually()
@@ -55,8 +55,9 @@ class Streams(val service: String, val prefs: Preferences,
     if (location.isDefined) {
       frame.setBounds(location.get)
     } else {
-      frame.setBounds(0, 0, 300, 500)
+      frame.setBounds(0, 0, 400, dpSize.height)
     }
+    frame.moveToFront
     val view = new View(model, pane, Some(frame))
     views ::= view
     frame.addInternalFrameListener(new InternalFrameAdapter {

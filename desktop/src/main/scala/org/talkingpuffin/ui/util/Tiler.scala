@@ -21,13 +21,12 @@ class Tiler(numTiles: Int) {
   } 
 }
 
-class ColTiler(size: Dimension, numCols: Int, heightFactor: Double) extends Tiler(numCols) {
+class ColTiler(size: Dimension, numCols: Int) extends Tiler(numCols) {
   override val tileWidth = size.width / numCols
 
   override def next: Rectangle = {
     val colWidth = size.width / numCols
-    new Rectangle(nextTileIndex.getAndIncrement * colWidth, 0, colWidth, 
-      (heightFactor * size.height).toInt)
+    new Rectangle(nextTileIndex.getAndIncrement * colWidth, 0, colWidth, size.height)
   }  
 }
 
