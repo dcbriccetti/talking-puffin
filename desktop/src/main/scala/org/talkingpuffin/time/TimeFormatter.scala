@@ -17,15 +17,16 @@ case class TimeFormatter(time: Long) {
     sb.append(twoDigitNum(seconds))
     sb.toString
   }
-  
+
   def longForm: String = {
     val sb = new StringBuilder
     addPart(sb, days,    "day")
     addPart(sb, hours,   "hour")
     addPart(sb, minutes, "min")
     addPart(sb, seconds, "sec")
-    
-    def addPart(sb: StringBuilder, value: Long, name: String): Unit = {
+
+
+  def addPart(sb: StringBuilder, value: Long, name: String): Unit = {
       if (value > 0) {
         if (sb.length > 0) sb.append(' ')
         sb.append(value).append(' ').append(name)
@@ -35,7 +36,8 @@ case class TimeFormatter(time: Long) {
     
     sb.toString
   }
-  
+
   private def twoDigitNum(num: java.lang.Long) = String.format("%02d", num)
   
 }
+
