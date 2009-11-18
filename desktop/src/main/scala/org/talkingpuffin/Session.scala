@@ -15,6 +15,7 @@ class Session(val serviceName: String, val twitterSession: AuthenticatedSession)
     val desktopSize = new Dimension(screenSize.width * 4 / 5, screenSize.height * 4 / 5)
     setPreferredSize(desktopSize)
     add(new JInternalFrame("Status Details", true, false, false, true) {
+      setLayer(10)
       setContentPane(tweetDetailPanel.peer)
       pack
       setLocation(desktopSize.width / 2 - tweetDetailPanel.preferredSize.width / 2, 
