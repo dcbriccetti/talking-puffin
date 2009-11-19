@@ -145,8 +145,12 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   
   def getSentMessages(page: Int): List[TwitterMessage] = getSentMessages(TwitterArgs.page(page))
 
-  def createList(listName: String): TwitterList = {
-    TwitterList(http.post(url(user, "lists.xml"), List(("name", listName))))
+  def createList(listName: String, description: String): TwitterList = {
+    TwitterList(http.post(url(user, "lists.xml"), List(("name", listName), ("description", description))))
+  }
+  
+  def changeListDescription(list: TwitterList, description: String): TwitterList = {
+    TwitterList(http.post(url(user, "lists", list.slug + ".xml"), List(("description", description))))
   }
   
   def getLists(screenName: String): List[TwitterList] = extractLists(http.get(url(screenName, "lists.xml")))
@@ -164,12 +168,12 @@ class AuthenticatedSession(val user: String, val password: String, val apiURL: S
   }
   
   /**
-   * Gets (or creates if it doesn’t exit) a list and its members.
+   * Gets a list and its members.
    */
-  def getListAndMembers(listName: String): Tuple2[TwitterList, List[TwitterUser]] = {
+  def getListAndMembers(listName: String): Option[Tuple2[TwitterList, List[TwitterUser]]] = {
     getListNamed(listName) match { 
-      case Some(list) => (list, loadAllWithCursor(getListMembers(list)))
-      case None => (createList(listName), List[TwitterUser]())
+      case Some(list) => Some((list, loadAllWithCursor(getListMembers(list))))
+      case None => None
     }
   }
   

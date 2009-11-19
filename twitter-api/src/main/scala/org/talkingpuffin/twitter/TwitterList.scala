@@ -4,6 +4,7 @@ import scala.xml.Node
 
 class TwitterList(val xml: Node) {
   val name = (xml \ "name").text
+  val description = (xml \ "description").text
   val shortName = name
   val longName = shortName + " from " + (xml \ "user" \ "name").text
   val owner = TwitterUser((xml \ "user")(0))
