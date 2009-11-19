@@ -14,32 +14,30 @@ object TwitterListsDisplayer {
 
   type LLTL = List[List[TwitterList]]
   
-  /**
-   * Presents a pop-up menu of lists belonging to users with the specified screen names. One or
-   * all lists can be selected. Each list is launched in a new PeoplePane.
-   */
-  def viewLists(session: Session, screenNames: List[String], menuPos: MenuPos): Unit = 
-    viewLists(session, screenNames, menuPos, processLists(viewList))
-  
-  /**
-   * Presents a pop-up menu of lists belonging to users with the specified screen names. One or
-   * all lists can be selected. The statuses of each list is launched in a new StatusPane.
-   */
-  def viewListsStatuses(session: Session, screenNames: List[String], menuPos: MenuPos): Unit = 
-    viewLists(session, screenNames, menuPos, processLists(viewListStatuses))
-  
-  private def viewLists(session: Session, screenNames: List[String], menuPos: MenuPos,
-          process: (Boolean, Session, MenuPos) => (LLTL) => Unit) {
-    SwingInvoke.execSwingWorker({getLists(session, screenNames)}, {process(screenNames.length > 1, session, menuPos)})
-  }
+  def viewListsTable(session: Session, screenNames: List[String]): Unit = 
+    SwingInvoke.execSwingWorker({
+      getLists(session, screenNames)
+    }, showListsInTable(session))
   
   /**
    * Presents a pop-up menu of lists containing the specified screen names. One or all lists can 
    * be selected. Each list is launched in a new PeoplePane.
    */
-  def viewListsContaining(session: Session, screenNames: List[String], menuPos: MenuPos) {
+  def viewListsContaining(session: Session, screenNames: List[String]) {
     SwingInvoke.execSwingWorker({getListsContaining(session, screenNames)}, 
-        {processLists(viewList)(true, session, menuPos)}) 
+        showListsInTable(session)) 
+  }
+  
+  def viewLists(session: Session, lists: List[TwitterList]) = {
+    lists.foreach(l => viewList(l, session, None))
+  }
+  
+  def viewListsStatuses(session: Session, lists: List[TwitterList]) = {
+    lists.foreach(l => viewListStatuses(l, session, None))
+  }
+  
+  private def showListsInTable(session: Session)(lltl: LLTL): Unit = {
+    new ListsFrame(session, lltl.flatMap(f => f))
   }
   
   private def viewList(list: TwitterList, session: Session, tiler: Option[Tiler]) = {

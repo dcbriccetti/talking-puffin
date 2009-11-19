@@ -71,20 +71,13 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
     }
     contents += new MenuItem(new Action("Display your lists") {
       def apply = {
-        TwitterListsDisplayer.viewLists(session, 
-          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
+        TwitterListsDisplayer.viewListsTable(session, List(session.twitterSession.user))
       }
     })
     contents += new MenuItem(new Action("Display lists you are in") {
       def apply = {
         TwitterListsDisplayer.viewListsContaining(session, 
-          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
-      }
-    })
-    contents += new MenuItem(new Action("Display statuses from your lists") {
-      def apply = {
-        TwitterListsDisplayer.viewListsStatuses(session, 
-          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
+          List(session.twitterSession.user))
       }
     })
   }
