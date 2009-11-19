@@ -35,7 +35,7 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   
   private val cursorSetter = new AfterFilteringCursorSetter(table)
   
-  session.tweetDetailPanel.connectToTable(table)
+  session.tweetDetailPanel.connectToTable(table, Some(filtersDialog))
 
   def saveState = table.saveState
   

@@ -34,7 +34,7 @@ class TweetDetailPanel(session: Session,
 
   private val bigPic = new BigPictureDisplayer(medThumbPicFetcher)
   private var userDescription: TextArea = _
-  private var largeTweet = new LargeTweet(session, filtersDialog, background)
+  private var largeTweet = new LargeTweet(session, background)
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
           
@@ -67,21 +67,7 @@ class TweetDetailPanel(session: Session,
   
   var userDescScrollPane: JScrollPane = _
   
-  private def addUserDescription {
-    userDescription = new UserDescription
-    userDescScrollPane = new JScrollPane {
-      val dim = new Dimension(400, Thumbnail.MEDIUM_SIZE); setMinimumSize(dim); setPreferredSize(dim)
-      setViewportView(userDescription.peer)
-      setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4))
-      setVisible(false)
-    }
-    peer.add(userDescScrollPane, new Constraints {
-      anchor = SouthWest; insets = new Insets(0, 8, 0, 0); 
-      grid = (1,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; 
-    }.peer)
-  }
-  
-  def connectToTable(table: JTable) {
+  def connectToTable(table: JTable, filtersDialog: Option[FiltersDialog]) {
     val model = table.getModel.asInstanceOf[UserAndStatusProvider]
     
     def prefetchAdjacentRows {        
@@ -101,7 +87,7 @@ class TweetDetailPanel(session: Session,
             try {
               val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
               val (user, status) = model.getUserAndStatusAt(modelRowIndex)
-              showStatusDetails(user, status)
+              showStatusDetails(user, status, filtersDialog)
               prefetchAdjacentRows        
             } catch {
               case ex: IndexOutOfBoundsException => println(ex)
@@ -114,7 +100,24 @@ class TweetDetailPanel(session: Session,
     })
   }
 
-  def showStatusDetails(user: TwitterUser, status: Option[TwitterStatus]) {
+  private def addUserDescription {
+    userDescription = new UserDescription
+    userDescScrollPane = new JScrollPane {
+      val dim = new Dimension(400, Thumbnail.MEDIUM_SIZE); setMinimumSize(dim); setPreferredSize(dim)
+      setViewportView(userDescription.peer)
+      setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4))
+      setVisible(false)
+    }
+    peer.add(userDescScrollPane, new Constraints {
+      anchor = SouthWest; insets = new Insets(0, 8, 0, 0); 
+      grid = (1,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; 
+    }.peer)
+  }
+  
+  private def getFiltersDialog: Option[FiltersDialog] = None
+  
+  private def showStatusDetails(user: TwitterUser, 
+      status: Option[TwitterStatus], filtersDialog: Option[FiltersDialog]) {
     session.statusMsg = " "
     setText(user, status)
     largeTweetScrollPane.setVisible(true)
@@ -123,6 +126,7 @@ class TweetDetailPanel(session: Session,
     status match {
       case None => largeTweet.setText(null) 
       case Some(st) =>
+        largeTweet.filtersDialog = filtersDialog
         largeTweet.setText(HtmlFormatter.createTweetHtml(st.text,
           st.inReplyToStatusId, st.source))
 

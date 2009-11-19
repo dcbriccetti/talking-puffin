@@ -1,6 +1,6 @@
 package org.talkingpuffin
 
-import filter.{DuplicatesFilter, TagUsers}
+import filter.{TagUsers}
 import java.util.prefs.Preferences
 import swing.Label
 import java.awt.{Dimension, Toolkit}
@@ -24,7 +24,6 @@ class Session(val serviceName: String, val twitterSession: AuthenticatedSession)
       setVisible(true)
     })
   }
-  val duplicatesFilter = new DuplicatesFilter
   val windows = new Windows
   val statusMsgLabel = new Label(" ")
   def statusMsg_=(text: String) = statusMsgLabel.text = text
