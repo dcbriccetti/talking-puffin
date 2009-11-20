@@ -51,7 +51,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
       log.info("Tweets Arrived: " + listAny.length)
       if (e.clear) clear(true)
       val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
-        session.duplicatesFilter.filter(e.data.asInstanceOf[List[TwitterStatus]])
+        e.data.asInstanceOf[List[TwitterStatus]]
       else
         adaptDmsToTweets(e.data.asInstanceOf[List[TwitterMessage]])
       processStatuses(newTweets)

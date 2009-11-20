@@ -54,7 +54,10 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
       })
       contents += newItem("People", NewPeoplePaneEvent(session))
     }
-    contents += new MenuItem(Action("Tile") {eventDistributor.publish(TileViewsEvent(session))})
+    def pub(numRows: Int) = eventDistributor.publish(TileViewsEvent(session, numRows))
+    contents += new MenuItem(Action("Tile, 1 row") {pub(1)})
+    contents += new MenuItem(Action("Tile, 2 rows") {pub(2)})
+    contents += new MenuItem(Action("Tile, 3 rows") {pub(3)})
   }
   
   contents += new Menu("Lists") {
@@ -62,7 +65,8 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
       tagUsers.getTags.foreach(tag => {
         contents += new MenuItem(new Action(tag) {
           def apply = {
-            SwingInvoke.execSwingWorker({TwitterListUtils.export(tsess, tag, tagUsers.usersForTag(tag))
+            SwingInvoke.execSwingWorker({TwitterListUtils.exportTagToList(tsess, tag, 
+              tagUsers.getDescription(tag).getOrElse(""), tagUsers.usersForTag(tag))
             }, (_: Unit) => {debug("Tag exported to list")})
           }
         })
@@ -70,20 +74,13 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
     }
     contents += new MenuItem(new Action("Display your lists") {
       def apply = {
-        TwitterListsDisplayer.viewLists(session, 
-          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
+        TwitterListsDisplayer.viewListsTable(session, List(session.twitterSession.user))
       }
     })
     contents += new MenuItem(new Action("Display lists you are in") {
       def apply = {
         TwitterListsDisplayer.viewListsContaining(session, 
-          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
-      }
-    })
-    contents += new MenuItem(new Action("Display statuses from your lists") {
-      def apply = {
-        TwitterListsDisplayer.viewListsStatuses(session, 
-          List(session.twitterSession.user), MenuPos(MainMenuBar.this.peer, 0, 0))
+          List(session.twitterSession.user))
       }
     })
   }
@@ -123,6 +120,6 @@ case class NewViewEvent(override val session: Session, val provider: DataProvide
     extends AppEvent(session)
 case class NewFollowingViewEvent(override val session: Session, include: Option[String]) extends AppEvent(session)
 case class NewPeoplePaneEvent(override val session: Session) extends AppEvent(session)
-case class TileViewsEvent(override val session: Session) extends AppEvent(session)
+case class TileViewsEvent(override val session: Session, numRows: Int) extends AppEvent(session)
 case class SendStatusEvent(override val session: Session) extends AppEvent(session)
 case class SendDirectMessageEvent(override val session: Session) extends AppEvent(session)

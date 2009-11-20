@@ -4,17 +4,17 @@ import scala.swing.{MenuItem, Action}
 import java.awt.{Desktop, Color}
 import javax.swing.event.{HyperlinkListener, HyperlinkEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
-import javax.swing.{JComponent, JTextPane, JPopupMenu}
+import javax.swing.{JTextPane, JPopupMenu}
 import org.talkingpuffin.util.LinkUnIndirector
 import filter.FiltersDialog
 import org.talkingpuffin.Session
 import util.{eventDistributor, DesktopUtil}
 
 /**
- * A large version of the tweet, that can contain hyperlinks, and from which filters can be created.
+ * A large version of the tweet, which can contain hyperlinks, and from which filters can be created.
  */
-class LargeTweet(session: Session, filtersDialog: Option[FiltersDialog], 
-    backgroundColor: Color) extends JTextPane {
+class LargeTweet(session: Session, backgroundColor: Color) extends JTextPane {
+  var filtersDialog: Option[FiltersDialog] = None 
   setBackground(backgroundColor)
   setContentType("text/html");
   setEditable(false);

@@ -96,7 +96,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
     grid=(0,1); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1 
   })
   
-  session.tweetDetailPanel.connectToTable(table)
+  session.tweetDetailPanel.connectToTable(table, None)
 
   reactions += {
     case e: UsersChanged => setLabels

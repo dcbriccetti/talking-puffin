@@ -36,21 +36,11 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
   def reportSpam(names: List[String]) = process(names, tsess.reportSpam, "report spam")
   
   def viewLists(selectedScreenNames: List[String], table: JTable) = {
-    val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
-    TwitterListsDisplayer.viewLists(session, selectedScreenNames, 
-        MenuPos(table, menuLoc.getX().toInt, menuLoc.getY().toInt))
+    TwitterListsDisplayer.viewListsTable(session, selectedScreenNames)
   }
   
   def viewListsOn(selectedScreenNames: List[String], table: JTable) = {
-    val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
-    TwitterListsDisplayer.viewListsContaining(session, selectedScreenNames, 
-        MenuPos(table, menuLoc.getX().toInt, menuLoc.getY().toInt))
-  }
-  
-  def viewListsStatuses(selectedScreenNames: List[String], table: JTable) = {
-    val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation
-    TwitterListsDisplayer.viewListsStatuses(session, selectedScreenNames, 
-        MenuPos(table, menuLoc.getX().toInt, menuLoc.getY().toInt))
+    TwitterListsDisplayer.viewListsContaining(session, selectedScreenNames)
   }
   
   def showFriends(selectedScreenNames: List[String]) = {
@@ -101,8 +91,6 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     mh add(Action("View lists…") {viewLists(getSelectedScreenNames, table)}, ks(VK_L, SHIFT_DOWN_MASK))
     mh add(Action("View lists on…") {viewListsOn(getSelectedScreenNames, table)}, 
         ks(VK_L, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
-    mh add(Action("View statuses from lists…") {viewListsStatuses(getSelectedScreenNames, table)}, 
-        ks(VK_L, ALT_DOWN_MASK | SHIFT_DOWN_MASK))
     mh add(new TagAction(table, table.getModel.asInstanceOf[TaggingSupport]), ks(VK_T, 0))
     mh.add(followAK(specialMenuItems, getSelectedScreenNames))
     mh.add(unfollowAK(specialMenuItems, getSelectedScreenNames))
