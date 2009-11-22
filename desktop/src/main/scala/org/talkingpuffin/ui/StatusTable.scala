@@ -19,14 +19,14 @@ import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.twitter.{TwitterStatus}
 import org.talkingpuffin.Session
 import table.{AgeCellRenderer, EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
-import util.{TableUtil, DesktopUtil}
+import util.{TableUtil, DesktopUtil, Activateable}
 import org.talkingpuffin.util.{LinkUnIndirector, Loggable, PopupListener}
 
 /**
  * Table of statuses.
  */
 class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture: => Unit)
-    extends JXTable(tableModel) with Loggable {
+    extends JXTable(tableModel) with Activateable with Loggable {
 
   setColumnControlVisible(true)
   val rowMarginVal = 3

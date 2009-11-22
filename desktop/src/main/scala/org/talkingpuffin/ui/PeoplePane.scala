@@ -9,8 +9,8 @@ import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
 import java.awt.event.{KeyEvent, ActionListener, ActionEvent}
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.Session
-import util.{DesktopUtil, TableUtil}
 import org.talkingpuffin.twitter.{TwitterStatus, TwitterUser}
+import util.{Activateable, DesktopUtil, TableUtil}
 
 object UserColumns {
   val ARROWS = 0
@@ -33,7 +33,7 @@ object UserColumns {
 class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relationships, 
     updateCallback: Option[() => Unit]) extends GridBagPanel 
     with Loggable with Reactor {
-  var table: JTable = _
+  var table: PeopleTable = _
   val tableScrollPane = new ScrollPane {
     table = new PeopleTable(tableModel)
     peer.setViewportView(table)

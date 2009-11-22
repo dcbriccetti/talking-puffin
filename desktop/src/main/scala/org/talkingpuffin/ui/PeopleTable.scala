@@ -5,11 +5,12 @@ import org.jdesktop.swingx.JXTable
 import org.jdesktop.swingx.decorator.HighlighterFactory
 import org.jdesktop.swingx.table.TableColumnExt
 import table.{HtmlCellRenderer, LastStatusDateCellRenderer, EmphasizedStringCellRenderer, EmphasizedStringComparator}
+import util.Activateable
 
 /**
  * People Table
  */
-class PeopleTable(tableModel: UsersTableModel) extends JXTable(tableModel) {
+class PeopleTable(tableModel: UsersTableModel) extends JXTable(tableModel) with Activateable {
   setColumnControlVisible(true)
   setHighlighters(HighlighterFactory.createSimpleStriping)
   setRowHeight(Thumbnail.THUMBNAIL_SIZE + 2)

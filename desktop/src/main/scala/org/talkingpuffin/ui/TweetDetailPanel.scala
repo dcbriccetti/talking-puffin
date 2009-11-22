@@ -4,6 +4,7 @@ import javax.swing.event.{ListSelectionListener, ListSelectionEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
 import java.text.NumberFormat
 import javax.swing.{JScrollPane, BorderFactory, JTable}
+import java.awt.{Color, Dimension, Insets, Font}
 import scala.swing.{Label, GridBagPanel, TextArea}
 import scala.swing.GridBagPanel._
 import scala.swing.GridBagPanel.Anchor._
@@ -12,9 +13,8 @@ import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
 import org.talkingpuffin.Session
 import org.talkingpuffin.ui.filter.FiltersDialog
-import util.{CenteredPicture, TextChangingAnimator}
+import util.{Activateable, CenteredPicture, TextChangingAnimator}
 import org.talkingpuffin.util._
-import java.awt.{Color, Dimension, Insets, Font}
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE))
 
@@ -67,7 +67,8 @@ class TweetDetailPanel(session: Session,
   
   var userDescScrollPane: JScrollPane = _
   
-  def connectToTable(table: JTable, filtersDialog: Option[FiltersDialog]) {
+  def connectToTable(activateable: Activateable, filtersDialog: Option[FiltersDialog]) {
+    val table = activateable.asInstanceOf[JTable]
     val model = table.getModel.asInstanceOf[UserAndStatusProvider]
     
     def prefetchAdjacentRows {        
@@ -83,7 +84,7 @@ class TweetDetailPanel(session: Session,
     table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
       def valueChanged(e: ListSelectionEvent) = {
         if (! e.getValueIsAdjusting) {
-          if (table.getSelectedRowCount == 1) {
+          if (activateable.isActive && table.getSelectedRowCount == 1) {
             try {
               val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
               val (user, status) = model.getUserAndStatusAt(modelRowIndex)
