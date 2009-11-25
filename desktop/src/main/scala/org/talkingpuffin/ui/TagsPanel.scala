@@ -1,11 +1,11 @@
 package org.talkingpuffin.ui
 
-import org.talkingpuffin.filter.TagUsers
 import java.awt.event.KeyEvent
 import javax.swing.{BorderFactory}
-import swing._
-import _root_.scala.swing.GridBagPanel._
 import java.awt.Insets
+import swing.{Label, BorderPanel, FlowPanel, Button, Action, GridBagPanel, ScrollPane, TextField, CheckBox}
+import _root_.scala.swing.GridBagPanel._
+import org.talkingpuffin.filter.TagUsers
 
 /**
  * A panel displaying and allowing selection of tags.
@@ -17,8 +17,18 @@ class TagsPanel(showTitle: Boolean, showNew: Boolean, tagUsers: TagUsers, checke
 
   add(new FlowPanel {
     if (showTitle) contents += new Label("Tags")
-    contents += new Button(Action("All" ) {checkBoxView.selectAll(true)})
-    contents += new Button(Action("None") {checkBoxView.selectAll(false)})
+    contents += new Button(new Action("1. All" ) {
+      mnemonic = KeyEvent.VK_1
+      def apply {
+        checkBoxView.selectAll(true)
+      }
+    })
+    contents += new Button(new Action("2. None") {
+      mnemonic = KeyEvent.VK_2
+      def apply {
+        checkBoxView.selectAll(false)
+      }
+    })
   }, BorderPanel.Position.North)
   
   add(new GridBagPanel {
