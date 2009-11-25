@@ -46,7 +46,7 @@ class LargeTweet(session: Session, backgroundColor: Color) extends JTextPane {
                   {fd.addExcludeMatching(text)}).peer)
             case _ =>
           }
-          popup.add(new MenuItem(Action("Create a new stream for “" + text + "”") {
+          popup.add(new MenuItem(Action("Create a new view for “" + text + "”") {
             eventDistributor.publish(NewFollowingViewEvent(session, Some(text)))
           }).peer)
           if (popup.getComponentCount > 0)

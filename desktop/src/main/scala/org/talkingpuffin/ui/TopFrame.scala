@@ -84,6 +84,11 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
       }
   }
   rels.getIds(twitterSession, mainToolBar)
+  
+  pack
+  visible = true
+  setFocus
+  streams.views(0).frame.get.setSelected(true)
 
   def setFocus = streams.views.last.pane.requestFocusForTable
   

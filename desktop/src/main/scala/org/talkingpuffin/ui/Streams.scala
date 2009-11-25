@@ -59,7 +59,7 @@ class Streams(val service: String, val prefs: Preferences,
     }
     frame.moveToFront
     val view = new View(model, pane, Some(frame))
-    views ::= view
+    views = views ::: List(view)
     frame.addInternalFrameListener(new InternalFrameAdapter {
       override def internalFrameClosing(e: InternalFrameEvent) = {
         debug(e.toString)

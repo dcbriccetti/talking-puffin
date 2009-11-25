@@ -27,11 +27,7 @@ object Main {
      * Called by LoginDialog if login is successful, to create and show a TopFrame.
      */
     def startUp(service: String, twitterSession: AuthenticatedSession) {
-      new TopFrame(service, twitterSession) {
-        pack
-        visible = true
-        setFocus
-      }
+      new TopFrame(service, twitterSession)
     }
 
     new LoginDialog(TopFrames.exitIfNoFrames, startUp).display
