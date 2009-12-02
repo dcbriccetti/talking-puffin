@@ -34,7 +34,7 @@ class TweetDetailPanel(session: Session,
 
   private val bigPic = new BigPictureDisplayer(medThumbPicFetcher)
   private var userDescription: TextArea = _
-  private var largeTweet = new LargeTweet(session, background)
+  private var largeTweet = new LargeTweet(session, background, getActivateable _)
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
           
@@ -66,6 +66,8 @@ class TweetDetailPanel(session: Session,
   addUserDescription
   
   var userDescScrollPane: JScrollPane = _
+  private var currentActivateable: Option[Activateable] = None
+  def getActivateable = currentActivateable
   
   def connectToTable(activateable: Activateable, filtersDialog: Option[FiltersDialog]) {
     val table = activateable.asInstanceOf[JTable]
@@ -88,6 +90,7 @@ class TweetDetailPanel(session: Session,
             try {
               val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
               val (user, status) = model.getUserAndStatusAt(modelRowIndex)
+              currentActivateable = Some(activateable)
               showStatusDetails(user, status, filtersDialog)
               prefetchAdjacentRows        
             } catch {
@@ -95,6 +98,7 @@ class TweetDetailPanel(session: Session,
             }
           } else {
             clearStatusDetails
+            currentActivateable = None
           }
         }
       }
