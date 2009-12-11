@@ -69,9 +69,9 @@ class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers,
   
   def getRowAt(rowIndex: Int) = usersModel.users(rowIndex)
   
-  def getUserAndStatusAt(rowIndex: Int): Tuple2[TwitterUser, Option[TwitterStatus]] = {
+  def getUserAndStatusAt(rowIndex: Int): Tuple3[TwitterUser, Option[TwitterUser], Option[TwitterStatus]] = {
     val user = getRowAt(rowIndex)
-    (user, user.status)
+    (user, None, user.status)
   }
 
   def getUsers(rows: List[Int]): List[User] = 

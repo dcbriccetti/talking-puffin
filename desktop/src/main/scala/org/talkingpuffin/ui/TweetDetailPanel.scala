@@ -89,9 +89,9 @@ class TweetDetailPanel(session: Session,
           if (activateable.isActive && table.getSelectedRowCount == 1) {
             try {
               val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
-              val (user, status) = model.getUserAndStatusAt(modelRowIndex)
+              val (user, retweetedUser, status) = model.getUserAndStatusAt(modelRowIndex)
               currentActivateable = Some(activateable)
-              showStatusDetails(user, status, filtersDialog)
+              showStatusDetails(user, retweetedUser, status, filtersDialog)
               prefetchAdjacentRows        
             } catch {
               case ex: IndexOutOfBoundsException => println(ex)
@@ -121,8 +121,9 @@ class TweetDetailPanel(session: Session,
   
   private def getFiltersDialog: Option[FiltersDialog] = None
   
-  private def showStatusDetails(user: TwitterUser, 
+  private def showStatusDetails(topUser: TwitterUser, retweetedUser: Option[TwitterUser], 
       status: Option[TwitterStatus], filtersDialog: Option[FiltersDialog]) {
+    val user = if (retweetedUser.isDefined) retweetedUser.get else topUser
     session.statusMsg = " "
     setText(user, status)
     largeTweetScrollPane.setVisible(true)
@@ -130,10 +131,11 @@ class TweetDetailPanel(session: Session,
     picture.visible = true
     status match {
       case None => largeTweet.setText(null) 
-      case Some(st) =>
+      case Some(topStatus) =>
+        val st = topStatus.retweetOrTweet
         largeTweet.filtersDialog = filtersDialog
         largeTweet.setText(HtmlFormatter.createTweetHtml(st.text,
-          st.inReplyToStatusId, st.source))
+          st.inReplyToStatusId, st.source, if (retweetedUser.isDefined) Some(topUser) else None))
 
         if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
           def replaceUrl(shortUrl: String, fullUrl: String) = {
@@ -174,7 +176,8 @@ class TweetDetailPanel(session: Session,
 
     statusOp match {
       case None =>
-      case Some(status) =>
+      case Some(topStatus) =>
+        val status = topStatus.retweetOrTweet
         if (GlobalPrefs.isOn(PrefKeys.LOOK_UP_LOCATIONS)) {
           (status.location match {
             case Some(location) => {
