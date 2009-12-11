@@ -31,10 +31,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     contents += new FlowPanel {
       val applyAction = Action("Apply") {applyChanges}
       contents += new Button(applyAction)
-      val okAction = new Action("OK") {
-        mnemonic = KeyEvent.VK_O
-        def apply = {applyChanges; FiltersDialog.this.visible = false}
-      }
+      val okAction = Action("OK") {applyChanges; FiltersDialog.this.visible = false}
       val okButton = new Button(okAction) 
       defaultButton = okButton
       contents += okButton
