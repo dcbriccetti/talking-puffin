@@ -4,6 +4,33 @@ body {
     font-size: 100%;
 }
 
+.heading1, .heading2 {
+    font-family: Georgia, serif;
+}
+
+.heading1 {
+    font-size: 300%;
+    font-weight: bold;
+    margin-right: .5em;
+}
+
+.heading2 {
+    font-size: 150%;
+    font-weight: bold;
+}
+
+.featured {
+    font-size: 150%;
+    font-family: Georgia, serif;
+}
+
+.runApp {
+    background: #eee;
+    padding: .5em 1em .5em 1em;
+    border: thin solid darkgray;
+    margin-bottom: .5em;
+}
+
 .newsHead {
     font-weight: bold;
 }
@@ -16,7 +43,8 @@ p {
     margin-bottom: .7em;
 }
 ul {
-    padding-left: 1.4em;
+    padding-left: 1.1em;
+    margin: 0 1em 0 0;
 }
 
 .run {
