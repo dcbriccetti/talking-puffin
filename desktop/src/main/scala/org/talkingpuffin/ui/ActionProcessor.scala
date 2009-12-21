@@ -5,17 +5,17 @@ import org.talkingpuffin.Session
 trait ActionProcessor {
   val session: Session
   
-  def process[T](names:List[T], action:((T) => Unit), actionName: String, msg: String) = 
-    names foreach {name => 
+  def process[T <: Object](items: Seq[T], action: ((T) => Unit), actionName: String, msg: String) =
+    items.foreach(item =>   
       try {
-        action(name)
-        session.addMessage(String.format(msg, name))
+        action(item)
+        session.addMessage(String.format(msg, item))
       } catch {
-        case e: Throwable => showActionErr(e, actionName, name)
+        case e: Throwable => showActionErr(e, actionName, item)
       }
-    }
+    )
 
-  private def showActionErr(e: Throwable, actionName: String, screenName: String) =
-    session.addMessage("Error " + actionName + " " + screenName)
+  private def showActionErr[T](e: Throwable, actionName: String, item: T) =
+    session.addMessage("Error " + actionName + " " + item.toString)
   
 }

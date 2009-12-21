@@ -25,8 +25,8 @@ import org.talkingpuffin.util.{LinkUnIndirector, Loggable, PopupListener}
 /**
  * Table of statuses.
  */
-class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture: => Unit)
-    extends JXTable(tableModel) with Activateable with Loggable {
+class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPicture: => Unit)
+    extends JXTable(tableModel) with ActionProcessor with Activateable with Loggable {
 
   setColumnControlVisible(true)
   val rowMarginVal = 3
@@ -131,7 +131,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     createSendMsgDialog(status, Some(name), Some(status.text)).visible = true
   }
   
-  private def retweetNewWay = getSelectedStatuses.foreach(status => session.twitterSession.retweet(status.id))
+  private def retweetNewWay = process(getSelectedStatuses.map(_.id), session.twitterSession.retweet, 
+    "retweeting", "Status %s retweeted.")
   
   private def createSendMsgDialog(status: TwitterStatus, names: Option[String], retweetMsg: Option[String]) =
     new SendMsgDialog(session, null, names, Some(status.id), retweetMsg, false)
