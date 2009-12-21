@@ -16,7 +16,7 @@ import util.Tiler
 /**
  * Handles user actions like follow
  */
-class UserActions(session: Session, rels: Relationships) extends Loggable {
+class UserActions(val session: Session, rels: Relationships) extends ActionProcessor with Loggable {
   val tsess = session.twitterSession
   
   def follow(names: List[String]) = process(names, tsess.createFriendship, "following", "Now following %s.")
@@ -100,19 +100,6 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     mh.add(new ActionAndKeys(Action("Report Spam") {reportSpam(getSelectedScreenNames)},
         ks(VK_S, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK)))
   }
-  
-  private def process(names:List[String], action:((String) => Unit), actionName: String, msg: String) = 
-    names foreach {name => 
-      try {
-        action(name)
-        session.addMessage(String.format(msg, name))
-      } catch {
-        case e: Throwable => showActionErr(e, actionName, name)
-      }
-    }
-
-  private def showActionErr(e: Throwable, action: String, screenName: String) =
-    session.addMessage("Error " + action + " " + screenName)
 }
 
 object UserActions {
