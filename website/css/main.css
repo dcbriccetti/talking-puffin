@@ -1,0 +1,24 @@
+body {
+    background-color: white;
+    margin-top: 2em;
+    font-size: 100%;
+}
+
+.newsHead {
+    font-weight: bold;
+}
+
+.newsBody {
+    margin-bottom: .7em;
+}
+
+p {
+    margin-bottom: .7em;
+}
+ul {
+    padding-left: 1.4em;
+}
+
+.run {
+    font-size: 150%;
+}
