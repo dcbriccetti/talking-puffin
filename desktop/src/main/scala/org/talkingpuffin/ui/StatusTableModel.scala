@@ -10,7 +10,7 @@ import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.{TwitterStatus, TwitterRetweet, TwitterUser, TwitterMessage}
+import org.talkingpuffin.twitter.{TwitterStatus, TwitterUser, TwitterMessage}
 import org.talkingpuffin.util.Loggable
 
 /**

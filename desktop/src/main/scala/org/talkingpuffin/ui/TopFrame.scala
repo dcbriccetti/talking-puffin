@@ -33,7 +33,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   
   val rels = new Relationships()
   
-  val providers = new DataProviders(twitterSession, prefs, session.progress)
+  val providers = new DataProviders(session, prefs, session.progress)
   session.dataProviders = providers
   val streams = new Streams(service, prefs, session, tagUsers, rels)
   session.windows.streams = streams
@@ -83,7 +83,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
         updatePeople
       }
   }
-  rels.getIds(twitterSession, mainToolBar)
+  rels.getIds(session, mainToolBar)
   
   pack
   visible = true
@@ -131,7 +131,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   }
 
   private def updatePeople = {
-    rels.getUsers(twitterSession, twitterSession.user, mainToolBar)
+    rels.getUsers(session, twitterSession.user, mainToolBar)
   }
           
   private def createPeoplePane: Unit = {

@@ -1,17 +1,17 @@
 package org.talkingpuffin.ui
 
-import javax.swing.JOptionPane
 import org.talkingpuffin.util.Loggable
+import org.talkingpuffin.Session
 
 trait ErrorHandler extends Loggable {
-  def doAndHandleError(f: () => Unit, msg: String) {
+  def doAndHandleError(f: () => Unit, msg: String, session: Session) {
     try {
       f()
     } catch {
       case e: Exception => {
         val displayMsg = msg + ": " + e.getMessage
         error(displayMsg)
-        JOptionPane.showMessageDialog(null, displayMsg)
+        session.addMessage(displayMsg)
       }
     }
     

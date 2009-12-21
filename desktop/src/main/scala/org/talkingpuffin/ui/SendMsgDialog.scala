@@ -136,7 +136,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
   message.requestFocus
   
   private def send {
-    session.statusMsg = "Sending message"
+    session.addMessage("Sending message")
     new SwingWorker[Object, Object] {
       override def doInBackground: Object = {
         val twses = sendingSession.twitterSession
@@ -150,7 +150,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
       }
       override def done = {
         val result = get
-        session.statusMsg = "Message sent"
+        session.addMessage("Message sent")
       }
     }.execute
 

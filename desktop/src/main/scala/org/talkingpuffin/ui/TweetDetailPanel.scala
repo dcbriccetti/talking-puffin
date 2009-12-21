@@ -124,7 +124,7 @@ class TweetDetailPanel(session: Session,
   private def showStatusDetails(topUser: TwitterUser, retweetedUser: Option[TwitterUser], 
       status: Option[TwitterStatus], filtersDialog: Option[FiltersDialog]) {
     val user = if (retweetedUser.isDefined) retweetedUser.get else topUser
-    session.statusMsg = " "
+    session.clearMessage()
     setText(user, status)
     largeTweetScrollPane.setVisible(true)
     userDescScrollPane.setVisible(true)
@@ -156,7 +156,7 @@ class TweetDetailPanel(session: Session,
   }
   
   def clearStatusDetails {
-    session.statusMsg = " "
+    session.clearMessage()
     animator.stop
     showingUrl = null
     picLabel.icon = Thumbnail.transparentMedium
