@@ -274,6 +274,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     userActions.addCommonItems(mh, specialMenuItems, this, showBigPicture, getSelectedScreenNames)
     
     mh.menu.add(new JMenu("Delete") {
+      setToolTipText("Deletes tweets from the local view, without deleting from Twitter")
       mh add(Action("Selected tweets") {
         tableModel removeStatuses smi 
       }, this, ks(VK_D, SHORTCUT), ks(VK_DELETE, 0), ks(VK_BACK_SPACE, 0))
