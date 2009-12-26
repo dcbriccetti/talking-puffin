@@ -10,7 +10,9 @@ import org.joda.time._
 */
 class TwitterStatus() extends Validated {
   private val logger = Logger.getLogger("twitter")
-  var text: String = null
+  private var _text: String = null
+  def text = retweetOrTweet._text
+  def text_=(t: String) = _text = t
   var user: TwitterUser = null
   var id: Long = 0L
   var createdAt: DateTime = null
@@ -32,22 +34,21 @@ class TwitterStatus() extends Validated {
     assignFromNode(n)
   }
   
-  def assignFromNode(n: Node) {
+  private[twitter] def assignFromNode(n: Node) {
     n.child foreach {(sub) =>
       try {
         sub match {
-          case <id>{Text(text)}</id> => id = text.toLong
-          case <created_at>{Text(text)}</created_at> => createdAt = fmt.parseDateTime(text)
-          case <text>{Text(text)}</text> => this.text = text
-          case <source>{Text(text)}</source> => extractSource(text)
-          case <truncated>{Text(text)}</truncated> => truncated = java.lang.Boolean.valueOf(text).booleanValue
-          case <in_reply_to_status_id>{Text(text)}</in_reply_to_status_id> => inReplyToStatusId = 
-              Some(text.toLong)
-          case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => inReplyToUserId = 
-              Some(text.toLong)
-          case <in_reply_to_screen_name>{Text(text)}</in_reply_to_screen_name> => 
-              inReplyToScreenName = Some(text)
-          case <favorited>{Text(text)}</favorited> => favorited = java.lang.Boolean.valueOf(text).booleanValue
+          case <id>{Text(t)}</id> => id = t.toLong
+          case <created_at>{Text(t)}</created_at> => createdAt = fmt.parseDateTime(t)
+          case <text>{Text(t)}</text> => this._text = t
+          case <source>{Text(t)}</source> => extractSource(t)
+          case <truncated>{Text(t)}</truncated> => truncated = java.lang.Boolean.valueOf(t).booleanValue
+          case <in_reply_to_status_id>{Text(t)}</in_reply_to_status_id> => inReplyToStatusId = 
+              Some(t.toLong)
+          case <in_reply_to_user_id>{Text(t)}</in_reply_to_user_id> => inReplyToUserId = Some(t.toLong)
+          case <in_reply_to_screen_name>{Text(t)}</in_reply_to_screen_name> => 
+              inReplyToScreenName = Some(t)
+          case <favorited>{Text(t)}</favorited> => favorited = java.lang.Boolean.valueOf(t).booleanValue
           case <user>{ _* }</user> => addUser(TwitterUser(sub))
           case <retweeted_status>{ _* }</retweeted_status> => retweet = Some(TwitterRetweet(sub))
           case <geo>{ _* }</geo> => extractLocation(sub)
