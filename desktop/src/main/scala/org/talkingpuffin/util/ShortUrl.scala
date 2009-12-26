@@ -10,7 +10,8 @@ object ShortUrl extends Loggable {
   private val shortenerRegexStrings = List("""http://digg\.com/""" + LinkExtractor.urlCharClass + "{4,10}")
   private val shortenerRegexes = shortenerRegexStrings.map(_.r)
   private val redirBypassesWrapperHosts = List("su.pr", "ow.ly")
-  private val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "ping.fm", "r2.ly", "short.ie", "su.pr", 
+  private val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "j.mp", "ping.fm", 
+    "r2.ly", "short.ie", "su.pr", 
     "tinyurl.com", "tr.im") ::: redirBypassesWrapperHosts
   private val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + 
       LinkExtractor.urlCharClass + "*"
