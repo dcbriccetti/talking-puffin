@@ -32,7 +32,7 @@ class TweetDetailPanel(session: Session,
     icon = Thumbnail.transparentMedium
   }
 
-  private val bigPic = new BigPictureDisplayer(medThumbPicFetcher)
+  private val bigPic = new BigPictureDisplayer(medThumbPicFetcher, session)
   private var userDescription: TextArea = _
   private var largeTweet = new LargeTweet(session, background, getActivateable _)
   private var showingUrl: String = _
