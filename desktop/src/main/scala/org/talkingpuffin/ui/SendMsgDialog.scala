@@ -56,9 +56,6 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
   
   listenTo(message.caret)
   reactions += { case CaretUpdate(c) => total.text = remainingMsg }
-  message.peer.addKeyListener(new KeyAdapter() {
-    override def keyTyped(e: KeyEvent) = if (e.getKeyChar == '\n') send 
-  })
   listenTo(searchText)
   reactions += {
     case EditDone(`searchText`) => usersCombo.peer.setModel(ComboBox.newConstantModel(users))
@@ -118,7 +115,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
       override def toString = session.twitterSession.user + " " + session.serviceName
     }
     debug("Sessions: " + Globals.sessions.length)
-    if (Globals.sessions.length > 1)
+    if (Globals.sessions.length > 1) {
       add(new FlowPanel(FlowPanel.Alignment.Left) {
         contents += new Label("Send from:")
         val sessionsCB = new ComboBox(Globals.sessions.map(SessionDisplay)) {
@@ -130,6 +127,16 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
         listenTo(sessionsCB.selection)
         contents += sessionsCB
       }, new Constr {grid=(0,5); anchor=GridBagPanel.Anchor.West})
+    }
+    
+    add(new FlowPanel(FlowPanel.Alignment.Left) {
+      val sendButton = new Button(new Action("Send") {
+        def apply = send 
+        mnemonic = KeyEvent.VK_S
+      })
+      defaultButton = sendButton
+      contents += sendButton
+    }, new Constr {grid=(0,6); anchor=GridBagPanel.Anchor.West})
   }
   pack
   peer.setLocationRelativeTo(parent)

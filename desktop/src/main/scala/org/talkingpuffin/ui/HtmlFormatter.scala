@@ -15,7 +15,7 @@ object HtmlFormatter extends Loggable {
       case None => ""
     }
               
-    val r = LinkExtractor.createLinks(text)
+    val r = LinkExtractor.createLinks(text).replaceAll("\n", "<br/>")
 
     htmlAround(arrowLinkToParent + fontAround(r, "190%") + 
         fontAround(" from " + source + 
