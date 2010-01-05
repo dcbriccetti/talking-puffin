@@ -9,12 +9,14 @@ import util.TitleCreator
 import org.joda.time.DateTime
 import javax.swing.{Timer, SwingWorker}
 import org.talkingpuffin.twitter.{Constants, TwitterArgs, AuthenticatedSession}
+import org.talkingpuffin.Session
 
-abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Long], 
+abstract class DataProvider(session: Session, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
     with Publisher with ErrorHandler {
   
-  private val log = Logger.getLogger(providerName + " " + session.user)
+  private val twSess = session.twitterSession
+  private val log = Logger.getLogger(providerName + " " + twSess.user)
   private var highestId: Option[Long] = startingId
   val titleCreator = new TitleCreator(providerName)
 
@@ -56,7 +58,7 @@ abstract class DataProvider(session: AuthenticatedSession, startingId: Option[Lo
           val statuses = get
           if (statuses != Nil)
             DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
-          }, "Error fetching " + providerName + " data for " + session.user)
+          }, "Error fetching " + providerName + " data for " + twSess.user, session)
       }
     }.execute
   }

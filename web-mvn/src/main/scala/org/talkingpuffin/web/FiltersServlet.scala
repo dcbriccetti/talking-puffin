@@ -19,6 +19,7 @@ Just added myself to the .*wefollow.*
 Hey, I just added you to my Mafia family\. You should accept my invitation! :\) Click here: .*
 I favorited a YouTube video.*
 is now arriving at .* Powered by http://myskystatus.com/ 
+I ran .* before hitting a wall and tumbling to my death on my iPhone.*
 """)
   }
 }

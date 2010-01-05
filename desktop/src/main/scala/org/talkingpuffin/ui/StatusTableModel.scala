@@ -9,8 +9,9 @@ import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
-import org.talkingpuffin.twitter.{TwitterUser, TwitterMessage, TwitterStatus}
 import org.talkingpuffin.Session
+import org.talkingpuffin.twitter.{TwitterStatus, TwitterUser, TwitterMessage}
+import org.talkingpuffin.util.Loggable
 
 /**
  * Model providing status data to the JTable
@@ -19,7 +20,8 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     val relationships: Relationships,
     screenNameToUserNameMap: Map[String, String], filterSet: FilterSet, service: String, 
     val tagUsers: TagUsers) 
-    extends UserAndStatusProvider with TaggingSupport with Publisher with Reactor {
+    extends UserAndStatusProvider with TaggingSupport with Publisher with Reactor with Loggable
+{
   
   private val username = session.twitterSession.user
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
@@ -66,8 +68,10 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   private val pictureCell = new PictureCell(this, 0)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
-    val status = getStatusAt(rowIndex)
-    
+    val topStatus = getStatusAt(rowIndex)
+    val status = topStatus.retweetOrTweet
+    val parent = if (topStatus.retweet.isDefined) Some(topStatus) else None
+
     def senderName(status: TwitterStatus) = 
       if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) 
         UserProperties.overriddenUserName(userPrefs, status.user) 
@@ -92,7 +96,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
       case 2 => senderNameEs(status)
       case 3 => new EmphasizedString(toName(status), false)
       case 4 => 
-        var st = getStatusText(status, username)
+        var st = getStatusText(status, username, parent)
         if (options.showToColumn) st = LinkExtractor.getWithoutUser(st)
         StatusCell(if (options.showAgeColumn) None else Some(status.createdAt.toDate),
           if (showNameInStatus) Some(senderNameEs(status)) else None, st)
@@ -101,19 +105,15 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   
   protected def showNameInStatus = ! options.showNameColumn
   
-  def getStatusText(status: TwitterStatus, username: String): String = status.text
-
-  def getStatusAt(rowIndex: Int): TwitterStatus = {
-    val st = filteredStatuses_(rowIndex)
-    st.retweeted match {
-      case Some(rt) => rt
-      case None => st
-    }
+  def getStatusText(status: TwitterStatus, username: String, parent: Option[TwitterStatus]): String = {
+    status.text + (if (parent.isDefined) " RT by " + parent.get.user.screenName else "") 
   }
+
+  def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses_(rowIndex)
   
-  def getUserAndStatusAt(rowIndex: Int): Tuple2[TwitterUser, Option[TwitterStatus]] = {
+  def getUserAndStatusAt(rowIndex: Int): Tuple3[TwitterUser, Option[TwitterUser], Option[TwitterStatus]] = {
     val status = getStatusAt(rowIndex)
-    (status.user, Some(status))
+    (status.user, if (status.retweet.isDefined) Some(status.retweet.get.user) else None, Some(status))
   }
 
   override def getColumnClass(col: Int) = List(
@@ -235,7 +235,7 @@ case class TableContentsChanged(val model: StatusTableModel, val filteredIn: Int
     val total: Int) extends Event
   
 trait Mentions extends StatusTableModel {
-  override def getStatusText(status: TwitterStatus, username: String): String = {
+  override def getStatusText(status: TwitterStatus, username: String, parent: Option[TwitterStatus]): String = {
     val text = status.text
     val userTag = "@" + username
     if (text.startsWith(userTag)) text.substring(userTag.length).trim else text

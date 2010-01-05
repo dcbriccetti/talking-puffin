@@ -1,12 +1,12 @@
 package org.talkingpuffin
 
-import filter.{TagUsers}
+import org.talkingpuffin.filter.{TagUsers}
 import java.util.prefs.Preferences
 import swing.Label
 import java.awt.{Dimension, Toolkit}
 import twitter.{AuthenticatedSession}
-import ui.{TweetDetailPanel, DataProviders, Windows, LongOpListener}
 import javax.swing.{JInternalFrame, JDesktopPane}
+import ui._
 
 class Session(val serviceName: String, val twitterSession: AuthenticatedSession) {
   val tweetDetailPanel = new TweetDetailPanel(this, None) // TODO Some(filtersDialog))
@@ -26,11 +26,21 @@ class Session(val serviceName: String, val twitterSession: AuthenticatedSession)
   }
   val windows = new Windows
   val statusMsgLabel = new Label(" ")
-  def statusMsg_=(text: String) = statusMsgLabel.text = text
-  def statusMsg = statusMsgLabel.text
   var progress: LongOpListener = null
   var dataProviders: DataProviders = _
   def userPrefs: Preferences = windows.streams.prefs
   def tagUsers: TagUsers = windows.streams.tagUsers
+
+  /**
+   * Records an error message for display to the user.
+   */
+  def addMessage(msg: String): Unit = {
+    // TODO  expand this into a feature that presents all accumulated error messages
+    SwingInvoke.later(statusMsgLabel.text = msg)
+  }
+  
+  def clearMessage(): Unit = {
+    SwingInvoke.later(statusMsgLabel.text = " ")
+  }
 }
 

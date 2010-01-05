@@ -25,8 +25,8 @@ import org.talkingpuffin.util.{LinkUnIndirector, Loggable, PopupListener}
 /**
  * Table of statuses.
  */
-class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture: => Unit)
-    extends JXTable(tableModel) with Activateable with Loggable {
+class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPicture: => Unit)
+    extends JXTable(tableModel) with ActionProcessor with Activateable with Loggable {
 
   setColumnControlVisible(true)
   val rowMarginVal = 3
@@ -131,7 +131,8 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     createSendMsgDialog(status, Some(name), Some(status.text)).visible = true
   }
   
-  private def retweetNewWay = getSelectedStatuses.foreach(status => session.twitterSession.retweet(status.id))
+  private def retweetNewWay = process(getSelectedStatuses.map(_.id), session.twitterSession.retweet, 
+    "retweeting", "Status %s retweeted.")
   
   private def createSendMsgDialog(status: TwitterStatus, names: Option[String], retweetMsg: Option[String]) =
     new SendMsgDialog(session, null, names, Some(status.id), retweetMsg, false)
@@ -273,6 +274,7 @@ class StatusTable(session: Session, tableModel: StatusTableModel, showBigPicture
     userActions.addCommonItems(mh, specialMenuItems, this, showBigPicture, getSelectedScreenNames)
     
     mh.menu.add(new JMenu("Delete") {
+      setToolTipText("Deletes tweets from the local view, without deleting from Twitter")
       mh add(Action("Selected tweets") {
         tableModel removeStatuses smi 
       }, this, ks(VK_D, SHORTCUT), ks(VK_DELETE, 0), ks(VK_BACK_SPACE, 0))

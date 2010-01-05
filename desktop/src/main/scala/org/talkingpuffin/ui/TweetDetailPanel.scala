@@ -32,9 +32,9 @@ class TweetDetailPanel(session: Session,
     icon = Thumbnail.transparentMedium
   }
 
-  private val bigPic = new BigPictureDisplayer(medThumbPicFetcher)
+  private val bigPic = new BigPictureDisplayer(medThumbPicFetcher, session)
   private var userDescription: TextArea = _
-  private var largeTweet = new LargeTweet(session, background)
+  private var largeTweet = new LargeTweet(session, background, getActivateable _)
   private var showingUrl: String = _
   private var showingUser: TwitterUser = _
           
@@ -66,6 +66,8 @@ class TweetDetailPanel(session: Session,
   addUserDescription
   
   var userDescScrollPane: JScrollPane = _
+  private var currentActivateable: Option[Activateable] = None
+  def getActivateable = currentActivateable
   
   def connectToTable(activateable: Activateable, filtersDialog: Option[FiltersDialog]) {
     val table = activateable.asInstanceOf[JTable]
@@ -87,14 +89,16 @@ class TweetDetailPanel(session: Session,
           if (activateable.isActive && table.getSelectedRowCount == 1) {
             try {
               val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
-              val (user, status) = model.getUserAndStatusAt(modelRowIndex)
-              showStatusDetails(user, status, filtersDialog)
+              val (user, retweetedUser, status) = model.getUserAndStatusAt(modelRowIndex)
+              currentActivateable = Some(activateable)
+              showStatusDetails(user, retweetedUser, status, filtersDialog)
               prefetchAdjacentRows        
             } catch {
               case ex: IndexOutOfBoundsException => println(ex)
             }
           } else {
             clearStatusDetails
+            currentActivateable = None
           }
         }
       }
@@ -117,19 +121,21 @@ class TweetDetailPanel(session: Session,
   
   private def getFiltersDialog: Option[FiltersDialog] = None
   
-  private def showStatusDetails(user: TwitterUser, 
+  private def showStatusDetails(topUser: TwitterUser, retweetedUser: Option[TwitterUser], 
       status: Option[TwitterStatus], filtersDialog: Option[FiltersDialog]) {
-    session.statusMsg = " "
+    val user = if (retweetedUser.isDefined) retweetedUser.get else topUser
+    session.clearMessage()
     setText(user, status)
     largeTweetScrollPane.setVisible(true)
     userDescScrollPane.setVisible(true)
     picture.visible = true
     status match {
       case None => largeTweet.setText(null) 
-      case Some(st) =>
+      case Some(topStatus) =>
+        val st = topStatus.retweetOrTweet
         largeTweet.filtersDialog = filtersDialog
         largeTweet.setText(HtmlFormatter.createTweetHtml(st.text,
-          st.inReplyToStatusId, st.source))
+          st.inReplyToStatusId, st.source, if (retweetedUser.isDefined) Some(topUser) else None))
 
         if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
           def replaceUrl(shortUrl: String, fullUrl: String) = {
@@ -150,7 +156,7 @@ class TweetDetailPanel(session: Session,
   }
   
   def clearStatusDetails {
-    session.statusMsg = " "
+    session.clearMessage()
     animator.stop
     showingUrl = null
     picLabel.icon = Thumbnail.transparentMedium
@@ -170,7 +176,8 @@ class TweetDetailPanel(session: Session,
 
     statusOp match {
       case None =>
-      case Some(status) =>
+      case Some(topStatus) =>
+        val status = topStatus.retweetOrTweet
         if (GlobalPrefs.isOn(PrefKeys.LOOK_UP_LOCATIONS)) {
           (status.location match {
             case Some(location) => {

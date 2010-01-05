@@ -15,7 +15,7 @@
   <security><all-permissions/></security>
   <resources>
     <j2se version="1.6+" max-heap-size="256m"/>
-    <jar href="talking-puffin-0.78-devel-jar-with-dependencies.jar"/>
+    <jar href="talking-puffin-0.79a-devel-jar-with-dependencies.jar"/>
   </resources>
   <application-desc main-class="org.talkingpuffin.Main">
   </application-desc>

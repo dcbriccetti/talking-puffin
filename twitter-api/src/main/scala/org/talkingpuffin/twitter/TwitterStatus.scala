@@ -8,8 +8,11 @@ import org.joda.time._
 * Represents a twitter status update.
 * This object is represented in several API calls.
 */
-class TwitterStatus() extends Validated{
-  var text: String = null
+class TwitterStatus() extends Validated {
+  private val logger = Logger.getLogger("twitter")
+  private var _text: String = null
+  def text = retweetOrTweet._text
+  def text_=(t: String) = _text = t
   var user: TwitterUser = null
   var id: Long = 0L
   var createdAt: DateTime = null
@@ -21,12 +24,49 @@ class TwitterStatus() extends Validated{
   var inReplyToUserId: Option[Long] = None
   var inReplyToScreenName: Option[String] = None
   var favorited: Boolean = false
-  var retweeted: Option[TwitterStatus] = None
+  var retweet: Option[TwitterRetweet] = None
   var location: Option[(Double, Double)] = None
 
+  private val fmt = DateTimeFormats.fmt1
+
+  def this(n: Node) {
+    this()
+    assignFromNode(n)
+  }
+  
+  private[twitter] def assignFromNode(n: Node) {
+    n.child foreach {(sub) =>
+      try {
+        sub match {
+          case <id>{Text(t)}</id> => id = t.toLong
+          case <created_at>{Text(t)}</created_at> => createdAt = fmt.parseDateTime(t)
+          case <text>{Text(t)}</text> => this._text = t
+          case <source>{Text(t)}</source> => extractSource(t)
+          case <truncated>{Text(t)}</truncated> => truncated = java.lang.Boolean.valueOf(t).booleanValue
+          case <in_reply_to_status_id>{Text(t)}</in_reply_to_status_id> => inReplyToStatusId = 
+              Some(t.toLong)
+          case <in_reply_to_user_id>{Text(t)}</in_reply_to_user_id> => inReplyToUserId = Some(t.toLong)
+          case <in_reply_to_screen_name>{Text(t)}</in_reply_to_screen_name> => 
+              inReplyToScreenName = Some(t)
+          case <favorited>{Text(t)}</favorited> => favorited = java.lang.Boolean.valueOf(t).booleanValue
+          case <user>{ _* }</user> => addUser(TwitterUser(sub))
+          case <retweeted_status>{ _* }</retweeted_status> => retweet = Some(TwitterRetweet(sub))
+          case <geo>{ _* }</geo> => extractLocation(sub)
+          case _ => Nil
+        }
+      } catch {
+        case e: NumberFormatException => logger.error(e + " " + sub + " " + n)
+      }
+    }
+  }
+  
   def isValid() = {
     text != null && user != null
   }
+  
+  def retweetOrTweet = if (retweet.isDefined) retweet.get else this
+  
+  protected def addUser(user: TwitterUser) = this.user = user
 
   override def equals(obj: Any) = {
     if(obj.isInstanceOf[TwitterStatus]){
@@ -91,40 +131,21 @@ class TwitterStatus() extends Validated{
  * </pre></tt>
  */ 
 object TwitterStatus{
-  val logger = Logger.getLogger("twitter")
-  val fmt = DateTimeFormats.fmt1
-
   /**
   * construct a TwitterStatus object from an XML node
   */
-  def apply(n: Node):TwitterStatus = {
-    val status = new TwitterStatus
-    n.child foreach {(sub) =>
-      try {
-        sub match {
-          case <id>{Text(text)}</id> => status.id = text.toLong
-          case <created_at>{Text(text)}</created_at> => status.createdAt = fmt.parseDateTime(text)
-          case <text>{Text(text)}</text> => status.text = text
-          case <source>{Text(text)}</source> => status.extractSource(text)
-          case <truncated>{Text(text)}</truncated> => status.truncated = java.lang.Boolean.valueOf(text).booleanValue
-          case <in_reply_to_status_id>{Text(text)}</in_reply_to_status_id> => status.inReplyToStatusId = 
-              Some(text.toLong)
-          case <in_reply_to_user_id>{Text(text)}</in_reply_to_user_id> => status.inReplyToUserId = 
-              Some(text.toLong)
-          case <in_reply_to_screen_name>{Text(text)}</in_reply_to_screen_name> => 
-              status.inReplyToScreenName = Some(text)
-          case <favorited>{Text(text)}</favorited> => status.favorited = java.lang.Boolean.valueOf(text).booleanValue
-          case <user>{ _* }</user> => status.user = TwitterUser(sub)
-          case <retweeted_status>{ _* }</retweeted_status> => status.retweeted = Some(TwitterStatus(sub))
-          case <geo>{ _* }</geo> => status.extractLocation(sub)
-          case _ => Nil
-        }
-      } catch {
-        case e: NumberFormatException => logger.error(e + " " + sub + " " + n)
-      }
-    }
-    status
-  }
   
+  def apply(n: Node): TwitterStatus = new TwitterStatus(n)
 }
 
+class TwitterRetweet extends TwitterStatus {
+
+  def this(n: Node) = {
+    this()
+    assignFromNode(n)
+  }
+}
+
+object TwitterRetweet extends TwitterStatus {
+  def apply(n: Node): TwitterRetweet = new TwitterRetweet(n)
+}

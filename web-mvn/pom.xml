@@ -6,7 +6,7 @@
     <parent>
       <groupId>org.talkingpuffin</groupId>
       <artifactId>talking-puffin-base</artifactId>
-      <version>0.78-devel</version>
+      <version>0.79a-devel</version>
     </parent>
     <packaging>war</packaging>
     <name>TalkingPuffin Web Client</name>

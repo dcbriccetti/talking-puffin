@@ -5,15 +5,16 @@ import java.awt.{Desktop, Color}
 import javax.swing.event.{HyperlinkListener, HyperlinkEvent}
 import java.awt.event.{MouseEvent, MouseAdapter}
 import javax.swing.{JTextPane, JPopupMenu}
-import org.talkingpuffin.util.LinkUnIndirector
 import filter.FiltersDialog
 import org.talkingpuffin.Session
-import util.{eventDistributor, DesktopUtil}
+import org.talkingpuffin.util.{Loggable, LinkUnIndirector}
+import util.{Activateable, eventDistributor, DesktopUtil}
 
 /**
  * A large version of the tweet, which can contain hyperlinks, and from which filters can be created.
  */
-class LargeTweet(session: Session, backgroundColor: Color) extends JTextPane {
+class LargeTweet(session: Session, backgroundColor: Color, 
+    activateable: Function0[Option[Activateable]]) extends JTextPane with Loggable {
   var filtersDialog: Option[FiltersDialog] = None 
   setBackground(backgroundColor)
   setContentType("text/html");
@@ -25,7 +26,10 @@ class LargeTweet(session: Session, backgroundColor: Color) extends JTextPane {
         if (Desktop.isDesktopSupported) {
           LinkUnIndirector.findLinks(DesktopUtil.browse, DesktopUtil.browse)(e.getURL.toString)
         }
-        //TODO focusAfterHyperlinkClick.requestFocusInWindow // Let user resume using keyboard to move through tweets
+        activateable() match { 
+          case Some(a) => a.activate // Let user resume using keyboard to move through tweets
+          case _ =>
+        }
       }
     }
   });

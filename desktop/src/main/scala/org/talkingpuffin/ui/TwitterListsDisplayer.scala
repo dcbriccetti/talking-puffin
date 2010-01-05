@@ -55,7 +55,7 @@ object TwitterListsDisplayer {
     tiler match {case Some(t) => Some(t.next) case _ => None}
 
   private def viewListStatuses(list: TwitterList, session: Session, tiler: Option[Tiler]) = {
-    val provider = new ListStatusesProvider(session.twitterSession, 
+    val provider = new ListStatusesProvider(session, 
       list.owner.screenName, list.slug, None, session.progress)
     session.windows.streams.createView(session.desktopPane, provider, None, tilerNext(tiler))
     provider.loadContinually

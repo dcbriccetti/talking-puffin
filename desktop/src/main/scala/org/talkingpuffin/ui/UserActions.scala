@@ -6,7 +6,7 @@ import java.awt.event.InputEvent.SHIFT_DOWN_MASK
 import java.awt.event.InputEvent.ALT_DOWN_MASK
 import swing.Action
 import javax.swing.KeyStroke.{getKeyStroke => ks}
-import javax.swing.{JOptionPane, JTable}
+import javax.swing.JTable
 import java.awt.{Toolkit}
 import org.talkingpuffin.twitter.TwitterArgs
 import org.talkingpuffin.Session
@@ -16,24 +16,25 @@ import util.Tiler
 /**
  * Handles user actions like follow
  */
-class UserActions(session: Session, rels: Relationships) extends Loggable {
+class UserActions(val session: Session, rels: Relationships) extends ActionProcessor with Loggable {
   val tsess = session.twitterSession
   
-  def follow(names: List[String]) = process(names, tsess.createFriendship, "following")
+  def follow(names: List[String]) = process(names, tsess.createFriendship, "following", "Now following %s.")
   
   def unfollow(names: List[String]) {
-    process(names, tsess.destroyFriendship, "unfollowing")
+    process(names, tsess.destroyFriendship, "unfollowing", "Unfollowed %s.")
     rels.removeFriendsWithScreenNames(names)
   }
 
   def block(names: List[String]) {
-    process(names, tsess.blockUser, "block")
+    process(names, tsess.blockUser, "block", "%s blocked.")
     rels.removeFriendsWithScreenNames(names)
   }
   
-  def unblock(names: List[String]) = process(names, tsess.unblockUser, "unblock")
+  def unblock(names: List[String]) = process(names, tsess.unblockUser, "unblock", "%s unblocked.")
   
-  def reportSpam(names: List[String]) = process(names, tsess.reportSpam, "report spam")
+  def reportSpam(names: List[String]) = process(names, tsess.reportSpam, "report spam", 
+    "%s reported for spam.")
   
   def viewLists(selectedScreenNames: List[String], table: JTable) = {
     TwitterListsDisplayer.viewListsTable(session, selectedScreenNames)
@@ -47,7 +48,7 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
     val tiler = new Tiler(selectedScreenNames.length)
     selectedScreenNames.foreach(screenName => {
       val rels = new Relationships
-      rels.getUsers(session.twitterSession, screenName, session.progress)
+      rels.getUsers(session, screenName, session.progress)
       session.windows.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName, 
         Some(rels), None, None, Some(tiler.next))
     })
@@ -56,7 +57,7 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
   def showFavorites(selectedScreenNames: List[String]) = {
     val tiler = new Tiler(selectedScreenNames.length)
     selectedScreenNames.foreach(screenName => {
-      val favorites = new FavoritesProvider(session.twitterSession, screenName, None, session.progress)
+      val favorites = new FavoritesProvider(session, screenName, None, session.progress)
       session.windows.streams.createView(session.desktopPane, favorites, None, Some(tiler.next))
       favorites.loadAndPublishData(TwitterArgs(), false)
     })
@@ -98,19 +99,6 @@ class UserActions(session: Session, rels: Relationships) extends Loggable {
         ks(VK_B, UserActions.shortcutKeyMask)))
     mh.add(new ActionAndKeys(Action("Report Spam") {reportSpam(getSelectedScreenNames)},
         ks(VK_S, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK)))
-  }
-  
-  private def process(names:List[String], action:((String) => Unit), actionName: String) = 
-    names foreach {name => 
-      try {
-        action(name)
-      } catch {
-        case e: Throwable => showFollowErr(e, actionName, name)
-      }
-    }
-
-  private def showFollowErr(e:Throwable,action:String,screenName:String){
-    JOptionPane.showMessageDialog(null, "Error " + action + " " + screenName)
   }
 }
 
