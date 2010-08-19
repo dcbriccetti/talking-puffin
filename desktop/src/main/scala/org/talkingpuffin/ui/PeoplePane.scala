@@ -41,7 +41,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
   private val userActions = new UserActions(session, rels)
   val mh = new PopupMenuHelper(table)
   private var specialMenuItems = new SpecialMenuItems(table, tableModel.relationships,
-    {getSelectedUsers map(_.id)}, getSelectedScreenNames, {false})
+    {getSelectedUsers map(_.id.toLong)}, getSelectedScreenNames, {false})
   buildActions(mh, table)
   table.addMouseListener(new PopupListener(table, mh.menu))
 

@@ -12,7 +12,7 @@ class TwitterUser() extends Validated{
   /** the screen name of this user */
   var screenName = ""
   /** the twitter user id of this user */
-  var id = 0
+  var id = 0L
   /** the natural name of this user */
   var name = ""
   /** the location of this user (if specified) */

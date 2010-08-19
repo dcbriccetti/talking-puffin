@@ -80,7 +80,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
     border = Swing.EmptyBorder(5,5,5,5)
     class Constr extends Constraints { anchor=GridBagPanel.Anchor.West }
     if (isDm) {
-      add(new FlowPanel(FlowPanel.Alignment.Left) {
+      add(new FlowPanel(FlowPanel.Alignment.Left)() {
         contents += new Label("To: ")
         recipients match {
           case Some(r) => {
@@ -94,7 +94,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
         contents += dmRecipCombo
       }, new Constr {grid=(0,0)})
     }
-    add(new FlowPanel(FlowPanel.Alignment.Left) {
+    add(new FlowPanel(FlowPanel.Alignment.Left)() {
       val searchLabel = new Label("Search: ")
       searchLabel.peer.setLabelFor(searchText.peer)
       contents += searchLabel
@@ -116,7 +116,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
     }
     debug("Sessions: " + Globals.sessions.length)
     if (Globals.sessions.length > 1) {
-      add(new FlowPanel(FlowPanel.Alignment.Left) {
+      add(new FlowPanel(FlowPanel.Alignment.Left)() {
         contents += new Label("Send from:")
         val sessionsCB = new ComboBox(Globals.sessions.map(SessionDisplay)) {
           selection.item = SessionDisplay(session)
@@ -129,7 +129,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
       }, new Constr {grid=(0,5); anchor=GridBagPanel.Anchor.West})
     }
     
-    add(new FlowPanel(FlowPanel.Alignment.Left) {
+    add(new FlowPanel(FlowPanel.Alignment.Left)() {
       val sendButton = new Button(new Action("Send") {
         def apply = send 
         mnemonic = KeyEvent.VK_S
@@ -149,7 +149,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
         val twses = sendingSession.twitterSession
         if (isDm) dmRecipCombo.selection.item match {
           case u: NameAndScreenName => twses.newDirectMessage(u.screenName, message.text)
-          case _ =>
+          case _ => null
         } else replyToId match {
           case Some(idStr) => twses.updateStatus(message.text, idStr)
           case _ => twses.updateStatus(message.text)
