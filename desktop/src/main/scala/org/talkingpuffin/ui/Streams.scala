@@ -35,7 +35,7 @@ class Streams(val service: String, val prefs: Preferences,
     val screenNameToUserNameMap = usersTableModel.usersModel.screenNameToUserNameMap
     val user = session.twitterSession.user
     val sto = new StatusTableOptions(true, true, true)
-    val filterSet = FilterSet.load(service,session.twitterSession.user,tagUsers)
+    val filterSet = new FilterSet(tagUsers)
     val model = dataProvider match {
       case p: MentionsProvider => new StatusTableModel(session, sto, p, relationships, screenNameToUserNameMap,
         filterSet, service, tagUsers) with Mentions

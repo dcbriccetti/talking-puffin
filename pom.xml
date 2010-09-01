@@ -43,15 +43,6 @@
             <plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
-                <configuration>
-                 <args>
-                    <arg>-deprecation</arg>
-                    <arg>-Xmigration</arg>
-                    <arg>-Xcheckinit</arg>
-                    <arg>-Xstrict-warnings</arg>
-                    <arg>-Xwarninit</arg>
-                 </args>
-                </configuration>
             </plugin>
         </plugins>
     </reporting>

@@ -5,7 +5,6 @@ import org.talkingpuffin.ui.{Relationships}
 import org.talkingpuffin.twitter.TwitterStatus
 import org.talkingpuffin.filter.RetweetDetector._
 import org.talkingpuffin.util.Loggable
-import org.talkingpuffin.state.GlobalPrefs.prefsForUser
 
 /**
  * A set of all filters, and logic to apply them
@@ -50,27 +49,3 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
   def publish: Unit = publish(new FilterSetChanged(this))
 }
 
-
-object FilterSet {
-
-
-  def load(service : String, username : String, tagUsers: TagUsers)  : FilterSet = {
-    val userPrefs = prefsForUser(service, username)
-    val fs = new FilterSet(tagUsers)
-
-    val excludeFilters = userPrefs.node("excludefilters")
-    excludeFilters.keys.foreach(filter=>{
-      //fs.excludeSet.cpdFilters.add(CompoundFilter())
-
-    })
-/*
-    fs.includeSet.cpdFilters.add(CompoundFilter())
-    fs.excludeFriendRetweets=true
-    fs.excludeNonFollowers=false
-*/
-    fs
-  }
-
-  //def save() : Unit {}
-
-}
