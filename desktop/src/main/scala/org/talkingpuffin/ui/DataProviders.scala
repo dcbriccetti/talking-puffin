@@ -13,18 +13,16 @@ class DataProviders(val session: Session, prefs: Preferences, progress: LongOpLi
     prefs.get(prefKeys(idx), null) match {case null => None; case v => Some(v.toLong)} 
 
   val following     = new FollowingProvider    (session, getHighest(0), progress)
-  /* todo
   val mentions      = new MentionsProvider     (session, getHighest(1), progress)
   val retweetsOfMe  = new RetweetsOfMeProvider (session, getHighest(2), progress)
   val retweetedByMe = new RetweetedByMeProvider(session, getHighest(3), progress)
   val retweetedToMe = new RetweetedToMeProvider(session, getHighest(4), progress)
   val dmsReceived   = new DmsReceivedProvider  (session, getHighest(5), progress)
   val dmsSent       = new DmsSentProvider      (session, getHighest(6), progress)
-  */
 
-  val providers = List(following/*, mentions, retweetsOfMe, retweetedByMe,
-    retweetedToMe, dmsReceived, dmsSent*/)
-  val autoStartProviders = List(following/*, mentions, dmsReceived*/)
+  val providers = List(following, mentions, retweetsOfMe, retweetedByMe,
+    retweetedToMe, dmsReceived, dmsSent)
+  val autoStartProviders = List(following, mentions, dmsReceived)
   val providersAndPrefKeys = providers zip prefKeys
   
   def stop = providers.foreach(_.stop)
