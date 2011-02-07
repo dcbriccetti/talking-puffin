@@ -13,6 +13,8 @@ import org.talkingpuffin.Session
 import org.talkingpuffin.util.Loggable
 import org.joda.time.DateTime
 import twitter4j.{User, DirectMessage, Status}
+import org.talkingpuffin.twitter.RichStatus._
+
 
 /**
  * Model providing status data to the JTable
@@ -82,13 +84,14 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     def senderNameEs(status: Status): EmphasizedString =
       new EmphasizedString(Some(senderName(status)), relationships.followerIds.contains(status.getUser.getId))
 
-    def toName(status: Status) = status.getInReplyToScreenName match {
-      case screenName => Some(
+    def toName(status: Status) = status.inReplyToScreenName match {
+      case Some(screenName) => Some(
         if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) {
           screenNameToUserNameMap.getOrElse(screenName, screenName)
         } else {
           screenName
         })
+      case None => None
     }
     
     columnIndex match {
@@ -144,7 +147,8 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
       row <- rows
       status = filteredStatuses_(row)
       sender = status.getUser.getScreenName
-    } yield (sender, status.getInReplyToScreenName)
+      if status.inReplyToScreenName.isDefined
+    } yield (sender, status.inReplyToScreenName.get)
     
     filterSet.adder.muteSenderReceivers(senderReceivers)
     if (andViceVersa)

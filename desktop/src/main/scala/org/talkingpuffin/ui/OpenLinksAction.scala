@@ -4,6 +4,7 @@ import _root_.scala.swing.{Action,MenuItem}
 import java.awt.event.KeyEvent
 import javax.swing.{JTable, KeyStroke, JPopupMenu}
 import twitter4j.Status
+import org.talkingpuffin.twitter.RichStatus._
 
 /**
  * Shows a menu of links, or launches the browser on the link if there is only one. 
@@ -30,12 +31,7 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[Status], table: JTab
 
     getSelectedStatus match {
       case Some(status) =>
-        val urls = LinkExtractor.getLinks(status.getText,
-          status.getInReplyToStatusId match {
-            case 0 => None
-            case id => Some(id)
-          },
-          users, pages, lists)
+        val urls = LinkExtractor.getLinks(status.getText, status.inReplyToStatusId, users, pages, lists)
   
         if (urls.length == 1) {
           browse(urls(0)._2)

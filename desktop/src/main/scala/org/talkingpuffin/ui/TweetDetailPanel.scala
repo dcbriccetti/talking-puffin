@@ -15,6 +15,7 @@ import org.talkingpuffin.ui.filter.FiltersDialog
 import util.{Activateable, CenteredPicture, TextChangingAnimator}
 import org.talkingpuffin.util._
 import twitter4j.{User, Status}
+import org.talkingpuffin.twitter.RichStatus._
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE))
 
@@ -135,7 +136,7 @@ class TweetDetailPanel(session: Session,
         val st = topStatus //todo .retweetOrTweet
         largeTweet.filtersDialog = filtersDialog
         largeTweet.setText(HtmlFormatter.createTweetHtml(st.getText,
-          Some(st.getInReplyToStatusId), st.getSource, if (retweetedUser.isDefined) Some(topUser) else None))
+          st.inReplyToStatusId, st.getSource, if (retweetedUser.isDefined) Some(topUser) else None))
 
         if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
           def replaceUrl(shortUrl: String, fullUrl: String) = {

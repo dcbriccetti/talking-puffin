@@ -1,6 +1,7 @@
 package org.talkingpuffin.filter
 
 import twitter4j.Status
+import org.talkingpuffin.twitter.RichStatus
 
 /**
  * A base class for filters that match based on a string or regular expression.
@@ -29,7 +30,8 @@ case class TextTextFilter(override val text: String, override val isRegEx: Boole
  * To filter.
  */
 case class ToTextFilter(override val text: String, override val isRegEx: Boolean) 
-    extends TextFilter(text, isRegEx, (status) => status.getInReplyToScreenName)
+    extends TextFilter(text, isRegEx, (status) => RichStatus(status).inReplyToScreenName.getOrElse(""))
+// todo Why doesn’t RichStatus implicit conversion work?
 
 /**
  * Source (the application that created the tweet) filter.

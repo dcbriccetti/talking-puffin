@@ -21,6 +21,7 @@ import table.{AgeCellRenderer, EmphasizedStringCellRenderer, EmphasizedStringCom
 import util.{TableUtil, DesktopUtil, Activateable}
 import org.talkingpuffin.util.{LinkUnIndirector, Loggable, PopupListener}
 import twitter4j.Status
+import org.talkingpuffin.twitter.RichStatus._
 
 /**
  * Table of statuses.
@@ -59,7 +60,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   private val mh = new PopupMenuHelper(this)
   private var specialMenuItems = new SpecialMenuItems(this, tableModel.relationships,
       getSelectedStatuses map(_.getUser.getId.toLong), getSelectedScreenNames,
-      {getSelectedStatuses.exists(_.getInReplyToStatusId != 0)})
+      {getSelectedStatuses.exists(_.inReplyToStatusId.isDefined)})
   buildActions
 
   new Reactor {
@@ -98,8 +99,9 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     DesktopUtil.browse("http://twitter.com/" + screenName))
 
   private def viewParent = getSelectedStatuses.foreach(status => 
-      DesktopUtil.browse("http://twitter.com/" + status.getInReplyToScreenName +
-          "/statuses/" + status.getInReplyToStatusId)
+    if (status.inReplyToScreenName.isDefined && status.inReplyToStatusId.isDefined)
+      DesktopUtil.browse("http://twitter.com/" + status.inReplyToScreenName.get +
+          "/statuses/" + status.inReplyToStatusId.get)
   )
  
   private def editUser = getSelectedStatuses.foreach(status => { 
