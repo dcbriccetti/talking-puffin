@@ -117,7 +117,7 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
   
 }
 
-case class NewViewEvent(override val session: Session, val provider: DataProvider, include: Option[String]) 
+case class NewViewEvent(override val session: Session, provider: DataProvider, include: Option[String])
     extends AppEvent(session)
 case class NewFollowingViewEvent(override val session: Session, include: Option[String]) extends AppEvent(session)
 case class NewPeoplePaneEvent(override val session: Session) extends AppEvent(session)

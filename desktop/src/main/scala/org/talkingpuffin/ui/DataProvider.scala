@@ -2,11 +2,12 @@ package org.talkingpuffin.ui
 
 import java.util.Date
 import java.awt.event.{ActionListener, ActionEvent}
+import javax.swing.{Timer, SwingWorker}
 import swing.event.Event
 import swing.Publisher
 import org.apache.log4j.Logger
 import org.joda.time.DateTime
-import javax.swing.{Timer, SwingWorker}
+import twitter4j.Paging
 import util.TitleCreator
 import org.talkingpuffin.Session
 import org.talkingpuffin.twitter.Constants
@@ -74,6 +75,13 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
 
   def getResponseId(response: TwitterDataWithId): Long
 
+  protected def paging(): Paging = {
+    val paging = new Paging
+    paging.setCount(Constants.MaxItemsPerRequest)
+    getHighestId.foreach(paging.setSinceId)
+    paging
+  }
+
   protected def updateFunc:() => List[TwitterDataWithId]
 
   private def computeHighestId(tweets: List[TwitterDataWithId], maxId: Option[Long]):Option[Long] = tweets match {
@@ -108,7 +116,7 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
 
 }
 
-case class NextLoadAt(val when: DateTime) extends Event
+case class NextLoadAt(when: DateTime) extends Event
 
 abstract class BaseProvider(val providerName: String) extends Publisher {
   def loadContinually()
