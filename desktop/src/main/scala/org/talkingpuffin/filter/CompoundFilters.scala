@@ -2,7 +2,7 @@ package org.talkingpuffin.filter
 
 import swing.Publisher
 import swing.event.Event
-import org.talkingpuffin.twitter.TwitterStatus
+import twitter4j.Status
 
 /**
  * A list of CompoundFilters, and methods to operate on them.
@@ -18,12 +18,12 @@ class CompoundFilters extends Publisher {
   /**
    * Returns whether the given status matches all the filters.
    */
-  def matchesAll(status: TwitterStatus): Boolean = list.forall(_.matches(status))
+  def matchesAll(status: Status): Boolean = list.forall(_.matches(status))
   
   /**
    * Returns whether the given status matches any of the filters.
    */
-  def matchesAny(status: TwitterStatus): Boolean = list.exists(_.matches(status))
+  def matchesAny(status: Status): Boolean = list.exists(_.matches(status))
 
   /**
    * Adds a filter to the list

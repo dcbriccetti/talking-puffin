@@ -5,11 +5,11 @@ import java.awt.event.{ActionListener, ActionEvent}
 import swing.event.Event
 import swing.Publisher
 import org.apache.log4j.Logger
-import util.TitleCreator
 import org.joda.time.DateTime
 import javax.swing.{Timer, SwingWorker}
-import org.talkingpuffin.twitter.{Constants, TwitterArgs, AuthenticatedSession}
+import util.TitleCreator
 import org.talkingpuffin.Session
+import org.talkingpuffin.twitter.Constants
 
 abstract class DataProvider(session: Session, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
@@ -43,12 +43,12 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     restartTimer
   }
   
-  def loadAndPublishData(args: TwitterArgs, clear: Boolean): Unit = {
+  def loadAndPublishData(clear: Boolean): Unit = {
     longOpListener.startOperation
     new SwingWorker[List[TwitterDataWithId], Object] {
       val sendClear = clear
       override def doInBackground: List[TwitterDataWithId] = {
-        val data = updateFunc(args)
+        val data = updateFunc()
         highestId = computeHighestId(data, getHighestId)
         data
       }
@@ -68,13 +68,13 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
       timer.stop
   }
   
-  def loadLastBlockOfTweets() = loadAndPublishData(TwitterArgs.maxResults(Constants.MaxItemsPerRequest), true)
+  def loadLastBlockOfTweets() = loadAndPublishData(true)
 
-  type TwitterDataWithId = {def id: Long} 
+  type TwitterDataWithId = {def getId: Long}
 
   def getResponseId(response: TwitterDataWithId): Long
 
-  protected def updateFunc:(TwitterArgs) => List[TwitterDataWithId]
+  protected def updateFunc:() => List[TwitterDataWithId]
 
   private def computeHighestId(tweets: List[TwitterDataWithId], maxId: Option[Long]):Option[Long] = tweets match {
     case tweet :: rest => maxId match {
@@ -84,11 +84,6 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     case Nil => maxId
   }
 
-  private def addSince(args: TwitterArgs) = highestId match {
-    case None => args
-    case Some(i) => args.since(i)
-  }
-  
   private def restartTimer {
     def publishNextLoadTime = publish(NextLoadAt(new DateTime((new Date).getTime + updateFrequencyMs)))
 
@@ -109,7 +104,7 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     
   }
 
-  private def loadNewDataInternal = loadAndPublishData(addSince(TwitterArgs.maxResults(Constants.MaxItemsPerRequest)), false)
+  private def loadNewDataInternal = loadAndPublishData(false)
 
 }
 

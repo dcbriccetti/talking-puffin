@@ -7,12 +7,13 @@ import javax.swing.BorderFactory
 import java.awt.Dimension
 import _root_.scala.swing.event.ButtonClicked
 import _root_.scala.swing.GridBagPanel._
+import twitter4j.User
 
 /**
  * A panel for unmuting any muted users
  */
 class UnmutePane(title: String, tableModel: StatusTableModel, filterSet: FilterSet, 
-    mutedList: scala.collection.mutable.Map[Long,User], unMute: (List[Long]) => Unit) 
+    mutedList: scala.collection.mutable.Map[Long,User], unMute: (List[Long]) => Unit)
     extends GridBagPanel with TableModelListener {
   border = BorderFactory.createTitledBorder(title)
 
@@ -30,6 +31,6 @@ class UnmutePane(title: String, tableModel: StatusTableModel, filterSet: FilterS
   
   listenTo(removeButton)
   reactions += {
-    case ButtonClicked(b) => unMute(view.selection.items.toList.map(_.id))
+    case ButtonClicked(b) => unMute(view.selection.items.toList.map(_.getId.toLong))
   }
 }

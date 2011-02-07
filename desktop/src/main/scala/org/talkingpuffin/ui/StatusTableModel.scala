@@ -10,8 +10,9 @@ import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.{TwitterStatus, TwitterUser, TwitterMessage}
 import org.talkingpuffin.util.Loggable
+import org.joda.time.DateTime
+import twitter4j.{User, DirectMessage, Status}
 
 /**
  * Model providing status data to the JTable
@@ -31,10 +32,10 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   private val userPrefs = GlobalPrefs.prefsForUser(service, username)
 
   /** All loaded statuses */
-  private var statuses = List[TwitterStatus]()
+  private var statuses = List[Status]()
   
   /** Statuses, after filtering */
-  private var filteredStatuses_ = Array[TwitterStatus]()
+  private var filteredStatuses_ = Array[Status]()
   def filteredStatuses = filteredStatuses_
   
   var preChangeListener: PreChangeListener = _;
@@ -52,10 +53,11 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
       val listAny = e.data
       log.info("Tweets Arrived: " + listAny.length)
       if (e.clear) clear(true)
-      val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[TwitterStatus])
-        e.data.asInstanceOf[List[TwitterStatus]]
+      val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[Status])
+        e.data.asInstanceOf[List[Status]]
       else
-        adaptDmsToTweets(e.data.asInstanceOf[List[TwitterMessage]])
+        List[Status]()
+        // todo adaptDmsToTweets(e.data.asInstanceOf[List[DirectMessage]])
       processStatuses(newTweets)
       if (GlobalPrefs.isOn(PrefKeys.NOTIFY_TWEETS)) doNotify(newTweets)
     }
@@ -69,51 +71,52 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val topStatus = getStatusAt(rowIndex)
-    val status = topStatus.retweetOrTweet
-    val parent = if (topStatus.retweet.isDefined) Some(topStatus) else None
+    val status = topStatus// todo .retweetOrTweet
+    val parent = None // todo if (topStatus.retweet.isDefined) Some(topStatus) else None
 
-    def senderName(status: TwitterStatus) = 
+    def senderName(status: Status) =
       if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) 
-        UserProperties.overriddenUserName(userPrefs, status.user) 
-      else status.user.screenName
+        UserProperties.overriddenUserName(userPrefs, status.getUser)
+      else status.getUser.getScreenName
 
-    def senderNameEs(status: TwitterStatus): EmphasizedString = 
-      new EmphasizedString(Some(senderName(status)), relationships.followerIds.contains(status.user.id))
+    def senderNameEs(status: Status): EmphasizedString =
+      new EmphasizedString(Some(senderName(status)), relationships.followerIds.contains(status.getUser.getId))
 
-    def toName(status: TwitterStatus) = status.inReplyToScreenName match {
-      case Some(screenName) => Some(
+    def toName(status: Status) = status.getInReplyToScreenName match {
+      case screenName => Some(
         if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) {
           screenNameToUserNameMap.getOrElse(screenName, screenName)
         } else {
           screenName
         })
-      case None => None 
     }
     
     columnIndex match {
-      case 0 => status.createdAt.toDate
-      case 1 => pictureCell.request(status.user.profileImageURL, rowIndex)
+      case 0 => new DateTime(status.getCreatedAt).toDate
+      case 1 => pictureCell.request(status.getUser.getProfileImageURL.toString, rowIndex)
       case 2 => senderNameEs(status)
       case 3 => new EmphasizedString(toName(status), false)
       case 4 => 
         var st = getStatusText(status, username, parent)
         if (options.showToColumn) st = LinkExtractor.getWithoutUser(st)
-        StatusCell(if (options.showAgeColumn) None else Some(status.createdAt.toDate),
+        StatusCell(if (options.showAgeColumn) None else Some(new DateTime(status.getCreatedAt).toDate),
           if (showNameInStatus) Some(senderNameEs(status)) else None, st)
     }
   }
   
   protected def showNameInStatus = ! options.showNameColumn
   
-  def getStatusText(status: TwitterStatus, username: String, parent: Option[TwitterStatus]): String = {
-    status.text + (if (parent.isDefined) " RT by " + parent.get.user.screenName else "") 
+  def getStatusText(status: Status, username: String, parent: Option[Status]): String = {
+    status.getText + (if (parent.isDefined) " RT by " + parent.get.getUser.getScreenName else "")
   }
 
-  def getStatusAt(rowIndex: Int): TwitterStatus = filteredStatuses_(rowIndex)
+  def getStatusAt(rowIndex: Int): Status = filteredStatuses_(rowIndex)
   
-  def getUserAndStatusAt(rowIndex: Int): Tuple3[TwitterUser, Option[TwitterUser], Option[TwitterStatus]] = {
+  def getUserAndStatusAt(rowIndex: Int): Tuple3[User, Option[User], Option[Status]] = {
     val status = getStatusAt(rowIndex)
-    (status.user, if (status.retweet.isDefined) Some(status.retweet.get.user) else None, Some(status))
+    (status.getUser,
+      None, //todo if (status.retweet.isDefined) Some(status.retweet.get.user) else None,
+      Some(status))
   }
 
   override def getColumnClass(col: Int) = List(
@@ -124,12 +127,12 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     classOf[StatusCell])(col) 
   
   def getIndexOfStatus(statusId: Long): Option[Int] = 
-    filteredStatuses_.zipWithIndex.find(si => si._1.id == statusId) match {
+    filteredStatuses_.zipWithIndex.find(si => si._1.getId == statusId) match {
       case Some((_, i)) => Some(i)
       case None => None
     }
 
-  private def mapToIdTuple(users: List[User]) = users.map(user => (user.id, user))
+  private def mapToIdTuple(users: List[User]) = users.map(user => (user.getId, user))
   
   def muteSelectedUsers(rows: List[Int]) = {
     filterSet.adder.muteSenders(getScreenNames(rows))
@@ -140,9 +143,8 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     val senderReceivers = for {
       row <- rows
       status = filteredStatuses_(row)
-      sender = status.user.screenName
-      if status.inReplyToScreenName.isDefined
-    } yield (sender, status.inReplyToScreenName.get)
+      sender = status.getUser.getScreenName
+    } yield (sender, status.getInReplyToScreenName)
     
     filterSet.adder.muteSenderReceivers(senderReceivers)
     if (andViceVersa)
@@ -161,20 +163,20 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   }
 
   def muteSelectedApps(rows: List[Int]) = {
-    filterSet.adder.muteApps(rows.map(i => filteredStatuses_(i).sourceName))
+    filterSet.adder.muteApps(rows.map(i => filteredStatuses_(i).getSource))
     filterAndNotify
   }
 
-  def getUsers(rows: List[Int]) = rows.map(i => {
-    val user = filteredStatuses_(i).user
-    new User(user.id, user.name)
+  def getUsers(rows: List[Int]): List[UserIdName] = rows.map(i => {
+    val user = filteredStatuses_(i).getUser
+    new UserIdName(user.getId, user.getName)
   })
   
-  private def getScreenNames(rows: List[Int]) = rows.map(i => filteredStatuses_(i).user.screenName)
+  private def getScreenNames(rows: List[Int]) = rows.map(i => filteredStatuses_(i).getUser.getScreenName)
   
-  def getStatuses(rows: List[Int]): List[TwitterStatus] = rows.map(filteredStatuses_)
+  def getStatuses(rows: List[Int]): List[Status] = rows.map(filteredStatuses_)
 
-  private def processStatuses(newStatuses: List[TwitterStatus]) {
+  private def processStatuses(newStatuses: List[Status]) {
     statuses :::= newStatuses.reverse
     filterAndNotify
   }
@@ -183,7 +185,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
    * Clear (remove) statuses
    */
   def clear(all: Boolean) {
-    statuses = if (all) List[TwitterStatus]() else statuses.filter(! filteredStatuses_.contains(_))
+    statuses = if (all) List[Status]() else statuses.filter(! filteredStatuses_.contains(_))
     filterAndNotify
   }
   
@@ -194,7 +196,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   }
   
   def removeStatusesFrom(screenNames: List[String]) {
-    statuses = statuses.filter(s => ! screenNames.contains(s.user.screenName))
+    statuses = statuses.filter(s => ! screenNames.contains(s.getUser.getScreenName))
     filterAndNotify
   }
 
@@ -208,17 +210,19 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     fireTableDataChanged
   }
   
-  private def adaptDmsToTweets(dms: List[TwitterMessage]): List[TwitterStatus] = {
-    dms.map(dm => new TwitterStatus {
-      text = dm.text
-      user = if (dm.sender.screenName == username) dm.recipient else dm.sender
-      id = dm.id
-      createdAt = dm.createdAt
+/* todo
+  private def adaptDmsToTweets(dms: List[DirectMessage]): List[Status] = {
+    dms.map(dm => new Status {
+      text = dm.getText
+      user = if (dm.sender.getScreenName == username) dm.recipient else dm.sender
+      id = dm.getId
+      createdAt = dm.getCreatedAt
     })
   }
+  */
 
-  def doNotify(newTweets: List[TwitterStatus]) = newTweets.length match {
-    case 1 => DesktopUtil.notify(newTweets.first.user.screenName+": "+newTweets.first.text,"New tweet")
+  def doNotify(newTweets: List[Status]) = newTweets.length match {
+    case 1 => DesktopUtil.notify(newTweets.first.getUser.getScreenName+": "+newTweets.first.getText,"New tweet")
     case _ => DesktopUtil.notify(newTweets.length +" new tweets arrived","New tweets")
   }
 }
@@ -235,8 +239,8 @@ case class TableContentsChanged(val model: StatusTableModel, val filteredIn: Int
     val total: Int) extends Event
   
 trait Mentions extends StatusTableModel {
-  override def getStatusText(status: TwitterStatus, username: String, parent: Option[TwitterStatus]): String = {
-    val text = status.text
+  override def getStatusText(status: Status, username: String, parent: Option[Status]): String = {
+    val text = status.getText
     val userTag = "@" + username
     if (text.startsWith(userTag)) text.substring(userTag.length).trim else text
   }

@@ -1,12 +1,13 @@
 package org.talkingpuffin.ui
 
-import org.talkingpuffin.Session
 import org.talkingpuffin.ui.util.Tiler
 import swing.{Action, MenuItem}
 import org.talkingpuffin.util.Parallelizer
 import javax.swing.{JComponent, JPopupMenu, JTable}
 import java.awt.Rectangle
-import org.talkingpuffin.twitter.{Constants, TwitterArgs, TwitterUser, TwitterList}
+import org.talkingpuffin.twitter.{Constants, TwitterList}
+import org.talkingpuffin.Session
+import twitter4j.User
 
 case class MenuPos(parent: JComponent, menuX: Int, menuY: Int)
 
@@ -14,53 +15,54 @@ object TwitterListsDisplayer {
 
   type LLTL = List[List[TwitterList]]
   
-  def viewListsTable(session: Session, screenNames: List[String]): Unit = 
+  def viewListsTable(session: Session, screenNames: List[String]): Unit = {} /* todo
     SwingInvoke.execSwingWorker({
       getLists(session, screenNames)
-    }, showListsInTable(session))
+    }, showListsInTable(session))*/
   
   /**
    * Presents a pop-up menu of lists containing the specified screen names. One or all lists can 
    * be selected. Each list is launched in a new PeoplePane.
    */
-  def viewListsContaining(session: Session, screenNames: List[String]) {
+  def viewListsContaining(session: Session, screenNames: List[String]) = List[String]() /* {
     SwingInvoke.execSwingWorker({getListsContaining(session, screenNames)}, 
         showListsInTable(session)) 
-  }
+  }*/
   
   def viewLists(session: Session, lists: List[TwitterList]) = {
     lists.foreach(l => viewList(l, session, None))
   }
   
   def viewListsStatuses(session: Session, lists: List[TwitterList]) = {
-    lists.foreach(l => viewListStatuses(l, session, None))
+    //todo lists.foreach(l => viewListStatuses(l, session, None))
   }
   
   private def showListsInTable(session: Session)(lltl: LLTL): Unit = {
     new ListsFrame(session, lltl.flatMap(f => f))
   }
   
-  private def viewList(list: TwitterList, session: Session, tiler: Option[Tiler]) = {
+  private def viewList(list: TwitterList, session: Session, tiler: Option[Tiler]) = {} /* todo
     SwingInvoke.execSwingWorker({
       val tsess = session.twitterSession
-      tsess.loadAllWithCursor(tsess.getListMembers(list))}, {
-      members: List[TwitterUser] => {
-        session.windows.peoplePaneCreator.createPeoplePane(list.longName, 
+      tsess.twitter.getListMembers(list)}, {
+      members: List[User] => {
+        session.windows.peoplePaneCreator.createPeoplePane(list.longName,
           None, Some(members), None, tilerNext(tiler))
       }
     })
-  }
+  }*/
   
-  private def tilerNext(tiler: Option[Tiler]): Option[Rectangle] = 
+  /* todo
+  private def tilerNext(tiler: Option[Tiler]): Option[Rectangle] =
     tiler match {case Some(t) => Some(t.next) case _ => None}
 
   private def viewListStatuses(list: TwitterList, session: Session, tiler: Option[Tiler]) = {
     val provider = new ListStatusesProvider(session, 
-      list.owner.screenName, list.slug, None, session.progress)
+      list.owner.getScreenName, list.slug, None, session.progress)
     session.windows.streams.createView(session.desktopPane, provider, None, tilerNext(tiler))
     provider.loadContinually
   }
-    
+
   private def getLists(session: Session, screenNames: List[String]): LLTL = {
     Parallelizer.run(20, screenNames, session.twitterSession.getLists) filter(_ != Nil)
   }
@@ -99,5 +101,5 @@ object TwitterListsDisplayer {
       }
     }
   }
-    
+    */
 }

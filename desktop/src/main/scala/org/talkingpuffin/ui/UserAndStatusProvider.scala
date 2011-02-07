@@ -1,8 +1,8 @@
 package org.talkingpuffin.ui
 
-import org.talkingpuffin.twitter.{TwitterUser, TwitterStatus}
 import javax.swing.table.AbstractTableModel
+import twitter4j.{User, Status}
 
 trait UserAndStatusProvider extends AbstractTableModel {
-  def getUserAndStatusAt(rowIndex: Int): Tuple3[TwitterUser, Option[TwitterUser], Option[TwitterStatus]]
+  def getUserAndStatusAt(rowIndex: Int): Tuple3[User, Option[User], Option[Status]]
 }

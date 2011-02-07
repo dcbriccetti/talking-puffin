@@ -1,11 +1,12 @@
 package org.talkingpuffin.ui
 
+import scala.collection.JavaConversions._
 import java.util.concurrent.{Executors, Callable}
 import swing.event.Event
 import swing.Publisher
-import org.talkingpuffin.twitter.{TwitterUser, AuthenticatedSession, TwitterUserId}
 import javax.swing.SwingWorker
 import org.talkingpuffin.Session
+import twitter4j.User
 
 case class IdsChanged(val source: Relationships) extends Event
 case class UsersChanged(val source: Relationships) extends Event
@@ -13,8 +14,8 @@ case class UsersChanged(val source: Relationships) extends Event
 class Relationships extends Publisher with ErrorHandler {
   var friendIds = List[Long]()
   var followerIds = List[Long]()
-  var friends = List[TwitterUser]()
-  var followers = List[TwitterUser]()
+  var friends = List[User]()
+  var followers = List[User]()
 
   /**
    * Uses the provided AuthenticatedSession to get all friends and followers (doing the
@@ -24,12 +25,12 @@ class Relationships extends Publisher with ErrorHandler {
     val twSess = session.twitterSession
     longOpListener.startOperation
     val pool = Executors.newFixedThreadPool(2)
-    val friendsFuture = pool.submit(new Callable[List[TwitterUser]] {
-      def call = twSess.loadAllWithCursor(twSess.getFriendsFor(screenName)) })
-    val followersFuture = pool.submit(new Callable[List[TwitterUser]] {
-      def call = twSess.loadAllWithCursor(twSess.getFollowersFor(screenName)) })
+    val friendsFuture = pool.submit(new Callable[List[User]] {
+      def call = {twSess.twitter.getFriendsStatuses(screenName).toList }}) // todo get all
+    val followersFuture = pool.submit(new Callable[List[User]] {
+      def call = {twSess.twitter.getFollowersStatuses(screenName).toList }})
 
-    new SwingWorker[Tuple2[List[TwitterUser],List[TwitterUser]], Object] {
+    new SwingWorker[Tuple2[List[User],List[User]], Object] {
       def doInBackground = (friendsFuture.get, followersFuture.get)
       override def done {
         longOpListener.stopOperation
@@ -48,19 +49,21 @@ class Relationships extends Publisher with ErrorHandler {
     val twSess = session.twitterSession
     longOpListener.startOperation
     val pool = Executors.newFixedThreadPool(2)
-    val friendsFuture = pool.submit(new Callable[List[TwitterUserId]] {
-      def call = twSess.loadAllWithCursor(twSess.getFriendsIds) })
-    val followersFuture = pool.submit(new Callable[List[TwitterUserId]] {
-      def call = twSess.loadAllWithCursor(twSess.getFollowersIds) })
+    val friendsFuture = pool.submit(new Callable[List[Int]] {
+      def call = {twSess.twitter.getFriendsIDs.getIDs.toList}
+    })
+    val followersFuture = pool.submit(new Callable[List[Int]] {
+      def call = {twSess.twitter.getFollowersIDs.getIDs.toList}
+    })
 
-    new SwingWorker[Tuple2[List[TwitterUserId],List[TwitterUserId]], Object] {
+    new SwingWorker[Tuple2[List[Int],List[Int]], Object] {
       def doInBackground = (friendsFuture.get, followersFuture.get)
       override def done {
         longOpListener.stopOperation
         doAndHandleError(() => {
           val (fr, fo) = get
-          friendIds = fr.map(_.id)
-          followerIds = fo.map(_.id)
+          friendIds = fr map {_.toLong}
+          followerIds = fo map {_.toLong}
           Relationships.this.publish(IdsChanged(Relationships.this)) // SwingWorker also has a publish
         }, "Error fetching friend and follower IDs for " + twSess.user, session)
       }
@@ -69,8 +72,8 @@ class Relationships extends Publisher with ErrorHandler {
   }
   
   def removeFriendsWithScreenNames(names: List[String]) {
-    friends = friends.filter(user => ! names.contains(user.screenName))
-    friendIds = friends.map(_.id)
+    friends = friends.filter(user => ! names.contains(user.getScreenName))
+    friendIds = friends.map(_.getId.toLong)
     publish(UsersChanged(this))
     publish(IdsChanged(this))
   }

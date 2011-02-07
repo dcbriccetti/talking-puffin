@@ -1,7 +1,7 @@
 package org.talkingpuffin.ui
 
 import org.talkingpuffin.util.Loggable
-import org.talkingpuffin.twitter.TwitterUser
+import twitter4j.User
 
 /**
  * Helps with creating HTML for display in the UI
@@ -9,7 +9,7 @@ import org.talkingpuffin.twitter.TwitterUser
 object HtmlFormatter extends Loggable {
 
   def createTweetHtml(text: String, replyTo: Option[Long], source: String, 
-                      retweetingUser: Option[TwitterUser]): String = {
+                      retweetingUser: Option[User]): String = {
     val arrowLinkToParent = LinkExtractor.getReplyToInfo(replyTo, text) match {
       case Some((user, id)) => "<a href='" + LinkExtractor.getStatusUrl(id, user) + "'>↑</a> " 
       case None => ""
@@ -19,7 +19,7 @@ object HtmlFormatter extends Loggable {
 
     htmlAround(arrowLinkToParent + fontAround(r, "190%") + 
         fontAround(" from " + source + 
-        (if (retweetingUser.isDefined) ", RT by " + retweetingUser.get.screenName else ""), "80%"))
+        (if (retweetingUser.isDefined) ", RT by " + retweetingUser.get.getScreenName else ""), "80%"))
   }
   
   def fontAround(s: String, size: String) = 

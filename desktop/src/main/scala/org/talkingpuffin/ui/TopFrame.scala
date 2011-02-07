@@ -3,14 +3,15 @@ package org.talkingpuffin.ui
 import java.awt.{Rectangle}
 import java.text.NumberFormat
 import scala.swing.event.{WindowClosing}
-import swing.{Reactor, Frame, Label, GridBagPanel}
+import scala.swing.{Reactor, Frame, Label, GridBagPanel}
 import org.talkingpuffin.{Main, Globals, Session, Constants}
 import org.talkingpuffin.filter.TagUsers
-import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, AuthenticatedSession}
+import org.talkingpuffin.twitter.{AuthenticatedSession}
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
 import util.{ColTiler, AppEvent, eventDistributor}
 import javax.swing.{JInternalFrame, ImageIcon}
+import twitter4j.{User, RateLimitStatusEvent}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -55,7 +56,8 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   contents = new GridBagPanel {
     val userPic = new Label
     val picFetcher = new PictureFetcher("Frame picture " + hashCode, None)
-    picFetcher.requestItem(new FetchRequest(twitterSession.getUserDetail().profileImageURL, null, 
+    picFetcher.requestItem(new FetchRequest(twitterSession.twitter.showUser(twitterSession.user).
+      getProfileImageURL.toString, null,
       (imageReady: PictureFetcher.ImageReady) => {
         if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
           userPic.icon = imageReady.resource.image 
@@ -92,16 +94,16 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   def setFocus = streams.views.last.pane.requestFocusForTable
   
-  def close {
+  override def close {
     streams.stop
-    deafTo(twitterSession.httpPublisher)
+    //todo deafTo(twitterSession.httpPublisher)
     Globals.sessions -= session
     dispose
     StateSaver.save(streams, session.userPrefs, tagUsers)
     TopFrames.removeFrame(this)
   }
 
-  type Users = List[TwitterUser]
+  type Users = List[User]
   
   def createPeoplePane(longTitle: String, otherRels: Option[Relationships], users: Option[Users], 
         updatePeople: Option[() => Unit], location: Option[Rectangle]): PeoplePane = {
@@ -114,9 +116,9 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     val customRels = if (users.isDefined) {
       new Relationships {
         friends = rels.friends intersect users.get
-        friendIds = friends map(_.id)
+        friendIds = friends map(_.getId.toLong)
         followers = rels.followers intersect users.get
-        followerIds = followers map(_.id)
+        followerIds = followers map(_.getId.toLong)
       }
     } else getRels
     val peoplePane = new PeoplePane(session, model, customRels, updatePeople)
@@ -139,14 +141,14 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
         Some(updatePeople _), None)
   }
   
-  private def setUpUserStatusReactor {
+  private def setUpUserStatusReactor {}/*todo
     reactions += {
       case e: RateLimitStatusEvent => SwingInvoke.later {
-        mainToolBar.remaining.text = NumberFormat.getIntegerInstance.format(e.status.remainingHits)
+        mainToolBar.remaining.text = NumberFormat.getIntegerInstance.format(e.getStatus.remainingHits)
       }
     }
     listenTo(twitterSession.httpPublisher)
-  }
+  }*/
 
   private def tileViews(numRows: Int) {
     val frames = (for {

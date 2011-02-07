@@ -8,7 +8,7 @@ import org.talkingpuffin.filter.TagUsers
 trait TaggingSupport {
   val tagUsers: TagUsers
   
-  def getUsers(rows: List[Int]): List[User]
+  def getUsers(rows: List[Int]): List[UserIdName]
 
   /**
    * If all selected users have the same tags applied, return those tags, otherwise return an 
@@ -18,7 +18,7 @@ trait TaggingSupport {
     val users = getUsers(selectedRows)
     val firstUserTags = tagUsers.tagsForUser(users(0).id)
     val firstUserTagsSet = Set(firstUserTags: _*)
-    if (users.tail.forall(u => Set(tagUsers.tagsForUser(u.id): _*) == firstUserTagsSet)) 
+    if (users.tail.forall(u => Set(tagUsers.tagsForUser(u.id): _*) == firstUserTagsSet))
       firstUserTags 
     else 
       List[String]() 

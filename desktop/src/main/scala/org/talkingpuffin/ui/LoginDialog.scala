@@ -5,14 +5,15 @@ import scala.swing.{ComboBox, CheckBox, Label, Button, Frame, PasswordField, Pub
 FlowPanel, GridBagPanel, TextField}
 import scala.swing.GridBagPanel.Anchor.West
 import swing.event.{SelectionChanged, ButtonClicked, EditDone, Event}
-import org.talkingpuffin.twitter.{TwitterSession,AuthenticatedSession,API}
+import org.talkingpuffin.twitter.{AuthenticatedSession}
 import org.talkingpuffin.state.{Account, Accounts}
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.ui.util.Cancelable
 
 class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession) => Unit)
     extends Frame with Cancelable with Loggable {
-  
+
+  /* todo
   title = "TalkingPuffin - Log In"
   def username = usernameTextField.text
   def password = new String(passwordTextField.password)
@@ -116,7 +117,7 @@ class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession
       { 
         () =>
         try {
-          val sess = TwitterSession(username,password,apiUrl)
+          val sess = TwitterSession(username)
           if(sess.verifyCredentials){
             loggedInUser = sess
             true
@@ -162,6 +163,7 @@ class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession
   private case class ComboDisplay(val account: Account) {
     override def toString = account.service + " " + account.user
   }
+  */
 }
 
 

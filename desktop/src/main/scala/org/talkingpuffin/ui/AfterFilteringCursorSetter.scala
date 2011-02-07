@@ -16,7 +16,7 @@ class AfterFilteringCursorSetter(table: JTable) {
     cursorCandidates = table.getSelectedRow match {
       case -1 => List[Long]()
       case selectedRow => (for(row <- selectedRow + 1 until table.getRowCount)  
-        yield model.getStatusAt(table.convertRowIndexToModel(row)).id).toList 
+        yield model.getStatusAt(table.convertRowIndexToModel(row)).getId).toList
     }
   }
   

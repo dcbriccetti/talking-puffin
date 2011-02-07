@@ -8,7 +8,6 @@ import swing.Action
 import javax.swing.KeyStroke.{getKeyStroke => ks}
 import javax.swing.JTable
 import java.awt.{Toolkit}
-import org.talkingpuffin.twitter.TwitterArgs
 import org.talkingpuffin.Session
 import org.talkingpuffin.util.Loggable
 import util.Tiler
@@ -18,7 +17,8 @@ import util.Tiler
  */
 class UserActions(val session: Session, rels: Relationships) extends ActionProcessor with Loggable {
   val tsess = session.twitterSession
-  
+
+  /* todo
   def follow(names: List[String]) = process(names, tsess.createFriendship, "following", "Now following %s.")
   
   def unfollow(names: List[String]) {
@@ -76,9 +76,10 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
       smi.friendsOnly.list ::= this
     }, ks(VK_F, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
   }
-  
+  */
+
   def addCommonItems(mh: PopupMenuHelper, specialMenuItems: SpecialMenuItems, 
-      table: JTable, showBigPicture: => Unit, getSelectedScreenNames: => List[String]) {
+      table: JTable, showBigPicture: => Unit, getSelectedScreenNames: => List[String]) = List[String]()/* todo {
 
     mh add(new Action("Show larger image") { 
       def apply = showBigPicture
@@ -99,7 +100,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
         ks(VK_B, UserActions.shortcutKeyMask)))
     mh.add(new ActionAndKeys(Action("Report Spam") {reportSpam(getSelectedScreenNames)},
         ks(VK_S, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK)))
-  }
+  }*/
 }
 
 object UserActions {

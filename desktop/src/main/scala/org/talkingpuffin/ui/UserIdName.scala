@@ -1,5 +1,5 @@
 package org.talkingpuffin.ui
 
-class User(val id: Long, val name: String) {
+class UserIdName(val id: Long, val name: String) {
   override def toString = name
 }

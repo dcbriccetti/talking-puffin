@@ -3,7 +3,7 @@ package org.talkingpuffin.util
 import org.junit.Test
 import org.junit.Assert._
 import org.apache.log4j.{Logger}
-
+/*todo
 class LinkUnIndirectorTest {
   val log = Logger.getLogger("Tests")
     
@@ -36,4 +36,4 @@ class LinkUnIndirectorTest {
   }
 
 }
- 
+ */

@@ -59,7 +59,8 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
     contents += new MenuItem(Action("Tile, 2 rows") {pub(2)})
     contents += new MenuItem(Action("Tile, 3 rows") {pub(3)})
   }
-  
+
+  /* todo
   contents += new Menu("Lists") {
     contents += new Menu("Export tag to list") {
       tagUsers.getTags.foreach(tag => {
@@ -83,7 +84,7 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
           List(session.twitterSession.user))
       }
     })
-  }
+  }*/
   
   contents += new Menu("Options") {
     object ItemFactory {

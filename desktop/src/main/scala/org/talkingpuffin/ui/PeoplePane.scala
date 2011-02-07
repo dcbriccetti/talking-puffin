@@ -9,8 +9,8 @@ import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
 import java.awt.event.{KeyEvent, ActionListener, ActionEvent}
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.{TwitterUser}
 import util.{DesktopUtil, TableUtil}
+import twitter4j.User
 
 object UserColumns {
   val ARROWS = 0
@@ -41,7 +41,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
   private val userActions = new UserActions(session, rels)
   val mh = new PopupMenuHelper(table)
   private var specialMenuItems = new SpecialMenuItems(table, tableModel.relationships,
-    {getSelectedUsers map(_.id)}, getSelectedScreenNames, {false})
+    {getSelectedUsers map(_.getId.toLong)}, getSelectedScreenNames, {false})
   buildActions(mh, table)
   table.addMouseListener(new PopupListener(table, mh.menu))
 
@@ -115,12 +115,12 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
       case _ => Some(searchText.text)
     }))
   
-  private def findPeople: Unit = {
+  private def findPeople: Unit = {} /* todo
     val people = session.twitterSession.findPeople(findPeopleText.text)
     debug("Found people: " + people)
     session.windows.peoplePaneCreator.createPeoplePane(findPeopleText.text, 
       None, Some(people), None, None)
-  }
+  }*/
 
   private def buildActions(mh: PopupMenuHelper, comp: java.awt.Component) = {
     mh.add(Action("View in Browser") {viewSelected}, ks(KeyEvent.VK_V,0))
@@ -132,16 +132,16 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
         session.tweetDetailPanel.showBigPicture, getSelectedScreenNames)
   }
 
-  private def getSelectedUsers:List[TwitterUser] = 
+  private def getSelectedUsers:List[User] =
     TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
   
-  def getSelectedScreenNames: List[String] = getSelectedUsers.map(user => user.screenName)
+  def getSelectedScreenNames: List[String] = getSelectedUsers.map(user => user.getScreenName)
 
   private def viewSelected = getSelectedUsers.foreach(u => DesktopUtil.browse("http://twitter.com/" + 
-      u.screenName))
+      u.getScreenName))
   
   private def reply {
-    val names = getSelectedUsers.map(user => ("@" + user.screenName)).mkString(" ")
+    val names = getSelectedUsers.map(user => ("@" + user.getScreenName)).mkString(" ")
     val sm = new SendMsgDialog(session, null, Some(names), None, None, false)
     sm.visible = true
   }

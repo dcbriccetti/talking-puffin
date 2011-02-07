@@ -1,8 +1,10 @@
 package org.talkingpuffin.util
 
-import org.talkingpuffin.twitter.{TwitterUser, AuthenticatedSession}
+import org.talkingpuffin.twitter.{AuthenticatedSession}
+import twitter4j.User
 
 object TwitterListUtils extends Loggable {
+  /* todo
   /**
    * Exports the specified tag and users to a Twitter list.
    */
@@ -14,11 +16,11 @@ object TwitterListUtils extends Loggable {
           tsess.changeListDescription(list, description)
         }
         (list, members) 
-      case None => (tsess.createList(tag, description), List[TwitterUser]())
+      case None => (tsess.createList(tag, description), List[User]())
     }
     debug("Count: " + list.memberCount + ", members length: " + members.length)
     val listMembers = members.map(_.id.toLong)
     Parallelizer.run(10, listMembers -- users, tsess.deleteFromList(list))
     Parallelizer.run(10, users -- listMembers, tsess.addToList(list))
-  }
+  }*/
 }

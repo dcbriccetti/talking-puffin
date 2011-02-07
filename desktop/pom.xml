@@ -6,7 +6,7 @@
     <parent>
       <groupId>org.talkingpuffin</groupId>
       <artifactId>talking-puffin-base</artifactId>
-      <version>0.79b-devel</version>
+      <version>${project.version}</version>
     </parent>
     <name>TalkingPuffin Desktop Client</name>
     <url>http://TalkingPuffin.org/</url>
@@ -14,14 +14,24 @@
 
     <dependencies>
         <dependency>
-          <groupId>org.talkingpuffin</groupId>
-          <artifactId>twitter-api</artifactId>
-          <version>${project.version}</version>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
         </dependency>
         <dependency>
-          <groupId>net.lag</groupId>
-          <artifactId>configgy</artifactId>
-          <version>1.4</version>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-swing</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+        <dependency>
+             <groupId>org.twitter4j</groupId>
+             <artifactId>twitter4j-core</artifactId>
+             <version>[2.1,)</version>
+         </dependency>
+        <dependency>
+            <groupId>net.lag</groupId>
+            <artifactId>configgy</artifactId>
+            <version>2.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.swinglabs</groupId>
@@ -30,14 +40,29 @@
         </dependency>
         <dependency>
             <groupId>org.scala-tools.testing</groupId>
-            <artifactId>specs</artifactId>
-            <version>1.6.0</version>
+            <artifactId>specs_2.8.0</artifactId>
+            <version>1.6.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.collections</groupId>
+            <artifactId>google-collections</artifactId>
+            <version>1.0-rc1</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.14</version>
         </dependency>
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
           <version>4.5</version>
           <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>joda-time</groupId>
+          <artifactId>joda-time</artifactId>
+          <version>1.6</version>
         </dependency>
     </dependencies>
 
@@ -61,6 +86,7 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <scalaVersion>${scala.version}</scalaVersion>
                     <args>
                         <arg>-target:jvm-1.5</arg>
                     </args>
@@ -80,6 +106,34 @@
                     </descriptorRefs>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <configuration>
+                    <downloadSources>true</downloadSources>
+                    <buildcommands>
+                        <buildcommand>ch.epfl.lamp.sdt.core.scalabuilder</buildcommand>
+                    </buildcommands>
+                    <additionalProjectnatures>
+                        <projectnature>ch.epfl.lamp.sdt.core.scalanature</projectnature>
+                    </additionalProjectnatures>
+                    <classpathContainers>
+                        <classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER</classpathContainer>
+                        <classpathContainer>ch.epfl.lamp.sdt.launching.SCALA_CONTAINER</classpathContainer>
+                    </classpathContainers>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.scala-tools</groupId>
+                <artifactId>maven-scala-plugin</artifactId>
+                <configuration>
+                    <scalaVersion>${scala.version}</scalaVersion>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>

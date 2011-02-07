@@ -1,6 +1,6 @@
 package org.talkingpuffin.mac
 
-import apache.log4j.Logger
+import org.apache.log4j.Logger
 import java.lang.reflect.{Proxy, InvocationHandler, Method}
 
 /**
@@ -23,6 +23,7 @@ object QuitHandler {
             }
             case _ =>
           }
+          null
         }
       }
 

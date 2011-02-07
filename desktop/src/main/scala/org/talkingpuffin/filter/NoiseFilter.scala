@@ -4,6 +4,7 @@ import scala.util.matching.Regex
 import scala.io.Source
 import org.talkingpuffin.Constants
 import org.talkingpuffin.util.Loggable
+import java.net.URL
 
 /**
  * Loads noise filters from a repository and finds noisy tweets.
@@ -32,7 +33,7 @@ object NoiseFilter extends Loggable {
    */
   def load {
     try {
-      val regExStrings = Source.fromURL(Constants.NoiseRepository).getLines.
+      val regExStrings = Source.fromURL(new URL(Constants.NoiseRepository)).getLines.
           map(_.trim).toList.filter(_.length > 0)
       info("Loaded " + regExStrings)
       expressions = regExStrings.map(_.r)

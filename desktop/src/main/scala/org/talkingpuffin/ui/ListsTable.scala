@@ -17,7 +17,7 @@ class ListsTableModel(lists: List[TwitterList]) extends AbstractTableModel {
     columnIndex match {
       case 0 => list.name
       case 1 => list.description
-      case 2 => list.owner.name
+      case 2 => list.owner.getName
       case 3 => list.memberCount.asInstanceOf[Object]
       case 4 => list.subscriberCount.asInstanceOf[Object]
     }

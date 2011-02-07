@@ -1,7 +1,7 @@
 package org.talkingpuffin.filter
 
 import org.talkingpuffin.ui.LinkExtractor
-import org.talkingpuffin.twitter.TwitterStatus
+import twitter4j.Status
 
 /**
  * Methods related to old-style (RT, via, etc.) retweets
@@ -15,8 +15,7 @@ object RetweetDetector {
   private val regexes = List(rtUser, viaUser)
   
   implicit def string2RetweetDetector(text: String) = new RetweetDetector(text)
-  implicit def status2RetweetDetector(status: TwitterStatus) = 
-      new RetweetDetector(status.text)
+  implicit def status2RetweetDetector(status: Status) = new RetweetDetector(status.getText)
 }
   
 class RetweetDetector(text: String) {

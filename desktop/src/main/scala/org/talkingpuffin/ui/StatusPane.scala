@@ -5,8 +5,8 @@ import javax.swing.event._
 import swing.{ScrollPane, GridBagPanel}
 import org.talkingpuffin.filter.{TagUsers, FilterSet}
 import org.talkingpuffin.ui.filter.FiltersDialog
-import org.talkingpuffin.twitter.TwitterStatus
 import org.talkingpuffin.Session
+import twitter4j.Status
 
 /**
  * Displays friend statuses
@@ -15,7 +15,7 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
     filterSet: FilterSet, tagUsers: TagUsers) 
     extends GridBagPanel with TableModelListener with PreChangeListener {
   var table: StatusTable = _
-  private var lastSelectedRows: List[TwitterStatus] = Nil
+  private var lastSelectedRows: List[Status] = Nil
   private var lastRowSelected: Boolean = _
   private val filtersDialog = new FiltersDialog(longTitle, tableModel, filterSet, tagUsers)
 
@@ -86,7 +86,7 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   }
 
   private def showWordCloud {
-    new WordFrequenciesFrame(tableModel.filteredStatuses.map(_.text).mkString(" ")) {
+    new WordFrequenciesFrame(tableModel.filteredStatuses.map(_.getText).mkString(" ")) {
       size = new Dimension(400, 400)
       peer.setLocationRelativeTo(null)
       visible = true

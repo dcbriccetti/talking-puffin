@@ -1,10 +1,10 @@
 package org.talkingpuffin.ui.filter
 
-import java.awt.event.KeyEvent
+import swing.{TabbedPane, Orientation, BoxPanel, Frame, FlowPanel, Action, Button}
+import java.awt.Dimension
 import org.talkingpuffin.filter.{CompoundFilter, TextTextFilter, TagUsers, FilterSet}
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.ui.{StatusTableModel}
-import swing.{TabbedPane, Orientation, BoxPanel, Frame, FlowPanel, Action, Button}
 
 /**
  * Dialog for setting filters
@@ -13,7 +13,7 @@ class FiltersDialog(paneTitle: String, tableModel: StatusTableModel, filterSet: 
     tagUsers: TagUsers) extends Frame with Loggable {
   
   title = paneTitle + " Filters"
-  preferredSize = (600, 600)
+  preferredSize = new Dimension(600, 600)
   
   val generalPane = new GeneralPane
   val includePane = new IncludeExcludePane(tagUsers, "Only Tweets Matching One of", 

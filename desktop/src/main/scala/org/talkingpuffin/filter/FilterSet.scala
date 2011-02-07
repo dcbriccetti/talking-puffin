@@ -2,9 +2,9 @@ package org.talkingpuffin.filter
 
 import scala.swing.Publisher
 import org.talkingpuffin.ui.{Relationships}
-import org.talkingpuffin.twitter.TwitterStatus
 import org.talkingpuffin.filter.RetweetDetector._
 import org.talkingpuffin.util.Loggable
+import twitter4j.Status
 
 /**
  * A set of all filters, and logic to apply them
@@ -24,12 +24,12 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
    * Filter the given list of statuses, returning a list of only those that pass the filters
    * in this set.
    */
-  def filter(statuses: List[TwitterStatus], rels: Relationships): List[TwitterStatus] = {
-    val friendUsernames = rels.friends.map(_.screenName)
+  def filter(statuses: List[Status], rels: Relationships): List[Status] = {
+    val friendUsernames = rels.friends.map(_.getScreenName)
     
-    def includeStatus(status: TwitterStatus): Boolean = {
-      def tagFiltersInclude = includeSet.tags == Nil || includeSet.tagMatches(status.user.id)
-      def excludedByTags = excludeSet.tagMatches(status.user.id)
+    def includeStatus(status: Status): Boolean = {
+      def tagFiltersInclude = includeSet.tags == Nil || includeSet.tagMatches(status.getUser.getId)
+      def excludedByTags = excludeSet.tagMatches(status.getUser.getId)
     
       def excludedByCompoundFilters: Boolean = {
         (includeSet.cpdFilters.list != Nil && !includeSet.cpdFilters.matchesAll(status)) ||
@@ -38,8 +38,8 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
 
       tagFiltersInclude && ! excludedByTags && 
           ! (excludeFriendRetweets && status.isRetweetOfStatusFromFriend(friendUsernames)) &&
-          ! (excludeNonFollowers && ! rels.followerIds.contains(status.user.id)) &&
-          ! (useNoiseFilters && NoiseFilter.isNoise(status.text)) &&
+          ! (excludeNonFollowers && ! rels.followerIds.contains(status.getUser.getId)) &&
+          ! (useNoiseFilters && NoiseFilter.isNoise(status.getText)) &&
           ! excludedByCompoundFilters
     }
 

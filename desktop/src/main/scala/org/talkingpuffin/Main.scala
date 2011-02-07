@@ -1,9 +1,9 @@
 package org.talkingpuffin
 
 import javax.swing.{UIManager, JFrame}
-import mac.{MacInit}
-import ui.{TopFrames, LoginDialog, TopFrame}
 import twitter.AuthenticatedSession
+import mac.MacInit
+import ui.{TopFrame}
 
 /**
  * TalkingPuffin main object
@@ -22,14 +22,6 @@ object Main {
    * Presents the login dialog, and if login is successful, creates a TopFrame.
    */
   def launchSession {
-
-    /**
-     * Called by LoginDialog if login is successful, to create and show a TopFrame.
-     */
-    def startUp(service: String, twitterSession: AuthenticatedSession) {
-      new TopFrame(service, twitterSession)
-    }
-
-    new LoginDialog(TopFrames.exitIfNoFrames, startUp).display
+      new TopFrame("Twitter", new AuthenticatedSession())
   }
 }
