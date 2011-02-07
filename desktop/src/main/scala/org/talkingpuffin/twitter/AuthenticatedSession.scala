@@ -8,7 +8,7 @@ import org.talkingpuffin.util.Loggable
 class AuthenticatedSession extends Loggable {
 
   var twitterUser: User = _
-  def user = twitterUser.getName
+  def user = twitterUser.getScreenName
   
   val twitter = new TwitterFactory().getInstance
   twitter.setOAuthConsumer("Uep9qT3lJ9fHFESZXf9g", "10odNkkH4ZGLkx7oFUS7dsV3VvnwYcC6ZxEriTQ53ps")

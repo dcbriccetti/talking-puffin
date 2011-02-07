@@ -1,23 +1,23 @@
 package org.talkingpuffin.ui
 
 import java.awt.{Rectangle}
-import java.text.NumberFormat
 import scala.swing.event.{WindowClosing}
 import scala.swing.{Reactor, Frame, Label, GridBagPanel}
+import javax.swing.{JInternalFrame, ImageIcon}
+import twitter4j.{User, RateLimitStatusEvent}
 import org.talkingpuffin.{Main, Globals, Session, Constants}
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.twitter.{AuthenticatedSession}
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
 import util.{ColTiler, AppEvent, eventDistributor}
-import javax.swing.{JInternalFrame, ImageIcon}
-import twitter4j.{User, RateLimitStatusEvent}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
  */
-class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable 
+class TopFrame(twitterSession: AuthenticatedSession) extends Frame with Loggable
     with PeoplePaneCreator with Reactor {
+  val service = "twitter" // Only Twitter since change to Twitter4J
   val prefs = GlobalPrefs.prefsForUser(service, twitterSession.user)
   val tagUsers = new TagUsers(service, twitterSession.user)
   TopFrames.addFrame(this)

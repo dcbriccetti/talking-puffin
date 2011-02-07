@@ -19,9 +19,9 @@ object Main {
   }
 
   /**
-   * Presents the login dialog, and if login is successful, creates a TopFrame.
+   * Creates a TopFrame.
    */
   def launchSession {
-      new TopFrame("Twitter", new AuthenticatedSession())
+      new TopFrame(new AuthenticatedSession())
   }
 }
