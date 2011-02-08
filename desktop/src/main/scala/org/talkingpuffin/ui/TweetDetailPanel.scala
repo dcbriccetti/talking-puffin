@@ -79,7 +79,7 @@ class TweetDetailPanel(session: Session,
         val adjacentRowIndex = table.getSelectedRow + offset
         if (adjacentRowIndex >= 0 && adjacentRowIndex < table.getRowCount) {
           prefetch(model.getUserAndStatusAt(
-            table.convertRowIndexToModel(adjacentRowIndex))._1)
+            table.convertRowIndexToModel(adjacentRowIndex)).user)
         }
       })
     }
@@ -90,9 +90,9 @@ class TweetDetailPanel(session: Session,
           if (activateable.isActive && table.getSelectedRowCount == 1) {
             try {
               val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
-              val (user, retweetedUser, status) = model.getUserAndStatusAt(modelRowIndex)
+              val userAndStatus = model.getUserAndStatusAt(modelRowIndex)
               currentActivateable = Some(activateable)
-              showStatusDetails(user, retweetedUser, status, filtersDialog)
+              showStatusDetails(userAndStatus, filtersDialog)
               prefetchAdjacentRows        
             } catch {
               case ex: IndexOutOfBoundsException => println(ex)
@@ -122,21 +122,19 @@ class TweetDetailPanel(session: Session,
   
   private def getFiltersDialog: Option[FiltersDialog] = None
   
-  private def showStatusDetails(topUser: User, retweetedUser: Option[User],
-      status: Option[Status], filtersDialog: Option[FiltersDialog]) {
-    val user = if (retweetedUser.isDefined) retweetedUser.get else topUser
+  private def showStatusDetails(ustat: UserAndStatus, filtersDialog: Option[FiltersDialog]) {
     session.clearMessage()
-    setText(user, status)
+    setText(ustat.origUser, ustat.status)
     largeTweetScrollPane.setVisible(true)
     userDescScrollPane.setVisible(true)
     picture.visible = true
-    status match {
+    ustat.status match {
       case None => largeTweet.setText(null) 
       case Some(topStatus) =>
         val st = topStatus //todo .retweetOrTweet
         largeTweet.filtersDialog = filtersDialog
         largeTweet.setText(HtmlFormatter.createTweetHtml(st.getText,
-          st.inReplyToStatusId, st.getSource, if (retweetedUser.isDefined) Some(topUser) else None))
+          st.inReplyToStatusId, st.getSource, if (ustat.retweetedUser.isDefined) Some(ustat.user) else None))
 
         if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
           def replaceUrl(shortUrl: String, fullUrl: String) = {
@@ -153,7 +151,7 @@ class TweetDetailPanel(session: Session,
     }
     largeTweet setCaretPosition 0
 
-    showMediumPicture(user.getProfileImageURL.toString)
+    showMediumPicture(ustat.origUser.getProfileImageURL.toString)
   }
   
   def clearStatusDetails {

@@ -113,11 +113,10 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
 
   def getStatusAt(rowIndex: Int): Status = filteredStatuses_(rowIndex)
   
-  def getUserAndStatusAt(rowIndex: Int): Tuple3[User, Option[User], Option[Status]] = {
+  def getUserAndStatusAt(rowIndex: Int): UserAndStatus = {
     val status = getStatusAt(rowIndex)
-    (status.getUser,
-      None, //todo if (status.retweet.isDefined) Some(status.retweet.get.user) else None,
-      Some(status))
+    UserAndStatus(status.getUser,
+      if (status.retweet.isDefined) Some(status.retweet.get.getUser) else None, Some(status))
   }
 
   override def getColumnClass(col: Int) = List(

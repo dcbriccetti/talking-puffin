@@ -6,6 +6,7 @@ import twitter4j.Status
 case class RichStatus(status: Status) {
   def inReplyToScreenName: Option[String] = makeOption(status.getInReplyToScreenName)
   def inReplyToStatusId  : Option[Long]   = makeOption(status.getInReplyToStatusId)
+  def retweet            : Option[Status] = makeOption(status.getRetweetedStatus)
   def createdAt = new DateTime(status.getCreatedAt)
 
   private def makeOption[T](value: Any): Option[T] = value match {
