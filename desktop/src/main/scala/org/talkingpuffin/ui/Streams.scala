@@ -39,8 +39,8 @@ class Streams(val service: String, val prefs: Preferences,
     val model = dataProvider match {
       case p: MentionsProvider => new StatusTableModel(session, sto, p, relationships, screenNameToUserNameMap,
         filterSet, service, tagUsers) with Mentions
-      case p: DmsSentProvider => new StatusTableModel(session, sto, p, relationships, screenNameToUserNameMap,
-        filterSet, service, tagUsers) with DmsSent
+      /*todo case p: DmsSentProvider => new StatusTableModel(session, sto, p, relationships, screenNameToUserNameMap,
+        filterSet, service, tagUsers) with DmsSent*/
       case p: BaseProvider => new StatusTableModel(session, sto, p, relationships, screenNameToUserNameMap,
         filterSet, service, tagUsers)
     }

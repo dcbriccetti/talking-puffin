@@ -1,73 +1,68 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing.event.Event
-import _root_.scala.xml.{NodeSeq}
+import scala.collection.JavaConversions._
+import scala.swing.event.Event
 import org.talkingpuffin.util.Loggable
-import org.talkingpuffin.twitter.{TwitterMessage, AuthenticatedSession, TwitterArgs, TwitterStatus}
-import org.talkingpuffin.Session
+import twitter4j.Paging
+import org.talkingpuffin.{Constants, Session}
+import org.talkingpuffin.twitter.TwitterArgs
 
-case class NewTwitterDataEvent(val data: List[AnyRef], val clear: Boolean) extends Event
+case class NewTwitterDataEvent(data: List[AnyRef], clear: Boolean) extends Event
 
 abstract class TweetsProvider(session: Session, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends
     DataProvider(session, startingId, providerName, longOpListener) with Loggable {
-  override def getResponseId(response: TwitterDataWithId): Long = response.id
+
+  override def getResponseId(response: TwitterDataWithId): Long = response.getId
 }
 
-class FollowingProvider(session: Session, startingId: Option[Long], 
-    longOpListener: LongOpListener)
+class FollowingProvider(session: Session, startingId: Option[Long], longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, "Following", longOpListener) {
-  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.twitterSession.getHomeTimeline
+  override def updateFunc(args: TwitterArgs) =
+    session.twitterSession.twitter.getHomeTimeline(paging(args.since)).toList.map(_.asInstanceOf[TwitterDataWithId])
 }
 
-class MentionsProvider(session: Session, startingId: Option[Long], 
-    longOpListener: LongOpListener)
+class MentionsProvider(session: Session, startingId: Option[Long], longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, "Mentions", longOpListener) {
-  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.twitterSession.getReplies
+  override def updateFunc(args: TwitterArgs) =
+    session.twitterSession.twitter.getMentions(paging(args.since)).toList.map(_.asInstanceOf[TwitterDataWithId])
 }
 
-class RetweetsOfMeProvider(session: Session, startingId: Option[Long], 
-    longOpListener: LongOpListener)
+class RetweetsOfMeProvider(session: Session, startingId: Option[Long], longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, "RTs of Me", longOpListener) {
-  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.twitterSession.getRetweetsOfMe
+  override def updateFunc(args: TwitterArgs) = session.twitterSession.twitter.getRetweetsOfMe(paging(args.since)).toList.map(_.asInstanceOf[TwitterDataWithId])
 }
 
-class RetweetedByMeProvider(session: Session, startingId: Option[Long], 
-    longOpListener: LongOpListener)
+class RetweetedByMeProvider(session: Session, startingId: Option[Long], longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, "RTs by Me", longOpListener) {
-  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.twitterSession.getRetweetedByMe
+  override def updateFunc(args: TwitterArgs) = session.twitterSession.twitter.getRetweetedByMe(paging(args.since)).toList.map(_.asInstanceOf[TwitterDataWithId])
 }
 
-class RetweetedToMeProvider(session: Session, startingId: Option[Long], 
-    longOpListener: LongOpListener)
+class RetweetedToMeProvider(session: Session, startingId: Option[Long], longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, "RTs to Me", longOpListener) {
-  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.twitterSession.getRetweetedToMe
+  override def updateFunc(args: TwitterArgs) = session.twitterSession.twitter.getRetweetedToMe(paging(args.since)).toList.map(_.asInstanceOf[TwitterDataWithId])
 }
 
-class DmsReceivedProvider(session: Session, startingId: Option[Long], 
-    longOpListener: LongOpListener)
-    extends DataProvider(session, startingId, "DMs Rcvd", longOpListener) {
-  def updateFunc:(TwitterArgs) => List[TwitterMessage] = session.twitterSession.getDirectMessages
-  override def getResponseId(response: TwitterDataWithId): Long = response.id
-}
-
-class DmsSentProvider(session: Session, startingId: Option[Long], 
-    longOpListener: LongOpListener)
-    extends DataProvider(session, startingId, "DMs Sent", longOpListener) {
-  def updateFunc:(TwitterArgs) => List[TwitterMessage] = session.twitterSession.getSentMessages
-  override def getResponseId(response: TwitterDataWithId): Long = response.id
-}
-
-class FavoritesProvider(session: Session, id: String, startingId: Option[Long], 
+class FavoritesProvider(session: Session, id: String, startingId: Option[Long],
     longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, id + " Favorites", longOpListener) {
-  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.twitterSession.getFavoritesFor(id)
+  override def updateFunc(args: TwitterArgs) = session.twitterSession.twitter.getFavorites.toList.map(_.asInstanceOf[TwitterDataWithId])
 }
 
-class ListStatusesProvider(session: Session, userId: String, listId: String, 
+/* todo class ListStatusesProvider(session: Session, userId: String, listId: String,
     startingId: Option[Long], longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, userId + " " + listId + " List", longOpListener) {
-  override def updateFunc:(TwitterArgs) => List[TwitterStatus] = session.twitterSession.getListStatusesFor(userId, listId)
+  override def updateFunc(args: TwitterArgs) = session.twitterSession.twitter.getUserListStatuses(userId, listId, new Paging)
+}*/
+
+/* todo class DmsReceivedProvider(session: Session, startingId: Option[Long], longOpListener: LongOpListener)
+    extends DataProvider(session, startingId, "DMs Rcvd", longOpListener) {
+  override def getResponseId(response: TwitterDataWithId): Long = response.getId
+  override def updateFunc(args: TwitterArgs) = session.twitterSession.twitter.getDirectMessages(paging(args.since)).toList.map(_.asInstanceOf[TwitterDataWithId])
 }
 
-case class TweetsArrived(tweets: NodeSeq) extends Event
+class DmsSentProvider(session: Session, startingId: Option[Long], longOpListener: LongOpListener)
+    extends DataProvider(session, startingId, "DMs Sent", longOpListener) {
+  override def getResponseId(response: TwitterDataWithId): Long = response.getId
+  override def updateFunc(args: TwitterArgs) = session.twitterSession.twitter.getSentDirectMessages(paging(args.since)).toList.map(_.asInstanceOf[TwitterDataWithId])
+}*/

@@ -1,22 +1,24 @@
 package org.talkingpuffin.ui
 
 import java.awt.{Rectangle}
+import javax.swing.{JInternalFrame, ImageIcon}
 import java.text.NumberFormat
 import scala.swing.event.{WindowClosing}
-import swing.{Reactor, Frame, Label, GridBagPanel}
+import scala.swing.{Reactor, Frame, Label, GridBagPanel}
+import twitter4j.{User, RateLimitStatusEvent}
 import org.talkingpuffin.{Main, Globals, Session, Constants}
 import org.talkingpuffin.filter.TagUsers
-import org.talkingpuffin.twitter.{RateLimitStatusEvent, TwitterUser, AuthenticatedSession}
+import org.talkingpuffin.twitter.{AuthenticatedSession}
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
 import util.{ColTiler, AppEvent, eventDistributor}
-import javax.swing.{JInternalFrame, ImageIcon}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
  */
-class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Frame with Loggable 
+class TopFrame(twitterSession: AuthenticatedSession) extends Frame with Loggable
     with PeoplePaneCreator with Reactor {
+  val service = "twitter" // Only Twitter since change to Twitter4J
   val prefs = GlobalPrefs.prefsForUser(service, twitterSession.user)
   val tagUsers = new TagUsers(service, twitterSession.user)
   TopFrames.addFrame(this)
@@ -29,8 +31,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   val mainToolBar = new MainToolBar
   session.progress = mainToolBar
-  setUpUserStatusReactor
-  
+
   val rels = new Relationships()
   
   val providers = new DataProviders(session, prefs, session.progress)
@@ -55,7 +56,8 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
   contents = new GridBagPanel {
     val userPic = new Label
     val picFetcher = new PictureFetcher("Frame picture " + hashCode, None)
-    picFetcher.requestItem(new FetchRequest(twitterSession.getUserDetail().profileImageURL, null, 
+    picFetcher.requestItem(new FetchRequest(twitterSession.twitter.showUser(twitterSession.user).
+      getProfileImageURL.toString, null,
       (imageReady: PictureFetcher.ImageReady) => {
         if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
           userPic.icon = imageReady.resource.image 
@@ -92,16 +94,15 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   def setFocus = streams.views.last.pane.requestFocusForTable
   
-  def close {
+  override def close {
     streams.stop
-    deafTo(twitterSession.httpPublisher)
     Globals.sessions -= session
     dispose
     StateSaver.save(streams, session.userPrefs, tagUsers)
     TopFrames.removeFrame(this)
   }
 
-  type Users = List[TwitterUser]
+  type Users = List[User]
   
   def createPeoplePane(longTitle: String, otherRels: Option[Relationships], users: Option[Users], 
         updatePeople: Option[() => Unit], location: Option[Rectangle]): PeoplePane = {
@@ -114,9 +115,9 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     val customRels = if (users.isDefined) {
       new Relationships {
         friends = rels.friends intersect users.get
-        friendIds = friends map(_.id)
+        friendIds = friends map(_.getId.toLong)
         followers = rels.followers intersect users.get
-        followerIds = followers map(_.id)
+        followerIds = followers map(_.getId.toLong)
       }
     } else getRels
     val peoplePane = new PeoplePane(session, model, customRels, updatePeople)
@@ -139,15 +140,6 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
         Some(updatePeople _), None)
   }
   
-  private def setUpUserStatusReactor {
-    reactions += {
-      case e: RateLimitStatusEvent => SwingInvoke.later {
-        mainToolBar.remaining.text = NumberFormat.getIntegerInstance.format(e.status.remainingHits)
-      }
-    }
-    listenTo(twitterSession.httpPublisher)
-  }
-
   private def tileViews(numRows: Int) {
     val frames = (for {
       v <- session.windows.streams.views

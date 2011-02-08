@@ -59,7 +59,7 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
     contents += new MenuItem(Action("Tile, 2 rows") {pub(2)})
     contents += new MenuItem(Action("Tile, 3 rows") {pub(3)})
   }
-  
+
   contents += new Menu("Lists") {
     contents += new Menu("Export tag to list") {
       tagUsers.getTags.foreach(tag => {
@@ -116,7 +116,7 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
   
 }
 
-case class NewViewEvent(override val session: Session, val provider: DataProvider, include: Option[String]) 
+case class NewViewEvent(override val session: Session, provider: DataProvider, include: Option[String])
     extends AppEvent(session)
 case class NewFollowingViewEvent(override val session: Session, include: Option[String]) extends AppEvent(session)
 case class NewPeoplePaneEvent(override val session: Session) extends AppEvent(session)

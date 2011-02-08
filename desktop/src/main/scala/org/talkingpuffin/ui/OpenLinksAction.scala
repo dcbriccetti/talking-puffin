@@ -3,12 +3,13 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.{Action,MenuItem}
 import java.awt.event.KeyEvent
 import javax.swing.{JTable, KeyStroke, JPopupMenu}
-import org.talkingpuffin.twitter.{TwitterStatus}
+import twitter4j.Status
+import org.talkingpuffin.twitter.RichStatus._
 
 /**
  * Shows a menu of links, or launches the browser on the link if there is only one. 
  */
-abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
+abstract class OpenLinksAction(getSelectedStatus: => Option[Status], table: JTable,
     browse: (String) => Unit, title: String) extends Action(title) {
   
   def apply {
@@ -30,7 +31,7 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], tabl
 
     getSelectedStatus match {
       case Some(status) =>
-        val urls = LinkExtractor.getLinks(status.text, status.inReplyToStatusId, users, pages, lists)
+        val urls = LinkExtractor.getLinks(status.getText, status.inReplyToStatusId, users, pages, lists)
   
         if (urls.length == 1) {
           browse(urls(0)._2)
@@ -60,7 +61,7 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[TwitterStatus], tabl
   def lists: Boolean
 }
 
-class OpenPageLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
+class OpenPageLinksAction(getSelectedStatus: => Option[Status], table: JTable,
     browse: (String) => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,
     "Open Links…") {
   def users = false
@@ -68,7 +69,7 @@ class OpenPageLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JT
   def lists = false
 }
 
-class OpenTwitterUserLinksAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
+class OpenTwitterUserLinksAction(getSelectedStatus: => Option[Status], table: JTable,
     browse: (String) => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,  
     "Open User Links…") {
   def users = true
@@ -76,7 +77,7 @@ class OpenTwitterUserLinksAction(getSelectedStatus: => Option[TwitterStatus], ta
   def lists = false
 }
 
-class OpenTwitterUserListsAction(getSelectedStatus: => Option[TwitterStatus], table: JTable,
+class OpenTwitterUserListsAction(getSelectedStatus: => Option[Status], table: JTable,
     browse: (String) => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,  
     "Open User Lists…") {
   def users = false

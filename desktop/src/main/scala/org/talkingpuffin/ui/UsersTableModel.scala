@@ -6,10 +6,12 @@ import swing.Reactor
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.ui.table.EmphasizedString
 import org.talkingpuffin.util.Loggable
+import org.talkingpuffin.twitter.RichUser._
+import org.talkingpuffin.twitter.RichStatus._
 import java.util.Date
-import org.talkingpuffin.twitter.{TwitterStatus, TwitterUser}
+import twitter4j.{User, Status}
 
-class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers, 
+class UsersTableModel(users: Option[List[User]], val tagUsers: TagUsers,
     val relationships: Relationships) 
     extends UserAndStatusProvider with TaggingSupport with Reactor with Loggable {
   
@@ -43,25 +45,25 @@ class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers,
     val user = usersModel.users(rowIndex)
     columnIndex match {
       case UserColumns.ARROWS => usersModel.arrows(rowIndex)
-      case UserColumns.DESCRIPTION => user.description
-      case UserColumns.LOCATION => user.location
-      case UserColumns.NAME => user.name
+      case UserColumns.DESCRIPTION => user.getDescription
+      case UserColumns.LOCATION => user.getLocation
+      case UserColumns.NAME => user.getName
       case UserColumns.PICTURE => {
-        val picUrl = user.profileImageURL
+        val picUrl = user.getProfileImageURL.toString
         pcell.request(picUrl, rowIndex)
       }
-      case UserColumns.SCREEN_NAME => new EmphasizedString(Some(user.screenName), relationships.followers.contains(user))
-      case UserColumns.FRIENDS => user.friendsCount.asInstanceOf[Object]
-      case UserColumns.FOLLOWERS => user.followersCount.asInstanceOf[Object]
+      case UserColumns.SCREEN_NAME => new EmphasizedString(Some(user.getScreenName), relationships.followers.contains(user))
+      case UserColumns.FRIENDS => user.getFriendsCount.asInstanceOf[Object]
+      case UserColumns.FOLLOWERS => user.getFollowersCount.asInstanceOf[Object]
       case UserColumns.STATUS => user.status match {
-        case Some(status) => status.text
+        case Some(status) => status.getText
         case None => ""
       }
       case UserColumns.STATUS_DATE => user.status match {
         case Some(status) => status.createdAt.toDate
         case None => new Date(0)
       }
-      case UserColumns.TAGS => tagUsers.tagsForUser(user.id).mkString(", ")
+      case UserColumns.TAGS => tagUsers.tagsForUser(user.getId).mkString(", ")
       case _ => null
     }
   }
@@ -69,15 +71,15 @@ class UsersTableModel(users: Option[List[TwitterUser]], val tagUsers: TagUsers,
   
   def getRowAt(rowIndex: Int) = usersModel.users(rowIndex)
   
-  def getUserAndStatusAt(rowIndex: Int): Tuple3[TwitterUser, Option[TwitterUser], Option[TwitterStatus]] = {
+  def getUserAndStatusAt(rowIndex: Int): UserAndStatus = {
     val user = getRowAt(rowIndex)
-    (user, None, user.status)
+    UserAndStatus(user, None, user.status)
   }
 
-  def getUsers(rows: List[Int]): List[User] = 
+  def getUsers(rows: List[Int]): List[UserIdName] =
     rows.map(rowIndex => {
       val user = usersModel.users(rowIndex)
-      new User(user.id, user.name)
+      new UserIdName(user.getId, user.getName)
     })
 
   private[ui] def buildModelData(sel: UserSelection) {

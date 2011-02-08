@@ -16,11 +16,12 @@ import org.jdesktop.swingx.event.TableColumnModelExtListener
 import org.jdesktop.swingx.JXTable
 import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
-import org.talkingpuffin.twitter.{TwitterStatus}
 import org.talkingpuffin.Session
 import table.{AgeCellRenderer, EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
 import util.{TableUtil, DesktopUtil, Activateable}
 import org.talkingpuffin.util.{LinkUnIndirector, Loggable, PopupListener}
+import twitter4j.Status
+import org.talkingpuffin.twitter.RichStatus._
 
 /**
  * Table of statuses.
@@ -58,7 +59,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
 
   private val mh = new PopupMenuHelper(this)
   private var specialMenuItems = new SpecialMenuItems(this, tableModel.relationships,
-      getSelectedStatuses map(_.user.id), getSelectedScreenNames, 
+      getSelectedStatuses map(_.getUser.getId.toLong), getSelectedScreenNames,
       {getSelectedStatuses.exists(_.inReplyToStatusId.isDefined)})
   buildActions
 
@@ -88,18 +89,18 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     }
   }
   
-  private def viewSelected = getSelectedStatuses.foreach(status => 
-    DesktopUtil.browse("http://twitter.com/" + status.user.screenName + "/statuses/" + status.id))
+  private def viewSelected = getSelectedStatuses.foreach(status =>
+    DesktopUtil.browse("http://twitter.com/" + status.getUser.getScreenName + "/statuses/" + status.getId))
  
   private def viewSourceSelected = getSelectedStatuses.foreach(status => 
-    DesktopUtil.browse("http://twitter.com/statuses/show/" + status.id + ".xml"))
+    DesktopUtil.browse("http://twitter.com/statuses/show/" + status.getId + ".xml"))
  
   private def viewUser = getSelectedScreenNames.foreach(screenName => 
     DesktopUtil.browse("http://twitter.com/" + screenName))
 
   private def viewParent = getSelectedStatuses.foreach(status => 
     if (status.inReplyToScreenName.isDefined && status.inReplyToStatusId.isDefined)
-      DesktopUtil.browse("http://twitter.com/" + status.inReplyToScreenName.get + 
+      DesktopUtil.browse("http://twitter.com/" + status.inReplyToScreenName.get +
           "/statuses/" + status.inReplyToStatusId.get)
   )
  
@@ -117,7 +118,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   def reply {
     val statuses = getSelectedStatuses
     if (! statuses.isEmpty) {
-      val recipients = statuses.map(("@" + _.user.screenName)).mkString(" ")
+      val recipients = statuses.map(("@" + _.getUser.getScreenName)).mkString(" ")
       createSendMsgDialog(statuses(0), Some(recipients), None).visible = true
     }
   }
@@ -127,20 +128,20 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   
   private def retweetOldWay {
     val status = getSelectedStatuses(0) 
-    val name = "@" + status.user.screenName
-    createSendMsgDialog(status, Some(name), Some(status.text)).visible = true
+    val name = "@" + status.getUser.getScreenName
+    createSendMsgDialog(status, Some(name), Some(status.getText)).visible = true
   }
   
-  private def retweetNewWay = process(getSelectedStatuses.map(_.id), session.twitterSession.retweet, 
-    "retweeting", "Status %s retweeted.")
+  private def retweetNewWay = process(getSelectedStatuses.map(_.getId), session.twitterSession.twitter.retweetStatus,
+      "retweeting", "Status %s retweeted.")
   
-  private def createSendMsgDialog(status: TwitterStatus, names: Option[String], retweetMsg: Option[String]) =
-    new SendMsgDialog(session, null, names, Some(status.id), retweetMsg, false)
+  private def createSendMsgDialog(status: Status, names: Option[String], retweetMsg: Option[String]) =
+    new SendMsgDialog(session, null, names, Some(status.getId), retweetMsg, false)
   
-  private def getSelectedScreenNames = getSelectedStatuses.map(_.user.screenName).removeDuplicates
+  private def getSelectedScreenNames = getSelectedStatuses.map(_.getUser.getScreenName).removeDuplicates
   def getSelectedStatuses = tableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
 
-  def getSelectedStatus: Option[TwitterStatus] = {
+  def getSelectedStatus: Option[Status] = {
     val row = getSelectedRow
     if (row == -1) None else Some(tableModel.getStatusAt(convertRowIndexToModel(row)))
   }

@@ -8,13 +8,14 @@ import java.awt.{Color, Dimension, Insets, Font}
 import scala.swing.{Label, GridBagPanel, TextArea}
 import scala.swing.GridBagPanel._
 import scala.swing.GridBagPanel.Anchor._
-import org.talkingpuffin.twitter.{TwitterStatus,TwitterUser}
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
 import org.talkingpuffin.Session
 import org.talkingpuffin.ui.filter.FiltersDialog
 import util.{Activateable, CenteredPicture, TextChangingAnimator}
 import org.talkingpuffin.util._
+import twitter4j.{User, Status}
+import org.talkingpuffin.twitter.RichStatus._
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE))
 
@@ -36,7 +37,7 @@ class TweetDetailPanel(session: Session,
   private var userDescription: TextArea = _
   private var largeTweet = new LargeTweet(session, background, getActivateable _)
   private var showingUrl: String = _
-  private var showingUser: TwitterUser = _
+  private var showingUser: User = _
           
   val largeTweetScrollPane = new JScrollPane {
     val dim = new Dimension(600, 140); setMinimumSize(dim); setPreferredSize(dim)
@@ -78,7 +79,7 @@ class TweetDetailPanel(session: Session,
         val adjacentRowIndex = table.getSelectedRow + offset
         if (adjacentRowIndex >= 0 && adjacentRowIndex < table.getRowCount) {
           prefetch(model.getUserAndStatusAt(
-            table.convertRowIndexToModel(adjacentRowIndex))._1)
+            table.convertRowIndexToModel(adjacentRowIndex)).user)
         }
       })
     }
@@ -89,9 +90,9 @@ class TweetDetailPanel(session: Session,
           if (activateable.isActive && table.getSelectedRowCount == 1) {
             try {
               val modelRowIndex = table.convertRowIndexToModel(table.getSelectedRow)
-              val (user, retweetedUser, status) = model.getUserAndStatusAt(modelRowIndex)
+              val userAndStatus = model.getUserAndStatusAt(modelRowIndex)
               currentActivateable = Some(activateable)
-              showStatusDetails(user, retweetedUser, status, filtersDialog)
+              showStatusDetails(userAndStatus, filtersDialog)
               prefetchAdjacentRows        
             } catch {
               case ex: IndexOutOfBoundsException => println(ex)
@@ -121,21 +122,19 @@ class TweetDetailPanel(session: Session,
   
   private def getFiltersDialog: Option[FiltersDialog] = None
   
-  private def showStatusDetails(topUser: TwitterUser, retweetedUser: Option[TwitterUser], 
-      status: Option[TwitterStatus], filtersDialog: Option[FiltersDialog]) {
-    val user = if (retweetedUser.isDefined) retweetedUser.get else topUser
+  private def showStatusDetails(ustat: UserAndStatus, filtersDialog: Option[FiltersDialog]) {
     session.clearMessage()
-    setText(user, status)
+    setText(ustat.origUser, ustat.status)
     largeTweetScrollPane.setVisible(true)
     userDescScrollPane.setVisible(true)
     picture.visible = true
-    status match {
+    ustat.status match {
       case None => largeTweet.setText(null) 
       case Some(topStatus) =>
-        val st = topStatus.retweetOrTweet
+        val st = topStatus //todo .retweetOrTweet
         largeTweet.filtersDialog = filtersDialog
-        largeTweet.setText(HtmlFormatter.createTweetHtml(st.text,
-          st.inReplyToStatusId, st.source, if (retweetedUser.isDefined) Some(topUser) else None))
+        largeTweet.setText(HtmlFormatter.createTweetHtml(st.getText,
+          st.inReplyToStatusId, st.source, if (ustat.retweetedUser.isDefined) Some(ustat.user) else None))
 
         if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
           def replaceUrl(shortUrl: String, fullUrl: String) = {
@@ -147,12 +146,12 @@ class TweetDetailPanel(session: Session,
             }
           }
       
-          ShortUrl.getExpandedUrls(st.text, replaceUrl)
+          ShortUrl.getExpandedUrls(st.getText, replaceUrl)
         } 
     }
     largeTweet setCaretPosition 0
 
-    showMediumPicture(user.profileImageURL)
+    showMediumPicture(ustat.origUser.getProfileImageURL.toString)
   }
   
   def clearStatusDetails {
@@ -169,22 +168,23 @@ class TweetDetailPanel(session: Session,
   
   def showBigPicture = bigPic.showBigPicture(showingUrl, peer)
 
-  private def setText(user: TwitterUser, statusOp: Option[TwitterStatus]) {
+  private def setText(user: User, statusOp: Option[Status]) {
     animator.stop
     showingUser = user
-    val rawLocationOfShowingItem = user.location
+    val rawLocationOfShowingItem = user.getLocation
 
     statusOp match {
       case None =>
       case Some(topStatus) =>
-        val status = topStatus.retweetOrTweet
+        val status = topStatus //todo .retweetOrTweet
         if (GlobalPrefs.isOn(PrefKeys.LOOK_UP_LOCATIONS)) {
-          (status.location match {
-            case Some(location) => {
-              val key = GeoCoder.formatLatLongKey(location)
+          (status.getGeoLocation match {
+            case null => GeoCoder.extractLatLong(rawLocationOfShowingItem)
+            case location => {
+              val key = GeoCoder.formatLatLongKey(String.valueOf(location.getLatitude),
+                String.valueOf(location.getLongitude))
               Some(key)
             }
-            case None => GeoCoder.extractLatLong(rawLocationOfShowingItem)
           }) match {
             case Some(latLong) =>
               GeoCoder.getCachedObject(latLong) match {
@@ -203,16 +203,16 @@ class TweetDetailPanel(session: Session,
     setText(user, rawLocationOfShowingItem)
   }
   
-  private def setText(user: TwitterUser, location: String) {
+  private def setText(user: User, location: String) {
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
 
     userDescription.text = UserProperties.overriddenUserName(session.userPrefs, user) + 
-        " (" + user.screenName + ")\n" +
+        " (" + user.getScreenName + ")\n" +
         location + "\n\n" + 
-        user.description  + "\n\n" +
-        fmt(user.followersCount) + " followers, following " +
-        fmt(user.friendsCount) +
-        (session.tagUsers.tagsForUser(user.id) match { 
+        user.getDescription + "\n\n" +
+        fmt(user.getFollowersCount) + " followers, following " +
+        fmt(user.getFriendsCount) +
+        (session.tagUsers.tagsForUser(user.getId) match {
           case Nil => "" 
           case tags => "\n\nTags: " + tags.mkString(", ")
         })
@@ -221,7 +221,7 @@ class TweetDetailPanel(session: Session,
   private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
     if (resourceReady.userData == showingUser) {
       animator.stop
-      animator.run(showingUser.location, resourceReady.resource, 
+      animator.run(showingUser.getLocation, resourceReady.resource,
           (text: String) => setText(showingUser, text))
     }
   }
@@ -232,8 +232,8 @@ class TweetDetailPanel(session: Session,
     }
   }
   
-  def prefetch(user: TwitterUser) {
-    val smallUrl = user.profileImageURL
+  def prefetch(user: User) {
+    val smallUrl = user.getProfileImageURL.toString
     val mediumUrl = PictureFetcher.getFullSizeUrl(smallUrl)
     List(smallUrl, mediumUrl).foreach(url => medThumbPicFetcher.requestItem(
         medThumbPicFetcher.FetchImageRequest(url, null, processFinishedPicture)))

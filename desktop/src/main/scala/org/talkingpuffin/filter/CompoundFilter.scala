@@ -1,8 +1,8 @@
 package org.talkingpuffin.filter
 
-import org.talkingpuffin.twitter.TwitterStatus
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.filter.RetweetDetector._
+import twitter4j.Status
 
 /**
  * Used to match a tweet against a set of TextFilters and retweet options.
@@ -14,7 +14,7 @@ case class CompoundFilter(val textFilters: List[TextFilter],
   /**
    * Whether the specified tweet matches all the elements of this CompoundFilter.
    */
-  def matches(status: TwitterStatus): Boolean = {
+  def matches(status: Status): Boolean = {
 
     def allTextFiltersMatch = textFilters.forall(tf => {
       val text = tf.text
@@ -29,7 +29,7 @@ case class CompoundFilter(val textFilters: List[TextFilter],
     def retweetFilterMatches = booleanFilterMatches(retweet, status.isRetweet)
 
     def commentedRetweetFilterMatches = booleanFilterMatches(
-        commentedRetweet, status.isCommentedRetweet)
+        commentedRetweet, false) // todo status.isCommentedRetweet)
 
     def booleanFilterMatches(filter: Option[Boolean], value: Boolean) = filter match {
       case Some(f) => f == value

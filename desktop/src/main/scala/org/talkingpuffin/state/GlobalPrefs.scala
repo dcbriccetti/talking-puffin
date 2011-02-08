@@ -11,7 +11,7 @@ object GlobalPrefs {
   val prefs = Preferences.userRoot.node("/org/talkingpuffin/all")
   val publisher = new Publisher {}
   
-  case class PrefChangedEvent(val key: String, val value: Any) extends Event
+  case class PrefChangedEvent(key: String, value: Any) extends Event
   
   def prefsForUser(service: String, username: String) =
     Preferences.userRoot.node("/org/talkingpuffin/streams/" + service.toLowerCase + "/" + username)

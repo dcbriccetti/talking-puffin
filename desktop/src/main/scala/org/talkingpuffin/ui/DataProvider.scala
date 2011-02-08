@@ -2,16 +2,17 @@ package org.talkingpuffin.ui
 
 import java.util.Date
 import java.awt.event.{ActionListener, ActionEvent}
+import javax.swing.{Timer, SwingWorker}
 import swing.event.Event
 import swing.Publisher
 import org.apache.log4j.Logger
-import util.TitleCreator
 import org.joda.time.DateTime
-import javax.swing.{Timer, SwingWorker}
-import org.talkingpuffin.twitter.{Constants, TwitterArgs, AuthenticatedSession}
+import twitter4j.Paging
+import util.TitleCreator
 import org.talkingpuffin.Session
+import org.talkingpuffin.twitter.{TwitterArgs, Constants}
 
-abstract class DataProvider(session: Session, startingId: Option[Long], 
+abstract class DataProvider(session: Session, startingId: Option[Long],
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
     with Publisher with ErrorHandler {
   
@@ -68,13 +69,20 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
       timer.stop
   }
   
-  def loadLastBlockOfTweets() = loadAndPublishData(TwitterArgs.maxResults(Constants.MaxItemsPerRequest), true)
+  def loadLastBlockOfTweets() = loadAndPublishData(TwitterArgs(None), true)
 
-  type TwitterDataWithId = {def id: Long} 
+  type TwitterDataWithId = {def getId: Long}
 
   def getResponseId(response: TwitterDataWithId): Long
 
-  protected def updateFunc:(TwitterArgs) => List[TwitterDataWithId]
+  protected def paging(highestId: Option[Long] = getHighestId): Paging = {
+    val paging = new Paging
+    paging.setCount(Constants.MaxItemsPerRequest)
+    highestId.foreach(paging.setSinceId)
+    paging
+  }
+
+  def updateFunc(args: TwitterArgs): List[TwitterDataWithId]
 
   private def computeHighestId(tweets: List[TwitterDataWithId], maxId: Option[Long]):Option[Long] = tweets match {
     case tweet :: rest => maxId match {
@@ -84,11 +92,6 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     case Nil => maxId
   }
 
-  private def addSince(args: TwitterArgs) = highestId match {
-    case None => args
-    case Some(i) => args.since(i)
-  }
-  
   private def restartTimer {
     def publishNextLoadTime = publish(NextLoadAt(new DateTime((new Date).getTime + updateFrequencyMs)))
 
@@ -109,11 +112,11 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     
   }
 
-  private def loadNewDataInternal = loadAndPublishData(addSince(TwitterArgs.maxResults(Constants.MaxItemsPerRequest)), false)
+  private def loadNewDataInternal = loadAndPublishData(TwitterArgs(highestId), false)
 
 }
 
-case class NextLoadAt(val when: DateTime) extends Event
+case class NextLoadAt(when: DateTime) extends Event
 
 abstract class BaseProvider(val providerName: String) extends Publisher {
   def loadContinually()
