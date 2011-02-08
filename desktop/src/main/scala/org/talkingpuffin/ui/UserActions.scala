@@ -8,6 +8,7 @@ import swing.Action
 import javax.swing.KeyStroke.{getKeyStroke => ks}
 import javax.swing.JTable
 import java.awt.{Toolkit}
+import org.talkingpuffin.twitter.TwitterArgs
 import org.talkingpuffin.Session
 import org.talkingpuffin.util.Loggable
 import util.Tiler
@@ -18,23 +19,22 @@ import util.Tiler
 class UserActions(val session: Session, rels: Relationships) extends ActionProcessor with Loggable {
   val tsess = session.twitterSession
 
-  /* todo
-  def follow(names: List[String]) = process(names, tsess.createFriendship, "following", "Now following %s.")
+  def follow(names: List[String]) = {}//todo process(names, tsess.createFriendship, "following", "Now following %s.")
   
-  def unfollow(names: List[String]) {
+  def unfollow(names: List[String]) = {}/*todo
     process(names, tsess.destroyFriendship, "unfollowing", "Unfollowed %s.")
     rels.removeFriendsWithScreenNames(names)
-  }
+  }*/
 
-  def block(names: List[String]) {
+  def block(names: List[String]) {}/*todo
     process(names, tsess.blockUser, "block", "%s blocked.")
     rels.removeFriendsWithScreenNames(names)
-  }
+  }*/
   
-  def unblock(names: List[String]) = process(names, tsess.unblockUser, "unblock", "%s unblocked.")
+  def unblock(names: List[String]) {}//todo = process(names, tsess.unblockUser, "unblock", "%s unblocked.")
   
-  def reportSpam(names: List[String]) = process(names, tsess.reportSpam, "report spam", 
-    "%s reported for spam.")
+  def reportSpam(names: List[String]) {}/*todo = process(names, tsess.reportSpam, "report spam",
+    "%s reported for spam.")*/
   
   def viewLists(selectedScreenNames: List[String], table: JTable) = {
     TwitterListsDisplayer.viewListsTable(session, selectedScreenNames)
@@ -76,10 +76,9 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
       smi.friendsOnly.list ::= this
     }, ks(VK_F, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
   }
-  */
 
   def addCommonItems(mh: PopupMenuHelper, specialMenuItems: SpecialMenuItems, 
-      table: JTable, showBigPicture: => Unit, getSelectedScreenNames: => List[String]) = List[String]()/* todo {
+      table: JTable, showBigPicture: => Unit, getSelectedScreenNames: => List[String]) {
 
     mh add(new Action("Show larger image") { 
       def apply = showBigPicture
@@ -100,7 +99,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
         ks(VK_B, UserActions.shortcutKeyMask)))
     mh.add(new ActionAndKeys(Action("Report Spam") {reportSpam(getSelectedScreenNames)},
         ks(VK_S, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK)))
-  }*/
+  }
 }
 
 object UserActions {

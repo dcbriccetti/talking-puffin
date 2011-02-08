@@ -10,9 +10,9 @@ import org.joda.time.DateTime
 import twitter4j.Paging
 import util.TitleCreator
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.Constants
+import org.talkingpuffin.twitter.{TwitterArgs, Constants}
 
-abstract class DataProvider(session: Session, startingId: Option[Long], 
+abstract class DataProvider(session: Session, startingId: Option[Long],
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
     with Publisher with ErrorHandler {
   
@@ -44,12 +44,12 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     restartTimer
   }
   
-  def loadAndPublishData(clear: Boolean): Unit = {
+  def loadAndPublishData(args: TwitterArgs, clear: Boolean): Unit = {
     longOpListener.startOperation
     new SwingWorker[List[TwitterDataWithId], Object] {
       val sendClear = clear
       override def doInBackground: List[TwitterDataWithId] = {
-        val data = updateFunc()
+        val data = updateFunc(args)
         highestId = computeHighestId(data, getHighestId)
         data
       }
@@ -69,20 +69,20 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
       timer.stop
   }
   
-  def loadLastBlockOfTweets() = loadAndPublishData(true)
+  def loadLastBlockOfTweets() = loadAndPublishData(TwitterArgs(None), true)
 
   type TwitterDataWithId = {def getId: Long}
 
   def getResponseId(response: TwitterDataWithId): Long
 
-  protected def paging(): Paging = {
+  protected def paging(highestId: Option[Long] = getHighestId): Paging = {
     val paging = new Paging
     paging.setCount(Constants.MaxItemsPerRequest)
-    getHighestId.foreach(paging.setSinceId)
+    highestId.foreach(paging.setSinceId)
     paging
   }
 
-  protected def updateFunc:() => List[TwitterDataWithId]
+  def updateFunc(args: TwitterArgs): List[TwitterDataWithId]
 
   private def computeHighestId(tweets: List[TwitterDataWithId], maxId: Option[Long]):Option[Long] = tweets match {
     case tweet :: rest => maxId match {
@@ -112,7 +112,7 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     
   }
 
-  private def loadNewDataInternal = loadAndPublishData(false)
+  private def loadNewDataInternal = loadAndPublishData(TwitterArgs(highestId), false)
 
 }
 
