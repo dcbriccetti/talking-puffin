@@ -55,7 +55,7 @@ class FavoritesProvider(session: Session, id: String, startingId: Option[Long],
   override def updateFunc(args: TwitterArgs) = session.twitterSession.twitter.getUserListStatuses(userId, listId, new Paging)
 }*/
 
-class DmsReceivedProvider(session: Session, startingId: Option[Long], longOpListener: LongOpListener)
+/* todo class DmsReceivedProvider(session: Session, startingId: Option[Long], longOpListener: LongOpListener)
     extends DataProvider(session, startingId, "DMs Rcvd", longOpListener) {
   override def getResponseId(response: TwitterDataWithId): Long = response.getId
   override def updateFunc(args: TwitterArgs) = session.twitterSession.twitter.getDirectMessages(paging(args.since)).toList.map(_.asInstanceOf[TwitterDataWithId])
@@ -65,5 +65,4 @@ class DmsSentProvider(session: Session, startingId: Option[Long], longOpListener
     extends DataProvider(session, startingId, "DMs Sent", longOpListener) {
   override def getResponseId(response: TwitterDataWithId): Long = response.getId
   override def updateFunc(args: TwitterArgs) = session.twitterSession.twitter.getSentDirectMessages(paging(args.since)).toList.map(_.asInstanceOf[TwitterDataWithId])
-}
-
+}*/

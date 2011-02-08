@@ -17,12 +17,12 @@ class DataProviders(val session: Session, prefs: Preferences, progress: LongOpLi
   val retweetsOfMe  = new RetweetsOfMeProvider (session, getHighest(2), progress)
   val retweetedByMe = new RetweetedByMeProvider(session, getHighest(3), progress)
   val retweetedToMe = new RetweetedToMeProvider(session, getHighest(4), progress)
-  val dmsReceived   = new DmsReceivedProvider  (session, getHighest(5), progress)
-  val dmsSent       = new DmsSentProvider      (session, getHighest(6), progress)
+  /*todo val dmsReceived   = new DmsReceivedProvider  (session, getHighest(5), progress)
+  val dmsSent       = new DmsSentProvider      (session, getHighest(6), progress)*/
 
   val providers = List(following, mentions, retweetsOfMe, retweetedByMe,
-    retweetedToMe, dmsReceived, dmsSent)
-  val autoStartProviders = List(following, mentions, dmsReceived)
+    retweetedToMe)//todo, dmsReceived, dmsSent)
+  val autoStartProviders = List(following, mentions)//todo, dmsReceived)
   val providersAndPrefKeys = providers zip prefKeys
   
   def stop = providers.foreach(_.stop)

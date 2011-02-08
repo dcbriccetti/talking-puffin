@@ -235,8 +235,7 @@ trait PreChangeListener {
   def tableChanging
 }
 
-case class TableContentsChanged(val model: StatusTableModel, val filteredIn: Int, 
-    val total: Int) extends Event
+case class TableContentsChanged(model: StatusTableModel, filteredIn: Int, total: Int) extends Event
   
 trait Mentions extends StatusTableModel {
   override def getStatusText(status: Status, username: String, parent: Option[Status]): String = {
