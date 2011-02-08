@@ -37,4 +37,5 @@ case class ToTextFilter(override val text: String, override val isRegEx: Boolean
  * Source (the application that created the tweet) filter.
  */
 case class SourceTextFilter(override val text: String, override val isRegEx: Boolean) 
-    extends TextFilter(text, isRegEx, (status) => status.getSource)
+    extends TextFilter(text, isRegEx, (status) => RichStatus(status).sourceName)
+

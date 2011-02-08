@@ -164,7 +164,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   }
 
   def muteSelectedApps(rows: List[Int]) = {
-    filterSet.adder.muteApps(rows.map(i => filteredStatuses_(i).getSource))
+    filterSet.adder.muteApps(rows.map(i => filteredStatuses_(i).sourceName))
     filterAndNotify
   }
 

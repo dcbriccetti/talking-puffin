@@ -134,7 +134,7 @@ class TweetDetailPanel(session: Session,
         val st = topStatus //todo .retweetOrTweet
         largeTweet.filtersDialog = filtersDialog
         largeTweet.setText(HtmlFormatter.createTweetHtml(st.getText,
-          st.inReplyToStatusId, st.getSource, if (ustat.retweetedUser.isDefined) Some(ustat.user) else None))
+          st.inReplyToStatusId, st.source, if (ustat.retweetedUser.isDefined) Some(ustat.user) else None))
 
         if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
           def replaceUrl(shortUrl: String, fullUrl: String) = {
