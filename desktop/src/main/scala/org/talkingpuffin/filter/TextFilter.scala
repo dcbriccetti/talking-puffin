@@ -38,4 +38,3 @@ case class ToTextFilter(override val text: String, override val isRegEx: Boolean
  */
 case class SourceTextFilter(override val text: String, override val isRegEx: Boolean) 
     extends TextFilter(text, isRegEx, (status) => status.getSource)
-

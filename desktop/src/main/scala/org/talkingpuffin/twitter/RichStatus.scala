@@ -15,11 +15,5 @@ case class RichStatus(status: Status) {
 }
 
 object RichStatus {
-  implicit def asRichStatus(status: Status) = new RichStatus(status)
+  implicit def asRichStatus(status: Status): RichStatus = RichStatus(status)
 }
-
-
-
-
-
-
