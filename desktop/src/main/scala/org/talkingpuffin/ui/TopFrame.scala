@@ -1,9 +1,10 @@
 package org.talkingpuffin.ui
 
 import java.awt.{Rectangle}
+import javax.swing.{JInternalFrame, ImageIcon}
+import java.text.NumberFormat
 import scala.swing.event.{WindowClosing}
 import scala.swing.{Reactor, Frame, Label, GridBagPanel}
-import javax.swing.{JInternalFrame, ImageIcon}
 import twitter4j.{User, RateLimitStatusEvent}
 import org.talkingpuffin.{Main, Globals, Session, Constants}
 import org.talkingpuffin.filter.TagUsers
@@ -30,8 +31,7 @@ class TopFrame(twitterSession: AuthenticatedSession) extends Frame with Loggable
 
   val mainToolBar = new MainToolBar
   session.progress = mainToolBar
-  setUpUserStatusReactor
-  
+
   val rels = new Relationships()
   
   val providers = new DataProviders(session, prefs, session.progress)
@@ -96,7 +96,6 @@ class TopFrame(twitterSession: AuthenticatedSession) extends Frame with Loggable
   
   override def close {
     streams.stop
-    //todo deafTo(twitterSession.httpPublisher)
     Globals.sessions -= session
     dispose
     StateSaver.save(streams, session.userPrefs, tagUsers)
@@ -141,15 +140,6 @@ class TopFrame(twitterSession: AuthenticatedSession) extends Frame with Loggable
         Some(updatePeople _), None)
   }
   
-  private def setUpUserStatusReactor {}/*todo
-    reactions += {
-      case e: RateLimitStatusEvent => SwingInvoke.later {
-        mainToolBar.remaining.text = NumberFormat.getIntegerInstance.format(e.getStatus.remainingHits)
-      }
-    }
-    listenTo(twitterSession.httpPublisher)
-  }*/
-
   private def tileViews(numRows: Int) {
     val frames = (for {
       v <- session.windows.streams.views

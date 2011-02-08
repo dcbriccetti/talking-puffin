@@ -4,12 +4,11 @@ import org.talkingpuffin.twitter.{AuthenticatedSession}
 import twitter4j.User
 
 object TwitterListUtils extends Loggable {
-  /* todo
   /**
    * Exports the specified tag and users to a Twitter list.
    */
   def exportTagToList(tsess: AuthenticatedSession, 
-      tag: String, description: String, users: List[Long]): Unit = {
+      tag: String, description: String, users: List[Long]): Unit = {}/*todo
     val (list, members) = tsess.getListAndMembers(tag) match {
       case Some((list, members)) =>
         if (list.description != description) {
