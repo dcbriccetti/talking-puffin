@@ -1,10 +1,12 @@
 package org.talkingpuffin.twitter
 
+import org.joda.time.DateTime
 import twitter4j.Status
 
 case class RichStatus(status: Status) {
   def inReplyToScreenName: Option[String] = makeOption(status.getInReplyToScreenName)
   def inReplyToStatusId  : Option[Long]   = makeOption(status.getInReplyToStatusId)
+  def createdAt = new DateTime(status.getCreatedAt)
 
   private def makeOption[T](value: Any): Option[T] = value match {
     case null => None

@@ -11,10 +11,8 @@ import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 import org.talkingpuffin.Session
 import org.talkingpuffin.util.Loggable
-import org.joda.time.DateTime
 import twitter4j.{User, DirectMessage, Status}
 import org.talkingpuffin.twitter.RichStatus._
-
 
 /**
  * Model providing status data to the JTable
@@ -95,14 +93,14 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     }
     
     columnIndex match {
-      case 0 => new DateTime(status.getCreatedAt).toDate
+      case 0 => status.createdAt.toDate
       case 1 => pictureCell.request(status.getUser.getProfileImageURL.toString, rowIndex)
       case 2 => senderNameEs(status)
       case 3 => new EmphasizedString(toName(status), false)
       case 4 => 
         var st = getStatusText(status, username, parent)
         if (options.showToColumn) st = LinkExtractor.getWithoutUser(st)
-        StatusCell(if (options.showAgeColumn) None else Some(new DateTime(status.getCreatedAt).toDate),
+        StatusCell(if (options.showAgeColumn) None else Some(status.createdAt.toDate),
           if (showNameInStatus) Some(senderNameEs(status)) else None, st)
     }
   }
@@ -214,8 +212,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     fireTableDataChanged
   }
   
-/* todo
-  private def adaptDmsToTweets(dms: List[DirectMessage]): List[Status] = {
+/* todo private def adaptDmsToTweets(dms: List[DirectMessage]): List[Status] = {
     dms.map(dm => new Status {
       text = dm.getText
       user = if (dm.sender.getScreenName == username) dm.recipient else dm.sender
