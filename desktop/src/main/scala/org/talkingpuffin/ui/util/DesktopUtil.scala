@@ -4,7 +4,6 @@ import java.awt.Desktop
 import java.net.URI
 import java.awt._
 import javax.swing.ImageIcon
-import org.talkingpuffin.Main
 
 object DesktopUtil {
   val trayIcon: TrayIcon = SystemTray.isSupported match {

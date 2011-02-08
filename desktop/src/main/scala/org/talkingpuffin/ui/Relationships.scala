@@ -59,8 +59,8 @@ class Relationships extends Publisher with ErrorHandler {
         longOpListener.stopOperation
         doAndHandleError(() => {
           val (fr, fo) = get
-          friendIds = fr.map(_.id.toLong)
-          followerIds = fo.map(_.id.toLong)
+          friendIds = fr.map(_.id)
+          followerIds = fo.map(_.id)
           Relationships.this.publish(IdsChanged(Relationships.this)) // SwingWorker also has a publish
         }, "Error fetching friend and follower IDs for " + twSess.user, session)
       }
@@ -70,7 +70,7 @@ class Relationships extends Publisher with ErrorHandler {
   
   def removeFriendsWithScreenNames(names: List[String]) {
     friends = friends.filter(user => ! names.contains(user.screenName))
-    friendIds = friends.map(_.id.toLong)
+    friendIds = friends.map(_.id)
     publish(UsersChanged(this))
     publish(IdsChanged(this))
   }

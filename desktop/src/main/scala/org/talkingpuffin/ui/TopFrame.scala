@@ -92,7 +92,7 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
 
   def setFocus = streams.views.last.pane.requestFocusForTable
   
-  override def close {
+  def close {
     streams.stop
     deafTo(twitterSession.httpPublisher)
     Globals.sessions -= session
@@ -114,9 +114,9 @@ class TopFrame(service: String, twitterSession: AuthenticatedSession) extends Fr
     val customRels = if (users.isDefined) {
       new Relationships {
         friends = rels.friends intersect users.get
-        friendIds = friends map(_.id.toLong)
+        friendIds = friends map(_.id)
         followers = rels.followers intersect users.get
-        followerIds = followers map(_.id.toLong)
+        followerIds = followers map(_.id)
       }
     } else getRels
     val peoplePane = new PeoplePane(session, model, customRels, updatePeople)

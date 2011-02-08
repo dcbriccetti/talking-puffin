@@ -58,7 +58,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
 
   private val mh = new PopupMenuHelper(this)
   private var specialMenuItems = new SpecialMenuItems(this, tableModel.relationships,
-      getSelectedStatuses map(_.user.id.toLong), getSelectedScreenNames, 
+      getSelectedStatuses map(_.user.id), getSelectedScreenNames, 
       {getSelectedStatuses.exists(_.inReplyToStatusId.isDefined)})
   buildActions
 

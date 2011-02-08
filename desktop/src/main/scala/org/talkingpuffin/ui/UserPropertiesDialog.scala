@@ -25,7 +25,7 @@ class UserPropertiesDialog(userPrefs: Preferences, status: TwitterStatus) extend
       lineWrap = true
     }
     add(notesField, new Constraints {grid=(1,1); fill=Fill.Both; weightx=1})
-    add(new FlowPanel(FlowPanel.Alignment.Left)() {
+    add(new FlowPanel(FlowPanel.Alignment.Left) {
       val saveAction = new Action("Save") {
         mnemonic = KeyEvent.VK_S
         def apply = {

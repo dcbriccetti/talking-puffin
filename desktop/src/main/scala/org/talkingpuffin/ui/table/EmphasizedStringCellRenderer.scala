@@ -3,7 +3,6 @@ package org.talkingpuffin.ui.table
 import java.awt.Color
 import java.util.Comparator
 import javax.swing.text.JTextComponent
-import org.talkingpuffin.ui.HtmlFormatter
 
 /**
  * Emphasized string renderer.

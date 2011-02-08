@@ -34,8 +34,8 @@
         </dependency>
         <dependency>
             <groupId>org.scala-tools.testing</groupId>
-            <artifactId>specs_2.8.0</artifactId>
-            <version>1.6.5</version>
+            <artifactId>specs</artifactId>
+            <version>1.6.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.collections</groupId>
