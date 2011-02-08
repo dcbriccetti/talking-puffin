@@ -5,7 +5,7 @@ import org.specs.Specification
 import net.lag.configgy.Configgy
 import org.specs.matcher.Matchers._
 import org.joda.time.{DateTime, Duration, DateMidnight, Seconds}
-/*todo
+
 import TimeUtil._
 
 class TimeUtilTest extends JUnit4(TimeUtilSpec)
@@ -35,4 +35,4 @@ object TimeUtilSpec extends Specification {
   "now is now" in {
     now must beEqualTo(new DateTime)
   }
-}*/
+}

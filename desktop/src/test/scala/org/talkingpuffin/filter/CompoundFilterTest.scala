@@ -4,7 +4,7 @@ import org.junit.Test
 import org.junit.Assert._
 import twitter4j.{User, Status}
 
-class CompoundFilterTest {/*todo
+class CompoundFilterTest {
   @Test def matchesText {
     val cf = CompoundFilter(List(TextTextFilter("abc", false)), None, None)
   }
@@ -23,5 +23,5 @@ class CompoundFilterTest {/*todo
       SourceTextFilter("web", false)), None, None)
     val cf2 = CompoundFilter(List(FromTextFilter("bill", false), TextTextFilter("def", false)), None, None)
     cfs.list :::= List(cf1, cf2)
-  }*/
+  }
 }

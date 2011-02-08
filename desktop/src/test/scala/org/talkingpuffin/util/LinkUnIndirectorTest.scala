@@ -3,7 +3,7 @@ package org.talkingpuffin.util
 import org.junit.Test
 import org.junit.Assert._
 import org.apache.log4j.{Logger}
-/*todo
+
 class LinkUnIndirectorTest {
   val log = Logger.getLogger("Tests")
     
@@ -13,14 +13,14 @@ class LinkUnIndirectorTest {
 //  @Test def digg = testExpand("http://digg.com/story/r/Scala_and_GWT",
 //    "http://www.eishay.com/2009/07/scala-on-google-app-engine-playing-it.html")
   
-//  @Test def bitly = testExpand("http://bit.ly/vO47k",
-//    "http://www.dzone.com/links/spinners_in_substance_60.html")
+  @Test def bitly = testExpand("http://bit.ly/vO47k",
+    "http://www.pushing-pixels.org/?p=1499")
   
-//  @Test def friendFeed = testExpand("http://ff.im/auf8d",
-//    "http://friendfeed.com/michaelg/09a8d52e/social-technology-fail")
+  @Test def friendFeed = testExpand("http://ff.im/auf8d",
+    "http://fupeg.blogspot.com/2009/10/social-technology-fail.html")
   
-//  @Test def hootSuite = testExpand("http://ow.ly/xdVE",
-//    "http://www.meetup.com/TwitterMeetup/calendar/11708113/")
+  @Test def hootSuite = testExpand("http://ow.ly/xdVE",
+    "http://www.meetup.com/TwitterMeetup/calendar/11708113/")
 
    @Test def dummyTest =  assertTrue(true) 
   
@@ -38,4 +38,3 @@ class LinkUnIndirectorTest {
   }
 
 }
-*/

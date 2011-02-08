@@ -2,7 +2,7 @@ package org.talkingpuffin.filter
 
 import org.junit.Test
 import org.junit.Assert._
-/*todo import RetweetDetector._
+import RetweetDetector._
  
 class RetweetDetectorTest {
  
@@ -22,4 +22,3 @@ class RetweetDetectorTest {
     assertTrue("Great! RT @dave Hi".isCommentedRetweet)
   }
 }
- */
