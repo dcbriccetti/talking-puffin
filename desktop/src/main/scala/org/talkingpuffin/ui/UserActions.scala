@@ -17,34 +17,32 @@ import util.Tiler
  * Handles user actions like follow
  */
 class UserActions(val session: Session, rels: Relationships) extends ActionProcessor with Loggable {
-  val tsess = session.twitterSession
+  val tw = session.twitterSession.twitter
+  type Names = List[String]
 
-  def follow(names: List[String]) = {}//todo process(names, tsess.createFriendship, "following", "Now following %s.")
+  def follow(names: Names) = processUsers(names, tw.createFriendship, "following", "Now following %s.")
   
-  def unfollow(names: List[String]) = {}/*todo
-    process(names, tsess.destroyFriendship, "unfollowing", "Unfollowed %s.")
+  def unfollow(names: Names) {
+    processUsers(names, tw.destroyFriendship, "unfollowing", "Unfollowed %s.")
     rels.removeFriendsWithScreenNames(names)
-  }*/
+  }
 
-  def block(names: List[String]) {}/*todo
-    process(names, tsess.blockUser, "block", "%s blocked.")
+  def block(names: Names) {
+    processUsers(names, tw.createBlock, "block", "%s blocked.")
     rels.removeFriendsWithScreenNames(names)
-  }*/
+  }
   
-  def unblock(names: List[String]) {}//todo = process(names, tsess.unblockUser, "unblock", "%s unblocked.")
+  def unblock(names: Names) = processUsers(names, tw.destroyBlock, "unblock", "%s unblocked.")
   
-  def reportSpam(names: List[String]) {}/*todo = process(names, tsess.reportSpam, "report spam",
-    "%s reported for spam.")*/
+  def reportSpam(names: Names) = processUsers(names, tw.reportSpam, "report spam", "%s reported for spam.")
   
-  def viewLists(selectedScreenNames: List[String], table: JTable) = {
+  def viewLists(selectedScreenNames: Names, table: JTable) =
     TwitterListsDisplayer.viewListsTable(session, selectedScreenNames)
-  }
-  
-  def viewListsOn(selectedScreenNames: List[String], table: JTable) = {
+
+  def viewListsOn(selectedScreenNames: Names, table: JTable) =
     TwitterListsDisplayer.viewListsContaining(session, selectedScreenNames)
-  }
-  
-  def showFriends(selectedScreenNames: List[String]) = {
+
+  def showFriends(selectedScreenNames: Names) = {
     val tiler = new Tiler(selectedScreenNames.length)
     selectedScreenNames.foreach(screenName => {
       val rels = new Relationships
@@ -54,7 +52,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
     })
   }
   
-  def showFavorites(selectedScreenNames: List[String]) = {
+  def showFavorites(selectedScreenNames: Names) = {
     val tiler = new Tiler(selectedScreenNames.length)
     selectedScreenNames.foreach(screenName => {
       val favorites = new FavoritesProvider(session, screenName, None, session.progress)
@@ -63,14 +61,14 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
     })
   }
   
-  def followAK(smi: SpecialMenuItems, getSelectedScreenNames: => List[String]) = {
+  def followAK(smi: SpecialMenuItems, getSelectedScreenNames: => Names) = {
     new ActionAndKeys(new Action("Follow") { 
       def apply = follow(getSelectedScreenNames)
       smi.notFriendsOnly.list ::= this
     }, ks(VK_F, UserActions.shortcutKeyMask))
   }
   
-  def unfollowAK(smi: SpecialMenuItems, getSelectedScreenNames: => List[String]) = {
+  def unfollowAK(smi: SpecialMenuItems, getSelectedScreenNames: => Names) = {
     new ActionAndKeys(new Action("Unfollow") {
       def apply = unfollow(getSelectedScreenNames)
       smi.friendsOnly.list ::= this
@@ -78,7 +76,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   }
 
   def addCommonItems(mh: PopupMenuHelper, specialMenuItems: SpecialMenuItems, 
-      table: JTable, showBigPicture: => Unit, getSelectedScreenNames: => List[String]) {
+      table: JTable, showBigPicture: => Unit, getSelectedScreenNames: => Names) {
 
     mh add(new Action("Show larger image") { 
       def apply = showBigPicture
