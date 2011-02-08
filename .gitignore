@@ -2,9 +2,8 @@
 .manager
 .project
 .settings
-nbactions.xml
 target
-.gitignore
 *.iml
 *.ipr
 *.iws
+.idea
