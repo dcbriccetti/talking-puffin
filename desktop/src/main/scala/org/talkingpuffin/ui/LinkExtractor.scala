@@ -111,9 +111,12 @@ object LinkExtractor {
   }
   
   private def replaceAtCode(text: String) = text.replaceAll(atCode, "@")
-  
-  private def stripTrailingPunctuation(text: String) = 
-    if (text.endsWith(".") || text.endsWith(",")) text.substring(0, text.length - 1) else text
+
+  private val trailingPunctRe = "^(.*?)[,.\"”]?$".r
+
+  private def stripTrailingPunctuation(text: String) = text match {
+    case trailingPunctRe(result) => result
+  }
 
   /**
    * Finds hyperlinks.
