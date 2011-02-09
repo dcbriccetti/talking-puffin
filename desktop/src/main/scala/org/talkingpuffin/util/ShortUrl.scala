@@ -12,7 +12,7 @@ object ShortUrl extends Loggable {
   private val redirBypassesWrapperHosts = List("su.pr", "ow.ly")
   private val shortenerDomains = List("bit.ly", "ff.im", "is.gd", "j.mp", "ping.fm", 
     "r2.ly", "short.ie", "su.pr", 
-    "tinyurl.com", "tr.im") ::: redirBypassesWrapperHosts
+    "tinyurl.com", "tr.im", "goo.gl", "t.co", "huff.to", "scoble.it", "oreil.ly") ::: redirBypassesWrapperHosts
   private val regex = "http://(" + shortenerDomains.map(_.replace(".","""\.""")).mkString("|") + ")/" + 
       LinkExtractor.urlCharClass + "*"
   private val redirectionCodes = List(301, 302)
