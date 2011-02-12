@@ -1,9 +1,9 @@
 package org.talkingpuffin.ui
 
-import java.awt.{Dimension}
+import java.awt.Dimension
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.{SwingUtilities, JToolBar}
-import swing.{ProgressBar, Label, Action}
+import swing.{ProgressBar, Action}
 import util.ToolBarHelpers
 
 /**
@@ -16,7 +16,6 @@ class MainToolBar extends JToolBar with ToolBarHelpers with LongOpListener {
     minimumSize = s
   }
   val operationsInProgress = new AtomicInteger
-  val remaining = new Label(" ")
   var dataProvidersDialog: DataProvidersDialog = _
 
   setFloatable(false)
@@ -30,9 +29,6 @@ class MainToolBar extends JToolBar with ToolBarHelpers with LongOpListener {
       def apply = dataProvidersDialog.visible = true
     })
     addSeparator
-    add(new Label("Left: ") {tooltip = "The number of requests remaining in the hour, before reset"}.peer)
-    add(remaining.peer)
-    addSeparator
     add(progressBar.peer)
   }
   
@@ -41,4 +37,3 @@ class MainToolBar extends JToolBar with ToolBarHelpers with LongOpListener {
   def stopOperation = if (operationsInProgress.decrementAndGet == 0) progressBar.indeterminate = false;
   
 }
-
