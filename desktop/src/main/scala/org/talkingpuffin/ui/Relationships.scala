@@ -1,15 +1,15 @@
 package org.talkingpuffin.ui
 
-import scala.collection.JavaConversions._
 import java.util.concurrent.{Executors, Callable}
+import javax.swing.SwingWorker
 import swing.event.Event
 import swing.Publisher
-import javax.swing.SwingWorker
 import org.talkingpuffin.Session
+import org.talkingpuffin.twitter.PageHandler._
 import twitter4j.User
 
-case class IdsChanged(val source: Relationships) extends Event
-case class UsersChanged(val source: Relationships) extends Event
+case class IdsChanged(source: Relationships) extends Event
+case class UsersChanged(source: Relationships) extends Event
 
 class Relationships extends Publisher with ErrorHandler {
   var friendIds = List[Long]()
@@ -24,13 +24,13 @@ class Relationships extends Publisher with ErrorHandler {
   def getUsers(session: Session, screenName: String, longOpListener: LongOpListener) {
     val tw = session.twitter
     longOpListener.startOperation
+    type Users = List[User]
     val pool = Executors.newFixedThreadPool(2)
-    val friendsFuture = pool.submit(new Callable[List[User]] {
-      def call = {tw.getFriendsStatuses(screenName).toList }}) // todo get all
-    val followersFuture = pool.submit(new Callable[List[User]] {
-      def call = {tw.getFollowersStatuses(screenName).toList }})
 
-    new SwingWorker[Tuple2[List[User],List[User]], Object] {
+    val friendsFuture   = pool.submit(new Callable[Users] { def call = {allPages(friendsStatuses(tw, screenName), -1)}})
+    val followersFuture = pool.submit(new Callable[Users] { def call = {allPages(followersStatuses(tw, screenName), -1)}})
+
+    new SwingWorker[Tuple2[Users,Users], Object] {
       def doInBackground = (friendsFuture.get, followersFuture.get)
       override def done {
         longOpListener.stopOperation
