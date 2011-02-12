@@ -4,6 +4,8 @@ package org.talkingpuffin.state
  * Keys used for storing and retrieving preferences.
  */
 object PrefKeys {
+  val ACCESS_TOKEN      = "accessToken"
+  val ACCESS_TOKEN_SECRET = "accessTokenSecret"
   val USE_ANIMATIONS    = "useAnimations"
   val USE_REAL_NAMES    = "useRealNames"
   val NOTIFY_TWEETS     = "notifyTweets"
