@@ -8,8 +8,9 @@ import twitter.{AuthenticatedSession}
 import javax.swing.{JInternalFrame, JDesktopPane}
 import ui._
 import twitter4j.Twitter
+import util.Loggable
 
-class Session(val serviceName: String, val twitter: Twitter) {
+class Session(val serviceName: String, val twitter: Twitter) extends Loggable {
   val tweetDetailPanel = new TweetDetailPanel(this, None) // TODO Some(filtersDialog))
   val desktopPane = new JDesktopPane {
     setDragMode(JDesktopPane.OUTLINE_DRAG_MODE)
@@ -37,6 +38,7 @@ class Session(val serviceName: String, val twitter: Twitter) {
    */
   def addMessage(msg: String): Unit = {
     // TODO  expand this into a feature that presents all accumulated error messages
+    info(msg)
     SwingInvoke.later(statusMsgLabel.text = msg)
   }
   
