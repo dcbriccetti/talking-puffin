@@ -12,11 +12,13 @@ class DataProviders(val session: Session, prefs: Preferences, progress: LongOpLi
   private def getHighest(idx: Int): Option[Long] = 
     prefs.get(prefKeys(idx), null) match {case null => None; case v => Some(v.toLong)} 
 
-  val following     = new FollowingProvider    (session, getHighest(0), progress)
-  val mentions      = new MentionsProvider     (session, getHighest(1), progress)
-  val retweetsOfMe  = new RetweetsOfMeProvider (session, getHighest(2), progress)
-  val retweetedByMe = new RetweetedByMeProvider(session, getHighest(3), progress)
-  val retweetedToMe = new RetweetedToMeProvider(session, getHighest(4), progress)
+  private val tw = session.twitter
+  val following     = new CommonTweetsProvider("Following", session, getHighest(0), progress, tw.getHomeTimeline)
+  val mentions      = new CommonTweetsProvider("Mentions",  session, getHighest(1), progress, tw.getMentions,
+    Some(StatusTableModelCust.Mentions))
+  val retweetsOfMe  = new CommonTweetsProvider("RTs of Me", session, getHighest(2), progress, tw.getRetweetsOfMe)
+  val retweetedByMe = new CommonTweetsProvider("RTs by Me", session, getHighest(3), progress, tw.getRetweetedByMe)
+  val retweetedToMe = new CommonTweetsProvider("RTs to Me", session, getHighest(4), progress, tw.getRetweetedToMe)
   /*todo val dmsReceived   = new DmsReceivedProvider  (session, getHighest(5), progress)
   val dmsSent       = new DmsSentProvider      (session, getHighest(6), progress)*/
 

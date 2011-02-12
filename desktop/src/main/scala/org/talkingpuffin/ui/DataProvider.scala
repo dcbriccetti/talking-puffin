@@ -13,7 +13,8 @@ import org.talkingpuffin.Session
 import org.talkingpuffin.twitter.{TwitterArgs, Constants}
 
 abstract class DataProvider(session: Session, startingId: Option[Long],
-    providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
+    providerName: String, longOpListener: LongOpListener,
+    statusTableModelCust: Option[StatusTableModelCust.Value] = None) extends BaseProvider(providerName)
     with Publisher with ErrorHandler {
   
   private val tw = session.twitter
@@ -47,7 +48,6 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
   def loadAndPublishData(args: TwitterArgs, clear: Boolean): Unit = {
     longOpListener.startOperation
     new SwingWorker[List[TwitterDataWithId], Object] {
-      val sendClear = clear
       override def doInBackground: List[TwitterDataWithId] = {
         val data = updateFunc(args)
         highestId = computeHighestId(data, getHighestId)
@@ -55,11 +55,10 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
       }
       override def done {
         longOpListener.stopOperation
-        doAndHandleError(() => {
-          val statuses = get
-          if (statuses != Nil)
-            DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
-          }, "Error fetching " + providerName + " data for " + tw.getScreenName, session)
+        doAndHandleError(() => get match {
+          case Nil =>
+          case statuses => DataProvider.this.publish(NewTwitterDataEvent(statuses, clear))
+        }, "Error fetching " + providerName + " data for " + tw.getScreenName, session)
       }
     }.execute
   }
