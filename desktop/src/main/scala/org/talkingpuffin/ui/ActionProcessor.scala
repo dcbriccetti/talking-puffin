@@ -19,6 +19,6 @@ trait ActionProcessor {
     )
 
   def processUsers(items: Seq[String], action: ((String) => User), actionName: String, msg: String) =
-    process(items, (name: String) => {action}: Unit, actionName, msg)
+    process(items, (name: String) => {action(name)}: Unit, actionName, msg)
   
 }
