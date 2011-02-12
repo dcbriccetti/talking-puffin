@@ -14,7 +14,6 @@ abstract class TweetsProvider(session: Session, startingId: Option[Long],
     DataProvider(session, startingId, providerName, longOpListener) with Loggable {
 
   override def getResponseId(response: TwitterDataWithId): Long = response.getId
-  def tw = session.twitter
   protected def toIdData(r: ResponseList[Status]): List[TwitterDataWithId] =
     r.toList.map(_.asInstanceOf[TwitterDataWithId])
 }

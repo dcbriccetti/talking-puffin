@@ -17,7 +17,7 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     statusTableModelCust: Option[StatusTableModelCust.Value] = None) extends BaseProvider(providerName)
     with Publisher with ErrorHandler {
   
-  private val tw = session.twitter
+  protected val tw = session.twitter
   private val log = Logger.getLogger(providerName + " " + tw.getScreenName)
   private var highestId: Option[Long] = startingId
   val titleCreator = new TitleCreator(providerName)
