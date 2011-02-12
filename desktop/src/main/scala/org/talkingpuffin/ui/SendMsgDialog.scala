@@ -111,8 +111,8 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
     }
     add(message, new Constr {grid=(0,3); fill=GridBagPanel.Fill.Both; weightx=1; weighty=1})
     add(total,   new Constr {grid=(0,4); anchor=GridBagPanel.Anchor.West})
-    case class SessionDisplay(val session: Session) {
-      override def toString = session.twitterSession.user + " " + session.serviceName
+    case class SessionDisplay(session: Session) {
+      override def toString = session.twitter.getScreenName + " " + session.serviceName
     }
     debug("Sessions: " + Globals.sessions.length)
     if (Globals.sessions.length > 1) {
@@ -146,13 +146,13 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
     session.addMessage("Sending message")
     new SwingWorker[Object, Object] {
       override def doInBackground: Object = {
-        val twses = sendingSession.twitterSession
+        val tw = sendingSession.twitter
         if (isDm) dmRecipCombo.selection.item match {
-          case u: NameAndScreenName => twses.twitter.sendDirectMessage(u.screenName, message.text)
+          case u: NameAndScreenName => tw.sendDirectMessage(u.screenName, message.text)
           case _ =>
         } else replyToId match {
-          case Some(idStr) => twses.twitter.updateStatus(message.text, idStr)
-          case _ => twses.twitter.updateStatus(message.text)
+          case Some(idStr) => tw.updateStatus(message.text, idStr)
+          case _ => tw.updateStatus(message.text)
         }
         null
       }

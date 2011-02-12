@@ -7,8 +7,9 @@ import java.awt.{Dimension, Toolkit}
 import twitter.{AuthenticatedSession}
 import javax.swing.{JInternalFrame, JDesktopPane}
 import ui._
+import twitter4j.Twitter
 
-class Session(val serviceName: String, val twitterSession: AuthenticatedSession) {
+class Session(val serviceName: String, val twitter: Twitter) {
   val tweetDetailPanel = new TweetDetailPanel(this, None) // TODO Some(filtersDialog))
   val desktopPane = new JDesktopPane {
     setDragMode(JDesktopPane.OUTLINE_DRAG_MODE)

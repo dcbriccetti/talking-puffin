@@ -18,17 +18,17 @@ class Relationships extends Publisher with ErrorHandler {
   var followers = List[User]()
 
   /**
-   * Uses the provided AuthenticatedSession to get all friends and followers (doing the
+   * Uses the provided Twitter to get all friends and followers (doing the
    * fetches in parallel to be quicker), and publishes the results in the event-dispatching thread when done.
    */
   def getUsers(session: Session, screenName: String, longOpListener: LongOpListener) {
-    val twSess = session.twitterSession
+    val tw = session.twitter
     longOpListener.startOperation
     val pool = Executors.newFixedThreadPool(2)
     val friendsFuture = pool.submit(new Callable[List[User]] {
-      def call = {twSess.twitter.getFriendsStatuses(screenName).toList }}) // todo get all
+      def call = {tw.getFriendsStatuses(screenName).toList }}) // todo get all
     val followersFuture = pool.submit(new Callable[List[User]] {
-      def call = {twSess.twitter.getFollowersStatuses(screenName).toList }})
+      def call = {tw.getFollowersStatuses(screenName).toList }})
 
     new SwingWorker[Tuple2[List[User],List[User]], Object] {
       def doInBackground = (friendsFuture.get, followersFuture.get)
@@ -39,21 +39,21 @@ class Relationships extends Publisher with ErrorHandler {
           friends = fr
           followers = fo
           Relationships.this.publish(UsersChanged(Relationships.this))
-          }, "Error fetching friends and followers for " + twSess.user, session)
+          }, "Error fetching friends and followers for " + tw.getScreenName, session)
       }
     }.execute
     pool.shutdown()
   }
   
   def getIds(session: Session, longOpListener: LongOpListener) {
-    val twSess = session.twitterSession
+    val tw = session.twitter
     longOpListener.startOperation
     val pool = Executors.newFixedThreadPool(2)
     val friendsFuture = pool.submit(new Callable[List[Int]] {
-      def call = {twSess.twitter.getFriendsIDs.getIDs.toList}
+      def call = {tw.getFriendsIDs.getIDs.toList}
     })
     val followersFuture = pool.submit(new Callable[List[Int]] {
-      def call = {twSess.twitter.getFollowersIDs.getIDs.toList}
+      def call = {tw.getFollowersIDs.getIDs.toList}
     })
 
     new SwingWorker[Tuple2[List[Int],List[Int]], Object] {
@@ -65,7 +65,7 @@ class Relationships extends Publisher with ErrorHandler {
           friendIds = fr map {_.toLong}
           followerIds = fo map {_.toLong}
           Relationships.this.publish(IdsChanged(Relationships.this)) // SwingWorker also has a publish
-        }, "Error fetching friend and follower IDs for " + twSess.user, session)
+        }, "Error fetching friend and follower IDs for " + tw.getScreenName, session)
       }
     }.execute
     pool.shutdown()

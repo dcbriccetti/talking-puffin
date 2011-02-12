@@ -22,6 +22,6 @@ object Main {
    * Creates a TopFrame.
    */
   def launchSession {
-      new TopFrame(new AuthenticatedSession())
+      new TopFrame(AuthenticatedSession.logIn())
   }
 }

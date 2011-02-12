@@ -33,7 +33,7 @@ class Streams(val service: String, val prefs: Preferences,
   def createView(desktopPane: JDesktopPane, dataProvider: DataProvider, 
                  include: Option[String], location: Option[Rectangle]): View = {
     val screenNameToUserNameMap = usersTableModel.usersModel.screenNameToUserNameMap
-    val user = session.twitterSession.user
+    val user = session.twitter.getScreenName
     val sto = new StatusTableOptions(true, true, true)
     val filterSet = new FilterSet(tagUsers)
     val model = dataProvider match {

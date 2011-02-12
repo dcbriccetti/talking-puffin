@@ -116,7 +116,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
     }))
   
   private def findPeople: Unit = {} /* todo
-    val people = session.twitterSession.findPeople(findPeopleText.text)
+    val people = session.twitter.findPeople(findPeopleText.text)
     debug("Found people: " + people)
     session.windows.peoplePaneCreator.createPeoplePane(findPeopleText.text, 
       None, Some(people), None, None)

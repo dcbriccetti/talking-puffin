@@ -16,7 +16,7 @@ import util.{eventDistributor, AppEvent}
  * Main menu bar
  */
 class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Loggable {
-  val tsess = session.twitterSession
+  val tw = session.twitter
   val prefs = GlobalPrefs.prefs
 
   val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
@@ -65,7 +65,7 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
       tagUsers.getTags.foreach(tag => {
         contents += new MenuItem(new Action(tag) {
           def apply = {
-            SwingInvoke.execSwingWorker({TwitterListUtils.exportTagToList(tsess, tag, 
+            SwingInvoke.execSwingWorker({TwitterListUtils.exportTagToList(tw, tag,
               tagUsers.getDescription(tag).getOrElse(""), tagUsers.usersForTag(tag))
             }, (_: Unit) => {debug("Tag exported to list")})
           }
@@ -74,13 +74,13 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
     }
     contents += new MenuItem(new Action("Display your lists") {
       def apply = {
-        TwitterListsDisplayer.viewListsTable(session, List(session.twitterSession.user))
+        TwitterListsDisplayer.viewListsTable(session, List(tw.getScreenName))
       }
     })
     contents += new MenuItem(new Action("Display lists you are in") {
       def apply = {
         TwitterListsDisplayer.viewListsContaining(session, 
-          List(session.twitterSession.user))
+          List(tw.getScreenName))
       }
     })
   }

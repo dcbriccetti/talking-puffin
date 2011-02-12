@@ -43,7 +43,7 @@ object TwitterListsDisplayer {
   
   private def viewList(list: TwitterList, session: Session, tiler: Option[Tiler]) = {} /* todo
     SwingInvoke.execSwingWorker({
-      val tsess = session.twitterSession
+      val tsess = session.twitter
       tsess.twitter.getListMembers(list)}, {
       members: List[User] => {
         session.windows.peoplePaneCreator.createPeoplePane(list.longName,
@@ -64,11 +64,11 @@ object TwitterListsDisplayer {
   }
 
   private def getLists(session: Session, screenNames: List[String]): LLTL = {
-    Parallelizer.run(20, screenNames, session.twitterSession.getLists) filter(_ != Nil)
+    Parallelizer.run(20, screenNames, session.twitter.getLists) filter(_ != Nil)
   }
     
   private def getListsContaining(session: Session, screenNames: List[String]): LLTL = {
-    val tsess = session.twitterSession
+    val tsess = session.twitter
     def getAllMembershipsForScreenName(screenName: String): List[TwitterList] = {
       tsess.loadAllWithCursor(tsess.getListMemberships(screenName))
     }

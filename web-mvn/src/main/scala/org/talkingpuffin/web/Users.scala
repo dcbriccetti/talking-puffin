@@ -12,10 +12,10 @@ class UserRow(val picUrl: String, val arrows: String, val screenName: String, va
  * Users managed bean.
  */
 class Users extends Serializable {
-  var session: AuthenticatedSession = _
+  var session: Twitter = _
   val rels = new Relationships
 
-  def setSession(session: AuthenticatedSession) = this.session = session
+  def setSession(session: Twitter) = this.session = session
 
   def getUsers: Array[TwitterUser] = {
     rels.friends   = session.loadAllWithCursor(session.getFriends)

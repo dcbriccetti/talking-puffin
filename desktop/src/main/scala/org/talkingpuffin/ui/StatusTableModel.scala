@@ -24,7 +24,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     extends UserAndStatusProvider with TaggingSupport with Publisher with Reactor with Loggable
 {
   
-  private val username = session.twitterSession.user
+  private val username = session.twitter.getScreenName
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
 
   val unessentialCols = List("When", "Image", "From", "To") // Can be quickly hidden

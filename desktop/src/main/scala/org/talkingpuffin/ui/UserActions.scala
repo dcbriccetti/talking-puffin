@@ -17,7 +17,7 @@ import util.Tiler
  * Handles user actions like follow
  */
 class UserActions(val session: Session, rels: Relationships) extends ActionProcessor with Loggable {
-  val tw = session.twitterSession.twitter
+  val tw = session.twitter
   type Names = List[String]
 
   def follow(names: Names) = processUsers(names, tw.createFriendship, "following", "Now following %s.")

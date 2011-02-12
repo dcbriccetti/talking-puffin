@@ -16,8 +16,8 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     providerName: String, longOpListener: LongOpListener) extends BaseProvider(providerName)
     with Publisher with ErrorHandler {
   
-  private val twSess = session.twitterSession
-  private val log = Logger.getLogger(providerName + " " + twSess.user)
+  private val tw = session.twitter
+  private val log = Logger.getLogger(providerName + " " + tw.getScreenName)
   private var highestId: Option[Long] = startingId
   val titleCreator = new TitleCreator(providerName)
 
@@ -59,7 +59,7 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
           val statuses = get
           if (statuses != Nil)
             DataProvider.this.publish(NewTwitterDataEvent(statuses, sendClear)) // SwingWorker has a publish
-          }, "Error fetching " + providerName + " data for " + twSess.user, session)
+          }, "Error fetching " + providerName + " data for " + tw.getScreenName, session)
       }
     }.execute
   }

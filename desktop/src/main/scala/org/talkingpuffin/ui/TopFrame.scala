@@ -5,24 +5,23 @@ import javax.swing.{JInternalFrame, ImageIcon}
 import java.text.NumberFormat
 import scala.swing.event.{WindowClosing}
 import scala.swing.{Reactor, Frame, Label, GridBagPanel}
-import twitter4j.{User, RateLimitStatusEvent}
 import org.talkingpuffin.{Main, Globals, Session, Constants}
 import org.talkingpuffin.filter.TagUsers
-import org.talkingpuffin.twitter.{AuthenticatedSession}
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
 import util.{ColTiler, AppEvent, eventDistributor}
+import twitter4j.{Twitter, User, RateLimitStatusEvent}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
  */
-class TopFrame(twitterSession: AuthenticatedSession) extends Frame with Loggable
+class TopFrame(tw: Twitter) extends Frame with Loggable
     with PeoplePaneCreator with Reactor {
   val service = "twitter" // Only Twitter since change to Twitter4J
-  val prefs = GlobalPrefs.prefsForUser(service, twitterSession.user)
-  val tagUsers = new TagUsers(service, twitterSession.user)
+  val prefs = GlobalPrefs.prefsForUser(service, tw.getScreenName)
+  val tagUsers = new TagUsers(service, tw.getScreenName)
   TopFrames.addFrame(this)
-  val session = new Session(service, twitterSession)
+  val session = new Session(service, tw)
   Globals.sessions ::= session
   iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
     
@@ -41,7 +40,7 @@ class TopFrame(twitterSession: AuthenticatedSession) extends Frame with Loggable
   menuBar = new MainMenuBar(session, tagUsers)
   mainToolBar.init(streams)
     
-  title = Main.title + " - " + service + " " + twitterSession.user
+  title = Main.title + " - " + service + " " + tw.getScreenName
   reactions += {
     case e: AppEvent if e.session != session =>  // Ignore all from other sessions 
     case e: NewFollowingViewEvent => createView(providers.following, e.include, None) 
@@ -56,7 +55,7 @@ class TopFrame(twitterSession: AuthenticatedSession) extends Frame with Loggable
   contents = new GridBagPanel {
     val userPic = new Label
     val picFetcher = new PictureFetcher("Frame picture " + hashCode, None)
-    picFetcher.requestItem(new FetchRequest(twitterSession.twitter.showUser(twitterSession.user).
+    picFetcher.requestItem(new FetchRequest(tw.showUser(tw.getScreenName).
       getProfileImageURL.toString, null,
       (imageReady: PictureFetcher.ImageReady) => {
         if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
@@ -132,7 +131,7 @@ class TopFrame(twitterSession: AuthenticatedSession) extends Frame with Loggable
   }
 
   private def updatePeople = {
-    rels.getUsers(session, twitterSession.user, mainToolBar)
+    rels.getUsers(session, tw.getScreenName, mainToolBar)
   }
           
   private def createPeoplePane: Unit = {

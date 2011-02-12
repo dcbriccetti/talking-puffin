@@ -9,8 +9,9 @@ import org.talkingpuffin.twitter.{AuthenticatedSession}
 import org.talkingpuffin.state.{Account, Accounts}
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.ui.util.Cancelable
+import twitter4j.Twitter
 
-class LoginDialog(cancelPressed: => Unit, startup: (String, AuthenticatedSession) => Unit)
+class LoginDialog(cancelPressed: => Unit, startup: (String, Twitter) => Unit)
     extends Frame with Cancelable with Loggable {
 
   /* todo
