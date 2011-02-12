@@ -27,7 +27,7 @@ object UsersModel {
         if (sel.includeFriends)   set ++= selected(rels.friends  , sel.searchString)
         if (sel.includeFollowers) set ++= selected(rels.followers, sel.searchString)
         set.toList
-    }).sort(_.getName.toLowerCase < _.getName.toLowerCase)
+    }).sortBy(_.getName.toLowerCase)
     val users = combinedList.toArray
     val arrows = combinedList.map(user => {
       val friend = rels.friends.contains(user)
