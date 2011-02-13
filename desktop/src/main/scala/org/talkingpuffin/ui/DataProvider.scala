@@ -7,10 +7,10 @@ import swing.event.Event
 import swing.Publisher
 import org.apache.log4j.Logger
 import org.joda.time.DateTime
-import twitter4j.Paging
 import util.TitleCreator
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.{TwitterArgs, Constants}
+import org.talkingpuffin.twitter.Constants
+import twitter4j.{Status, Paging}
 
 abstract class DataProvider(session: Session, startingId: Option[Long],
     providerName: String, longOpListener: LongOpListener,
@@ -45,11 +45,11 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     restartTimer
   }
   
-  def loadAndPublishData(args: TwitterArgs, clear: Boolean): Unit = {
+  def loadAndPublishData(paging: Paging, clear: Boolean): Unit = {
     longOpListener.startOperation
-    new SwingWorker[List[TwitterDataWithId], Object] {
-      override def doInBackground: List[TwitterDataWithId] = {
-        val data = updateFunc(args)
+    new SwingWorker[List[Status], Object] {
+      override def doInBackground: List[Status] = {
+        val data = updateFunc(paging)
         highestId = computeHighestId(data, getHighestId)
         data
       }
@@ -68,22 +68,21 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
       timer.stop
   }
   
-  def loadLastBlockOfTweets() = loadAndPublishData(TwitterArgs(None), true)
+  def loadAllAvailable() = loadAndPublishData(newPagingMaxPer(), true)
 
-  type TwitterDataWithId = {def getId: Long}
+  def getResponseId(response: Status): Long
 
-  def getResponseId(response: TwitterDataWithId): Long
+  protected def newPagingMaxPer(): Paging = new Paging(1, Constants.MaxItemsPerRequest)
 
-  protected def paging(highestId: Option[Long] = getHighestId): Paging = {
-    val paging = new Paging
-    paging.setCount(Constants.MaxItemsPerRequest)
-    highestId.foreach(paging.setSinceId)
+  protected def newPaging(sinceId: Option[Long] = getHighestId): Paging = {
+    val paging = newPagingMaxPer
+    sinceId.foreach(paging.setSinceId)
     paging
   }
 
-  def updateFunc(args: TwitterArgs): List[TwitterDataWithId]
+  def updateFunc(paging: Paging): List[Status]
 
-  private def computeHighestId(tweets: List[TwitterDataWithId], maxId: Option[Long]):Option[Long] = tweets match {
+  private def computeHighestId(tweets: List[Status], maxId: Option[Long]):Option[Long] = tweets match {
     case tweet :: rest => maxId match {
       case Some(id) => computeHighestId(rest, if (getResponseId(tweet) > id) Some(getResponseId(tweet)) else Some(id))
       case None => computeHighestId(rest,Some(getResponseId(tweet)))
@@ -111,15 +110,14 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
     
   }
 
-  private def loadNewDataInternal = loadAndPublishData(TwitterArgs(highestId), false)
-
+  private def loadNewDataInternal = loadAndPublishData(newPaging(highestId), false)
 }
 
 case class NextLoadAt(when: DateTime) extends Event
 
 abstract class BaseProvider(val providerName: String) extends Publisher {
   def loadContinually()
-  def loadLastBlockOfTweets()
+  def loadAllAvailable()
   def setUpdateFrequency(updateFrequencySecs: Int)
 }
 

@@ -8,10 +8,10 @@ import swing.Action
 import javax.swing.KeyStroke.{getKeyStroke => ks}
 import javax.swing.JTable
 import java.awt.{Toolkit}
-import org.talkingpuffin.twitter.TwitterArgs
 import org.talkingpuffin.Session
 import org.talkingpuffin.util.Loggable
 import util.Tiler
+import twitter4j.Paging
 
 /**
  * Handles user actions like follow
@@ -57,7 +57,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
     selectedScreenNames.foreach(screenName => {
       val favorites = new FavoritesProvider(session, screenName, None, session.progress)
       session.windows.streams.createView(session.desktopPane, favorites, None, Some(tiler.next))
-      favorites.loadAndPublishData(TwitterArgs(), false)
+      favorites.loadAndPublishData(new Paging, false)
     })
   }
   

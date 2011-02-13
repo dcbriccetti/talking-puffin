@@ -46,10 +46,10 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
     def apply = tweetsProvider.loadContinually()
   }
   
-  val last200Action = new Action("200") {
-    toolTip = "Fetches the last 200 items"
-    mnemonic = KeyEvent.VK_2
-    def apply = tweetsProvider.loadLastBlockOfTweets
+  val last200Action = new Action("Load Max") {
+    toolTip = "Fetches all available (≈800) items"
+    mnemonic = KeyEvent.VK_A
+    def apply = tweetsProvider.loadAllAvailable
   }
 
   val wordsAction = new Action("Words") {
