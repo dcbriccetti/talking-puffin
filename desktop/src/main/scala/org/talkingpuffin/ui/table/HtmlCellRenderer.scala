@@ -24,9 +24,7 @@ class HtmlCellRenderer extends TableCellRenderer with Loggable {
     setForeground(renderer.getForeground) 
     setBackground(renderer.getBackground) 
     setBorder(border)
-    if (value == null) 
-      error("Row " + row + ", col " + column + " is null") 
-    else 
+    if (value != null)
       setFormattedText(this, value)
   }
   
