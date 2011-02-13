@@ -1,5 +1,6 @@
 package org.talkingpuffin.ui
 
+import scala.collection.JavaConversions._
 import _root_.scala.swing.event.EditDone
 import java.awt.Dimension
 import javax.swing.KeyStroke.{getKeyStroke => ks}
@@ -115,12 +116,12 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
       case _ => Some(searchText.text)
     }))
   
-  private def findPeople: Unit = {} /* todo
-    val people = session.twitter.findPeople(findPeopleText.text)
+  private def findPeople: Unit = {
+    val people = session.twitter.searchUsers(findPeopleText.text, 1).toList
     debug("Found people: " + people)
     session.windows.peoplePaneCreator.createPeoplePane(findPeopleText.text, 
       None, Some(people), None, None)
-  }*/
+  }
 
   private def buildActions(mh: PopupMenuHelper, comp: java.awt.Component) = {
     mh.add(Action("View in Browser") {viewSelected}, ks(KeyEvent.VK_V,0))
