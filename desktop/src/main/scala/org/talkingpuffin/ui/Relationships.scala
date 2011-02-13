@@ -27,8 +27,8 @@ class Relationships extends Publisher with ErrorHandler {
     type Users = List[User]
     val pool = Executors.newFixedThreadPool(2)
 
-    val friendsFuture   = pool.submit(new Callable[Users] { def call = {allPages(friendsStatuses(tw, screenName), -1)}})
-    val followersFuture = pool.submit(new Callable[Users] { def call = {allPages(followersStatuses(tw, screenName), -1)}})
+    val friendsFuture   = pool.submit(new Callable[Users] { def call = {allPages(friendsStatuses(tw, screenName))}})
+    val followersFuture = pool.submit(new Callable[Users] { def call = {allPages(followersStatuses(tw, screenName))}})
 
     new SwingWorker[Tuple2[Users,Users], Object] {
       def doInBackground = (friendsFuture.get, followersFuture.get)
