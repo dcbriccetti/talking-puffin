@@ -122,19 +122,19 @@ class TweetDetailPanel(session: Session,
   
   private def getFiltersDialog: Option[FiltersDialog] = None
   
-  private def showStatusDetails(ustat: UserAndStatus, filtersDialog: Option[FiltersDialog]) {
+  private def showStatusDetails(userAndStatus: UserAndStatus, filtersDialog: Option[FiltersDialog]) {
     session.clearMessage()
-    setText(ustat.origUser, ustat.status)
+    setText(userAndStatus.origUser, userAndStatus.status)
     largeTweetScrollPane.setVisible(true)
     userDescScrollPane.setVisible(true)
     picture.visible = true
-    ustat.status match {
+    userAndStatus.status match {
       case None => largeTweet.setText(null) 
       case Some(topStatus) =>
-        val st = topStatus //todo .retweetOrTweet
+        val st = topStatus.retweetOrTweet
         largeTweet.filtersDialog = filtersDialog
-        largeTweet.setText(HtmlFormatter.createTweetHtml(st.getText,
-          st.inReplyToStatusId, st.source, if (ustat.retweetedUser.isDefined) Some(ustat.user) else None))
+        largeTweet.setText(HtmlFormatter.createTweetHtml(st.getText, st.inReplyToStatusId, st.source,
+            userAndStatus.retweetingUser))
 
         if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
           def replaceUrl(shortUrl: String, fullUrl: String) = {
@@ -151,7 +151,7 @@ class TweetDetailPanel(session: Session,
     }
     largeTweet setCaretPosition 0
 
-    showMediumPicture(ustat.origUser.getProfileImageURL.toString)
+    showMediumPicture(userAndStatus.origUser.getProfileImageURL.toString)
   }
   
   def clearStatusDetails {
@@ -176,7 +176,7 @@ class TweetDetailPanel(session: Session,
     statusOp match {
       case None =>
       case Some(topStatus) =>
-        val status = topStatus //todo .retweetOrTweet
+        val status = topStatus.retweetOrTweet
         if (GlobalPrefs.isOn(PrefKeys.LOOK_UP_LOCATIONS)) {
           (status.getGeoLocation match {
             case null => GeoCoder.extractLatLong(rawLocationOfShowingItem)

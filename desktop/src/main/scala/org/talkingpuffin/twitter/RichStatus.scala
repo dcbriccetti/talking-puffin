@@ -7,6 +7,7 @@ case class RichStatus(status: Status) {
   def inReplyToScreenName: Option[String] = makeOption(status.getInReplyToScreenName)
   def inReplyToStatusId  : Option[Long]   = makeOption(status.getInReplyToStatusId)
   def retweet            : Option[Status] = makeOption(status.getRetweetedStatus)
+  def retweetOrTweet     : Status = retweet.getOrElse(status)
   def createdAt = new DateTime(status.getCreatedAt)
 
   def source = status.getSource

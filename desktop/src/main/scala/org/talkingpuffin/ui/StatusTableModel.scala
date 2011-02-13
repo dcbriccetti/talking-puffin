@@ -71,7 +71,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
 
   override def getValueAt(rowIndex: Int, columnIndex: Int) = {
     val topStatus = getStatusAt(rowIndex)
-    val status = topStatus// todo .retweetOrTweet
+    val status = topStatus.retweetOrTweet
     val parent = if (topStatus.isRetweet) Some(topStatus) else None
 
     def senderName(status: Status) =
