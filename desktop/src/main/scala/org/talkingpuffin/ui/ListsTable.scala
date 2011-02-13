@@ -15,9 +15,9 @@ class ListsTableModel(lists: List[UserList]) extends AbstractTableModel {
   def getValueAt(rowIndex: Int, columnIndex: Int)= {
     val list = lists(rowIndex)
     columnIndex match {
-      case 0 => list.getName
-      case 1 => list.getDescription
-      case 2 => list.getUser.getName
+      case 0 => list.getUser.getName
+      case 1 => list.getName
+      case 2 => list.getDescription
       case 3 => list.getMemberCount.asInstanceOf[Object]
       case 4 => list.getSubscriberCount.asInstanceOf[Object]
     }
@@ -34,15 +34,15 @@ class ListsTableModel(lists: List[UserList]) extends AbstractTableModel {
     classOf[Long], 
     classOf[Long])(col) 
 
-  override def getColumnName(column: Int) = List("Name", "Description", "Owner", "Fllwing", "Fllrs")(column)
+  override def getColumnName(column: Int) = List("Owner", "Name", "Description", "Fllwing", "Fllrs")(column)
   
 }
 
 class ListsTable(model: TableModel) extends JXTable(model) with Loggable {
   setHighlighters(HighlighterFactory.createSimpleStriping)
-  val nameCol            = getColumnExt(0)
-  val descriptionCol     = getColumnExt(1)
-  val ownerNameCol       = getColumnExt(2)
+  val ownerNameCol       = getColumnExt(0)
+  val nameCol            = getColumnExt(1)
+  val descriptionCol     = getColumnExt(2)
   val memberCountCol     = getColumnExt(3)
   val subscriberCountCol = getColumnExt(4)
   List(nameCol, ownerNameCol).foreach(_.setPreferredWidth(140))
