@@ -48,14 +48,9 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   listenTo(tweetsProvider)
   reactions += { 
     case e: NewTwitterDataEvent => {
-      val listAny = e.data
-      log.info("Tweets Arrived: " + listAny.length)
+      val newTweets = e.data
+      log.info("Tweets Arrived: " + newTweets.length)
       if (e.clear) clear(true)
-      val newTweets = if (listAny == Nil || listAny(0).isInstanceOf[Status])
-        e.data.asInstanceOf[List[Status]]
-      else
-        List[Status]()
-        // todo adaptDmsToTweets(e.data.asInstanceOf[List[DirectMessage]])
       processStatuses(newTweets)
       if (GlobalPrefs.isOn(PrefKeys.NOTIFY_TWEETS)) doNotify(newTweets)
     }

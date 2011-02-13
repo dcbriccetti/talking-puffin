@@ -8,7 +8,7 @@ import org.talkingpuffin.twitter.RichStatus._
 import org.talkingpuffin.twitter.PageHandler._
 import twitter4j.{UserList, Status, ResponseList, Paging}
 
-case class NewTwitterDataEvent(data: List[AnyRef], clear: Boolean) extends Event
+case class NewTwitterDataEvent(data: List[Status], clear: Boolean) extends Event
 
 abstract class TweetsProvider(session: Session, startingId: Option[Long], 
     providerName: String, longOpListener: LongOpListener) extends
