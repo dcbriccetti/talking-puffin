@@ -7,8 +7,8 @@ import twitter4j.Status
 /**
  * Used to match a tweet against a set of TextFilters and retweet options.
  */
-case class CompoundFilter(val textFilters: List[TextFilter], 
-    val retweet: Option[Boolean], val commentedRetweet: Option[Boolean]) 
+case class CompoundFilter(textFilters: List[TextFilter],
+    retweet: Option[Boolean], commentedRetweet: Option[Boolean])
     extends Loggable {
 
   /**
@@ -29,7 +29,7 @@ case class CompoundFilter(val textFilters: List[TextFilter],
     def retweetFilterMatches = booleanFilterMatches(retweet, status.isRetweet)
 
     def commentedRetweetFilterMatches = booleanFilterMatches(
-        commentedRetweet, false) // todo status.isCommentedRetweet)
+        commentedRetweet, status.isCommentedRetweet)
 
     def booleanFilterMatches(filter: Option[Boolean], value: Boolean) = filter match {
       case Some(f) => f == value
