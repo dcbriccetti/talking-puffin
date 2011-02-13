@@ -13,8 +13,7 @@ import javax.swing.event.{InternalFrameEvent, InternalFrameAdapter}
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
  */
-class Streams(val service: String, val prefs: Preferences, 
-    val session: Session, val tagUsers: TagUsers, val relationships: Relationships) 
+class Streams(val prefs: Preferences, val session: Session, val tagUsers: TagUsers, val relationships: Relationships)
     extends Reactor with Loggable {
   val usersTableModel = new UsersTableModel(None, tagUsers, relationships)
   
@@ -33,19 +32,18 @@ class Streams(val service: String, val prefs: Preferences,
   def createView(desktopPane: JDesktopPane, dataProvider: DataProvider, 
                  include: Option[String], location: Option[Rectangle]): View = {
     val screenNameToUserNameMap = usersTableModel.usersModel.screenNameToUserNameMap
-    val user = session.twitter.getScreenName
     val sto = new StatusTableOptions(true, true, true)
     val filterSet = new FilterSet(tagUsers)
     val model = dataProvider match {
       case p: CommonTweetsProvider if p.statusTableModelCust.isDefined =>
         p.statusTableModelCust.get match {
           case StatusTableModelCust.Mentions => new StatusTableModel(session, sto, p, relationships,
-              screenNameToUserNameMap, filterSet, service, tagUsers) with Mentions
+              screenNameToUserNameMap, filterSet, tagUsers) with Mentions
           case StatusTableModelCust.DmsSent => new StatusTableModel(session, sto, p, relationships,
-              screenNameToUserNameMap, filterSet, service, tagUsers) with DmsSent
+              screenNameToUserNameMap, filterSet, tagUsers) with DmsSent
         }
       case p: BaseProvider => new StatusTableModel(session, sto, p, relationships,
-        screenNameToUserNameMap, filterSet, service, tagUsers)
+        screenNameToUserNameMap, filterSet, tagUsers)
     }
     val title = dataProvider.titleCreator.create
     if (include.isDefined) {

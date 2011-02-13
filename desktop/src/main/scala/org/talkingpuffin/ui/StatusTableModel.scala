@@ -18,18 +18,16 @@ import org.talkingpuffin.twitter.RichStatus._
  * Model providing status data to the JTable
  */
 class StatusTableModel(session: Session, val options: StatusTableOptions, val tweetsProvider: BaseProvider,
-    val relationships: Relationships,
-    screenNameToUserNameMap: Map[String, String], filterSet: FilterSet, service: String, 
+    val relationships: Relationships, screenNameToUserNameMap: Map[String, String], filterSet: FilterSet,
     val tagUsers: TagUsers) 
     extends UserAndStatusProvider with TaggingSupport with Publisher with Reactor with Loggable
 {
-  
   private val username = session.twitter.getScreenName
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
 
   val unessentialCols = List("When", "Image", "From", "To") // Can be quickly hidden
   
-  private val userPrefs = GlobalPrefs.prefsForUser(service, username)
+  private val userPrefs = GlobalPrefs.prefsForUser(session.serviceName, username)
 
   /** All loaded statuses */
   private var statuses = List[Status]()

@@ -35,7 +35,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
   
   val providers = new DataProviders(session, prefs, session.progress)
   session.dataProviders = providers
-  val streams = new Streams(service, prefs, session, tagUsers, rels)
+  val streams = new Streams(prefs, session, tagUsers, rels)
   session.windows.streams = streams
   menuBar = new MainMenuBar(session, tagUsers)
   mainToolBar.init(streams)
