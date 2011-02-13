@@ -12,7 +12,12 @@ object PageHandler {
 
   def followersStatuses(tw: Twitter, screenName: String)(cursor: Long) = tw.getFollowersStatuses(screenName, cursor)
 
-  def allPages[T <: TwitterResponse](fn: (Long) => PagableResponseList[T], cursor: Long): List[T] = cursor match {
+  def userLists(tw: Twitter, listOwnerScreenName: String)(cursor: Long) = tw.getUserLists(listOwnerScreenName, cursor)
+
+  def userListMembers(tw: Twitter, listOwnerScreenName: String, listId: Int)(cursor: Long) =
+    tw.getUserListMembers(listOwnerScreenName, listId, cursor)
+
+  def allPages[T <: TwitterResponse](fn: (Long) => PagableResponseList[T], cursor: Long = -1): List[T] = cursor match {
     case 0 => Nil
     case c =>
       var resp = fn(c)

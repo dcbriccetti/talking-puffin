@@ -66,7 +66,7 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
         contents += new MenuItem(new Action(tag) {
           def apply = {
             SwingInvoke.execSwingWorker({TwitterListUtils.exportTagToList(tw, tag,
-              tagUsers.getDescription(tag).getOrElse(""), tagUsers.usersForTag(tag))
+              tagUsers.getDescription(tag).getOrElse(""), tagUsers.usersForTag(tag).map(_.toInt))
             }, (_: Unit) => {debug("Tag exported to list")})
           }
         })
