@@ -17,6 +17,9 @@ object PageHandler {
   def userListMembers(tw: Twitter, listOwnerScreenName: String, listId: Int)(cursor: Long) =
     tw.getUserListMembers(listOwnerScreenName, listId, cursor)
 
+  def userListMemberships(tw: Twitter, listMemberScreenName: String)(cursor: Long) =
+    tw.getUserListMemberships(listMemberScreenName, cursor)
+
   def allPages[T <: TwitterResponse](fn: (Long) => PagableResponseList[T], cursor: Long = -1): List[T] = cursor match {
     case 0 => Nil
     case c =>

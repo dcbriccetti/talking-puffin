@@ -2,10 +2,10 @@ package org.talkingpuffin.ui
 
 import scala.collection.JavaConversions._
 import scala.swing.event.Event
-import twitter4j.{Status, ResponseList, Paging}
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.Session
 import org.talkingpuffin.twitter.TwitterArgs
+import twitter4j.{UserList, Status, ResponseList, Paging}
 
 case class NewTwitterDataEvent(data: List[AnyRef], clear: Boolean) extends Event
 
@@ -31,11 +31,12 @@ class FavoritesProvider(session: Session, id: String, startingId: Option[Long],
   override def updateFunc(args: TwitterArgs) = toIdData(tw.getFavorites)
 }
 
-/* todo class ListStatusesProvider(session: Session, userId: String, listId: String,
+class ListStatusesProvider(session: Session, list: UserList,
     startingId: Option[Long], longOpListener: LongOpListener)
-    extends TweetsProvider(session, startingId, userId + " " + listId + " List", longOpListener) {
-  override def updateFunc(args: TwitterArgs) = toIdData(tw.getUserListStatuses(userId, listId, new Paging))
-}*/
+    extends TweetsProvider(session, startingId, list.getUser.getName + " " + list.getName + " List", longOpListener) {
+  override def updateFunc(args: TwitterArgs) =
+    toIdData(tw.getUserListStatuses(list.getUser.getScreenName, list.getId, new Paging))
+}
 
 /* todo class DmsReceivedProvider(session: Session, startingId: Option[Long], longOpListener: LongOpListener)
     extends DataProvider(session, startingId, "DMs Rcvd", longOpListener) {

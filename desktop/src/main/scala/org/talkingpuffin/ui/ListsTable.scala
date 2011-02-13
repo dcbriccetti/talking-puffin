@@ -2,7 +2,6 @@ package org.talkingpuffin.ui
 
 import org.jdesktop.swingx.JXTable
 import org.talkingpuffin.util.Loggable
-import org.talkingpuffin.twitter.TwitterList
 import javax.swing.table.{AbstractTableModel, TableModel}
 import java.awt.BorderLayout
 import org.jdesktop.swingx.decorator.HighlighterFactory
@@ -10,16 +9,17 @@ import swing.{FlowPanel, ScrollPane, BorderPanel, Frame, Button, Action}
 import org.talkingpuffin.Session
 import javax.swing.JTable
 import util.{TableUtil, Cancelable}
+import twitter4j.UserList
 
-class ListsTableModel(lists: List[TwitterList]) extends AbstractTableModel {
+class ListsTableModel(lists: List[UserList]) extends AbstractTableModel {
   def getValueAt(rowIndex: Int, columnIndex: Int)= {
     val list = lists(rowIndex)
     columnIndex match {
-      case 0 => list.name
-      case 1 => list.description
-      case 2 => list.owner.getName
-      case 3 => list.memberCount.asInstanceOf[Object]
-      case 4 => list.subscriberCount.asInstanceOf[Object]
+      case 0 => list.getName
+      case 1 => list.getDescription
+      case 2 => list.getUser.getName
+      case 3 => list.getMemberCount.asInstanceOf[Object]
+      case 4 => list.getSubscriberCount.asInstanceOf[Object]
     }
   }
 
@@ -50,7 +50,7 @@ class ListsTable(model: TableModel) extends JXTable(model) with Loggable {
   List(memberCountCol, subscriberCountCol).foreach(_.setPreferredWidth(50))
 }
 
-class ListsFrame(session: Session, lists: List[TwitterList]) extends Frame with Cancelable {
+class ListsFrame(session: Session, lists: List[UserList]) extends Frame with Cancelable {
   title = "Lists"
   contents = new BorderPanel {
     val table = new ListsTable(new ListsTableModel(lists))
