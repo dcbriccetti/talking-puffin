@@ -2,8 +2,9 @@ package org.talkingpuffin.ui
 
 import org.talkingpuffin.Session
 import twitter4j.User
+import org.talkingpuffin.util.Loggable
 
-trait ActionProcessor {
+trait ActionProcessor extends Loggable {
   val session: Session
   
   def process[T](items: Seq[T], action: ((T) => Unit), actionName: String, msg: String) =
@@ -13,7 +14,10 @@ trait ActionProcessor {
           action(item)
           String.format(msg, item.asInstanceOf[Object])
         } catch {
-          case e: Throwable => "Error " + actionName + " " + item.toString
+          case e: Throwable => {
+            error(e.getMessage)
+            "Error " + actionName + " " + item.toString
+          }
         }
       )
     )
