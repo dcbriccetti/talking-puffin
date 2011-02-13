@@ -1,6 +1,5 @@
 package org.talkingpuffin.filter
 
-//todo import org.talkingpuffin.ui.LinkExtractor
 import org.junit.Test
 import org.junit.Assert.assertEquals
 import org.talkingpuffin.ui.LinkExtractor
