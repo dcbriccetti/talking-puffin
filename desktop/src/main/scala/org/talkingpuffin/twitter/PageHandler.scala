@@ -36,4 +36,7 @@ object PageHandler extends Loggable {
       case n => resp ::: allPages(fn, {paging.setPage(paging.getPage + 1); paging})
     }
   }
+
+  def newPagingMaxPer() = new Paging(1, Constants.MaxItemsPerRequest)
+
 }

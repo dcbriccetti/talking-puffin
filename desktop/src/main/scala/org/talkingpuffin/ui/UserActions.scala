@@ -1,17 +1,15 @@
 package org.talkingpuffin.ui
 
-import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent._
 import java.awt.event.InputEvent.SHIFT_DOWN_MASK
-import java.awt.event.InputEvent.ALT_DOWN_MASK
 import swing.Action
 import javax.swing.KeyStroke.{getKeyStroke => ks}
 import javax.swing.JTable
-import java.awt.{Toolkit}
+import java.awt.Toolkit
 import org.talkingpuffin.Session
+import org.talkingpuffin.twitter.PageHandler._
 import org.talkingpuffin.util.Loggable
 import util.Tiler
-import twitter4j.Paging
 
 /**
  * Handles user actions like follow
@@ -42,25 +40,24 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   def viewListsOn(selectedScreenNames: Names, table: JTable) =
     TwitterListsDisplayer.viewListsContaining(session, selectedScreenNames)
 
-  def showFriends(selectedScreenNames: Names) = {
-    val tiler = new Tiler(selectedScreenNames.length)
-    selectedScreenNames.foreach(screenName => {
-      val rels = new Relationships
-      rels.getUsers(session, screenName, session.progress)
-      session.windows.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName, 
-        Some(rels), None, None, Some(tiler.next))
-    })
+  def showUserTimeline(screenName: String, tiler: Tiler) =
+    createView(new UserTweetsProvider(session, screenName, session.progress), tiler)
+
+  def showFriends(screenName: String, tiler: Tiler) = {
+    val rels = new Relationships
+    rels.getUsers(session, screenName, session.progress)
+    session.windows.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName,
+      Some(rels), None, None, Some(tiler.next))
   }
   
-  def showFavorites(selectedScreenNames: Names) = {
-    val tiler = new Tiler(selectedScreenNames.length)
-    selectedScreenNames.foreach(screenName => {
-      val favorites = new FavoritesProvider(session, screenName, None, session.progress)
-      session.windows.streams.createView(session.desktopPane, favorites, None, Some(tiler.next))
-      favorites.loadAndPublishData(new Paging, false)
-    })
-  }
+  def showFavorites(screenName: String, tiler: Tiler) =
+    createView(new FavoritesProvider(session, screenName, None, session.progress), tiler)
   
+  def forAll(selectedScreenNames: Names, fn: (String, Tiler) => Unit) = {
+    val tiler = new Tiler(selectedScreenNames.length)
+    selectedScreenNames.foreach(screenName => fn(screenName, tiler))
+  }
+
   def followAK(smi: SpecialMenuItems, getSelectedScreenNames: => Names) = {
     new ActionAndKeys(new Action("Follow") { 
       def apply = follow(getSelectedScreenNames)
@@ -83,10 +80,12 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
       specialMenuItems.oneStatusSelected.list ::= this
     }, ks(VK_I, 0))
     
-    mh add(Action("Show friends and followers") 
-        {showFriends(getSelectedScreenNames)}, ks(VK_H, SHIFT_DOWN_MASK))
-    mh add(Action("Show favorites") 
-        {showFavorites(getSelectedScreenNames)}, ks(VK_H, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
+    mh add(Action("View User Timeline")
+        {forAll(getSelectedScreenNames, showUserTimeline)}, ks(VK_T, SHIFT_DOWN_MASK))
+    mh add(Action("Show friends and followers")
+        {forAll(getSelectedScreenNames, showFriends)}, ks(VK_H, SHIFT_DOWN_MASK))
+    mh add(Action("Show favorites")
+        {forAll(getSelectedScreenNames, showFavorites)}, ks(VK_H, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
     mh add(Action("View lists…") {viewLists(getSelectedScreenNames, table)}, ks(VK_L, SHIFT_DOWN_MASK))
     mh add(Action("View lists on…") {viewListsOn(getSelectedScreenNames, table)}, 
         ks(VK_L, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
@@ -97,6 +96,11 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
         ks(VK_B, UserActions.shortcutKeyMask)))
     mh.add(new ActionAndKeys(Action("Report Spam") {reportSpam(getSelectedScreenNames)},
         ks(VK_S, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK)))
+  }
+
+  private def createView(provider: DataProvider, tiler: Tiler): Unit = {
+    session.windows.streams.createView(session.desktopPane, provider, None, Some(tiler.next))
+    provider.loadAndPublishData(newPagingMaxPer, false)
   }
 }
 

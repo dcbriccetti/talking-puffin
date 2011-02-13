@@ -127,7 +127,6 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
     mh.add(Action("View in Browser") {viewSelected}, ks(KeyEvent.VK_V,0))
     mh.add(new NextTAction(comp))
     mh.add(new PrevTAction(comp))
-    mh add(new TagAction(table, tableModel), ks(KeyEvent.VK_T,0))
     mh.add(Action("Reply") { reply }, ks(KeyEvent.VK_R,0))
     userActions.addCommonItems(mh, specialMenuItems, table, 
         session.tweetDetailPanel.showBigPicture, getSelectedScreenNames)

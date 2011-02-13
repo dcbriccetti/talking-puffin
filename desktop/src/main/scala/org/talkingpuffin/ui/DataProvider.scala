@@ -9,7 +9,7 @@ import org.apache.log4j.Logger
 import org.joda.time.DateTime
 import util.TitleCreator
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.Constants
+import org.talkingpuffin.twitter.PageHandler._
 import twitter4j.{Status, Paging}
 
 abstract class DataProvider(session: Session, startingId: Option[Long],
@@ -71,8 +71,6 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
   def loadAllAvailable() = loadAndPublishData(newPagingMaxPer(), true)
 
   def getResponseId(response: Status): Long
-
-  protected def newPagingMaxPer(): Paging = new Paging(1, Constants.MaxItemsPerRequest)
 
   protected def newPaging(sinceId: Option[Long] = getHighestId): Paging = {
     val paging = newPagingMaxPer

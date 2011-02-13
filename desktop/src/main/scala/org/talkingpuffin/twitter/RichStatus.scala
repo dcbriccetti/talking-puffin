@@ -6,6 +6,7 @@ import twitter4j.Status
 case class RichStatus(status: Status) {
   def inReplyToScreenName: Option[String] = makeOption(status.getInReplyToScreenName)
   def inReplyToStatusId  : Option[Long]   = makeOption(status.getInReplyToStatusId)
+  def inReplyToUserId    : Option[Long]   = makeOption(status.getInReplyToUserId)
   def retweet            : Option[Status] = makeOption(status.getRetweetedStatus)
   def retweetOrTweet     : Status = retweet.getOrElse(status)
   def createdAt = new DateTime(status.getCreatedAt)
