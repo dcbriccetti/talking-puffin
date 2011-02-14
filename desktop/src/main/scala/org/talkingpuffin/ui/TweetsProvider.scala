@@ -25,7 +25,7 @@ class CommonTweetsProvider(title: String, session: Session, startingId: Option[L
 class FavoritesProvider(session: Session, id: String, startingId: Option[Long],
     longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, id + " Favorites", longOpListener) {
-  override def updateFunc(paging: Paging) = tw.getFavorites.toList
+  override def updateFunc(paging: Paging) = tw.getFavorites(id).toList
 }
 
 class ListStatusesProvider(session: Session, list: UserList,
