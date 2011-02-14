@@ -39,8 +39,13 @@ object PageHandler extends Loggable {
 
     resp.size match {
       case n if n <= halfRequested /* Better way to find the end? */ => resp
-      case n => resp ::: allPages(fn, {paging.setPage(paging.getPage + 1); paging})
+      case n => resp ::: allPages(fn, incrementPage(paging))
     }
+  }
+
+  def incrementPage(paging: Paging): Paging = {
+    paging.setPage(paging.getPage + 1)
+    paging
   }
 
   def newPagingMaxPer() = new Paging(1, Constants.MaxItemsPerRequest)
