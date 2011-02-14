@@ -104,7 +104,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     status.getText + (if (parent.isDefined) " RT by " + parent.get.getUser.getScreenName else "")
   }
 
-  def getStatusAt(rowIndex: Int): Status = filteredStatuses_(rowIndex).retweetOrTweet
+  def getStatusAt(rowIndex: Int): Status = filteredStatuses_(rowIndex)
   
   def getUserAndStatusAt(rowIndex: Int): UserAndStatus = {
     val status = getStatusAt(rowIndex)
