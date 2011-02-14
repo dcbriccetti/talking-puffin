@@ -31,8 +31,14 @@ object PageHandler extends Loggable {
   def allPages(fn: (Paging) => ResponseList[Status], paging: Paging): List[Status] = {
     val resp = fn(paging).toList
     debug("Page " + paging.getPage + " results: " + resp.size)
+
+    def halfRequested: Int = paging.getCount match {
+      case -1 => 0 // -1 means not set, and we won’t assume we know what the default is
+      case n => n / 2
+    }
+
     resp.size match {
-      case 0 => resp
+      case n if n <= halfRequested /* Better way to find the end? */ => resp
       case n => resp ::: allPages(fn, {paging.setPage(paging.getPage + 1); paging})
     }
   }
