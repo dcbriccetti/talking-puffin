@@ -97,7 +97,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
     grid=(0,1); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1 
   })
   
-  session.tweetDetailPanel.connectToTable(table, None)
+  session.desktopPane.tweetDetailPanel.connectToTable(table, None)
 
   reactions += {
     case e: UsersChanged => setLabels
@@ -129,7 +129,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
     mh.add(new PrevTAction(comp))
     mh.add(Action("Reply") { reply }, ks(KeyEvent.VK_R,0))
     userActions.addCommonItems(mh, specialMenuItems, table, 
-        session.tweetDetailPanel.showBigPicture, getSelectedScreenNames)
+        session.desktopPane.tweetDetailPanel.showBigPicture, getSelectedScreenNames)
   }
 
   private def getSelectedUsers:List[User] =

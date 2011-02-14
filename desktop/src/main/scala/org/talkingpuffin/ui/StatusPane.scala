@@ -35,11 +35,11 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   
   private val cursorSetter = new AfterFilteringCursorSetter(table)
   
-  session.tweetDetailPanel.connectToTable(table, Some(filtersDialog))
+  session.desktopPane.tweetDetailPanel.connectToTable(table, Some(filtersDialog))
 
   def saveState = table.saveState
   
-  def newTable = new StatusTable(session, tableModel, session.tweetDetailPanel.showBigPicture)
+  def newTable = new StatusTable(session, tableModel, session.desktopPane.tweetDetailPanel.showBigPicture)
   
   def tableChanging = {
     lastRowSelected = false
@@ -82,7 +82,7 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   private def clearTweets(all: Boolean) {
     clearSelection
     tableModel.clear(all)
-    session.tweetDetailPanel.clearStatusDetails
+    session.desktopPane.tweetDetailPanel.clearStatusDetails
   }
 
   private def showWordCloud {
