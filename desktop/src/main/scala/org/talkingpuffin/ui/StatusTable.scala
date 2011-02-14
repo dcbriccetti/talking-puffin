@@ -138,7 +138,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   private def createSendMsgDialog(status: Status, names: Option[String], retweetMsg: Option[String]) =
     new SendMsgDialog(session, null, names, Some(status.getId), retweetMsg, false)
   
-  private def getSelectedScreenNames = getSelectedStatuses.map(_.retweetOrTweet.getUser.getScreenName).distinct
+  private def getSelectedScreenNames = getSelectedStatuses.map(_.getUser.getScreenName).distinct
   def getSelectedStatuses = tableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
 
   def getSelectedStatus: Option[Status] = {
