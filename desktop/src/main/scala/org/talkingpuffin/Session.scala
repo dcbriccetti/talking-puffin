@@ -9,12 +9,13 @@ import util.Loggable
 
 class Session(val serviceName: String, val twitter: Twitter) extends Loggable {
   val desktopPane = new DesktopPane(this)
-  val windows = new Windows
+  var streams: Streams = _
+  var peoplePaneCreator: PeoplePaneCreator = _
   val statusMsgLabel = new Label(" ")
   var progress: LongOpListener = null
   var dataProviders: DataProviders = _
-  def userPrefs: Preferences = windows.streams.prefs
-  def tagUsers: TagUsers = windows.streams.tagUsers
+  def userPrefs: Preferences = streams.prefs
+  def tagUsers: TagUsers = streams.tagUsers
 
   /**
    * Records an error message for display to the user.

@@ -46,7 +46,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   def showFriends(screenName: String) = {
     val rels = new Relationships
     rels.getUsers(session, screenName, session.progress)
-    session.windows.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName,
+    session.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName,
       Some(rels), None, None, None)
   }
   
@@ -98,7 +98,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   }
 
   private def createView(provider: DataProvider): Unit = {
-    session.windows.streams.createView(session.desktopPane, provider, None, None)
+    session.streams.createView(session.desktopPane, provider, None, None)
     provider.loadAndPublishData(newPagingMaxPer, false)
   }
 }

@@ -47,7 +47,7 @@ object TwitterListsDisplayer {
       val tw = session.twitter
       allPages(userListMembers(tw, list.getUser.getScreenName, list.getId))}, {
       members: List[User] => {
-        session.windows.peoplePaneCreator.createPeoplePane(list.getFullName,
+        session.peoplePaneCreator.createPeoplePane(list.getFullName,
           None, Some(members), None, tilerNext(tiler))
       }
     })
@@ -58,7 +58,7 @@ object TwitterListsDisplayer {
 
   private def viewListStatuses(list: UserList, session: Session, tiler: Option[Tiler]) = {
     val provider = new ListStatusesProvider(session, list, None, session.progress)
-    session.windows.streams.createView(session.desktopPane, provider, None, tilerNext(tiler))
+    session.streams.createView(session.desktopPane, provider, None, tilerNext(tiler))
     provider.loadContinually
   }
 

@@ -25,7 +25,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
   Globals.sessions ::= session
   iconImage = new ImageIcon(getClass.getResource("/TalkingPuffin.png")).getImage
     
-  session.windows.peoplePaneCreator = this
+  session.peoplePaneCreator = this
   private var peoplePane: PeoplePane = _
 
   val mainToolBar = new MainToolBar
@@ -36,7 +36,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
   val providers = new DataProviders(session, prefs, session.progress)
   session.dataProviders = providers
   val streams = new Streams(prefs, session, tagUsers, rels)
-  session.windows.streams = streams
+  session.streams = streams
   menuBar = new MainMenuBar(session, tagUsers)
   mainToolBar.init(streams)
     
@@ -141,7 +141,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
   
   private def tileViews(numRows: Int) {
     val frames = (for {
-      v <- session.windows.streams.views
+      v <- session.streams.views
       if v.frame.isDefined && ! v.frame.get.isIcon
     } yield v.frame.get) sort(_.getLocation().x < _.getLocation().x)
     if (frames != Nil) {

@@ -39,7 +39,7 @@ class UserTweetsProvider(session: Session, screenName: String, longOpListener: L
     extends TweetsProvider(session, None, screenName, longOpListener) {
   override def updateFunc(paging: Paging): List[Status] = tw.getUserTimeline(screenName, paging).toList.
     filter(status => status.inReplyToUserId match {
-    case Some(userId) => session.windows.streams.relationships.friendIds.contains(userId)
+    case Some(userId) => session.streams.relationships.friendIds.contains(userId)
     case None => true
     })
 }

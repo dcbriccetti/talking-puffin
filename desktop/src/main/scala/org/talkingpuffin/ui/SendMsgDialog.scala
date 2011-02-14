@@ -35,7 +35,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
   private def nameAndScreenNames(names: List[User]) = names.map(u =>
       NameAndScreenName(u.getName, u.getScreenName))
   private var sendingSession = session
-  private val rels = session.windows.streams.relationships
+  private val rels = session.streams.relationships
   
   private def users = {
     val matches = (nameAndScreenNames(rels.friends ::: rels.followers).
