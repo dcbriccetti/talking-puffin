@@ -40,22 +40,21 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   def viewListsOn(selectedScreenNames: Names, table: JTable) =
     TwitterListsDisplayer.viewListsContaining(session, selectedScreenNames)
 
-  def showUserTimeline(screenName: String, tiler: Tiler) =
-    createView(new UserTweetsProvider(session, screenName, session.progress), tiler)
+  def showUserTimeline(screenName: String) =
+    createView(new UserTweetsProvider(session, screenName, session.progress))
 
-  def showFriends(screenName: String, tiler: Tiler) = {
+  def showFriends(screenName: String) = {
     val rels = new Relationships
     rels.getUsers(session, screenName, session.progress)
     session.windows.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName,
-      Some(rels), None, None, Some(tiler.next))
+      Some(rels), None, None, None)
   }
   
-  def showFavorites(screenName: String, tiler: Tiler) =
-    createView(new FavoritesProvider(session, screenName, None, session.progress), tiler)
+  def showFavorites(screenName: String) =
+    createView(new FavoritesProvider(session, screenName, None, session.progress))
   
-  def forAll(selectedScreenNames: Names, fn: (String, Tiler) => Unit) = {
-    val tiler = new Tiler(selectedScreenNames.length)
-    selectedScreenNames.foreach(screenName => fn(screenName, tiler))
+  def forAll(selectedScreenNames: Names, fn: (String) => Unit) = {
+    selectedScreenNames.foreach(screenName => fn(screenName))
   }
 
   def followAK(smi: SpecialMenuItems, getSelectedScreenNames: => Names) = {
@@ -98,8 +97,8 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
         ks(VK_S, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK)))
   }
 
-  private def createView(provider: DataProvider, tiler: Tiler): Unit = {
-    session.windows.streams.createView(session.desktopPane, provider, None, Some(tiler.next))
+  private def createView(provider: DataProvider): Unit = {
+    session.windows.streams.createView(session.desktopPane, provider, None, None)
     provider.loadAndPublishData(newPagingMaxPer, false)
   }
 }
