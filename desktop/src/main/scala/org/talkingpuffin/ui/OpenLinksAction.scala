@@ -2,7 +2,8 @@ package org.talkingpuffin.ui
 
 import _root_.scala.swing.{Action,MenuItem}
 import java.awt.event.KeyEvent
-import javax.swing.{JTable, KeyStroke, JPopupMenu}
+import javax.swing.{JTable, JPopupMenu}
+import javax.swing.KeyStroke.getKeyStroke
 import twitter4j.Status
 import org.talkingpuffin.twitter.RichStatus._
 
@@ -15,7 +16,7 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[Status], table: JTab
   def apply {
     def addMenuItem(menu: JPopupMenu, title: String, accelIndex: Int, action: => Unit) = {
       val a1 = Action(title) {action}
-      a1.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_1 + accelIndex, 0)) 
+      a1.accelerator = Some(getKeyStroke(KeyEvent.VK_1 + accelIndex, 0))
       menu.add(new MenuItem(a1).peer)
     }
     
@@ -46,7 +47,7 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[Status], table: JTab
           
           if (urls.length > 1) {
             val a1 = Action(if (urls.length == 2) "Both" else "All") {browseUrls(urls.map(url => url._2))}
-            a1.accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_A, 0)) 
+            a1.accelerator = Some(getKeyStroke(KeyEvent.VK_A, 0))
             menu.add(new MenuItem(a1).peer)
           }
           val menuLoc = table.getCellRect(table.getSelectedRow, 0, true).getLocation

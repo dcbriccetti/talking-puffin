@@ -3,7 +3,8 @@ package org.talkingpuffin.ui
 import _root_.scala.swing.event.ButtonClicked
 import java.awt.Dimension
 import java.awt.event.KeyEvent
-import javax.swing.{KeyStroke, BorderFactory}
+import javax.swing.BorderFactory
+import javax.swing.KeyStroke.getKeyStroke
 import scala.swing.{BoxPanel, Orientation, ScrollPane, Table, FlowPanel, Button, Action}
 import org.talkingpuffin.filter.{CompoundFilter, CompoundFilters}
 import _root_.org.talkingpuffin.util.Loggable
@@ -34,8 +35,8 @@ class CompoundFilterControl(label: String, filters: CompoundFilters) extends Box
           dataChanged
         }
         peer.getActionMap.put(delAction.title, delAction.peer)
-        peer.getInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), delAction.title)
-        peer.getInputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), delAction.title)
+        peer.getInputMap.put(getKeyStroke(KeyEvent.VK_DELETE, 0), delAction.title)
+        peer.getInputMap.put(getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), delAction.title)
       }
 
       addDelete

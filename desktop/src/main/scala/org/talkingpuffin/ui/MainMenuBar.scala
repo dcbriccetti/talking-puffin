@@ -1,6 +1,6 @@
 package org.talkingpuffin.ui
 
-import javax.swing.KeyStroke
+import javax.swing.KeyStroke.getKeyStroke
 import java.awt.event.KeyEvent
 import java.awt.Toolkit
 import scala.swing.{MenuItem, MenuBar, Menu, CheckMenuItem, Action}
@@ -23,22 +23,22 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
   
   contents += new Menu("File") {
     contents += new MenuItem(new Action("New Session...") {
-      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, shortcutKeyMask))
+      accelerator = Some(getKeyStroke(KeyEvent.VK_N, shortcutKeyMask))
       def apply = Main.launchSession 
     })
     contents += new MenuItem(new Action("Close Window") {
-      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_W, shortcutKeyMask))
+      accelerator = Some(getKeyStroke(KeyEvent.VK_W, shortcutKeyMask))
       def apply = TopFrames.closeCurrentWindow()
     })
   }
   
   contents += new Menu("Send") {
     contents += new MenuItem(new Action("Status...") {
-      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_S, ALT_DOWN_MASK))
+      accelerator = Some(getKeyStroke(KeyEvent.VK_S, ALT_DOWN_MASK))
       def apply = eventDistributor.publish(SendStatusEvent(session)) 
     })
     contents += new MenuItem(new Action("Direct message...") {
-      accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_D, ALT_DOWN_MASK))
+      accelerator = Some(getKeyStroke(KeyEvent.VK_D, ALT_DOWN_MASK))
       def apply = eventDistributor.publish(SendDirectMessageEvent(session))
     })
   }

@@ -1,7 +1,8 @@
 package org.talkingpuffin.ui.util
 
 import java.awt.event.KeyEvent
-import javax.swing.{JRootPane, JDialog, JComponent, KeyStroke}
+import javax.swing.{JRootPane, JDialog, JComponent}
+import javax.swing.KeyStroke.getKeyStroke
 import swing.{Frame, Action}
 
 /**
@@ -24,7 +25,7 @@ trait Cancelable {
 
   rp.getActionMap.put(cancelAction.title, cancelAction.peer)
   rp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-    KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), cancelAction.title)
+    getKeyStroke(KeyEvent.VK_ESCAPE, 0), cancelAction.title)
   
   def notifyOfCancel {}
 }

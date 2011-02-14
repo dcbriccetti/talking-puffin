@@ -3,6 +3,7 @@ package org.talkingpuffin.ui
 import java.awt.Component
 import scala.swing.{Action}
 import javax.swing.{JMenuItem, JPopupMenu, KeyStroke, JComponent}
+import javax.swing.KeyStroke.getKeyStroke
 import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent._
 import javax.swing.KeyStroke.{getKeyStroke => ks}
@@ -21,9 +22,9 @@ class PrevAction(comp: java.awt.Component) extends EventGeneratingAction("Previo
 class KeyTriggeredAction(val action: Action, val keyStroke: KeyStroke*)
 
 class NextTAction(comp: Component) extends KeyTriggeredAction(new NextAction(comp), 
-  ks(VK_N, 0), KeyStroke.getKeyStroke(VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK))
+  ks(VK_N, 0), getKeyStroke(VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK))
 class PrevTAction(comp: Component) extends KeyTriggeredAction(new PrevAction(comp), 
-  ks(VK_P, 0), KeyStroke.getKeyStroke(VK_P, java.awt.event.InputEvent.CTRL_DOWN_MASK))
+  ks(VK_P, 0), getKeyStroke(VK_P, java.awt.event.InputEvent.CTRL_DOWN_MASK))
 
 case class ActionAndKeys(val action: Action, val keys: KeyStroke*)
 
