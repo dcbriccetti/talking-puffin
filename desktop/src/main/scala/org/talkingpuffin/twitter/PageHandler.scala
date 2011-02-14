@@ -30,7 +30,7 @@ object PageHandler extends Loggable {
 
   def allPages(fn: (Paging) => ResponseList[Status], paging: Paging): List[Status] = {
     val resp = fn(paging).toList
-    debug("Called Twitter for page " + paging.getPage + ". " + resp.size + " results.")
+    debug("Page " + paging.getPage + " results: " + resp.size)
     resp.size match {
       case 0 => resp
       case n => resp ::: allPages(fn, {paging.setPage(paging.getPage + 1); paging})
