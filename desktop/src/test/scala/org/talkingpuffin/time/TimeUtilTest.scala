@@ -2,15 +2,15 @@ package org.talkingpuffin.time
 
 import org.specs.runner.JUnit4
 import org.specs.Specification
-import net.lag.configgy.Configgy
-import org.specs.matcher.Matchers._
-import org.joda.time.{DateTime, Duration, DateMidnight, Seconds}
+import org.joda.time.DateTime
 
-import TimeUtil._
+import TimeUtil.{isToday, toAge}
 
 class TimeUtilTest extends JUnit4(TimeUtilSpec)
 
 object TimeUtilSpec extends Specification {
+  private def now = new DateTime
+
  "One hour ago should be 3600s" in {
    toAge(now.minusHours(1)) must beCloseTo(3600L,2L)
  }
