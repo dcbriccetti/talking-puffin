@@ -7,9 +7,9 @@ import twitter4j.{Twitter, TwitterException, TwitterFactory}
 import twitter4j.conf.ConfigurationBuilder
 
 object AuthenticatedSession extends Loggable {
-  def logIn(): Twitter = {
+  def logIn(credentialsOption: Option[Credentials]): Twitter = {
     var tw: Twitter = null
-    val credentials = CredentialsRepository.getAll.headOption match {
+    val credentials = credentialsOption match {
       case Some(cr) =>
         tw = createTwitter(Some(cr))
         cr
