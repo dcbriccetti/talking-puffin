@@ -17,7 +17,7 @@ import twitter4j.{RateLimitStatusListener, Twitter, User, RateLimitStatusEvent}
  */
 class TopFrame(tw: Twitter) extends Frame with Loggable
     with PeoplePaneCreator with Reactor {
-  val service = "twitter" // Only Twitter since change to Twitter4J
+  val service = org.talkingpuffin.twitter.Constants.ServiceName
   val prefs = GlobalPrefs.prefsForUser(service, tw.getScreenName)
   val tagUsers = new TagUsers(service, tw.getScreenName)
   TopFrames.addFrame(this)
