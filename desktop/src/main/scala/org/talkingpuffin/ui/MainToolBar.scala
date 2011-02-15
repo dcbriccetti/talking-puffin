@@ -1,10 +1,10 @@
 package org.talkingpuffin.ui
 
-import java.awt.Dimension
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.{SwingUtilities, JToolBar}
 import swing.{ProgressBar, Label, Action}
 import util.ToolBarHelpers
+import java.awt.Dimension
 
 /**
  * The main ToolBar
@@ -32,6 +32,8 @@ class MainToolBar extends JToolBar with ToolBarHelpers with LongOpListener {
     addSeparator
     add(new Label("Left: ") {tooltip = "The number of requests remaining in the hour, before reset"}.peer)
     add(remaining.peer)
+    addSeparator
+    aa(Tile.actions(streams.session, false): _*)
     addSeparator
     add(progressBar.peer)
   }

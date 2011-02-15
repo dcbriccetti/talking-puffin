@@ -54,10 +54,7 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
       })
       contents += newItem("People", NewPeoplePaneEvent(session))
     }
-    def pub(numRows: Int) = eventDistributor.publish(TileViewsEvent(session, numRows))
-    contents += new MenuItem(Action("Tile, 1 row") {pub(1)})
-    contents += new MenuItem(Action("Tile, 2 rows") {pub(2)})
-    contents += new MenuItem(Action("Tile, 3 rows") {pub(3)})
+    Tile.actions(session).foreach(action => contents += new MenuItem(action))
   }
 
   contents += new Menu("Lists") {
