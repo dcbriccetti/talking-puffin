@@ -9,7 +9,7 @@ import twitter4j.conf.ConfigurationBuilder
 object AuthenticatedSession extends Loggable {
   def logIn(): Twitter = {
     var tw: Twitter = null
-    val credentials = selectExistingCredentialsOrNone() match {
+    val credentials = CredentialsRepository.getAll.headOption match {
       case Some(cr) =>
         tw = createTwitter(Some(cr))
         cr
@@ -37,11 +37,6 @@ object AuthenticatedSession extends Loggable {
     }
 
     tw
-  }
-
-  private def selectExistingCredentialsOrNone(): Option[Credentials] = {
-    //todo Create dialog for selecting among all returned (if any)
-    CredentialsRepository.getAll.headOption
   }
 
   private def createTwitter(credentials: Option[Credentials]): Twitter = {
