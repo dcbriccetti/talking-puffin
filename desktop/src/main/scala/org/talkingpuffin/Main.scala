@@ -2,7 +2,7 @@ package org.talkingpuffin
 
 import javax.swing.{UIManager, JFrame}
 import mac.MacInit
-import twitter.{CredentialsRepository, AuthenticatedSession}
+import twitter.{Credentials, CredentialsRepository, AuthenticatedSession}
 import ui.{TopFrame}
 
 /**
@@ -18,11 +18,7 @@ object Main {
     launchAllSessions
   }
 
-  def launchAllSessions {
-      CredentialsRepository.getAll.foreach(cred => new TopFrame(AuthenticatedSession.logIn(Some(cred))))
-  }
+  def launchNewSession(credentials: Option[Credentials] = None) = new TopFrame(AuthenticatedSession.logIn(credentials))
 
-  def launchSession {
-      new TopFrame(AuthenticatedSession.logIn(None))
-  }
+  private def launchAllSessions = CredentialsRepository.getAll.foreach(cred => launchNewSession(Some(cred)))
 }

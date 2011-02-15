@@ -24,7 +24,7 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
   contents += new Menu("File") {
     contents += new MenuItem(new Action("New Session...") {
       accelerator = Some(getKeyStroke(KeyEvent.VK_N, shortcutKeyMask))
-      def apply = Main.launchSession 
+      def apply = Main.launchNewSession()
     })
     contents += new MenuItem(new Action("Close Window") {
       accelerator = Some(getKeyStroke(KeyEvent.VK_W, shortcutKeyMask))
