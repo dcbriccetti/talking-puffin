@@ -4,6 +4,7 @@ import javax.swing.Icon
 import _root_.scala.swing.event.Event
 import _root_.scala.swing.{Reactor, Publisher}
 import org.apache.log4j.Logger
+import org.talkingpuffin.Constants.RetweetSymbol
 import org.talkingpuffin.filter.{FilterSet, FilterSetChanged, TagUsers}
 import org.talkingpuffin.state.GlobalPrefs.PrefChangedEvent
 import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
@@ -11,7 +12,7 @@ import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 import org.talkingpuffin.Session
 import org.talkingpuffin.util.Loggable
-import twitter4j.{User, DirectMessage, Status}
+import twitter4j.{User, Status}
 import org.talkingpuffin.twitter.RichStatus._
 
 /**
@@ -101,7 +102,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   protected def showNameInStatus = ! options.showNameColumn
   
   def getStatusText(status: Status, username: String, parent: Option[Status]): String = {
-    status.getText + (if (parent.isDefined) " RT by " + parent.get.getUser.getScreenName else "")
+    status.getText + (if (parent.isDefined) " " + RetweetSymbol + " " + parent.get.getUser.getScreenName else "")
   }
 
   def getStatusAt(rowIndex: Int): Status = filteredStatuses_(rowIndex)
