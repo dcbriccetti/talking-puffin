@@ -1,10 +1,9 @@
 package org.talkingpuffin.ui
 
-import org.talkingpuffin.filter.TagUsers
 import javax.swing.JDialog
-import util.Cancelable
 import swing.{FlowPanel, Action, Button, BorderPanel}
-import java.awt.event.KeyEvent
+import org.talkingpuffin.filter.TagUsers
+import util.Cancelable
 
 /**
  * A dialog from which tags can be selected.
@@ -19,7 +18,6 @@ class TagsDialog(owner: java.awt.Frame, tagUsers: TagUsers, checkedValues: List[
     add(new FlowPanel {
       contents += new Button(cancelAction)
       val okAction = new Action("OK") {
-        mnemonic = KeyEvent.VK_O
         def apply = {ok = true; TagsDialog.this.setVisible(false)}
       }
       val okButton = new Button(okAction)
