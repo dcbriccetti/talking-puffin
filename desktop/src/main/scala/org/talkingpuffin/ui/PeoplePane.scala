@@ -42,7 +42,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
   private val userActions = new UserActions(session, rels)
   val mh = new PopupMenuHelper(table)
   private var specialMenuItems = new SpecialMenuItems(table, tableModel.relationships,
-    {getSelectedUsers map(_.getId.toLong)}, getSelectedScreenNames, {false})
+    {getSelectedUsers map(_.getId.toLong)}, getSelectedScreenNames(true), {false})
   buildActions(mh, table)
   table.addMouseListener(new PopupListener(table, mh.menu))
 
@@ -135,7 +135,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
   private def getSelectedUsers:List[User] =
     TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
   
-  def getSelectedScreenNames: List[String] = getSelectedUsers.map(user => user.getScreenName)
+  def getSelectedScreenNames(retweets: Boolean): List[String] = getSelectedUsers.map(user => user.getScreenName)
 
   private def viewSelected = getSelectedUsers.foreach(u => DesktopUtil.browse("http://twitter.com/" + 
       u.getScreenName))

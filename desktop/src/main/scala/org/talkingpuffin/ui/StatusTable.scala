@@ -59,8 +59,8 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
 
   private val mh = new PopupMenuHelper(this)
   private var specialMenuItems = new SpecialMenuItems(this, tableModel.relationships,
-      getSelectedStatuses map(_.getUser.getId.toLong), getSelectedScreenNames,
-      {getSelectedStatuses.exists(_.inReplyToStatusId.isDefined)})
+      getSelectedStatuses(true) map(_.getUser.getId.toLong), getSelectedScreenNames(true),
+      {getSelectedStatuses(true).exists(_.inReplyToStatusId.isDefined)})
   buildActions
 
   new Reactor {
@@ -89,22 +89,22 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     }
   }
   
-  private def viewSelected = getSelectedStatuses.foreach(status =>
+  private def viewSelected = getSelectedStatuses(true).foreach(status =>
     DesktopUtil.browse("http://twitter.com/" + status.getUser.getScreenName + "/statuses/" + status.getId))
  
-  private def viewSourceSelected = getSelectedStatuses.foreach(status => 
+  private def viewSourceSelected = getSelectedStatuses(true).foreach(status =>
     DesktopUtil.browse("http://twitter.com/statuses/show/" + status.getId + ".xml"))
  
-  private def viewUser = getSelectedScreenNames.foreach(screenName => 
+  private def viewUser = getSelectedScreenNames(true).foreach(screenName =>
     DesktopUtil.browse("http://twitter.com/" + screenName))
 
-  private def viewParent = getSelectedStatuses.foreach(status => 
+  private def viewParent = getSelectedStatuses(true).foreach(status =>
     if (status.inReplyToScreenName.isDefined && status.inReplyToStatusId.isDefined)
       DesktopUtil.browse("http://twitter.com/" + status.inReplyToScreenName.get +
           "/statuses/" + status.inReplyToStatusId.get)
   )
  
-  private def editUser = getSelectedStatuses.foreach(status => { 
+  private def editUser = getSelectedStatuses(true).foreach(status => {
     val userProperties = new UserPropertiesDialog(session.userPrefs, status)
     userProperties.visible = true  
   })
@@ -116,7 +116,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   }
   
   def reply {
-    val statuses = getSelectedStatuses
+    val statuses = getSelectedStatuses(true)
     if (! statuses.isEmpty) {
       val recipients = statuses.map(("@" + _.getUser.getScreenName)).mkString(" ")
       createSendMsgDialog(statuses(0), Some(recipients), None).visible = true
@@ -127,19 +127,27 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     (new SendMsgDialog(session, null, Some(screenName), None, None, true)).visible = true
   
   private def retweetOldWay {
-    val status = getSelectedStatuses(0) 
+    val status = getSelectedStatuses(true)(0)
     val name = "@" + status.getUser.getScreenName
     createSendMsgDialog(status, Some(name), Some(status.getText)).visible = true
   }
   
-  private def retweetNewWay = process(getSelectedStatuses.map(_.getId), session.twitter.retweetStatus,
+  private def retweetNewWay = process(getSelectedStatuses(true).map(_.getId), session.twitter.retweetStatus,
       "retweeting", "Status %s retweeted.")
   
   private def createSendMsgDialog(status: Status, names: Option[String], retweetMsg: Option[String]) =
     new SendMsgDialog(session, null, names, Some(status.getId), retweetMsg, false)
   
-  private def getSelectedScreenNames = getSelectedStatuses.map(_.getUser.getScreenName).distinct
-  def getSelectedStatuses = tableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
+  private def getSelectedScreenNames(retweets: Boolean = false): List[String] =
+    getSelectedStatuses(retweets).map(_.getUser.getScreenName).distinct
+
+  def getSelectedStatuses(retweets: Boolean = false) = {
+    val statuses = tableModel.getStatuses(TableUtil.getSelectedModelIndexes(this))
+    if (retweets)
+      statuses.map(_.retweetOrTweet)
+    else
+      statuses
+  }
 
   def getSelectedStatus: Option[Status] = {
     val row = getSelectedRow
@@ -224,7 +232,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     
     mh add(Action("Reply…") { reply }, ks(VK_R, 0))
     mh add(new Action("Direct Message…") { 
-      def apply = dm(getSelectedScreenNames(0))
+      def apply = dm(getSelectedScreenNames(true)(0))
       specialMenuItems.oneScreennameSelected.list ::= this
       specialMenuItems.followersOnly.list ::= this
     }, ks(VK_D, 0))
@@ -281,7 +289,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
       }, this, ks(VK_D, SHORTCUT), ks(VK_DELETE, 0), ks(VK_BACK_SPACE, 0))
   
       mh add(Action("All tweets from selected users") {
-        tableModel removeStatusesFrom getSelectedScreenNames }, this, ks(VK_D, SHORTCUT | SHIFT))
+        tableModel removeStatusesFrom getSelectedScreenNames(false) }, this, ks(VK_D, SHORTCUT | SHIFT))
     })
   }
 

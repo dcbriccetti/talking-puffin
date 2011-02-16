@@ -72,28 +72,27 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   }
 
   def addCommonItems(mh: PopupMenuHelper, specialMenuItems: SpecialMenuItems, 
-      table: JTable, showBigPicture: => Unit, getSelectedScreenNames: => Names) {
+      table: JTable, showBigPicture: => Unit, getSelectedScreenNames: (Boolean) => Names) {
+
+    def names = getSelectedScreenNames(true)
 
     mh add(new Action("Show larger image") { 
       def apply = showBigPicture
       specialMenuItems.oneStatusSelected.list ::= this
     }, ks(VK_I, 0))
     
-    mh add(Action("View User Timeline")
-        {forAll(getSelectedScreenNames, showUserTimeline)}, ks(VK_T, SHIFT_DOWN_MASK))
-    mh add(Action("Show friends and followers")
-        {forAll(getSelectedScreenNames, showFriends)}, ks(VK_H, SHIFT_DOWN_MASK))
+    mh add(Action("View user timeline") {forAll(names, showUserTimeline)}, ks(VK_T, SHIFT_DOWN_MASK))
+    mh add(Action("Show friends and followers") {forAll(names, showFriends)}, ks(VK_H, SHIFT_DOWN_MASK))
     mh add(Action("Show favorites")
-        {forAll(getSelectedScreenNames, showFavorites)}, ks(VK_H, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
-    mh add(Action("View lists…") {viewLists(getSelectedScreenNames, table)}, ks(VK_L, SHIFT_DOWN_MASK))
-    mh add(Action("View lists on…") {viewListsOn(getSelectedScreenNames, table)}, 
+        {forAll(names, showFavorites)}, ks(VK_H, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
+    mh add(Action("View lists…") {viewLists(names, table)}, ks(VK_L, SHIFT_DOWN_MASK))
+    mh add(Action("View lists on…") {viewListsOn(names, table)},
         ks(VK_L, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
     mh add(new TagAction(table, table.getModel.asInstanceOf[TaggingSupport]), ks(VK_T, 0))
-    mh.add(followAK(specialMenuItems, getSelectedScreenNames))
-    mh.add(unfollowAK(specialMenuItems, getSelectedScreenNames))
-    mh.add(new ActionAndKeys(Action("Block") { block(getSelectedScreenNames) }, 
-        ks(VK_B, UserActions.shortcutKeyMask)))
-    mh.add(new ActionAndKeys(Action("Report Spam") {reportSpam(getSelectedScreenNames)},
+    mh.add(followAK(specialMenuItems, names))
+    mh.add(unfollowAK(specialMenuItems, names))
+    mh.add(new ActionAndKeys(Action("Block") {block(names)}, ks(VK_B, UserActions.shortcutKeyMask)))
+    mh.add(new ActionAndKeys(Action("Report Spam") {reportSpam(names)},
         ks(VK_S, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK)))
   }
 

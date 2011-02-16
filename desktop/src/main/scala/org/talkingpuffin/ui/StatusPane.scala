@@ -44,7 +44,7 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   def tableChanging = {
     lastRowSelected = false
     cursorSetter.discardCandidates
-    lastSelectedRows = table.getSelectedStatuses
+    lastSelectedRows = table.getSelectedStatuses(false)
     if (lastSelectedRows.length > 0) {
       val lastStatus = tableModel.getStatusAt(table.convertRowIndexToModel(table.getRowCount-1))
       if (lastSelectedRows contains lastStatus) {
