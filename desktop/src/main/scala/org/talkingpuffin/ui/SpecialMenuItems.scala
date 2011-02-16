@@ -39,12 +39,12 @@ class SpecialMenuItems(table: JTable, rels: Relationships,
     
     all foreach(_.foreach(_.enabled = true))
     
-    oneStatusSelected     disableIf(selIds.length != 1) 
-    oneScreennameSelected disableIf(numSelectedScreenNames != 1)
-    followersOnly         disableIf(selIds.exists(id => ! rels.followerIds.contains(id)))
-    friendsOnly           disableIf(selIds.exists(id => ! rels.friendIds  .contains(id)))
-    notFriendsOnly        disableIf(selIds.exists(id =>   rels.friendIds  .contains(id)))
-    replyOnly             disableIf(! getReplyIsSelected)
+    oneStatusSelected     disableIf selIds.length != 1
+    oneScreennameSelected disableIf numSelectedScreenNames != 1
+    followersOnly         disableIf selIds.exists(id => ! rels.followerIds.contains(id))
+    friendsOnly           disableIf selIds.exists(id => ! rels.friendIds  .contains(id))
+    notFriendsOnly        disableIf selIds.exists(id =>   rels.friendIds  .contains(id))
+    replyOnly             disableIf ! getReplyIsSelected
   }
 }
   
