@@ -8,23 +8,21 @@ import twitter4j.conf.ConfigurationBuilder
 
 object AuthenticatedSession extends Loggable {
   def logIn(credentialsOption: Option[Credentials]): Twitter = {
-    var tw: Twitter = null
-    val credentials = credentialsOption match {
+    val (tw, credentials) = credentialsOption match {
       case Some(cr) =>
-        tw = createTwitter(Some(cr))
-        cr
+        (createTwitter(Some(cr)), cr)
       case None =>
-        tw = createTwitter(None)
-        val requestToken = tw.getOAuthRequestToken
+        val twitter = createTwitter(None)
+        val requestToken = twitter.getOAuthRequestToken
         DesktopUtil.browse(requestToken.getAuthorizationURL)
-        Dialog.showInput(null, "Enter the PIN from the Twitter authorization page in your browser",
+        (twitter, Dialog.showInput(null, "Enter the PIN from the Twitter authorization page in your browser",
           "Enter PIN", Dialog.Message.Question, null, List[String](), "") match {
           case Some(pin: String) =>
-            val token = tw.getOAuthAccessToken(requestToken, pin)
+            val token = twitter.getOAuthAccessToken(requestToken, pin)
             CredentialsRepository.save(Credentials(Constants.ServiceName, token.getScreenName,
                 token.getToken, token.getTokenSecret))
           case _ => throw new RuntimeException("No PIN received")
-        }
+        })
     }
 
     try {
