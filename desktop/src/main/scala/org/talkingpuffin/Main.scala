@@ -18,7 +18,9 @@ object Main {
     launchAllSessions
   }
 
-  def launchNewSession(credentials: Option[Credentials] = None) = new TopFrame(AuthenticatedSession.logIn(credentials))
+  def launchNewSession(credentials: Option[Credentials] = None) =
+      new TopFrame(AuthenticatedSession.logIn(credentials))
 
-  private def launchAllSessions = CredentialsRepository.getAll.foreach(cred => launchNewSession(Some(cred)))
+  private def launchAllSessions = CredentialsRepository.getAll.foreach(cred =>
+      launchNewSession(Some(cred)))
 }
