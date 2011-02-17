@@ -2,11 +2,12 @@ package org.talkingpuffin.twitter
 
 import twitter4j.{User, Status}
 
-case class RichUser(user: User) {
-  def status: Option[Status] = user.getStatus match {
-    case null => None
-    case s => Some(s)
-  }
+/**
+ * The twitter4j.User class, augmented with additional features for application
+ * and Scala suitability.
+ */
+case class RichUser(user: User) extends OptionMaker {
+  def status: Option[Status] = makeOption(user.getStatus)
 }
 
 object RichUser {
