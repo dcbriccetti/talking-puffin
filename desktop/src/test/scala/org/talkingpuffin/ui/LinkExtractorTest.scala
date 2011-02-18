@@ -1,8 +1,7 @@
-package org.talkingpuffin.filter
+package org.talkingpuffin.ui
 
 import org.junit.Test
 import org.junit.Assert.assertEquals
-import org.talkingpuffin.ui.LinkExtractor
 
 class LinkExtractorTest {
 
@@ -22,5 +21,10 @@ class LinkExtractorTest {
       LinkExtractor.createLinks("ABC http://davebsoft.com, 123"))
   }
 
+  @Test def allLinksAreFound {
+    val links = LinkExtractor.getLinks("CNN lies...silent http://bit.ly/cnn-BS Real story here: http://bit.ly/dSUqXT",
+      None, false, true, false)
+    assertEquals(2, links.size)
+  }
+
 }
- 
