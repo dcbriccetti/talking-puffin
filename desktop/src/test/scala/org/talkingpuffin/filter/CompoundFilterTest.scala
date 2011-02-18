@@ -1,10 +1,9 @@
 package org.talkingpuffin.filter
 
 import org.junit.Test
-import org.junit.Assert._
-import twitter4j.{User, Status}
 
 class CompoundFilterTest {
+
   @Test def matchesText {
     val cf = CompoundFilter(List(TextTextFilter("abc", false)), None, None)
   }

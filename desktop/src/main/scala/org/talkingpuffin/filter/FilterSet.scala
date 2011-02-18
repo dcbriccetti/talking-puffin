@@ -12,9 +12,9 @@ import org.talkingpuffin.twitter.RichStatus._
  */
 class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
   
-  var excludeFriendRetweets: Boolean = false
-  var excludeNonFollowers: Boolean = false
-  var useNoiseFilters: Boolean = false
+  var excludeFriendRetweets = false
+  var excludeNonFollowers = false
+  var useNoiseFilters = false
   
   val includeSet = new InOutFilters(tagUsers)
   val excludeSet = new InOutFilters(tagUsers)
@@ -30,14 +30,14 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
     
     def includeStatus(status: Status): Boolean = {
       def tagFiltersInclude = includeSet.tags == Nil || includeSet.tagMatches(status.getUser.getId)
+
       def excludedByTags = excludeSet.tagMatches(status.getUser.getId)
     
-      def excludedByCompoundFilters: Boolean = {
-        (includeSet.cpdFilters.list != Nil && !includeSet.cpdFilters.matchesAll(status)) ||
-                excludeSet.cpdFilters.matchesAny(status)
-      }
+      def excludedByCompoundFilters =
+          (includeSet.cpdFilters.list != Nil && !includeSet.cpdFilters.matchesAll(status)) ||
+          excludeSet.cpdFilters.matchesAny(status)
 
-      tagFiltersInclude && ! excludedByTags && 
+      tagFiltersInclude && ! excludedByTags &&
           ! (excludeFriendRetweets && status.isRetweetOfStatusFromFriend(friendUsernames)) &&
           ! (excludeNonFollowers && ! rels.followerIds.contains(status.getUser.getId)) &&
           ! (useNoiseFilters && NoiseFilter.isNoise(status.text)) &&
@@ -49,4 +49,3 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
   
   def publish: Unit = publish(new FilterSetChanged(this))
 }
-
