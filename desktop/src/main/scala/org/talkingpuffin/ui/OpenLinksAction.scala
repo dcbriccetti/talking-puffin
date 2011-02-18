@@ -32,7 +32,7 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[Status], table: JTab
 
     getSelectedStatus match {
       case Some(status) =>
-        val urls = LinkExtractor.getLinks(status.getText, status.inReplyToStatusId, users, pages, lists)
+        val urls = LinkExtractor.getLinks(status.text, status.inReplyToStatusId, users, pages, lists)
   
         if (urls.length == 1) {
           browse(urls(0)._2)

@@ -1,10 +1,11 @@
 package org.talkingpuffin.filter
 
 import scala.swing.Publisher
+import twitter4j.Status
 import org.talkingpuffin.ui.{Relationships}
 import org.talkingpuffin.filter.RetweetDetector._
 import org.talkingpuffin.util.Loggable
-import twitter4j.Status
+import org.talkingpuffin.twitter.RichStatus._
 
 /**
  * A set of all filters, and logic to apply them
@@ -39,7 +40,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
       tagFiltersInclude && ! excludedByTags && 
           ! (excludeFriendRetweets && status.isRetweetOfStatusFromFriend(friendUsernames)) &&
           ! (excludeNonFollowers && ! rels.followerIds.contains(status.getUser.getId)) &&
-          ! (useNoiseFilters && NoiseFilter.isNoise(status.getText)) &&
+          ! (useNoiseFilters && NoiseFilter.isNoise(status.text)) &&
           ! excludedByCompoundFilters
     }
 

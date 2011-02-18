@@ -129,7 +129,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   private def retweetOldWay {
     val status = getSelectedStatuses(true)(0)
     val name = "@" + status.getUser.getScreenName
-    createSendMsgDialog(status, Some(name), Some(status.getText)).visible = true
+    createSendMsgDialog(status, Some(name), Some(status.text)).visible = true
   }
   
   private def retweetNewWay = process(getSelectedStatuses(true).map(_.getId), session.twitter.retweetStatus,

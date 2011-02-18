@@ -102,7 +102,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   protected def showNameInStatus = ! options.showNameColumn
   
   def getStatusText(status: Status, username: String, parent: Option[Status]): String = {
-    status.getText + (if (parent.isDefined) " " + RetweetSymbol + " " + parent.get.getUser.getScreenName else "")
+    status.text + (if (parent.isDefined) " " + RetweetSymbol + " " + parent.get.getUser.getScreenName else "")
   }
 
   def getStatusAt(rowIndex: Int): Status = filteredStatuses_(rowIndex)
@@ -233,7 +233,7 @@ case class TableContentsChanged(model: StatusTableModel, filteredIn: Int, total:
   
 trait Mentions extends StatusTableModel {
   override def getStatusText(status: Status, username: String, parent: Option[Status]): String = {
-    val text = status.getText
+    val text = status.text
     val userTag = "@" + username
     if (text.startsWith(userTag)) text.substring(userTag.length).trim else text
   }

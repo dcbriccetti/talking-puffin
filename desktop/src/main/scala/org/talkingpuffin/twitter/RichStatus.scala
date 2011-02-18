@@ -16,6 +16,8 @@ case class RichStatus(status: Status) extends OptionMaker {
   def retweetOrTweet = retweet.getOrElse(status)
   def createdAt = new DateTime(status.getCreatedAt)
 
+  def text = retweetOrTweet.getText
+  
   def source = status.getSource
   def sourceName = SourceDetails(source).name
   def sourceUrl = SourceDetails(source).url

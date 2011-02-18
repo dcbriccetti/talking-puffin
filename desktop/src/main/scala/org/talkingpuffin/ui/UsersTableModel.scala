@@ -1,15 +1,14 @@
 package org.talkingpuffin.ui
 
-import javax.swing.table.AbstractTableModel
 import javax.swing.Icon
+import java.util.Date
 import swing.Reactor
+import twitter4j.User
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.ui.table.EmphasizedString
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.twitter.RichUser._
 import org.talkingpuffin.twitter.RichStatus._
-import java.util.Date
-import twitter4j.{User, Status}
 
 class UsersTableModel(users: Option[List[User]], val tagUsers: TagUsers,
     val relationships: Relationships) 
@@ -56,7 +55,7 @@ class UsersTableModel(users: Option[List[User]], val tagUsers: TagUsers,
       case UserColumns.FRIENDS => user.getFriendsCount.asInstanceOf[Object]
       case UserColumns.FOLLOWERS => user.getFollowersCount.asInstanceOf[Object]
       case UserColumns.STATUS => user.status match {
-        case Some(status) => status.getText
+        case Some(status) => status.text
         case None => ""
       }
       case UserColumns.STATUS_DATE => user.status match {
