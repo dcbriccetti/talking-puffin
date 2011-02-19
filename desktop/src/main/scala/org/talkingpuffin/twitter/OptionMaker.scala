@@ -11,4 +11,9 @@ trait OptionMaker {
     case -1 => None
     case t: T => Some(t)
   }
+
+  protected def makeEmptyString(value: String): String = value match {
+    case null => ""
+    case s => s
+  }
 }

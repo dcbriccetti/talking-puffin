@@ -8,6 +8,8 @@ import twitter4j.{User, Status}
  */
 case class RichUser(user: User) extends OptionMaker {
   def status: Option[Status] = makeOption(user.getStatus)
+  def location = makeEmptyString(user.getLocation)
+  def description = makeEmptyString(user.getDescription)
 }
 
 object RichUser {

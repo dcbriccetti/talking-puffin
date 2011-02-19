@@ -6,6 +6,7 @@ import javax.swing.text.JTextComponent
 import org.talkingpuffin.ui.{HtmlFormatter}
 import org.talkingpuffin.util.ShortUrl
 import org.talkingpuffin.time.TimeUtil
+import org.talkingpuffin.ui.util.EscapeHtml
 
 /**
  * Status cell renderer.
@@ -14,8 +15,8 @@ class StatusCellRenderer extends HtmlCellRenderer {
   var textSizePct = 100
   
   override def setFormattedText(component: JTextComponent, value: Any) = component.setText(
-    HtmlFormatter.htmlAround(formatValue(value.asInstanceOf[StatusCell], renderer.getForeground))) 
-  
+    HtmlFormatter.htmlAround(formatValue(value.asInstanceOf[StatusCell], renderer.getForeground)))
+
   private def formatValue(cell: StatusCell, color: Color): String = 
       "<font style='font-size: " + textSizePct + "%;' face='helvetica' color='#" + 
       Integer.toHexString(color.getRGB & 0x00ffffff) + "'>" + 
@@ -25,14 +26,14 @@ class StatusCellRenderer extends HtmlCellRenderer {
         case None => ""
       }
       case None => ""
-    }) + ShortUrl.substituteShortenedUrlWith(cell.status, "⁕") + (cell.age match {
+    }) + EscapeHtml(ShortUrl.substituteShortenedUrlWith(cell.status, "⁕")) + (cell.age match {
       case Some(age) => "<font size='-2'> " + TimeUtil.formatAge(age) +
           (if (TimeUtil.showAsAge_?) " ago" else "") + "</font>"
       case None => ""
     }) + "</font>"
 }
 
-case class StatusCell(val age: Option[Date], val name: Option[EmphasizedString], val status: String)
+case class StatusCell(age: Option[Date], name: Option[EmphasizedString], status: String)
 
 object StatusComparator extends Comparator[StatusCell] {
   def compare(o1: StatusCell, o2: StatusCell) = o1.status.compareToIgnoreCase(o2.status)

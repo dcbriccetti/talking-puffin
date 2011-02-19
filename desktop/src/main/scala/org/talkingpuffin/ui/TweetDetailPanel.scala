@@ -12,10 +12,11 @@ import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
 import org.talkingpuffin.Session
 import org.talkingpuffin.ui.filter.FiltersDialog
-import util.{Activateable, CenteredPicture, TextChangingAnimator}
 import org.talkingpuffin.util._
 import twitter4j.{User, Status}
 import org.talkingpuffin.twitter.RichStatus._
+import org.talkingpuffin.twitter.RichUser._
+import util.{EscapeHtml, Activateable, CenteredPicture, TextChangingAnimator}
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE))
 
@@ -133,7 +134,7 @@ class TweetDetailPanel(session: Session,
       case Some(topStatus) =>
         val st = topStatus.retweetOrTweet
         largeTweet.filtersDialog = filtersDialog
-        largeTweet.setText(HtmlFormatter.createTweetHtml(st.getText, st.inReplyToStatusId, st.source,
+        largeTweet.setText(HtmlFormatter.createTweetHtml(EscapeHtml(st.getText), st.inReplyToStatusId, st.source,
             userAndStatus.retweetingUser))
 
         if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
@@ -171,7 +172,7 @@ class TweetDetailPanel(session: Session,
   private def setText(user: User, statusOp: Option[Status]) {
     animator.stop
     showingUser = user
-    val rawLocationOfShowingItem = user.getLocation
+    val rawLocationOfShowingItem = user.location
 
     statusOp match {
       case None =>
@@ -209,7 +210,7 @@ class TweetDetailPanel(session: Session,
     userDescription.text = UserProperties.overriddenUserName(session.userPrefs, user) + 
         " (" + user.getScreenName + ")\n" +
         location + "\n\n" + 
-        user.getDescription + "\n\n" +
+        user.description  + "\n\n" +
         fmt(user.getFollowersCount) + " followers, following " +
         fmt(user.getFriendsCount) +
         (session.tagUsers.tagsForUser(user.getId) match {
@@ -221,7 +222,7 @@ class TweetDetailPanel(session: Session,
   private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
     if (resourceReady.userData == showingUser) {
       animator.stop
-      animator.run(showingUser.getLocation, resourceReady.resource,
+      animator.run(showingUser.location, resourceReady.resource,
           (text: String) => setText(showingUser, text))
     }
   }

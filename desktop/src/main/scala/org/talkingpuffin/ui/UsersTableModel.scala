@@ -44,8 +44,8 @@ class UsersTableModel(users: Option[List[User]], val tagUsers: TagUsers,
     val user = usersModel.users(rowIndex)
     columnIndex match {
       case UserColumns.ARROWS => usersModel.arrows(rowIndex)
-      case UserColumns.DESCRIPTION => user.getDescription
-      case UserColumns.LOCATION => user.getLocation
+      case UserColumns.DESCRIPTION => user.description
+      case UserColumns.LOCATION => user.location
       case UserColumns.NAME => user.getName
       case UserColumns.PICTURE => {
         val picUrl = user.getProfileImageURL.toString

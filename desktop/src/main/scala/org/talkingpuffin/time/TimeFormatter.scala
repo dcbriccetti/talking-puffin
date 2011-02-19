@@ -11,7 +11,7 @@ case class TimeFormatter(time: Long) {
   
   def colonSeparated: String = {
     val sb = new StringBuilder
-    if (days > 0)                      sb.append(twoDigitNum(days))    .append(":")
+    if (days > 0) sb.append(days).append(":")
     if (hours > 0    || sb.length > 0) sb.append(twoDigitNum(hours))   .append(":")
     if (minutes > 0  || sb.length > 0) sb.append(twoDigitNum(minutes)) .append(":")
     sb.append(twoDigitNum(seconds))

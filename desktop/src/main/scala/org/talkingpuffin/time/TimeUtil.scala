@@ -8,8 +8,8 @@ import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.ui.HtmlFormatter.htmlAround
 
 object TimeUtil {
-  private val fmt = DateTimeFormat.forPattern("MM/dd HH:mm:ss")
-  private val fmtNoDay = DateTimeFormat.forPattern("HH:mm:ss")
+  private val fmt      = DateTimeFormat.forPattern("M/dd H:mm")
+  private val fmtNoDay = DateTimeFormat.forPattern("H:mm")
 
   def formatAge(date: Date): String = formatAge(new DateTime(date))
 
