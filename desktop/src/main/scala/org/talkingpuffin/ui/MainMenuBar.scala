@@ -62,12 +62,12 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
       tagUsers.getTags.foreach(tag => {
         contents += new MenuItem(new Action(tag) {
           def apply = {
-            SwingInvoke.execSwingWorker({TwitterListUtils.exportTagToList(tw, tag,
-              tagUsers.getDescription(tag).getOrElse(""), tagUsers.usersForTag(tag).map(_.toInt))
-            }, (_: Unit) => {debug("Tag exported to list")})
-          }
-        })
-      })
+            SwingInvoke.execSwingWorker({
+              TwitterListUtils.exportTagToList(tw, tag,
+                tagUsers.getDescription(tag).getOrElse(""), tagUsers.usersForTag(tag).map(_.toInt))
+            }, (_: Unit) => {
+              session.addMessage("Tag “" + tag + "” exported to list") })
+      }})})
     }
     contents += new MenuItem(new Action("Display your lists") {
       def apply = {
