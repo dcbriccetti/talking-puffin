@@ -15,7 +15,10 @@ object Main {
     MacInit init Main.title
     UIManager setLookAndFeel UIManager.getSystemLookAndFeelClassName
     JFrame setDefaultLookAndFeelDecorated true
-    launchAllSessions
+    if ( 0 == CredentialsRepository.getAll.size )
+      launchNewSession()
+    else
+      launchAllSessions
   }
 
   def launchNewSession(credentials: Option[Credentials] = None) =
