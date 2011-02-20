@@ -14,10 +14,9 @@ trait ActionProcessor extends Loggable {
           action(item)
           String.format(msg, item.asInstanceOf[Object])
         } catch {
-          case e: Throwable => {
+          case e: Throwable =>
             error(e.getMessage)
             "Error " + actionName + " " + item.toString
-          }
         }
       )
     )
