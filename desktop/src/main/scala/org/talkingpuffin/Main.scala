@@ -15,15 +15,16 @@ object Main {
     MacInit init Main.title
     UIManager setLookAndFeel UIManager.getSystemLookAndFeelClassName
     JFrame setDefaultLookAndFeelDecorated true
-    if ( 0 == CredentialsRepository.getAll.size )
-      launchNewSession()
-    else
-      launchAllSessions
+    launchAllSessions
   }
 
-  def launchNewSession(credentials: Option[Credentials] = None) =
-      new TopFrame(AuthenticatedSession.logIn(credentials))
+  def launchNewSession(credentials: Option[Credentials] = None) = new TopFrame(AuthenticatedSession.logIn(credentials))
 
-  private def launchAllSessions = CredentialsRepository.getAll.foreach(cred =>
-      launchNewSession(Some(cred)))
+  private def launchAllSessions = {
+    val credentials = CredentialsRepository.getAll
+    if (credentials.isEmpty)
+      launchNewSession(None)
+    else
+      credentials.foreach(cred => launchNewSession(Some(cred)))
+  }
 }
