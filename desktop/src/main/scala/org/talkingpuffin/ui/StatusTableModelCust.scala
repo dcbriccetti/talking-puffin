@@ -5,5 +5,4 @@ package org.talkingpuffin.ui
  */
 object StatusTableModelCust extends Enumeration {
   val Mentions = Value
-  val DmsSent = Value
 }

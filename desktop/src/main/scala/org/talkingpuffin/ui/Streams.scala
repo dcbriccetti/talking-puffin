@@ -39,8 +39,6 @@ class Streams(val prefs: Preferences, val session: Session, val tagUsers: TagUse
         p.statusTableModelCust.get match {
           case StatusTableModelCust.Mentions => new StatusTableModel(session, sto, p, relationships,
               screenNameToUserNameMap, filterSet, tagUsers) with Mentions
-          case StatusTableModelCust.DmsSent => new StatusTableModel(session, sto, p, relationships,
-              screenNameToUserNameMap, filterSet, tagUsers) with DmsSent
         }
       case p: BaseProvider => new StatusTableModel(session, sto, p, relationships,
         screenNameToUserNameMap, filterSet, tagUsers)

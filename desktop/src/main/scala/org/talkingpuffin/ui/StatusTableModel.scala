@@ -205,16 +205,6 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     fireTableDataChanged
   }
   
-/* todo private def adaptDmsToTweets(dms: List[DirectMessage]): List[Status] = {
-    dms.map(dm => new Status {
-      text = dm.getText
-      user = if (dm.sender.getScreenName == username) dm.recipient else dm.sender
-      id = dm.getId
-      createdAt = dm.getCreatedAt
-    })
-  }
-  */
-
   def doNotify(newTweets: List[Status]) = newTweets.length match {
     case 1 => DesktopUtil.notify(newTweets.first.getUser.getScreenName+": "+newTweets.first.getText,"New tweet")
     case _ => DesktopUtil.notify(newTweets.length +" new tweets arrived","New tweets")
@@ -238,10 +228,3 @@ trait Mentions extends StatusTableModel {
     if (text.startsWith(userTag)) text.substring(userTag.length).trim else text
   }
 }
-
-trait DmsSent extends StatusTableModel {
-  override def getValueAt(rowIndex: Int, columnIndex: Int) = super.getValueAt(rowIndex, 
-    List(0,1,2,2,4)(columnIndex))
-  override def showNameInStatus = false
-}
-
