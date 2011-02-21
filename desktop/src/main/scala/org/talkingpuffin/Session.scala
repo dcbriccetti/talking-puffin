@@ -2,13 +2,13 @@ package org.talkingpuffin
 
 import org.talkingpuffin.filter.{TagUsers}
 import java.util.prefs.Preferences
-import swing.Label
 import ui._
 import twitter4j.Twitter
 import util.Loggable
+import swing.{TabbedPane, Label}
 
-class Session(val serviceName: String, val twitter: Twitter, tabbed: Boolean = false) extends Loggable {
-  val desktopPane: MainContents = if (tabbed) new TabbedPane(this) else new DesktopPane(this)
+class Session(val serviceName: String, val twitter: Twitter, tabbed: Boolean = true) extends Loggable {
+  val desktopPane: MainContents = if (tabbed) new TopTabbedPane(this) else new DesktopPane(this)
   var streams: Streams = _
   var peoplePaneCreator: PeoplePaneCreator = _
   val statusMsgLabel = new Label(" ")

@@ -77,6 +77,8 @@ class StatusToolBar(val session: Session, tweetsProvider: BaseProvider, filtersD
     aa(showFiltersAction, clearAction, clearAllAction, loadNewAction)
     aa(last200Action, wordsAction)
     aa(showMinColsAction, showMaxColsAction)
+    addSeparator
+    ac(statusPane.dockedButton, (new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
   }
   
   private def clearAndOptionallyLoad(all: Boolean) {

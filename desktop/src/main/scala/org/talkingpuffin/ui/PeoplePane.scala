@@ -10,8 +10,8 @@ import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
 import java.awt.event.{KeyEvent, ActionListener, ActionEvent}
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.Session
-import util.{DesktopUtil, TableUtil}
 import twitter4j.User
+import util.{Dockable, DesktopUtil, TableUtil}
 
 object UserColumns {
   val ARROWS = 0
@@ -31,14 +31,16 @@ object UserColumns {
 /**
  * Displays a list of friends or followers
  */
-class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relationships, 
+class PeoplePane(val longTitle: String, val shortTitle: String, val session: Session,
+    tableModel: UsersTableModel, rels: Relationships,
     updateCallback: Option[() => Unit]) extends GridBagPanel 
-    with Loggable with Reactor {
+    with Loggable with Reactor with Dockable {
   var table: PeopleTable = _
   val tableScrollPane = new ScrollPane {
     table = new PeopleTable(tableModel)
     peer.setViewportView(table)
   }
+  private val tweetDetailPanel = new TweetDetailPanel(session, None)
   private val userActions = new UserActions(session, rels)
   val mh = new PopupMenuHelper(table)
   private var specialMenuItems = new SpecialMenuItems(table, tableModel.relationships,
@@ -90,6 +92,10 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
 
     add(new JLabel("Find people on Twitter: "))
     add(findPeopleText.peer)
+
+    addSeparator
+    add(dockedButton)
+    add((new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
   }
   peer.add(toolbar, new Constraints { grid=(0,0); anchor=Anchor.West }.peer)
   
@@ -97,7 +103,13 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
     grid=(0,1); anchor=Anchor.West; fill=Fill.Both; weightx=1; weighty=1 
   })
   
-  session.desktopPane.tweetDetailPanel.connectToTable(table, None)
+  add(tweetDetailPanel, new Constraints{
+    grid = (0,2); fill = GridBagPanel.Fill.Horizontal;
+  })
+
+  tweetDetailPanel.connectToTable(table, None)
+
+// todo  session.desktopPane.tweetDetailPanel.connectToTable(table, None)
 
   reactions += {
     case e: UsersChanged => setLabels
@@ -119,7 +131,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
   private def findPeople: Unit = {
     val people = session.twitter.searchUsers(findPeopleText.text, 1).toList
     debug("Found people: " + people)
-    session.peoplePaneCreator.createPeoplePane(findPeopleText.text,
+    session.peoplePaneCreator.createPeoplePane(findPeopleText.text, findPeopleText.text,
       None, Some(people), None, None)
   }
 
@@ -129,7 +141,7 @@ class PeoplePane(val session: Session, tableModel: UsersTableModel, rels: Relati
     mh.add(new PrevTAction(comp))
     mh.add(Action("Reply") { reply }, ks(KeyEvent.VK_R,0))
     userActions.addCommonItems(mh, specialMenuItems, table, 
-        session.desktopPane.tweetDetailPanel.showBigPicture, getSelectedScreenNames)
+        tweetDetailPanel.showBigPicture, getSelectedScreenNames)
   }
 
   private def getSelectedUsers:List[User] =

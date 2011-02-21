@@ -4,13 +4,14 @@ import java.awt.{Rectangle}
 import javax.swing.{JInternalFrame, ImageIcon}
 import java.text.NumberFormat
 import scala.swing.event.{WindowClosing}
-import scala.swing.{Reactor, Frame, Label, GridBagPanel}
 import org.talkingpuffin.{Main, Globals, Session, Constants}
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
 import util.{ColTiler, AppEvent, eventDistributor}
 import twitter4j.{RateLimitStatusListener, Twitter, User, RateLimitStatusEvent}
+import swing._
+import swing.TabbedPane.Page
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -68,8 +69,14 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
       grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
       })
     peer.add(mainToolBar, new Constraints {grid = (1,1); anchor=GridBagPanel.Anchor.West}.peer)
-    peer.add(session.desktopPane, new Constraints {grid = (0,2); gridwidth=2; 
-      fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1}.peer)
+    session.desktopPane match { // todo clean up
+      case dp: DesktopPane =>
+        peer.add(dp, new Constraints {grid = (0,2); gridwidth=2;
+          fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1}.peer)
+      case tabbedPane: TopTabbedPane =>
+        add(tabbedPane, new Constraints {
+          grid = (0,2); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; gridwidth=2})
+    }
   }
 
   reactions += {
@@ -105,7 +112,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
 
   type Users = List[User]
   
-  def createPeoplePane(longTitle: String, otherRels: Option[Relationships], users: Option[Users], 
+  def createPeoplePane(longTitle: String, shortTitle: String, otherRels: Option[Relationships], users: Option[Users],
         updatePeople: Option[() => Unit], location: Option[Rectangle]): PeoplePane = {
     def getRels = if (otherRels.isDefined) otherRels.get else rels
     val model = 
@@ -121,14 +128,19 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
         followerIds = followers map(_.getId.toLong)
       }
     } else getRels
-    val peoplePane = new PeoplePane(session, model, customRels, updatePeople)
-    session.desktopPane.add(
-      new JInternalFrame(longTitle, true, true, true, true) {
-        setLayer(3)
-        setContentPane(peoplePane.peer)
-        pack()
-        setVisible(true)
-      })
+    val peoplePane = new PeoplePane(longTitle, shortTitle, session, model, customRels, updatePeople)
+    session.desktopPane match {
+      case dp: DesktopPane =>
+        dp.add(
+          new JInternalFrame(longTitle, true, true, true, true) {
+            setLayer(3)
+            setContentPane(peoplePane.peer)
+            pack()
+            setVisible(true)
+          })
+      case tabbedPane: TopTabbedPane =>
+        tabbedPane.pages += new Page(shortTitle, peoplePane) {tip = longTitle}
+    }
     peoplePane
   }
 
@@ -137,7 +149,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
   }
           
   private def createPeoplePane: Unit = {
-    peoplePane = createPeoplePane("People You Follow and People Who Follow You", None, None, 
+    peoplePane = createPeoplePane("People You Follow and People Who Follow You", "People", None, None,
         Some(updatePeople _), None)
   }
   
@@ -158,7 +170,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
       filter(f => ! f.isIcon).sortBy(_.getLocation().x) match {
       case Nil =>
       case frames =>
-        val tiler = new ColTiler(session.desktopPane.getSize, frames.length, numRows)
+        val tiler = new ColTiler(session.desktopPane.asInstanceOf[DesktopPane].getSize, frames.length, numRows)
         frames.foreach(_.setBounds(tiler.next))
       }
   }

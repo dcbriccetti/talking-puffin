@@ -47,7 +47,7 @@ object TwitterListsDisplayer {
       val tw = session.twitter
       allPages(userListMembers(tw, list.getUser.getScreenName, list.getId))}, {
       members: List[User] => {
-        session.peoplePaneCreator.createPeoplePane(list.getFullName,
+        session.peoplePaneCreator.createPeoplePane(list.getFullName, list.getName,
           None, Some(members), None, tilerNext(tiler))
       }
     })

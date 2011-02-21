@@ -46,7 +46,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   def showFriends(screenName: String) = {
     val rels = new Relationships
     rels.getUsers(session, screenName, session.progress)
-    session.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName,
+    session.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName, screenName,
       Some(rels), None, None, None)
   }
   

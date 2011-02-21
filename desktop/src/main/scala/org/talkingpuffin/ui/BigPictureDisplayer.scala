@@ -1,12 +1,11 @@
 package org.talkingpuffin.ui
 
-import java.awt.event.{KeyAdapter, KeyEvent}
-import swing.{Label}
-import javax.swing._
-import org.talkingpuffin.Session
+import java.awt.event.{MouseAdapter, MouseEvent, KeyAdapter, KeyEvent}
+import javax.swing.{JFrame, SwingUtilities, ImageIcon}
+import swing.{Label, Frame}
 
-class BigPictureDisplayer(picFetcher: PictureFetcher, session: Session) {
-  private var bigPicFrame: JInternalFrame = _
+class BigPictureDisplayer(picFetcher: PictureFetcher) {
+  private var bigPicFrame: Frame = _
   private var bigPicLabel: Label = _
 
   def showBigPicture(showingUrl: String, frameDescendant: java.awt.Component) {
@@ -14,11 +13,9 @@ class BigPictureDisplayer(picFetcher: PictureFetcher, session: Session) {
     if (bigPicFrame != null) {
       bigPicFrame.dispose
     }
-    bigPicFrame = new JInternalFrame("Large Picture", false,true, false, false) {
-      setLayer(10)
-      add(bigPicLabel.peer)
+    bigPicFrame = new Frame {
+      contents = bigPicLabel
     }
-    session.desktopPane.add(bigPicFrame)
     setBigPicLabelIcon(None, showingUrl, frameDescendant)
 
     def closePicture {
@@ -27,7 +24,11 @@ class BigPictureDisplayer(picFetcher: PictureFetcher, session: Session) {
       bigPicLabel = null
     }
 
-    bigPicFrame.addKeyListener(new KeyAdapter {
+    bigPicLabel.peer.addMouseListener(new MouseAdapter {
+      override def mouseClicked(e: MouseEvent) = closePicture
+    })
+    
+    bigPicFrame.peer.addKeyListener(new KeyAdapter {
       override def keyPressed(e: KeyEvent) = closePicture
     })
   }
@@ -43,7 +44,9 @@ class BigPictureDisplayer(picFetcher: PictureFetcher, session: Session) {
           }
       }
       bigPicFrame.pack
-      bigPicFrame.setVisible(true)
+      bigPicFrame.peer.setLocationRelativeTo(
+        SwingUtilities.getAncestorOfClass(classOf[JFrame], frameDescendant))
+      bigPicFrame.visible = true
     }
   }
   

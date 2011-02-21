@@ -7,13 +7,14 @@ import org.talkingpuffin.filter.{TagUsers, FilterSet}
 import org.talkingpuffin.ui.filter.FiltersDialog
 import org.talkingpuffin.Session
 import twitter4j.Status
+import util.Dockable
 
 /**
  * Displays friend statuses
  */
-class StatusPane(val session: Session, val longTitle: String, tableModel: StatusTableModel, 
+class StatusPane(val session: Session, val longTitle: String, val shortTitle: String, tableModel: StatusTableModel,
     filterSet: FilterSet, tagUsers: TagUsers) 
-    extends GridBagPanel with TableModelListener with PreChangeListener {
+    extends GridBagPanel with TableModelListener with PreChangeListener with Dockable {
   var table: StatusTable = _
   private var lastSelectedRows: List[Status] = Nil
   private var lastRowSelected: Boolean = _
@@ -35,11 +36,19 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   
   private val cursorSetter = new AfterFilteringCursorSetter(table)
   
-  session.desktopPane.tweetDetailPanel.connectToTable(table, Some(filtersDialog))
+  private val tweetDetailPanel = new TweetDetailPanel(session, Some(filtersDialog))
+  add(tweetDetailPanel, new Constraints{
+    grid = (0,3); fill = GridBagPanel.Fill.Horizontal;
+  })
+
+  statusToolBar.tweetDetailPanel = tweetDetailPanel
+
+  tweetDetailPanel.connectToTable(table, Some(filtersDialog))
+//todo  session.desktopPane.tweetDetailPanel.connectToTable(table, Some(filtersDialog))
 
   def saveState = table.saveState
   
-  def newTable = new StatusTable(session, tableModel, session.desktopPane.tweetDetailPanel.showBigPicture)
+  def newTable = new StatusTable(session, tableModel, tweetDetailPanel.showBigPicture)
   
   def tableChanging = {
     lastRowSelected = false
@@ -82,7 +91,7 @@ class StatusPane(val session: Session, val longTitle: String, tableModel: Status
   private def clearTweets(all: Boolean) {
     clearSelection
     tableModel.clear(all)
-    session.desktopPane.tweetDetailPanel.clearStatusDetails
+    tweetDetailPanel.clearStatusDetails
   }
 
   private def showWordCloud {
