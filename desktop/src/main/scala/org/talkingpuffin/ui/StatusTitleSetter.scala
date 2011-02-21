@@ -19,6 +19,6 @@ class StatusTitleSetter(pane: StatusPane, model: StatusTableModel, setTitle: (St
   def stop() = deafTo(model)
 
   private def withSuffix(titleSuffix: Option[String]) =
-    if (titleSuffix.isDefined) pane.longTitle else pane.longTitle + " " + titleSuffix.get
+    if (titleSuffix.isDefined) pane.longTitle + " " + titleSuffix.get else pane.longTitle
 }
 
