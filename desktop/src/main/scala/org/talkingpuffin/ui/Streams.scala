@@ -1,14 +1,13 @@
 package org.talkingpuffin.ui
 
-import java.awt.Rectangle
 import java.util.prefs.Preferences
 import util.ColTiler
 import swing.Reactor
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.Session
 import org.talkingpuffin.filter.{FilterSet, CompoundFilter, TextTextFilter, TagUsers}
-import javax.swing.event.{InternalFrameEvent, InternalFrameAdapter}
-import javax.swing.JComponent
+import java.awt.{AWTEvent, Rectangle}
+import javax.swing.{JInternalFrame, JComponent}
 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
@@ -49,22 +48,19 @@ class Streams(val prefs: Preferences, val session: Session, val tagUsers: TagUse
         List(TextTextFilter(include.get, false)), None, None)
     }
     val pane = new StatusPane(session, title, model, filterSet, tagUsers)
-    val frame = new TitledStatusInternalFrame(pane, session.dataProviders, tagUsers, model)
-    parentWindow.add(frame)
+    val frame = TitledFrameFactory.create(parentWindow, pane, session.dataProviders, tagUsers, model,
+      (e: AWTEvent) => {
+        debug(e.toString)
+        views = views.filter(_.frame.get != e.getSource)
+      })
     if (location.isDefined) {
       frame.setBounds(location.get)
     } else {
       frame.setBounds(0, 0, 400, dpSize.height)
     }
-    frame.moveToFront
+    frame match {case f: JInternalFrame => f.moveToFront case _ =>}
     val view = new View(model, pane, Some(frame))
     views = views ::: List(view)
-    frame.addInternalFrameListener(new InternalFrameAdapter {
-      override def internalFrameClosing(e: InternalFrameEvent) = {
-        debug(e.toString)
-        views = views.filter(_.frame.get != e.getSource)
-      }
-    })
     view
   }
   
