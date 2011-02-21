@@ -90,7 +90,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
   pack
   visible = true
   setFocus
-  streams.views(0).frame.get.setSelected(true)
+  streams.views(0).frame.get match {case f: JInternalFrame => f.setSelected(true) case _ =>}
 
   def setFocus = streams.views.last.pane.requestFocusForTable
   
@@ -152,10 +152,10 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
 
   private def tileViews(numRows: Int) {
     (for {
-      v <- session.streams.views
-      frame <- v.frame
-      if ! frame.isIcon
-    } yield frame) sortBy(_.getLocation().x) match {
+      view <- session.streams.views
+      frame <- view.frame
+    } yield frame).withFilter(_.isInstanceOf[JInternalFrame]).map(_.asInstanceOf[JInternalFrame]).
+      filter(f => ! f.isIcon).sortBy(_.getLocation().x) match {
       case Nil =>
       case frames =>
         val tiler = new ColTiler(session.desktopPane.getSize, frames.length, numRows)

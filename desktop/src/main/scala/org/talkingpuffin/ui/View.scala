@@ -1,5 +1,6 @@
 package org.talkingpuffin.ui
 
 import swing.Reactor
+import javax.swing.JComponent
 
-case class View(model: StatusTableModel, pane: StatusPane, frame: Option[TitledStatusInternalFrame]) extends Reactor
+case class View(model: StatusTableModel, pane: StatusPane, frame: Option[JComponent]) extends Reactor
