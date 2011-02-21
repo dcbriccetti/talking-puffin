@@ -151,14 +151,16 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
   }
 
   private def tileViews(numRows: Int) {
-    val frames = (for {
+    (for {
       v <- session.streams.views
-      if v.frame.isDefined && ! v.frame.get.isIcon
-    } yield v.frame.get) sort(_.getLocation().x < _.getLocation().x)
-    if (frames != Nil) {
-      val tiler = new ColTiler(session.desktopPane.getSize, frames.length, numRows)
-      frames.foreach(_.setBounds(tiler.next))
-    }
+      frame <- v.frame
+      if ! frame.isIcon
+    } yield frame) sortBy(_.getLocation().x) match {
+      case Nil =>
+      case frames =>
+        val tiler = new ColTiler(session.desktopPane.getSize, frames.length, numRows)
+        frames.foreach(_.setBounds(tiler.next))
+      }
   }
 
   private def createView(provider: DataProvider, include: Option[String], location: Option[Rectangle]) {

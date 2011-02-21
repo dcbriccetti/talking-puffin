@@ -2,13 +2,13 @@ package org.talkingpuffin.ui
 
 import java.awt.Rectangle
 import java.util.prefs.Preferences
-import javax.swing.JDesktopPane
 import util.ColTiler
 import swing.Reactor
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.Session
 import org.talkingpuffin.filter.{FilterSet, CompoundFilter, TextTextFilter, TagUsers}
 import javax.swing.event.{InternalFrameEvent, InternalFrameAdapter}
+import javax.swing.JComponent
 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
@@ -29,7 +29,7 @@ class Streams(val prefs: Preferences, val session: Session, val tagUsers: TagUse
     provider.loadContinually()
   })
   
-  def createView(desktopPane: JDesktopPane, dataProvider: DataProvider, 
+  def createView(parentWindow: JComponent, dataProvider: DataProvider,
                  include: Option[String], location: Option[Rectangle]): View = {
     val screenNameToUserNameMap = usersTableModel.usersModel.screenNameToUserNameMap
     val sto = new StatusTableOptions(true, true, true)
@@ -49,8 +49,8 @@ class Streams(val prefs: Preferences, val session: Session, val tagUsers: TagUse
         List(TextTextFilter(include.get, false)), None, None)
     }
     val pane = new StatusPane(session, title, model, filterSet, tagUsers)
-    val frame = new TitledStatusFrame(pane, session.dataProviders, tagUsers, model)
-    desktopPane.add(frame)
+    val frame = new TitledStatusInternalFrame(pane, session.dataProviders, tagUsers, model)
+    parentWindow.add(frame)
     if (location.isDefined) {
       frame.setBounds(location.get)
     } else {

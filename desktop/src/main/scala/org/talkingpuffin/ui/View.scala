@@ -1,7 +1,5 @@
 package org.talkingpuffin.ui
 
-import swing.{Reactor}
+import swing.Reactor
 
-case class View(val model: StatusTableModel, val pane: StatusPane, val frame: Option[TitledStatusFrame]) 
-    extends Reactor 
-
+case class View(model: StatusTableModel, pane: StatusPane, frame: Option[TitledStatusInternalFrame]) extends Reactor
