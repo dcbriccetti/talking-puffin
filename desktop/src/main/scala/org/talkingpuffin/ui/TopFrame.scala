@@ -90,7 +90,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
   pack
   visible = true
   setFocus
-  streams.views(0).frame.get match {case f: JInternalFrame => f.setSelected(true) case _ =>}
+  streams.views(0).frame.foreach(_ match {case f: JInternalFrame => f.setSelected(true) case _ =>})
 
   def setFocus = streams.views.last.pane.requestFocusForTable
   

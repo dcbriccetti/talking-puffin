@@ -48,18 +48,25 @@ class Streams(val prefs: Preferences, val session: Session, val tagUsers: TagUse
         List(TextTextFilter(include.get, false)), None, None)
     }
     val pane = new StatusPane(session, title, model, filterSet, tagUsers)
-    val frame = TitledFrameFactory.create(parentWindow, pane, session.dataProviders, tagUsers, model,
-      (e: AWTEvent) => {
-        debug(e.toString)
-        views = views.filter(_.frame.get != e.getSource)
-      })
-    if (location.isDefined) {
-      frame.setBounds(location.get)
-    } else {
-      frame.setBounds(0, 0, 400, dpSize.height)
+    val frameOp = parentWindow match {
+      case desktop: DesktopPane =>
+        val frame = new TitledStatusInternalFrame(pane, session.dataProviders, tagUsers, model, (e: AWTEvent) => {
+          debug(e.toString)
+          views = views.filter(_.frame.get != e.getSource)
+        })
+        desktop.add(frame)
+        if (location.isDefined) {
+          frame.setBounds(location.get)
+        } else {
+          frame.setBounds(0, 0, 400, dpSize.height)
+        }
+        frame.moveToFront
+        Some(frame)
+      case tabbedPane: TabbedPane =>
+        tabbedPane.addTab(title, pane.peer)
+        None
     }
-    frame match {case f: JInternalFrame => f.moveToFront case _ =>}
-    val view = new View(model, pane, Some(frame))
+    val view = new View(model, pane, frameOp)
     views = views ::: List(view)
     view
   }

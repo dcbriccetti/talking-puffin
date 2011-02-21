@@ -1,20 +1,15 @@
 package org.talkingpuffin.ui
 
-import javax.swing.{JInternalFrame, JDesktopPane}
 import java.awt.{Toolkit, Dimension}
 import org.talkingpuffin.Session
+import javax.swing.{JTabbedPane, JComponent, JInternalFrame, JDesktopPane}
 
 /**
  * This JDesktopPane sits in the TopFrame and manages several JInternalFrames.
  */
-class DesktopPane(session: Session) extends JDesktopPane {
-  val tweetDetailPanel = new TweetDetailPanel(session, None)
+class DesktopPane(val session: Session) extends JDesktopPane with MainContents {
   setDragMode(JDesktopPane.OUTLINE_DRAG_MODE)
-
-  private val screenSize = Toolkit.getDefaultToolkit.getScreenSize
-  private val desktopSize = new Dimension(math.min(screenSize.width * 4 / 5, 1200), screenSize.height * 4 / 5)
-
-  setPreferredSize(desktopSize)
+  setSize()
 
   add(new JInternalFrame("Status Details", true, false, false, true) {
     setLayer(10)
@@ -24,4 +19,17 @@ class DesktopPane(session: Session) extends JDesktopPane {
       desktopSize.height / 2 - tweetDetailPanel.preferredSize.height / 2)
     setVisible(true)
   })
+}
+
+class TabbedPane(val session: Session) extends JTabbedPane with MainContents {
+  setSize()
+}
+
+trait MainContents extends JComponent {
+  val session: Session
+  val tweetDetailPanel = new TweetDetailPanel(session, None)
+  val screenSize = Toolkit.getDefaultToolkit.getScreenSize
+  val desktopSize = new Dimension(math.min(screenSize.width * 4 / 5, 1200), screenSize.height * 4 / 5)
+
+  def setSize() = setPreferredSize(desktopSize)
 }

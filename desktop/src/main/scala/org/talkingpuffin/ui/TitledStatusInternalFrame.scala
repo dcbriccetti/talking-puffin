@@ -2,8 +2,8 @@ package org.talkingpuffin.ui
 
 import org.talkingpuffin.filter.TagUsers
 import javax.swing.event.{InternalFrameEvent, InternalFrameAdapter}
-import javax.swing.{JComponent, JInternalFrame}
 import java.awt.AWTEvent
+import javax.swing.JInternalFrame
 
 /**
  * A frame for status panes, including a custom title and menu.
@@ -21,18 +21,4 @@ class TitledStatusInternalFrame(val pane: StatusPane, providers: DataProviders, 
       close(e)
     }
   })
-}
-
-object TitledFrameFactory {
-  def create(parentWindow: JComponent, pane: StatusPane, providers: DataProviders, tagUsers: TagUsers,
-    model: StatusTableModel, close: (AWTEvent) => Unit): JComponent =
-  {
-    parentWindow match {
-      case desktop: DesktopPane => {
-        val frame = new TitledStatusInternalFrame(pane, providers, tagUsers, model, close)
-        desktop.add(frame)
-        frame
-      }
-    }
-  }
 }

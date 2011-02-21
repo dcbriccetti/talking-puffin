@@ -7,8 +7,8 @@ import ui._
 import twitter4j.Twitter
 import util.Loggable
 
-class Session(val serviceName: String, val twitter: Twitter) extends Loggable {
-  val desktopPane = new DesktopPane(this)
+class Session(val serviceName: String, val twitter: Twitter, tabbed: Boolean = false) extends Loggable {
+  val desktopPane: MainContents = if (tabbed) new TabbedPane(this) else new DesktopPane(this)
   var streams: Streams = _
   var peoplePaneCreator: PeoplePaneCreator = _
   val statusMsgLabel = new Label(" ")
@@ -26,8 +26,6 @@ class Session(val serviceName: String, val twitter: Twitter) extends Loggable {
     SwingInvoke.later(statusMsgLabel.text = msg)
   }
   
-  def clearMessage(): Unit = {
-    SwingInvoke.later(statusMsgLabel.text = " ")
-  }
+  def clearMessage() = SwingInvoke.later(statusMsgLabel.text = " ")
 }
 
