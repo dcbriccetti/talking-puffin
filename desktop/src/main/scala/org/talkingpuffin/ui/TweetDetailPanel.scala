@@ -27,6 +27,7 @@ class TweetDetailPanel(session: Session,
     filtersDialog: Option[FiltersDialog]) extends GridBagPanel with Loggable {
   
   preferredSize = new Dimension(600, 380)
+  minimumSize = preferredSize
   border = BorderFactory.createEmptyBorder(8, 8, 8, 8)
   private val animator = new TextChangingAnimator
 
