@@ -10,8 +10,9 @@ import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
 import java.awt.event.{KeyEvent, ActionListener, ActionEvent}
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.Session
-import twitter4j.User
+import org.talkingpuffin.twitter.RichUser._
 import util.{Dockable, DesktopUtil, TableUtil}
+import twitter4j.{Status, User}
 
 object UserColumns {
   val ARROWS = 0
@@ -139,7 +140,7 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     mh.add(new PrevTAction(comp))
     mh.add(Action("Reply") { reply }, ks(KeyEvent.VK_R,0))
     userActions.addCommonItems(mh, specialMenuItems, table, 
-        tweetDetailPanel.showBigPicture, getSelectedScreenNames)
+        tweetDetailPanel.showBigPicture, getSelectedScreenNames, getSelectedStatuses)
   }
 
   private def getSelectedUsers:List[User] =
@@ -147,7 +148,12 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
   
   def getSelectedScreenNames(retweets: Boolean): List[String] = getSelectedUsers.map(user => user.getScreenName)
 
-  private def viewSelected = getSelectedUsers.foreach(u => DesktopUtil.browse("http://twitter.com/" + 
+  def getSelectedStatuses(retweets: Boolean): List[Status] = for {
+    user <- getSelectedUsers
+    status <- user.status
+  } yield status
+
+  private def viewSelected = getSelectedUsers.foreach(u => DesktopUtil.browse("http://twitter.com/" +
       u.getScreenName))
   
   private def reply {

@@ -8,8 +8,9 @@ import javax.swing.JTable
 import java.awt.Toolkit
 import org.talkingpuffin.Session
 import org.talkingpuffin.twitter.PageHandler._
-import org.talkingpuffin.util.Loggable
-import util.Tiler
+import org.talkingpuffin.util.{LinkUnIndirector, Loggable}
+import util.{DesktopUtil, Tiler}
+import twitter4j.Status
 
 /**
  * Handles user actions like follow
@@ -72,7 +73,8 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   }
 
   def addCommonItems(mh: PopupMenuHelper, specialMenuItems: SpecialMenuItems, 
-      table: JTable, showBigPicture: => Unit, getSelectedScreenNames: (Boolean) => Names) {
+      table: JTable, showBigPicture: => Unit,
+      getSelectedScreenNames: (Boolean) => Names, getSelectedStatuses: (Boolean) => List[Status]) {
 
     def names = getSelectedScreenNames(true)
 
@@ -89,11 +91,21 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
     mh add(Action("View lists on…") {viewListsOn(names, table)},
         ks(VK_L, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
     mh add(new TagAction(table, table.getModel.asInstanceOf[TaggingSupport]), ks(VK_T, 0))
-    mh.add(followAK(specialMenuItems, names))
-    mh.add(unfollowAK(specialMenuItems, names))
-    mh.add(new ActionAndKeys(Action("Block") {block(names)}, ks(VK_B, UserActions.shortcutKeyMask)))
-    mh.add(new ActionAndKeys(Action("Report Spam") {reportSpam(names)},
+    mh add(followAK(specialMenuItems, names))
+    mh add(unfollowAK(specialMenuItems, names))
+    mh add(new ActionAndKeys(Action("Block") {block(names)}, ks(VK_B, UserActions.shortcutKeyMask)))
+    mh add(new ActionAndKeys(Action("Report Spam") {reportSpam(names)},
         ks(VK_S, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK)))
+    def getSelStat(): Option[Status] = {
+      getSelectedStatuses(true) match {
+        case status :: others => Some(status)
+        case _ => None
+      }
+    }
+    mh add(new OpenPageLinksAction(getSelStat, table,
+      LinkUnIndirector.findLinks(DesktopUtil.browse, DesktopUtil.browse)), ks(VK_L, 0))
+    mh add(new OpenTwitterUserLinksAction(getSelStat, table, DesktopUtil.browse), ks(VK_U, 0))
+    mh add(new OpenTwitterUserListsAction(getSelStat, table, DesktopUtil.browse), ks(VK_U, SHIFT_DOWN_MASK))
   }
 
   private def createView(provider: DataProvider): Unit = {

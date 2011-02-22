@@ -254,11 +254,6 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     
     mh add(Action("Edit user properties…") {editUser}, ks(VK_P, SHORTCUT))
 
-    mh add(new OpenPageLinksAction(getSelectedStatus, this, 
-      LinkUnIndirector.findLinks(DesktopUtil.browse, DesktopUtil.browse)), ks(VK_L, 0))
-    mh add(new OpenTwitterUserLinksAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, 0))
-    mh add(new OpenTwitterUserListsAction(getSelectedStatus, this, DesktopUtil.browse), ks(VK_U, SHIFT))
-    
     mh.menu.add(new JMenu("Mute") {
       mh add(Action("User") {tableModel.muteSelectedUsers(smi)}, this, ks(VK_M, SHORTCUT))
       mh add(Action("Retweets by user") {tableModel.muteSelectedUsersRetweets(
@@ -280,7 +275,8 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
       mh add(Action("Decrease Row Height") { changeRowHeight(-8) }, this)
     })
 
-    userActions.addCommonItems(mh, specialMenuItems, this, showBigPicture, getSelectedScreenNames)
+    userActions.addCommonItems(mh, specialMenuItems, this, showBigPicture, getSelectedScreenNames,
+      getSelectedStatuses)
     
     mh.menu.add(new JMenu("Delete") {
       setToolTipText("Deletes tweets from the local view, without deleting from Twitter")
