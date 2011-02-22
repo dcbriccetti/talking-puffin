@@ -109,8 +109,6 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
 
   tweetDetailPanel.connectToTable(table, None)
 
-// todo  session.desktopPane.tweetDetailPanel.connectToTable(table, None)
-
   reactions += {
     case e: UsersChanged => setLabels
   }

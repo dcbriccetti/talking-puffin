@@ -33,8 +33,6 @@ class MainToolBar extends JToolBar with ToolBarHelpers with LongOpListener {
     add(new Label("Left: ") {tooltip = "The number of requests remaining in the hour, before reset"}.peer)
     add(remaining.peer)
     addSeparator
-    aa(Tile.actions(streams.session, false): _*)
-    addSeparator
     add(progressBar.peer)
   }
   

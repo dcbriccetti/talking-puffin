@@ -97,7 +97,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   }
 
   private def createView(provider: DataProvider): Unit = {
-    session.streams.createView(session.desktopPane, provider, None, None)
+    session.streams.createView(session.tabbedPane, provider, None, None)
     provider.loadAndPublishData(newPagingMaxPer, false)
   }
 }

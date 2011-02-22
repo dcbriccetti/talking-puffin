@@ -1,14 +1,14 @@
 package org.talkingpuffin.ui
 
 import java.awt.{Rectangle}
-import javax.swing.{JInternalFrame, ImageIcon}
+import javax.swing.ImageIcon
 import java.text.NumberFormat
 import scala.swing.event.{WindowClosing}
 import org.talkingpuffin.{Main, Globals, Session, Constants}
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.util.{FetchRequest, Loggable}
 import org.talkingpuffin.state.{GlobalPrefs, StateSaver}
-import util.{ColTiler, AppEvent, eventDistributor}
+import util.{AppEvent, eventDistributor}
 import twitter4j.{RateLimitStatusListener, Twitter, User, RateLimitStatusEvent}
 import swing._
 import swing.TabbedPane.Page
@@ -48,8 +48,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
     case e: NewFollowingViewEvent => createView(providers.following, e.include, None) 
     case e: NewViewEvent => createView(e.provider, e.include, None) 
     case e: NewPeoplePaneEvent => createPeoplePane 
-    case e: TileViewsEvent => tileViews(e.numRows) 
-    case e: SendStatusEvent => (new SendMsgDialog(session, null, None, None, None, false)).visible = true 
+    case e: SendStatusEvent => (new SendMsgDialog(session, null, None, None, None, false)).visible = true
     case e: SendDirectMessageEvent => (new SendMsgDialog(session, null, None, None, None, true)).visible = true
   }
   listenTo(eventDistributor)
@@ -69,14 +68,8 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
       grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
       })
     peer.add(mainToolBar, new Constraints {grid = (1,1); anchor=GridBagPanel.Anchor.West}.peer)
-    session.desktopPane match { // todo clean up
-      case dp: DesktopPane =>
-        peer.add(dp, new Constraints {grid = (0,2); gridwidth=2;
-          fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1}.peer)
-      case tabbedPane: TopTabbedPane =>
-        add(tabbedPane, new Constraints {
-          grid = (0,2); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; gridwidth=2})
-    }
+    add(session.tabbedPane, new Constraints {
+        grid = (0,2); fill = GridBagPanel.Fill.Both; weightx = 1; weighty = 1; gridwidth=2})
   }
 
   reactions += {
@@ -97,9 +90,8 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
   pack
   visible = true
   setFocus
-  streams.views(0).frame.foreach(_ match {case f: JInternalFrame => f.setSelected(true) case _ =>})
 
-  def setFocus = streams.views.last.pane.requestFocusForTable
+  def setFocus = streams.views.foreach(_.pane.requestFocusForTable)
   
   override def close {
     streams.stop
@@ -129,18 +121,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
       }
     } else getRels
     val peoplePane = new PeoplePane(longTitle, shortTitle, session, model, customRels, updatePeople)
-    session.desktopPane match {
-      case dp: DesktopPane =>
-        dp.add(
-          new JInternalFrame(longTitle, true, true, true, true) {
-            setLayer(3)
-            setContentPane(peoplePane.peer)
-            pack()
-            setVisible(true)
-          })
-      case tabbedPane: TopTabbedPane =>
-        tabbedPane.pages += new Page(shortTitle, peoplePane) {tip = longTitle}
-    }
+    session.tabbedPane.pages += new Page(shortTitle, peoplePane) {tip = longTitle}
     peoplePane
   }
 
@@ -162,21 +143,8 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
     })
   }
 
-  private def tileViews(numRows: Int) {
-    (for {
-      view <- session.streams.views
-      frame <- view.frame
-    } yield frame).withFilter(_.isInstanceOf[JInternalFrame]).map(_.asInstanceOf[JInternalFrame]).
-      filter(f => ! f.isIcon).sortBy(_.getLocation().x) match {
-      case Nil =>
-      case frames =>
-        val tiler = new ColTiler(session.desktopPane.asInstanceOf[DesktopPane].getSize, frames.length, numRows)
-        frames.foreach(_.setBounds(tiler.next))
-      }
-  }
-
   private def createView(provider: DataProvider, include: Option[String], location: Option[Rectangle]) {
-    streams.createView(session.desktopPane, provider, include, location)
+    streams.createView(session.tabbedPane, provider, include, location)
     provider.loadContinually()
   }
 }

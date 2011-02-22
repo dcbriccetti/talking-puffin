@@ -18,19 +18,18 @@ trait Dockable extends Component with Loggable {
   val shortTitle: String
   /** The frame, when undocked */
   var frame: Frame = _
-  val reactor = new Reactor {}
-  reactor.reactions += {
-    case e: WindowEvent if (e.isInstanceOf[WindowClosing] || e.isInstanceOf[WindowClosed]) =>
-      if (e.source == frame) {
-        reactor.deafTo(frame)
-        stop
-      }
-    case _ =>
+  val reactor = new Reactor {
+    reactions += {
+      case e: WindowEvent if (e.isInstanceOf[WindowClosing] || e.isInstanceOf[WindowClosed]) =>
+        if (e.source == frame) {
+          deafTo(frame)
+          stop
+        }
+      case _ =>
+    }
   }
-
   private var titleSuffix_ = ""
   def titleSuffix = titleSuffix_
-  private val tabbedPane = session.desktopPane.asInstanceOf[TabbedPane]
 
   val dockedButton: JToggleButton = new JToggleButton(new Action("Docked") {
     toolTip = "Docks or frees the pane"
@@ -52,8 +51,8 @@ trait Dockable extends Component with Loggable {
 
   private def dock {
     val newPage = new Page(withSuffix(shortTitle), this) {tip = longTitle}
-    tabbedPane.pages += newPage
-    tabbedPane.selection.page = newPage
+    session.tabbedPane.pages += newPage
+    session.tabbedPane.selection.page = newPage
     reactor.deafTo(frame)
     frame.dispose
     frame = null
@@ -61,13 +60,13 @@ trait Dockable extends Component with Loggable {
 
   def titleSuffix_=(newTitleSuffix: String) = {
     titleSuffix_ = newTitleSuffix
-    tabbedPane.peer.indexOfComponent(peer) match {
+    session.tabbedPane.peer.indexOfComponent(peer) match {
       case -1 =>
         SwingUtilities.getAncestorOfClass(classOf[JFrame], peer) match {
           case null =>
           case jf => jf.asInstanceOf[JFrame].setTitle(withSuffix(longTitle))
         }
-      case i => tabbedPane.peer.setTitleAt(i, withSuffix(shortTitle))
+      case i => session.tabbedPane.peer.setTitleAt(i, withSuffix(shortTitle))
     }
   }
 

@@ -54,7 +54,6 @@ class MainMenuBar(session: Session, tagUsers: TagUsers) extends MenuBar with Log
       })
       contents += newItem("People", NewPeoplePaneEvent(session))
     }
-    Tile.actions(session).foreach(action => contents += new MenuItem(action))
   }
 
   contents += new Menu("Lists") {
@@ -117,6 +116,5 @@ case class NewViewEvent(override val session: Session, provider: DataProvider, i
     extends AppEvent(session)
 case class NewFollowingViewEvent(override val session: Session, include: Option[String]) extends AppEvent(session)
 case class NewPeoplePaneEvent(override val session: Session) extends AppEvent(session)
-case class TileViewsEvent(override val session: Session, numRows: Int) extends AppEvent(session)
 case class SendStatusEvent(override val session: Session) extends AppEvent(session)
 case class SendDirectMessageEvent(override val session: Session) extends AppEvent(session)

@@ -1,13 +1,11 @@
 package org.talkingpuffin.ui
 
 import java.util.prefs.Preferences
-import util.ColTiler
+import java.awt.Rectangle
+import swing.{TabbedPane, Reactor}
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.Session
 import org.talkingpuffin.filter.{FilterSet, CompoundFilter, TextTextFilter, TagUsers}
-import java.awt.{AWTEvent, Rectangle}
-import javax.swing.{JInternalFrame, JComponent}
-import swing.{TabbedPane, Reactor}
 
 /**
  * Stream creation and management. A stream is a provider, model, filter set and view of tweets.
@@ -18,13 +16,8 @@ class Streams(val prefs: Preferences, val session: Session, val tagUsers: TagUse
   
   var views = List[View]()
 
-  val dpSize = {
-    val s1 = session.desktopPane.size
-    if (s1.width > 0 && s1.height > 0) s1 else session.desktopPane.preferredSize 
-  }
-  val tiler = new ColTiler(dpSize, session.dataProviders.autoStartProviders.length, 1)
   session.dataProviders.autoStartProviders.foreach(provider => {
-    createView(session.desktopPane, provider, None, Some(tiler.next))
+    createView(session.tabbedPane, provider, None, None)
     provider.loadContinually()
   })
   
@@ -49,19 +42,6 @@ class Streams(val prefs: Preferences, val session: Session, val tagUsers: TagUse
     }
     val pane = new StatusPane(session, title, title, model, filterSet, tagUsers)
     val frameOp = parentWindow match {
-      case desktop: DesktopPane =>
-        val frame = new TitledStatusInternalFrame(pane, session.dataProviders, tagUsers, model, (e: AWTEvent) => {
-          debug(e.toString)
-          views = views.filter(_.frame.get != e.getSource)
-        })
-        desktop.add(frame)
-        if (location.isDefined) {
-          frame.setBounds(location.get)
-        } else {
-          frame.setBounds(0, 0, 400, dpSize.height)
-        }
-        frame.moveToFront
-        Some(frame)
       case tabbedPane: TopTabbedPane =>
         tabbedPane.pages += new TabbedPane.Page(title, pane)
         None

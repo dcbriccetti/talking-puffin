@@ -44,7 +44,6 @@ class StatusPane(val session: Session, val longTitle: String, val shortTitle: St
   statusToolBar.tweetDetailPanel = tweetDetailPanel
 
   tweetDetailPanel.connectToTable(table, Some(filtersDialog))
-//todo  session.desktopPane.tweetDetailPanel.connectToTable(table, Some(filtersDialog))
 
   def saveState = table.saveState
   
@@ -110,5 +109,8 @@ class StatusPane(val session: Session, val longTitle: String, val shortTitle: St
     lastSelectedRows = Nil
   }
   
-  def requestFocusForTable = table.requestFocusInWindow
+  def requestFocusForTable = {
+    info("requestFocusForTable " + shortTitle)
+    table.requestFocusInWindow
+  }
 }

@@ -58,7 +58,7 @@ object TwitterListsDisplayer {
 
   private def viewListStatuses(list: UserList, session: Session, tiler: Option[Tiler]) = {
     val provider = new ListStatusesProvider(session, list, None, session.progress)
-    session.streams.createView(session.desktopPane, provider, None, tilerNext(tiler))
+    session.streams.createView(session.tabbedPane, provider, None, tilerNext(tiler))
     provider.loadContinually
   }
 
