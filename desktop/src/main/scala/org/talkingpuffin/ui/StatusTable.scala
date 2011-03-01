@@ -21,7 +21,7 @@ import table.{AgeCellRenderer, EmphasizedStringCellRenderer, EmphasizedStringCom
 import util.{TableUtil, DesktopUtil, Activateable}
 import org.talkingpuffin.util.{LinkUnIndirector, Loggable, PopupListener}
 import twitter4j.Status
-import org.talkingpuffin.twitter.RichStatus._
+import org.talkingpuffin.apix.RichStatus._
 
 /**
  * Table of statuses.

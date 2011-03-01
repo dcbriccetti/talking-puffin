@@ -1,4 +1,4 @@
-package org.talkingpuffin.twitter
+package org.talkingpuffin.apix
 
 import twitter4j.{User, Status}
 

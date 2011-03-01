@@ -1,0 +1,103 @@
+body {
+	font: 12px Arial, Helvetica, sans-serif;
+	color: #333;
+	background: #eee;
+    margin-top: 0;
+}
+
+.container {
+    padding: 1em;
+}
+
+#logohead {
+    padding-top: .8em;
+}
+
+#loggedInUser {
+    vertical-align: top;
+    padding-top: 2px;
+}
+
+.title {
+    font-size: 175%;
+}
+
+.tpuflogo {
+	overflow: hidden;
+	background: url(//talkingpuffin.org/media/TalkingPuffin.png) no-repeat;
+    width: 128px;
+    height: 128px;
+    margin-right: .5em;
+}
+
+.flot_lww {
+    margin-top: 1em;
+}
+
+a {
+    color: #39c;
+    text-decoration: none;
+}
+
+.resnote {
+    color: #333;
+}
+
+ul.resource {
+    line-height: 150%;
+}
+
+p {
+    margin-top: inherit;
+    margin-bottom: 1.3em
+}
+
+p + p {
+    text-indent: inherit;
+    margin-top: inherit;
+}
+
+.sidebar ul {
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #ccc;
+}
+
+.sidebar ul li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid #ccc;
+    border-bottom: none;
+}
+
+.sidebar ul li a, .sidebar ul li span {
+    display: block;
+    padding: 3px;
+    text-indent: 10px;
+    text-decoration: none;
+}
+
+.sidebar ul li a:hover {
+    background-color: #eee;
+}
+
+.edit_error_class {
+  display: block;
+  color: red;
+}
+
+.lift_error {
+  color: red;
+}
+
+.lift_warning {
+  color: yellow;
+}
+
+.lift_notice {
+}
+
+table {
+    width: auto;
+}

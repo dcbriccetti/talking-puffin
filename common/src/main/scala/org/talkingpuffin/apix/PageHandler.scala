@@ -1,4 +1,4 @@
-package org.talkingpuffin.twitter
+package org.talkingpuffin.apix
 
 import scala.collection.JavaConversions._
 import twitter4j._

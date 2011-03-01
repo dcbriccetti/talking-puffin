@@ -5,6 +5,7 @@ import swing.Dialog
 import org.talkingpuffin.util.Loggable
 import twitter4j.{Twitter, TwitterException, TwitterFactory}
 import twitter4j.conf.ConfigurationBuilder
+import org.talkingpuffin.apix.Constants
 
 object AuthenticatedSession extends Loggable {
 

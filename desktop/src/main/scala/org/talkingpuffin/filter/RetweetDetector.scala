@@ -2,7 +2,7 @@ package org.talkingpuffin.filter
 
 import twitter4j.Status
 import org.talkingpuffin.ui.LinkExtractor
-import org.talkingpuffin.twitter.RichStatus._
+import org.talkingpuffin.apix.RichStatus._
 
 /**
  * Methods related to old-style (RT, via, etc.) retweets

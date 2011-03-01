@@ -7,8 +7,8 @@ import twitter4j.User
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.ui.table.EmphasizedString
 import org.talkingpuffin.util.Loggable
-import org.talkingpuffin.twitter.RichUser._
-import org.talkingpuffin.twitter.RichStatus._
+import org.talkingpuffin.apix.RichUser._
+import org.talkingpuffin.apix.RichStatus._
 
 class UsersTableModel(users: Option[List[User]], val tagUsers: TagUsers,
     val relationships: Relationships) 

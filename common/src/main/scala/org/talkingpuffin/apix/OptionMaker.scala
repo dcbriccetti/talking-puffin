@@ -1,4 +1,4 @@
-package org.talkingpuffin.twitter
+package org.talkingpuffin.apix
 
 /**
  * Translates special values from twitter4j to None.

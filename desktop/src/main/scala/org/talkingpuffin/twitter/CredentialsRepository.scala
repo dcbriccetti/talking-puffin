@@ -1,6 +1,7 @@
 package org.talkingpuffin.twitter
 
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
+import org.talkingpuffin.apix.Constants
 
 /**
  * Twitter login credentials

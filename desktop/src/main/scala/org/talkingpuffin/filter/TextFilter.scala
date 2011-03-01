@@ -1,8 +1,8 @@
 package org.talkingpuffin.filter
 
 import twitter4j.Status
-import org.talkingpuffin.twitter.RichStatus
-import org.talkingpuffin.twitter.RichStatus._
+import org.talkingpuffin.apix.RichStatus
+import org.talkingpuffin.apix.RichStatus._
 
 /**
  * A base class for filters that match based on a string or regular expression.

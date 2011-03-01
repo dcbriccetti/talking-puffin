@@ -7,7 +7,7 @@ import javax.swing.KeyStroke.{getKeyStroke => ks}
 import javax.swing.JTable
 import java.awt.Toolkit
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.PageHandler._
+import org.talkingpuffin.apix.PageHandler._
 import org.talkingpuffin.util.{LinkUnIndirector, Loggable}
 import util.{DesktopUtil, Tiler}
 import twitter4j.Status

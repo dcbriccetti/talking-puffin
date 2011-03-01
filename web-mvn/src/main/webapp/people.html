@@ -1,0 +1,30 @@
+<lift:surround with="default" at="content">
+    <table class="usersTable">
+        <tr>
+            <th> </th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Frnds</th>
+            <th>Flwrs</th>
+            <th>Location</th>
+            <th>Description</th>
+            <th>Status</th>
+        </tr>
+        <lift:Auth.resources>
+            <resources:resourceItems>
+                <tr>
+                    <td><%= u.getArrows(user) %></td>
+                    <td><img alt="Thumbnail" height="48" width="48" src="<%= user.profileImageURL() %>"/></td>
+                    <td><%= user.name() %><br/>
+                    <a href="http://twitter.com/<%=user.screenName()%>"><%= user.screenName() %></a></td>
+                    <td class="number"><%= user.friendsCount() %></td>
+                    <td class="number rightmostNumber"><%= user.followersCount() %></td>
+                    <td><%= user.location() %></td>
+                    <td><%= user.description() %></td>
+                    <td><%= u.getStatus(user) %></td>
+                </tr>
+               <item:resource/>
+            </resources:resourceItems>
+        </lift:Auth.resources>
+    </table>
+</lift:surround>

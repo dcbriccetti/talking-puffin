@@ -5,7 +5,7 @@ import java.awt.event.KeyEvent
 import javax.swing.{JTable, JPopupMenu}
 import javax.swing.KeyStroke.getKeyStroke
 import twitter4j.Status
-import org.talkingpuffin.twitter.RichStatus._
+import org.talkingpuffin.apix.RichStatus._
 
 /**
  * Shows a menu of links, or launches the browser on the link if there is only one. 

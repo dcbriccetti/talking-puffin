@@ -10,7 +10,7 @@ import swing.{Reactor, GridBagPanel, ScrollPane, TextField, Action}
 import java.awt.event.{KeyEvent, ActionListener, ActionEvent}
 import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.RichUser._
+import org.talkingpuffin.apix.RichUser._
 import util.{Dockable, DesktopUtil, TableUtil}
 import twitter4j.{Status, User}
 

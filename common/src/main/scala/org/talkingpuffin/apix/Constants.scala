@@ -1,4 +1,4 @@
-package org.talkingpuffin.twitter
+package org.talkingpuffin.apix
 
 object Constants {
   val ServiceName = "twitter"

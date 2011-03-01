@@ -1,6 +1,6 @@
 package org.talkingpuffin.util
 
-import org.talkingpuffin.twitter.PageHandler._
+import org.talkingpuffin.apix.PageHandler._
 import twitter4j.{UserList, Twitter, User}
 
 object TwitterListUtils extends Loggable {

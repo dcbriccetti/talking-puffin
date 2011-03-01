@@ -9,7 +9,7 @@ import org.apache.log4j.Logger
 import org.joda.time.DateTime
 import util.TitleCreator
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.PageHandler._
+import org.talkingpuffin.apix.PageHandler._
 import twitter4j.{Status, Paging}
 
 abstract class DataProvider(session: Session, startingId: Option[Long],

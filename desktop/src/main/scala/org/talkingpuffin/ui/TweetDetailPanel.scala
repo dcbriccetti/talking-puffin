@@ -14,8 +14,8 @@ import org.talkingpuffin.Session
 import org.talkingpuffin.ui.filter.FiltersDialog
 import org.talkingpuffin.util._
 import twitter4j.{User, Status}
-import org.talkingpuffin.twitter.RichStatus._
-import org.talkingpuffin.twitter.RichUser._
+import org.talkingpuffin.apix.RichStatus._
+import org.talkingpuffin.apix.RichUser._
 import util.{EscapeHtml, Activateable, CenteredPicture, TextChangingAnimator}
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE))

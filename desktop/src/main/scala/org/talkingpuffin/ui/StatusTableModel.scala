@@ -13,7 +13,7 @@ import util.DesktopUtil
 import org.talkingpuffin.Session
 import org.talkingpuffin.util.Loggable
 import twitter4j.{User, Status}
-import org.talkingpuffin.twitter.RichStatus._
+import org.talkingpuffin.apix.RichStatus._
 
 /**
  * Model providing status data to the JTable

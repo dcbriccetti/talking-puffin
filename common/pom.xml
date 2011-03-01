@@ -2,15 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.talkingpuffin</groupId>
-    <artifactId>talking-puffin</artifactId>
+    <artifactId>common</artifactId>
     <parent>
       <groupId>org.talkingpuffin</groupId>
       <artifactId>talking-puffin-base</artifactId>
       <version>${project.version}</version>
     </parent>
-    <name>TalkingPuffin Desktop Client</name>
+    <name>TalkingPuffin Desktop Common</name>
     <url>http://TalkingPuffin.org/</url>
-    <description>TalkingPuffin desktop Twitter client</description>
+    <description>TalkingPuffin common code</description>
 
     <dependencies>
         <dependency>
@@ -24,11 +24,6 @@
             <version>${scala.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.talkingpuffin</groupId>
-            <artifactId>common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
              <groupId>org.twitter4j</groupId>
              <artifactId>twitter4j-core</artifactId>
              <version>2.1.11</version>
@@ -37,11 +32,6 @@
             <groupId>net.lag</groupId>
             <artifactId>configgy</artifactId>
             <version>2.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.swinglabs</groupId>
-            <artifactId>swingx</artifactId>
-            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.scala-tools.testing</groupId>
@@ -100,38 +90,6 @@
                     <args>
                         <arg>-target:jvm-1.5</arg>
                     </args>
-                    <launchers>
-                        <launcher>
-                            <id>main</id>
-                            <mainClass>org.talkingpuffin.Main</mainClass>
-                        </launcher>
-                    </launchers>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.1</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-eclipse-plugin</artifactId>
-                <configuration>
-                    <downloadSources>true</downloadSources>
-                    <buildcommands>
-                        <buildcommand>ch.epfl.lamp.sdt.core.scalabuilder</buildcommand>
-                    </buildcommands>
-                    <additionalProjectnatures>
-                        <projectnature>ch.epfl.lamp.sdt.core.scalanature</projectnature>
-                    </additionalProjectnatures>
-                    <classpathContainers>
-                        <classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER</classpathContainer>
-                        <classpathContainer>ch.epfl.lamp.sdt.launching.SCALA_CONTAINER</classpathContainer>
-                    </classpathContainers>
                 </configuration>
             </plugin>
         </plugins>

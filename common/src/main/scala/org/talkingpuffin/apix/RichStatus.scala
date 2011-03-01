@@ -1,4 +1,4 @@
-package org.talkingpuffin.twitter
+package org.talkingpuffin.apix
 
 import org.joda.time.DateTime
 import twitter4j.Status

@@ -49,7 +49,6 @@
                         <arg>-deprecation</arg>
                         <arg>-Xmigration</arg>
                         <arg>-Xcheckinit</arg>
-                        <arg>-Xstrict-warnings</arg>
                         <arg>-Xwarninit</arg>
                     </args>
                 </configuration>
@@ -59,6 +58,7 @@
 
     <modules>
       <module>desktop</module>
+      <module>common</module>
       <module>web-mvn</module>
     </modules>
 </project>

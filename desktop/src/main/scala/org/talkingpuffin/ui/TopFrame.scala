@@ -18,7 +18,7 @@ import swing.TabbedPane.Page
  */
 class TopFrame(tw: Twitter) extends Frame with Loggable
     with PeoplePaneCreator with Reactor {
-  val service = org.talkingpuffin.twitter.Constants.ServiceName
+  val service = org.talkingpuffin.apix.Constants.ServiceName
   val prefs = GlobalPrefs.prefsForUser(service, tw.getScreenName)
   val tagUsers = new TagUsers(service, tw.getScreenName)
   TopFrames.addFrame(this)

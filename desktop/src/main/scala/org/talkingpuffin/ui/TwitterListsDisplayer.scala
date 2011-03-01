@@ -8,7 +8,7 @@ import javax.swing.{JComponent, JPopupMenu, JTable}
 import java.awt.Rectangle
 import org.talkingpuffin.Session
 import twitter4j.{UserList, User}
-import org.talkingpuffin.twitter.PageHandler._
+import org.talkingpuffin.apix.PageHandler._
 
 case class MenuPos(parent: JComponent, menuX: Int, menuY: Int)
 

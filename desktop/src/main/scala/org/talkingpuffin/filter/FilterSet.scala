@@ -5,7 +5,7 @@ import twitter4j.Status
 import org.talkingpuffin.ui.{Relationships}
 import org.talkingpuffin.filter.RetweetDetector._
 import org.talkingpuffin.util.Loggable
-import org.talkingpuffin.twitter.RichStatus._
+import org.talkingpuffin.apix.RichStatus._
 
 /**
  * A set of all filters, and logic to apply them

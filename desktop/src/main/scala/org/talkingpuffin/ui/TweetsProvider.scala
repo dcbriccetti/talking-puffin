@@ -4,8 +4,8 @@ import scala.collection.JavaConversions._
 import scala.swing.event.Event
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.RichStatus._
-import org.talkingpuffin.twitter.PageHandler._
+import org.talkingpuffin.apix.RichStatus._
+import org.talkingpuffin.apix.PageHandler._
 import twitter4j.{UserList, Status, ResponseList, Paging}
 
 case class NewTwitterDataEvent(data: List[Status], clear: Boolean) extends Event

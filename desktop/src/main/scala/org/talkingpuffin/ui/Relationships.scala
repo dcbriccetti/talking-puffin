@@ -5,7 +5,7 @@ import javax.swing.SwingWorker
 import swing.event.Event
 import swing.Publisher
 import org.talkingpuffin.Session
-import org.talkingpuffin.twitter.PageHandler._
+import org.talkingpuffin.apix.PageHandler._
 import twitter4j.User
 
 case class IdsChanged(source: Relationships) extends Event

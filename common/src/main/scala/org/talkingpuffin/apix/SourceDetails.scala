@@ -1,4 +1,4 @@
-package org.talkingpuffin.twitter
+package org.talkingpuffin.apix
 
 case class SourceDetails(raw: String, url: Option[String], name: String)
 
