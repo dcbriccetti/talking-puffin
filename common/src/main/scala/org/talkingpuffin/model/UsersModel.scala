@@ -1,11 +1,11 @@
-package org.talkingpuffin.ui
+package org.talkingpuffin.model
 
 import twitter4j.User
 
 /**
  * A model for users (followed and followers)
  */
-class UsersModel(rels: Relationships, val users: Array[User], val arrows: Array[String],
+class UsersModel(rels: BaseRelationships, val users: Array[User], val arrows: Array[String],
     val screenNameToUserNameMap: Map[String, String], val friendScreenNames: Set[String])
 
 object UsersModel {
@@ -13,7 +13,7 @@ object UsersModel {
   /**
    * If users is None, the list of users will be built from the relationships.
    */
-  def apply(usersList: Option[List[User]], rels: Relationships, sel: UserSelection): UsersModel = {
+  def apply(usersList: Option[List[User]], rels: BaseRelationships, sel: UserSelection): UsersModel = {
 
     def selected(users: List[User], search: Option[String]) = search match {
       case None => users

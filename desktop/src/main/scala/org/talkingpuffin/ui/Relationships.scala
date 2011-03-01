@@ -5,17 +5,12 @@ import javax.swing.SwingWorker
 import swing.event.Event
 import swing.Publisher
 import org.talkingpuffin.Session
-import org.talkingpuffin.apix.PageHandler._
-import twitter4j.User
+import org.talkingpuffin.model.BaseRelationships
 
 case class IdsChanged(source: Relationships) extends Event
 case class UsersChanged(source: Relationships) extends Event
 
-class Relationships extends Publisher with ErrorHandler {
-  var friendIds = List[Long]()
-  var followerIds = List[Long]()
-  var friends = List[User]()
-  var followers = List[User]()
+class Relationships extends BaseRelationships with Publisher with ErrorHandler {
 
   /**
    * Uses the provided Twitter to get all friends and followers (doing the
@@ -24,14 +19,10 @@ class Relationships extends Publisher with ErrorHandler {
   def getUsers(session: Session, screenName: String, longOpListener: LongOpListener) {
     val tw = session.twitter
     longOpListener.startOperation
-    type Users = List[User]
-    val pool = Executors.newFixedThreadPool(2)
-
-    val friendsFuture   = pool.submit(new Callable[Users] { def call = {allPages(friendsStatuses(tw, screenName))}})
-    val followersFuture = pool.submit(new Callable[Users] { def call = {allPages(followersStatuses(tw, screenName))}})
 
     new SwingWorker[Tuple2[Users,Users], Object] {
-      def doInBackground = (friendsFuture.get, followersFuture.get)
+      def doInBackground = getUsers(tw)
+
       override def done {
         longOpListener.stopOperation
         doAndHandleError(() => {
@@ -42,9 +33,8 @@ class Relationships extends Publisher with ErrorHandler {
           }, "Error fetching friends and followers for " + tw.getScreenName, session)
       }
     }.execute
-    pool.shutdown()
   }
-  
+
   def getIds(session: Session, longOpListener: LongOpListener) {
     val tw = session.twitter
     longOpListener.startOperation

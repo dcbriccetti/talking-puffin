@@ -1,30 +1,34 @@
 <lift:surround with="default" at="content">
-    <table class="usersTable">
-        <tr>
-            <th> </th>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Frnds</th>
-            <th>Flwrs</th>
-            <th>Location</th>
-            <th>Description</th>
-            <th>Status</th>
-        </tr>
-        <lift:Auth.resources>
-            <resources:resourceItems>
+        <table id="users" class="tablesorter">
+            <thead>
                 <tr>
-                    <td><%= u.getArrows(user) %></td>
-                    <td><img alt="Thumbnail" height="48" width="48" src="<%= user.profileImageURL() %>"/></td>
-                    <td><%= user.name() %><br/>
-                    <a href="http://twitter.com/<%=user.screenName()%>"><%= user.screenName() %></a></td>
-                    <td class="number"><%= user.friendsCount() %></td>
-                    <td class="number rightmostNumber"><%= user.followersCount() %></td>
-                    <td><%= user.location() %></td>
-                    <td><%= user.description() %></td>
-                    <td><%= u.getStatus(user) %></td>
+                    <th> </th>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Frnds</th>
+                    <th>Flwrs</th>
+                    <th>Location</th>
+                    <th>Description</th>
+                    <th>Status</th>
                 </tr>
-               <item:resource/>
-            </resources:resourceItems>
-        </lift:Auth.resources>
-    </table>
+            </thead>
+            <tbody>
+                <lift:Auth.users>
+                    <resources:resourceItems>
+                        <tr>
+                            <td><item:arrows/></td>
+                            <td><item:img/></td>
+                            <td><item:name/><br/>
+                            <item:screenName/></td>
+                            <td class="number"><item:friends/></td>
+                            <td class="number rightmostNumber"><item:followers/></td>
+                            <td><item:location/></td>
+                            <td><item:description/></td>
+                            <td><item:status/></td>
+                        </tr>
+                    </resources:resourceItems>
+                </lift:Auth.users>
+            </tbody>
+        </table>
+        <lift:Auth:tableSorter/>
 </lift:surround>

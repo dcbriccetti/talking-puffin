@@ -9,6 +9,7 @@ import org.talkingpuffin.ui.table.EmphasizedString
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.apix.RichUser._
 import org.talkingpuffin.apix.RichStatus._
+import org.talkingpuffin.model.{UserSelection, UsersModel}
 
 class UsersTableModel(users: Option[List[User]], val tagUsers: TagUsers,
     val relationships: Relationships) 

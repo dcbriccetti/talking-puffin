@@ -13,6 +13,7 @@ import org.talkingpuffin.Session
 import org.talkingpuffin.apix.RichUser._
 import util.{Dockable, DesktopUtil, TableUtil}
 import twitter4j.{Status, User}
+import org.talkingpuffin.model.UserSelection
 
 object UserColumns {
   val ARROWS = 0

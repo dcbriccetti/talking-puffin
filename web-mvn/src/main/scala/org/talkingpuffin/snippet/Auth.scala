@@ -7,6 +7,11 @@ import twitter4j.conf.ConfigurationBuilder
 import twitter4j.{Twitter, TwitterFactory}
 import net.liftweb.http.{SessionVar, S}
 import net.liftweb.util.Helpers._
+import org.talkingpuffin.web.Users
+import org.talkingpuffin.apix.RichStatus._
+import org.talkingpuffin.apix.RichUser._
+import net.liftweb.widgets.tablesorter.{Sorter, Sorting, TableSorter}
+import org.talkingpuffin.model.TooManyFriendsFollowers
 
 case class Credentials(user: String, token: String, secret: String)
 
@@ -20,7 +25,8 @@ class Auth extends Loggable {
       .setOAuthConsumerSecret("lSsNHuFhIbVfvvSffuiWWKlvoMd9PkAPtxD47NEG1k")
     val twitter = new TwitterFactory(cb.build()).getInstance()
     twitterS(Some(twitter))
-    val requestToken = twitter.getOAuthRequestToken("http://localhost:8080/login")
+    Auth.loggedIn(true)
+    val requestToken = twitter.getOAuthRequestToken("http://talkingpuffin.org:8080/tpuf/login")
     S.redirectTo(requestToken.getAuthorizationURL)
     Text("hi")
   }
@@ -36,59 +42,49 @@ class Auth extends Loggable {
     Text("token: " + token + ", verifier: " + verifier + ", access token: " + accessToken)
   }
 
-  def resources(content: NodeSeq): NodeSeq = {
+  def statuses(content: NodeSeq): NodeSeq = {
     val tw = twitterS.is.get
-    bind("resources", content,
-      "resourceItems" -> tw.getHomeTimeline.flatMap(st =>
-        bind("item", chooseTemplate("resources", "resourceItems", content),
-          "resource" -> <li>{st.getText}</li>)))
+    bind("statuses", content,
+      "statusItems" -> tw.getHomeTimeline.flatMap(st =>
+        bind("item", chooseTemplate("statuses", "statusItems", content),
+          "status" -> <li>{st.getText}</li>)))
+  }
+
+  def users(content: NodeSeq): NodeSeq = {
+    try {
+      val tw = twitterS.is.get
+      val ux = new Users()
+      ux.setSession(tw)
+      val userRows = ux.getUsers
+      bind("resources", content,
+        "resourceItems" -> userRows.flatMap(u =>
+          bind("item", chooseTemplate("resources", "resourceItems", content),
+            "arrows" -> Text(ux.getArrows(u)),
+            "img" -> <img alt="Thumbnail" height="48" width="48" src={u.getProfileImageURL.toString}/>,
+            "name" -> Text(u.getName),
+            "screenName" -> <span><a href={"http://twitter.com/" + u.getScreenName}>{u.getScreenName}</a></span>,
+            "friends" -> Text(u.getFriendsCount.toString),
+            "followers" -> Text(u.getFollowersCount.toString),
+            "location" -> Text(u.location),
+            "description" -> Text(u.description),
+            "status" -> Text(u.status match {case Some(s) => s.getText case _ => " "})
+            )))
+    } catch {
+      case e: TooManyFriendsFollowers =>
+        S.error("Can't process that many friends or followers")
+        Text("")
+    }
+  }
+
+  def tableSorter(content: NodeSeq): NodeSeq = {
+    val headers = (2,Sorter("string")) :: Nil
+    val sortList = (2,Sorting.ASC) :: Nil
+
+    val options = TableSorter.options(headers,sortList)
+    TableSorter("#users", options)
   }
 }
 
-/*
-object AuthenticatedSessionWeb extends Loggable {
-
-  def logIn(credentialsOption: Option[Credentials]): Twitter = {
-    val (tw, credentials) = credentialsOption match {
-      case Some(cr) => (createTwitter(Some(cr)), cr)
-      case None => createAccount()
-    }
-    verifyCredentials(tw, credentials)
-    tw
-  }
-
-  private def createTwitter(credentials: Option[Credentials]): Twitter = {
-    val cb = new ConfigurationBuilder()
-    cb.setDebugEnabled(true)
-      .setOAuthConsumerKey("o5lqEg5lT19K4xgzwWhjQ")
-      .setOAuthConsumerSecret("lSsNHuFhIbVfvvSffuiWWKlvoMd9PkAPtxD47NEG1k")
-    credentials.foreach(c => {
-      cb.setOAuthAccessToken(c.token).setOAuthAccessTokenSecret(c.secret)
-    })
-    new TwitterFactory(cb.build()).getInstance()
-  }
-
-  private def createAccount(): (Twitter, Credentials) = {
-    val twitter = createTwitter(None)
-    val requestToken = twitter.getOAuthRequestToken
-    DesktopUtil.browse(requestToken.getAuthorizationURL)
-    (twitter, getPin match {
-      case Some(pin: String) =>
-        val token = twitter.getOAuthAccessToken(requestToken, pin)
-        CredentialsRepository.save(Credentials(Constants.ServiceName, token.getScreenName,
-          token.getToken, token.getTokenSecret))
-      case _ => throw new RuntimeException("No PIN received")
-    })
-  }
-
-  private def verifyCredentials(tw: Twitter, credentials: Credentials): Unit = {
-    try {
-      val twitterUser = tw.verifyCredentials
-      info("Verified credentials of " + twitterUser.getScreenName)
-    } catch {
-      case te: TwitterException =>
-        CredentialsRepository.delete(credentials)
-        throw new RuntimeException("Failed to verify credentials: " + te.getMessage)
-    }
-  }
-}*/
+object Auth extends Loggable {
+  object loggedIn extends SessionVar[Boolean](false)
+}

@@ -1,23 +1,23 @@
 package org.talkingpuffin.web
 
 import java.io.Serializable
-//import org.talkingpuffin.ui.{UserSelection, UsersModel}
 import twitter4j.{User, Twitter}
+import org.talkingpuffin.apix.RichUser._
+import org.talkingpuffin.apix.RichStatus._
+import org.talkingpuffin.model.{UserSelection, UsersModel, BaseRelationships}
 
 class UserRow(val picUrl: String, val arrows: String, val screenName: String, val name: String,
     val numFriends: Int, val numFollowers: Int,
     val location: String, val description: String, val status: String) extends Serializable
 
 class Users extends Serializable {
-  /*
-  var session: Twitter = _
-  val rels = new Relationships
+  var tw: Twitter = _
+  val rels = new BaseRelationships
 
-  def setSession(session: Twitter) = this.session = session
+  def setSession(session: Twitter) = this.tw = session
 
   def getUsers: Array[User] = {
-    rels.friends   = session.loadAllWithCursor(session.getFriends)
-    rels.followers = session.loadAllWithCursor(session.getFollowers)
+    rels.lookUp(tw)
     UsersModel(None, rels, UserSelection(true, true, None)).users.toArray
   }
   
@@ -32,5 +32,5 @@ class Users extends Serializable {
     val friend = rels.friends.contains(user)
     val follower = rels.followers.contains(user)
     if (friend && follower) "↔" else if (friend) "→" else if (follower) "←" else " "
-  }*/
+  }
 }

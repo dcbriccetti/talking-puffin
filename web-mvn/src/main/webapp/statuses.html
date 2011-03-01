@@ -1,10 +1,10 @@
 <lift:surround with="default" at="content">
     <br/>
-    <ul class='resource'>
-        <lift:Auth.resources>
-            <resources:resourceItems>
-               <item:resource/>
-            </resources:resourceItems>
-        </lift:Auth.resources>
-    </ul>
+    <p>This page is just a start. Try People, unless you have thousands of friends
+        or followers.</p>
+    <lift:Auth.statuses>
+        <statuses:statusItems>
+           <item:status/>
+        </statuses:statusItems>
+    </lift:Auth.statuses>
 </lift:surround>

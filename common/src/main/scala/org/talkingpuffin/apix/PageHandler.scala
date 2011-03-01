@@ -21,12 +21,14 @@ object PageHandler extends Loggable {
   def userListMemberships(tw: Twitter, listMemberScreenName: String)(cursor: Long) =
     tw.getUserListMemberships(listMemberScreenName, cursor)
 
-  def allPages[T <: TwitterResponse](fn: (Long) => PagableResponseList[T], cursor: Long = -1): List[T] = cursor match {
-    case 0 => Nil
-    case c =>
-      var resp = fn(c)
-      resp.toList ::: allPages(fn, resp.getNextCursor)
-  }
+  def allPages[T <: TwitterResponse](fn: (Long) => PagableResponseList[T], cursor: Long = -1): List[T] =
+    cursor match {
+      case 0 => Nil
+      case c =>
+        debug("Getting a page. Cursor: " + cursor)
+        var resp = fn(c)
+        resp.toList ::: allPages(fn, resp.getNextCursor)
+    }
 
   def allPages(fn: (Paging) => ResponseList[Status], paging: Paging): List[Status] = {
     val resp = fn(paging).toList
