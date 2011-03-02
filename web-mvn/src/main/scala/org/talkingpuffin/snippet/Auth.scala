@@ -105,37 +105,7 @@ class Auth extends Loggable {
     def setUser(screenName: String): JsCmd = {
       info(tw.getScreenName + " is analyzing " + screenName)
       user(screenName)
-      val pt = PartitionedTweets(twitterS.is.get, user.is)
-
-      def newSer(heading: String, times: Seq[Status]) =
-        new FlotSerie () {
-          override def label = Full(heading)
-          override val points = Full (new FlotPointsOptions () {
-            override val show = Full(true)
-          })
-          override val data = times.map(_.getCreatedAt.getTime).sorted.map(t => Pair(t.toDouble,1.toDouble)).toList
-        }
-
-      Flot.renderJs("ph_graph",
-        newSer("Tweets", pt.notReplies) :: newSer("Replies", pt.replies) :: newSer("Retweets", pt.newStyleRetweets
-          ) :: newSer("OldRetweets", pt.oldStyleRetweets) :: Nil,
-        new FlotOptions {
-          override def legend = Full(new FlotLegendOptions () {
-            override def container = Full("#legend")
-          })
-          override val grid = Full (new FlotGridOptions () {
-            override def hoverable = Full(true)
-          })
-          override def xaxis = Full(new FlotAxisOptions {
-            override def mode = Full("time")
-          })
-          override def yaxis = Full(new FlotAxisOptions {
-            override def ticks = List(0d)
-          })
-        }, Flot.script(xhtml)) & JsRaw("""
-        var tweets = {
-        """ + pt.tweets.map(st => st.getCreatedAt.getTime.toString + ": \"" +
-        EscapeHtml(st.text.replaceAll("\n", " ")) + "\"").mkString(",\n") + "}")
+      UserTimelinePlotRenderer.render(twitterS.is.get, user.is)
     }
 
     SHtml.ajaxText(tw.getScreenName, setUser _)
@@ -145,3 +115,5 @@ class Auth extends Loggable {
 object Auth extends Loggable {
   object loggedIn extends SessionVar[Boolean](false)
 }
+
+
