@@ -1,7 +1,6 @@
 package org.talkingpuffin.util
 
 import java.net.{HttpURLConnection, URL}
-import org.talkingpuffin.ui.LinkExtractor
 
 /**
  * URL shortening and expanding.

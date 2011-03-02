@@ -1,8 +1,8 @@
 package org.talkingpuffin.ui
 
-import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.Constants.RetweetSymbol
 import twitter4j.User
+import org.talkingpuffin.util.{LinkExtractor, Loggable}
 
 /**
  * Helps with creating HTML for display in the UI

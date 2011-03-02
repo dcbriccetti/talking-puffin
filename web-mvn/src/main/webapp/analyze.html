@@ -1,0 +1,9 @@
+<lift:surround with="default" at="content">
+    <h2>Analyze a User</h2>
+    <div id="ph_graph" style="width:600px;height:150px"></div>
+      <lift:snippet type="Auth:user">
+        <flot:graph />
+      </lift:snippet>
+      <lift:Auth:analyzeUser/>
+      <lift:Auth:analyzeButton/>
+</lift:surround>

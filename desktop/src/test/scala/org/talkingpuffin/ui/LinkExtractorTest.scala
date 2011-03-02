@@ -2,6 +2,7 @@ package org.talkingpuffin.ui
 
 import org.junit.Test
 import org.junit.Assert.assertEquals
+import org.talkingpuffin.util.LinkExtractor
 
 class LinkExtractorTest {
 

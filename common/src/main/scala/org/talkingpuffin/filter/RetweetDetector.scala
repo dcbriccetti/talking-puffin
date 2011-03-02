@@ -1,7 +1,7 @@
 package org.talkingpuffin.filter
 
 import twitter4j.Status
-import org.talkingpuffin.ui.LinkExtractor
+import org.talkingpuffin.util.LinkExtractor
 import org.talkingpuffin.apix.RichStatus._
 
 /**
@@ -19,7 +19,7 @@ object RetweetDetector {
   implicit def status2RetweetDetector(status: Status) = new RetweetDetector(status.text)
 }
   
-class RetweetDetector(text: String) {
+case class RetweetDetector(text: String) {
 
   /**
    * Returns whether text contains a retweet.

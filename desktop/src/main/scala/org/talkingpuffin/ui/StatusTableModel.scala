@@ -11,9 +11,9 @@ import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 import org.talkingpuffin.Session
-import org.talkingpuffin.util.Loggable
 import twitter4j.{User, Status}
 import org.talkingpuffin.apix.RichStatus._
+import org.talkingpuffin.util.{LinkExtractor, Loggable}
 
 /**
  * Model providing status data to the JTable

@@ -6,6 +6,7 @@ import javax.swing.{JTable, JPopupMenu}
 import javax.swing.KeyStroke.getKeyStroke
 import twitter4j.Status
 import org.talkingpuffin.apix.RichStatus._
+import org.talkingpuffin.util.LinkExtractor
 
 /**
  * Shows a menu of links, or launches the browser on the link if there is only one. 

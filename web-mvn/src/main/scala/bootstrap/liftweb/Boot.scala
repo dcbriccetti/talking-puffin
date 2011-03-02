@@ -18,12 +18,13 @@ class Boot extends Loggable {
     LiftRules.setSiteMap(SiteMap(List(
       Menu("Home") / "index" >> Hidden,
       Menu("Log In") / "login" >> Hidden,
-      Menu("Statuses") / "statuses" >> LoggedIn,
+      Menu("Analyze") / "analyze" >> LoggedIn,
       Menu("People") / "people" >> LoggedIn)
       : _*))
 
     LiftRules.ajaxStart = Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
     LiftRules.ajaxEnd = Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
+    LiftRules.ajaxPostTimeout = 60000
 
     LiftRules.early.append {_.setCharacterEncoding("UTF-8")}
 

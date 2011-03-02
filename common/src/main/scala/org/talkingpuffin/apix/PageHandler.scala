@@ -30,6 +30,8 @@ object PageHandler extends Loggable {
         resp.toList ::: allPages(fn, resp.getNextCursor)
     }
 
+  def userTimeline(tw: Twitter, screenName: String)(paging: Paging) = tw.getUserTimeline(screenName, paging)
+
   def allPages(fn: (Paging) => ResponseList[Status], paging: Paging): List[Status] = {
     val resp = fn(paging).toList
     debug("Page " + paging.getPage + " results: " + resp.size)

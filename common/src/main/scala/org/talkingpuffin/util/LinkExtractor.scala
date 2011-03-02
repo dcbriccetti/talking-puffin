@@ -1,4 +1,4 @@
-package org.talkingpuffin.ui
+package org.talkingpuffin.util
 
 import java.util.regex.Pattern
 

@@ -6,6 +6,7 @@ import org.talkingpuffin.ui.{Relationships}
 import org.talkingpuffin.filter.RetweetDetector._
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.apix.RichStatus._
+import org.talkingpuffin.apix.RichStatus
 
 /**
  * A set of all filters, and logic to apply them
@@ -40,7 +41,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
       tagFiltersInclude && ! excludedByTags &&
           ! (excludeFriendRetweets && status.isRetweetOfStatusFromFriend(friendUsernames)) &&
           ! (excludeNonFollowers && ! rels.followerIds.contains(status.getUser.getId)) &&
-          ! (useNoiseFilters && NoiseFilter.isNoise(status.text)) &&
+          ! (useNoiseFilters && NoiseFilter.isNoise(RichStatus(status).text)) &&
           ! excludedByCompoundFilters
     }
 
