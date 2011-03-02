@@ -113,3 +113,18 @@ table {
 .usersTable tr td.rightmostNumber {
     padding-right: 1em;
 }
+
+#navlist {
+    height: 31px;
+}
+#navlist ul {
+    padding: inherit;
+}
+
+#navlist ul li {
+  border: thin solid black;
+  display: inline;
+  list-style-type: none;
+  margin: 1px;
+  padding: 3px;
+}

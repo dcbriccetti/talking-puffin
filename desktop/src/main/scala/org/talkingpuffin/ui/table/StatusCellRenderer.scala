@@ -4,9 +4,8 @@ import java.awt.Color
 import java.util.{Date, Comparator}
 import javax.swing.text.JTextComponent
 import org.talkingpuffin.ui.{HtmlFormatter}
-import org.talkingpuffin.util.ShortUrl
 import org.talkingpuffin.time.TimeUtil
-import org.talkingpuffin.ui.util.EscapeHtml
+import org.talkingpuffin.util.{EscapeHtml, ShortUrl}
 
 /**
  * Status cell renderer.

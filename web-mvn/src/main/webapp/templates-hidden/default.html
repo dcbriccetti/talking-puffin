@@ -13,21 +13,17 @@
 </head>
 <body>
 <div class="container">
-    <h1>TalkingPuffin Web Experimental Version</h1>
+    <img alt="" id="ajax-loader" style="position: absolute; display:none; margin-bottom: 0px; margin-left: 40em"
+         src="/images/ajax-loader.gif"/>
+    <h2>TalkingPuffin Web Experimental Version</h2>
     <hr/>
 
-    <div class="column span-4 colborder sidebar">
-        <hr class="space"/>
+    <div id="navlist">
         <lift:Menu.builder/>
-        <div>
-            <lift:Msgs showAll="true"/>
-            <hr class="space"/>
-        </div>
     </div>
+    <lift:Msgs showAll="true"/>
 
-    <div class="column last">
-        <lift:bind name="content"/>
-    </div>
+    <lift:bind name="content"/>
 </div>
 </body>
 </html>

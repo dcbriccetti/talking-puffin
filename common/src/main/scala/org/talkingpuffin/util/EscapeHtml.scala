@@ -1,4 +1,4 @@
-package org.talkingpuffin.ui.util
+package org.talkingpuffin.util
 
 import org.apache.commons.lang.StringEscapeUtils
 

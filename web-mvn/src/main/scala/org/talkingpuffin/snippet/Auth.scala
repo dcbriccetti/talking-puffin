@@ -2,22 +2,23 @@ package org.talkingpuffin.snippet
 
 import scala.collection.JavaConversions._
 import xml.{Text, NodeSeq}
-import org.talkingpuffin.util.Loggable
 import twitter4j.conf.ConfigurationBuilder
-import net.liftweb.util.Helpers._
 import net.liftweb.widgets.tablesorter.{Sorter, Sorting, TableSorter}
-import net.liftweb.common.Full
 import net.liftweb.widgets.flot._
 import net.liftweb.http.{RequestVar, SHtml, SessionVar, S}
-import net.liftweb.http.js.{JsCmds, JsCmd}
+import net.liftweb.http.js.JsCmds._
+import _root_.net.liftweb.util._
+import _root_.net.liftweb.common._
+import Helpers._
+import net.liftweb.http.js.JE.JsRaw
 import org.talkingpuffin.web.Users
 import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.apix.RichUser._
 import org.talkingpuffin.model.TooManyFriendsFollowers
-import org.talkingpuffin.filter.RetweetDetector
-import org.talkingpuffin.apix.PageHandler._
-import twitter4j.{Paging, Status, Twitter, TwitterFactory}
-import org.talkingpuffin.apix.Constants
+import twitter4j.{Status, Twitter, TwitterFactory}
+import org.talkingpuffin.util.{EscapeHtml, Loggable}
+import net.liftweb.http.js.JsCmd
+import org.talkingpuffin.apix.PartitionedTweets
 
 case class Credentials(user: String, token: String, secret: String)
 
@@ -96,48 +97,47 @@ class Auth extends Loggable {
       "graph" -> Flot.render("ph_graph", Nil, new FlotOptions {}, Flot.script(xhtml)))
   }
 
-  def analyzeButton (xhtml: NodeSeq) = {
+  object user extends RequestVar[String]("")
 
-    def graph (): JsCmd = {
-      val tw = twitterS.is.get
-      val paging = new Paging
-      paging.setCount(Constants.MaxItemsPerRequest)
-      val tweets = /*allPages(*/userTimeline(tw, user.is)(paging)
-      val (timesRt, timesNotRt) = tweets.partition(st => st.isRetweet)
-      val (timesORt, timesNotORt) = timesNotRt.partition(st => RetweetDetector(st.text).isRetweet)
-      val (replies, notReplies) = timesNotORt.partition(_.inReplyToUserId.isDefined)
+  def analyzeUser(xhtml: NodeSeq): NodeSeq = {
+    val tw = twitterS.is.get
+
+    def setUser(screenName: String): JsCmd = {
+      info(tw.getScreenName + " is analyzing " + screenName)
+      user(screenName)
+      val pt = PartitionedTweets(twitterS.is.get, user.is)
 
       def newSer(heading: String, times: Seq[Status]) =
         new FlotSerie () {
           override def label = Full(heading)
-          override val bars = Full (new FlotBarsOptions () {
+          override val points = Full (new FlotPointsOptions () {
             override val show = Full(true)
           })
           override val data = times.map(_.getCreatedAt.getTime).sorted.map(t => Pair(t.toDouble,1.toDouble)).toList
         }
 
       Flot.renderJs("ph_graph",
-        newSer("Tweets", timesNotORt) :: newSer("Replies", replies) :: newSer("Retweets", timesRt) :: newSer("OldRetweets", timesORt) :: Nil, new FlotOptions {
-        override def xaxis = Full(new FlotAxisOptions {
-          override def mode = Full("time")
-        })
-        override def yaxis = Full(new FlotAxisOptions {
-          override def ticks = List(0d)
-        })
-      }, Flot.script(xhtml))
+        newSer("Tweets", pt.notReplies) :: newSer("Replies", pt.replies) :: newSer("Retweets", pt.newStyleRetweets
+          ) :: newSer("OldRetweets", pt.oldStyleRetweets) :: Nil,
+        new FlotOptions {
+          override def legend = Full(new FlotLegendOptions () {
+            override def container = Full("#legend")
+          })
+          override val grid = Full (new FlotGridOptions () {
+            override def hoverable = Full(true)
+          })
+          override def xaxis = Full(new FlotAxisOptions {
+            override def mode = Full("time")
+          })
+          override def yaxis = Full(new FlotAxisOptions {
+            override def ticks = List(0d)
+          })
+        }, Flot.script(xhtml)) & JsRaw("""
+        var tweets = {
+        """ + pt.tweets.map(st => st.getCreatedAt.getTime.toString + ": \"" +
+        EscapeHtml(st.text.replaceAll("\n", " ")) + "\"").mkString(",\n") + "}")
     }
 
-    SHtml.ajaxButton("Analyze", graph _)
-  }
-
-  object user extends RequestVar[String]("")
-
-  def setUser(screenName: String): JsCmd = {
-    user(screenName)
-    JsCmds._Noop
-  }
-  def analyzeUser(xhtml: NodeSeq): NodeSeq = {
-    val tw = twitterS.is.get
     SHtml.ajaxText(tw.getScreenName, setUser _)
   }
 }

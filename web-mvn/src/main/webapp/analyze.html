@@ -1,9 +1,29 @@
 <lift:surround with="default" at="content">
-    <h2>Analyze a User</h2>
-    <div id="ph_graph" style="width:600px;height:150px"></div>
-      <lift:snippet type="Auth:user">
-        <flot:graph />
-      </lift:snippet>
-      <lift:Auth:analyzeUser/>
-      <lift:Auth:analyzeButton/>
+    <h3>Analyze a User</h3>
+
+    <div id="legend"/>
+    <div id="ph_graph" style="width:700px;height:50px"></div>
+    <div id="result" style="display:none; height: 3em; font-size: 200%;"></div>
+    <lift:snippet type="Auth:user">
+        <flot:graph/>
+        <script>
+            var previousPoint = null;
+            $("#ph_graph").bind("plothover", function (event, pos, item) {
+                if (item) {
+                    if (previousPoint != item.dataIndex) {
+                        previousPoint = item.dataIndex;
+
+                        var x = item.datapoint[0];
+
+                        $('#result').show();
+                        $('#result').html(tweets[x]);
+                    }
+                }
+                else {
+                    previousPoint = null;
+                }
+            });
+        </script>
+    </lift:snippet>
+    <lift:Auth:analyzeUser/>
 </lift:surround>
