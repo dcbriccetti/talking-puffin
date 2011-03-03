@@ -2,7 +2,7 @@
     <h3>Analyze a User</h3>
 
     <div id="legend"/>
-    <div id="ph_graph" style="width:700px;height:50px"></div>
+    <div id="ph_graph" style="width:100%; height:50px"></div>
     <div id="result" style="display:none; height: 3em; font-size: 200%;"></div>
     <lift:snippet type="Auth:user">
         <flot:graph/>
@@ -12,14 +12,10 @@
                 if (item) {
                     if (previousPoint != item.dataIndex) {
                         previousPoint = item.dataIndex;
-
-                        var x = item.datapoint[0];
-
                         $('#result').show();
-                        $('#result').html(tweets[x]);
+                        $('#result').text(tweets[item.datapoint[0]]);
                     }
-                }
-                else {
+                } else {
                     previousPoint = null;
                 }
             });

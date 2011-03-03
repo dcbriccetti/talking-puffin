@@ -17,5 +17,5 @@ case class PartitionedTweets(tw: Twitter, screenName: String) {
   val (newStyleRts, notNewStyleRts) = tweets.partition(_.isRetweet)
   val (oldStyleRts, notOldStyleRts) =
     notNewStyleRts.partition(st => RetweetDetector(st.text).isRetweet)
-  val (replies, notReplies) = notOldStyleRts.partition(_.inReplyToUserId.isDefined)
+  val (replies, plainTweets) = notOldStyleRts.partition(_.inReplyToUserId.isDefined)
 }
