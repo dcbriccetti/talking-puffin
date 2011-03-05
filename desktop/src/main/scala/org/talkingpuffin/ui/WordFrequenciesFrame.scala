@@ -12,7 +12,7 @@ class WordFrequenciesFrame(text: String) extends Frame with Cancelable {
     peer.add(new JScrollPane(new JTextPane {
       setContentType("text/html")
       setEditable(false)
-      setText(createDisplayText(WordCounter.count(text)))
+      setText(createDisplayText(WordCounter(text).frequencies))
       setCaretPosition(0)
     }), BorderLayout.CENTER
     )
