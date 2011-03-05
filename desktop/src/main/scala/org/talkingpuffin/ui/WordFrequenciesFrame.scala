@@ -20,7 +20,7 @@ class WordFrequenciesFrame(text: String) extends Frame with Cancelable {
 
   private def createDisplayText(buckets: WordCounter.BucketMap): String =
     "<div style='font-family: sans-serif'>" +
-    (for (freq <- buckets.keys.toList.sorted)
+    (for (freq <- buckets.keys.toList.sorted.reverse if freq > 2)
       yield "<b>" + freq + "</b>" + ": " + buckets.get(freq).get.sorted.mkString(", ") + "<br>"
     ).mkString + "</div>"
   
