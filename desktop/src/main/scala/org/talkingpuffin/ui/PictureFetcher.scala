@@ -3,7 +3,7 @@ package org.talkingpuffin.ui
 import java.awt.Image
 import javax.swing.{ImageIcon}
 import java.net.URL
-import org.talkingpuffin.util.{FetchRequest, ResourceReady, BackgroundResourceFetcher, Loggable}
+import org.talkingpuffin.util._
 
 /**
  * Fetches pictures in the background, and calls a method in the event
@@ -13,7 +13,7 @@ object PictureFetcher {
   type ImageReady = ResourceReady[String,ImageWithScaled]
 
   /** Derives the full size filename from the thumbnail filename */
-  def getFullSizeUrl(thumb: String) = thumb.replace("_normal", "")
+  def getFullSizeUrl(thumb: String) = Picture.getFullSizeUrl(thumb)
 
   private def scaleImageToFitSquare(sideLength: Int, imageIcon: ImageIcon): ImageIcon = {
     val image = imageIcon.getImage

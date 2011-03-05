@@ -8,9 +8,8 @@ import net.liftweb.common._
 import net.liftweb.http.js.JE.JsRaw
 import net.liftweb.http.js.JsCmd
 import net.liftweb.util.StringHelpers._
-import twitter4j.{Status, Twitter}
+import twitter4j.Status
 import org.talkingpuffin.apix.RichStatus._
-import org.talkingpuffin.util.EscapeHtml
 import org.talkingpuffin.apix.PartitionedTweets
 
 object UserTimelinePlotRenderer {
@@ -68,5 +67,4 @@ object UserTimelinePlotRenderer {
     JsCrVar("tweets", JsRaw("{" +
       pt.tweets.map(st => st.getCreatedAt.getTime.toString + ": " +
       st.text.encJs).mkString(",\n") + "}"))
-
 }

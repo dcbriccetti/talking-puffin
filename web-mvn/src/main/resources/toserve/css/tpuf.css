@@ -1,7 +1,6 @@
 body {
 	font: 12px Arial, Helvetica, sans-serif;
 	color: #333;
-	background: #eee;
     margin-top: 0;
 }
 
@@ -123,4 +122,12 @@ table {
   list-style-type: none;
   margin: 1px;
   padding: 3px;
+}
+
+.generalUser tr td {
+    vertical-align: top;
+}
+
+.profilePic {
+    margin-top: 1em;
 }
