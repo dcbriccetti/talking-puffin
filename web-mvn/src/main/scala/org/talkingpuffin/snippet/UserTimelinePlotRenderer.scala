@@ -23,7 +23,7 @@ object UserTimelinePlotRenderer {
       newSer("Replies"    , pt.replies),
       newSer("Retweets"   , pt.newStyleRts),
       newSer("OldRetweets", pt.oldStyleRts)),
-      createFlotOptions, Flot.script(Text(""))) & emitTweetsJs(pt)
+      createFlotOptions(pt.tweets.toList), Flot.script(Text(""))) & emitTweetsJs(pt)
   }
 
   private def newSer(heading: String, statuses: Seq[Status]) =
@@ -34,21 +34,34 @@ object UserTimelinePlotRenderer {
         override val show = Full(true) })
 
       override val data = statuses.map(_.getCreatedAt.getTime).sorted.
-        map(t => Pair(t.toDouble, 1.toDouble)).toList
+        map(t => Pair(t.toDouble, 0d)).toList
     }
 
-  private def createFlotOptions = new FlotOptions {
+  private def createFlotOptions(tweets: List[Status]) = new FlotOptions {
     override def legend = Full(new FlotLegendOptions() {
-      override def container = Full("#legend") })
+      override def container = Full("legend") })
 
     override val grid = Full(new FlotGridOptions() {
       override def hoverable = Full(true) })
 
     override def xaxis = Full(new FlotAxisOptions {
-      override def mode = Full("time") })
+      override def mode = Full("time")
+      override def panRange = Full(Pair(
+        tweets.map(_.getCreatedAt.getTime).min, tweets.map(_.getCreatedAt.getTime).max))
+    })
 
     override def yaxis = Full(new FlotAxisOptions {
+      override def panRange = Full(Pair(-1, 1))
+      override def zoomRange = Full(Pair(2, 2))
       override def ticks = List(0d) })
+
+    override def panOptions = Full(new PanOptions {
+      override def interactive = Full(true)
+    })
+
+    override def zoomOptions = Full(new ZoomOptions {
+      override def interactive = Full(true)
+    })
   }
 
   private def emitTweetsJs(pt: PartitionedTweets): JsCmd =
