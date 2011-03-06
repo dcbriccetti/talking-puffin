@@ -21,11 +21,8 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[Status], table: JTab
       menu.add(new MenuItem(a1).peer)
     }
     
-    def browseUrls(urls: List[String]) {
-      for (url <- urls) 
-        browse(url)
-    }
-    
+    def browseUrls(urls: List[String]) = urls.foreach(browse)
+
     def stripHttpProtocolString(url: String): String = {
       val prefix = "http://"
       if (url startsWith prefix) url substring prefix.length else url
@@ -36,18 +33,18 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[Status], table: JTab
         val urls = LinkExtractor.getLinks(status.text, status.inReplyToStatusId, users, pages, lists)
   
         if (urls.length == 1) {
-          browse(urls(0)._2)
+          browse(urls(0).link)
         } else if (urls.length > 1) {
           val menu = new JPopupMenu
           var index = 0
     
           for (url <- urls) {
-            addMenuItem(menu, stripHttpProtocolString(url._1), index, browse(url._2))
+            addMenuItem(menu, stripHttpProtocolString(url.title), index, browse(url.link))
             index += 1
           }
           
           if (urls.length > 1) {
-            val a1 = Action(if (urls.length == 2) "Both" else "All") {browseUrls(urls.map(url => url._2))}
+            val a1 = Action(if (urls.length == 2) "Both" else "All") {browseUrls(urls.map(_.link))}
             a1.accelerator = Some(getKeyStroke(KeyEvent.VK_A, 0))
             menu.add(new MenuItem(a1).peer)
           }

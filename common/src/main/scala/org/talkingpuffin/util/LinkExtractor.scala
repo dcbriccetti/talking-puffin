@@ -17,29 +17,32 @@ object LinkExtractor {
   val userListPattern = Pattern.compile(userListRegex)
   val usernamePattern = Pattern.compile(usernameRegex)
 
+  case class Link(title: String, link: String)
+  type Links = List[Link]
+
   /**
-   * Returns a list of tuples of (title, hyperlink) built from:
+   * Returns Links built from:
    * <ol>
    * <li>The in_reply_to_status_id
    * <li>@usernames
    * <li>Hyperlinks
    * </ol> 
    */
-  def getLinks(text: String, inReplyToStatusId: Option[Long], users: Boolean, pages: Boolean, 
-        lists: Boolean): List[(String,String)] = {
-    var urls: List[(String,String)] = List()
+  def getLinks(text: String, inReplyToStatusId: Option[Long], users: Boolean, pages: Boolean,
+        lists: Boolean): Links = {
+    var urls = List[Link]()
     
     if (users) {
       getReplyToInfo(inReplyToStatusId, text) match {
         case Some((user, replyTo)) => 
-          urls = urls ::: List(("Status " + replyTo + " of " + user, getStatusUrl(replyTo, user)))
+          urls = urls ::: List(Link("Status " + replyTo + " of " + user, getStatusUrl(replyTo, user)))
         case _ =>
       }
   
       val m = usernamePattern.matcher(text)
       while (m.find) {
         val userName = m.group(1)
-        val newItem = (userName, "http://twitter.com/" + userName)
+        val newItem = Link(userName, "http://twitter.com/" + userName)
         if (! urls.contains(newItem))
           urls = urls ::: List(newItem)
       }
@@ -95,7 +98,7 @@ object LinkExtractor {
     val items = getLinkItems(text) // Example: ("url", "url")
     var newText = text
     items.foreach(item => {
-      newText = newText.replace(item._1, "<a href='" + item._1 + "'>" + item._1 + "</a>")
+      newText = newText.replace(item.title, "<a href='" + item.title + "'>" + item.title + "</a>")
     })
     newText
   }
@@ -104,8 +107,8 @@ object LinkExtractor {
     val items = getListItems(text) // Example: ("dave/scala", "http://twitter.com/dave/scala")
     var newText = text
     items.foreach(item => {
-      newText = newText.replace("@" + item._1, 
-        "<a href='" + item._2 + "'>" + atCode + item._1 + "</a>")
+      newText = newText.replace("@" + item.title,
+        "<a href='" + item.link + "'>" + atCode + item.title + "</a>")
     })
     newText
   }
@@ -121,12 +124,12 @@ object LinkExtractor {
   /**
    * Finds hyperlinks.
    */
-  private def getLinkItems(text: String): List[Tuple2[String,String]] = {
-    var urls: List[(String,String)] = List()
+  private def getLinkItems(text: String): Links = {
+    var urls = List[Link]()
     val m = hyperlinkPattern.matcher(text)
     while (m.find) {
       val item = stripTrailingPunctuation(m.group(1))
-      val newItem = (item, item)
+      val newItem = Link(item, item)
       if (! urls.contains(newItem))
         urls = urls ::: List(newItem)
     }
@@ -136,12 +139,12 @@ object LinkExtractor {
   /**
    * Finds lists, like @dcbriccetti/scala.
    */
-  private def getListItems(text: String): List[Tuple2[String,String]] = {
-    var urls: List[(String,String)] = List()
+  private def getListItems(text: String): Links = {
+    var urls = List[Link]()
     val m = userListPattern.matcher(text)
     while (m.find) {
       val item = stripTrailingPunctuation(m.group(1))
-      val newItem = (item, "http://twitter.com/" + item)
+      val newItem = Link(item, "http://twitter.com/" + item)
       if (! urls.contains(newItem))
         urls = urls ::: List(newItem)
     }

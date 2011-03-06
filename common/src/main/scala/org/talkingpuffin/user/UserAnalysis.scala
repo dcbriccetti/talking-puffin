@@ -27,5 +27,7 @@ case class UserAnalysis(pt: PartitionedTweets) {
   val numUsers = users.size
 
   val allTweetText = pt.tweets.map(_.text).mkString(" ")
-  val buckets = WordCounter(allTweetText).frequencies
+  val tweetsWordCounter = WordCounter(allTweetText)
+
+  val screenNamesCounter = WordCounter(users.map(_.title).mkString(" "))
 }

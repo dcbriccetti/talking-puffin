@@ -6,6 +6,7 @@ import org.talkingpuffin.apix.PartitionedTweets
 import twitter4j.User
 import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.user.UserAnalysis
+import org.talkingpuffin.util.WordCounter
 
 object GeneralUserInfo {
   case class InfoLine(heading: String, value: String)
@@ -31,9 +32,16 @@ object GeneralUserInfo {
     if (ua.numUsers > 0)
       disp("Users mentioned", ua.numUsers + " (" + ua.users.distinct.size + " unique)")
     disp("Clients", ua.clients.map(_.name).mkString(", "))
+
+    def displayFreqs(freqs: WordCounter.BucketMap): Unit = {
+      for (freq <- freqs.keysIterator.filter(_ > 2).toList.sorted.reverse)
+        disp(freq.toString, freqs.get(freq).get.sorted.mkString(", "))
+    }
     disp("Word frequencies", "")
-    for (freq <- ua.buckets.keysIterator.filter(_ > 2).toList.sorted.reverse)
-      disp(freq.toString, ua.buckets.get(freq).get.sorted.mkString(", "))
+    displayFreqs(ua.tweetsWordCounter.frequencies)
+    disp("Screen name frequencies", "")
+    displayFreqs(ua.screenNamesCounter.frequencies)
+
     msgs.reverse
   }
 }
