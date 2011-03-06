@@ -30,6 +30,7 @@ object GeneralUserInfo {
       disp("Links in tweets", ua.numLinks + " (" + ua.links.distinct.size + " unique)")
     if (ua.numUsers > 0)
       disp("Users mentioned", ua.numUsers + " (" + ua.users.distinct.size + " unique)")
+    disp("Clients", ua.clients.map(_.name).mkString(", "))
     disp("Word frequencies", "")
     for (freq <- ua.buckets.keysIterator.filter(_ > 2).toList.sorted.reverse)
       disp(freq.toString, ua.buckets.get(freq).get.sorted.mkString(", "))

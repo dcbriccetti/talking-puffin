@@ -18,6 +18,8 @@ case class UserAnalysis(pt: PartitionedTweets) {
   val avgTweetsPerDay = numTweets.toDouble / range.getDays
   val avgTweetsPerDayExcludingReplies = numNonReplies.toDouble / range.getDays
 
+  val clients = pt.tweets.map(_.sourceDetails).distinct.sortBy(_.name)
+
   val links = pt.tweets.flatMap(t => LinkExtractor.getLinks(t.getText, None, false, true, false))
   val numLinks = links.size
 
