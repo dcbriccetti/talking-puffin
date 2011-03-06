@@ -101,7 +101,13 @@ class Auth extends Loggable {
           val uinfo = tw.lookupUsers(Array(screenName)).get(0)
           <table class="generalUser">
             <tr>
-              <td>{GeneralUserInfo.create(uinfo, screenName, pt).map(t => <span>{t}<br/></span>)}</td>
+              <td>
+                <table>
+                  {GeneralUserInfo.create(uinfo, screenName, pt).map(il =>
+                    <tr><td class="gnlInfoHead">{il.heading}</td><td class="gnlInfoVal">{il.value}</td></tr>)
+                  }
+                </table>
+              </td>
               <td><img class="profilePic" src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
                        alt="Profile Image"/></td>
             </tr>

@@ -131,3 +131,11 @@ table {
 .profilePic {
     margin-top: 1em;
 }
+
+.gnlInfoHead {
+    font-weight: bold;
+}
+
+.gnlInfoVal {
+    vertical-align: bottom;
+}
