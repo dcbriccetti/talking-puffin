@@ -9,23 +9,21 @@
     <div id="legend"/>
     <div id="ph_graph" style="width:100%; height:50px"></div>
     <div id="result" style="height: 3em; font-size: 200%;"></div>
-    <lift:snippet type="Auth:user">
-        <flot:graph/>
-        <script>
-            var previousPoint = null;
-            $("#ph_graph").bind("plothover", function (event, pos, item) {
-                if (item) {
-                    if (previousPoint != item.dataIndex) {
-                        previousPoint = item.dataIndex;
-                        $('#result').show();
-                        $('#result').text(tweets[item.datapoint[0]]);
-                    }
-                } else {
-                    previousPoint = null;
+    <lift:snippet type="Auth:headForGraph"/>
+    <script>
+        var previousPoint = null;
+        $("#ph_graph").bind("plothover", function (event, pos, item) {
+            if (item) {
+                if (previousPoint != item.dataIndex) {
+                    previousPoint = item.dataIndex;
+                    $('#result').show();
+                    $('#result').text(tweets[item.datapoint[0]]);
                 }
-            });
-        </script>
-    </lift:snippet>
+            } else {
+                previousPoint = null;
+            }
+        });
+    </script>
     <lift:Auth:generalInfo/>
     <lift:Auth:plot/>
 </lift:surround>

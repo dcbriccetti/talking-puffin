@@ -21,7 +21,7 @@ case class Credentials(user: String, token: String, secret: String)
 class Auth extends Loggable {
 
   object user extends RequestVar[Option[String]](None)
-  object ptRv extends RequestVar[PartitionedTweets](null)
+  object ptRv extends RequestVar[Option[PartitionedTweets]](None)
 
   def logIn(in: NodeSeq): NodeSeq = {
     val cb = new ConfigurationBuilder()
@@ -30,7 +30,6 @@ class Auth extends Loggable {
       .setOAuthConsumerSecret("lSsNHuFhIbVfvvSffuiWWKlvoMd9PkAPtxD47NEG1k")
     val twitter = new TwitterFactory(cb.build()).getInstance()
     Auth.twitterS(Some(twitter))
-    Auth.loggedIn(true)
     val requestToken = twitter.getOAuthRequestToken(if (S.hostName == "localhost")
       "http://localhost:8080/login2" else "http://talkingpuffin.org/tpuf/login2")
     S.redirectTo(requestToken.getAuthenticationURL)
@@ -42,9 +41,14 @@ class Auth extends Loggable {
     val verifier = S.param("oauth_verifier").get
     Auth.twitterS.is match {
       case Some(tw) =>
-        val accessToken = tw.getOAuthAccessToken(token, verifier)
-        val twitterUser = tw.verifyCredentials
-        info("Verified credentials of " + twitterUser.getScreenName)
+        try {
+          val accessToken = tw.getOAuthAccessToken(token, verifier)
+          val twitterUser = tw.verifyCredentials
+          info("Verified credentials of " + twitterUser.getScreenName)
+        } catch {
+          case e: TwitterException => S.redirectTo("index")
+        }
+        Auth.loggedIn(true)
         S.redirectTo("analyze")
       case _ => S.redirectTo("index")
     }
@@ -87,7 +91,7 @@ class Auth extends Loggable {
     TableSorter("#users", options)
   }
 
-  def user (xhtml: NodeSeq) = bind ("flot", xhtml, "graph" -> Flot.renderHead())
+  def headForGraph (xhtml: NodeSeq) = Flot.renderHead()
 
   def generalInfo(xhtml: NodeSeq): NodeSeq = {
     val tw = Auth.twitterS.is.get
@@ -97,7 +101,7 @@ class Auth extends Loggable {
         info(tw.getScreenName + " is analyzing " + screenName)
         try {
           val pt = PartitionedTweets(tw, screenName)
-          ptRv(pt)
+          ptRv(Some(pt))
           val uinfo = tw.lookupUsers(Array(screenName)).get(0)
           <table class="generalUser">
             <tr>
@@ -108,13 +112,15 @@ class Auth extends Loggable {
                   }
                 </table>
               </td>
-              <td><img class="profilePic" src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
-                       alt="Profile Image"/></td>
+              <td class="profilePicCell"><img
+                  src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
+                  alt="Profile Image"/></td>
             </tr>
           </table>
         } catch {
           case te: TwitterException =>
-            val failureMsg = "Unable to fetch data for that user. Status code: " + te.getStatusCode
+            val failureMsg = "Unable to fetch data for that user (may be temporary Twitter problem). Status code: " +
+              te.getStatusCode
             logger.info(failureMsg)
             S.warning(failureMsg)
             Text("")
@@ -124,11 +130,10 @@ class Auth extends Loggable {
   }
 
   def plot(xhtml: NodeSeq): NodeSeq =
-    user.is match {
-      case Some(screenName) =>
-        Script(UserTimelinePlotRenderer.render(ptRv.is, screenName))
-      case _ => Text("")
-    }
+    if (user.is.isDefined && ptRv.is.isDefined) // ptRv not set if error fetching user
+      Script(UserTimelinePlotRenderer.render(ptRv.is.get, user.is.get))
+    else
+      Text("")
 }
 
 object Auth extends Loggable {

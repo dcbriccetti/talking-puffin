@@ -124,12 +124,13 @@ table {
   padding: 3px;
 }
 
-.generalUser tr td {
-    vertical-align: top;
+.generalUser {
+    background: #f0f0f0;
 }
 
-.profilePic {
-    margin-top: 1em;
+.profilePicCell {
+    vertical-align: top;
+    padding: 5px;
 }
 
 .gnlInfoHead {
