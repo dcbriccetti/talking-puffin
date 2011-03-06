@@ -2,10 +2,10 @@
 <jnlp spec="1.0+" codebase="http://talkingpuffin.org/jws" href="talking-puffin.jnlp">
   <information>
     <title>TalkingPuffin 1.0-rc1</title>
-    <vendor>Dave Briccetti Software Consulting</vendor>
+    <vendor>Dave Briccetti Software LLC</vendor>
     <homepage href="http://davebsoft.com"/>
     <description>TalkingPuffin Twitter Client</description>
-    <description kind="short">On open source Twitter client written in Scala.</description>
+    <description kind="short">An open source Twitter client written in Scala.</description>
     <icon href="TalkingPuffin.png"/>
   </information>
   <shortcut>
