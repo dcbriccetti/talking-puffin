@@ -136,6 +136,6 @@ table {
     font-weight: bold;
 }
 
-.gnlInfoVal {
+td.gnlInfoVal {
     vertical-align: bottom;
 }
