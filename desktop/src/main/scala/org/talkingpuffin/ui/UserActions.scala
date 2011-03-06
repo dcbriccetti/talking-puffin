@@ -44,6 +44,8 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   def showUserTimeline(screenName: String) =
     createView(new UserTweetsProvider(session, screenName, session.progress))
 
+  def analyzeUser(screenName: String) = DesktopUtil.browse("http://TalkingPuffin.org/tpuf/analyze?user=" + screenName)
+
   def showFriends(screenName: String) = {
     val rels = new Relationships
     rels.getUsers(session, screenName, session.progress)
@@ -83,6 +85,8 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
       specialMenuItems.oneStatusSelected.list ::= this
     }, ks(VK_I, 0))
     
+    mh add(Action("Analyze user with TalkingPuffin Web") {forAll(names, analyzeUser)},
+      ks(VK_A, SHIFT_DOWN_MASK))
     mh add(Action("View user timeline") {forAll(names, showUserTimeline)}, ks(VK_T, SHIFT_DOWN_MASK))
     mh add(Action("Show friends and followers") {forAll(names, showFriends)}, ks(VK_H, SHIFT_DOWN_MASK))
     mh add(Action("Show favorites")
