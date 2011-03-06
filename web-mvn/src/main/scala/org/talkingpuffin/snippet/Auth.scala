@@ -32,9 +32,9 @@ class Auth extends Loggable {
     Auth.twitterS(Some(twitter))
     Auth.loggedIn(true)
     val requestToken = twitter.getOAuthRequestToken(if (S.hostName == "localhost")
-      "http://localhost:8080/login" else "http://talkingpuffin.org/tpuf/login")
-    S.redirectTo(requestToken.getAuthorizationURL)
-    Text("hi")
+      "http://localhost:8080/login2" else "http://talkingpuffin.org/tpuf/login2")
+    S.redirectTo(requestToken.getAuthenticationURL)
+    Text("")
   }
 
   def logIn2(in: NodeSeq): NodeSeq = {
