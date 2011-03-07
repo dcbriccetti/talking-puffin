@@ -25,9 +25,9 @@
             <url>http://scala-tools.org/repo-releases</url>
         </repository>
         <repository>
-            <id>lag.net</id>
-            <name>lag.net Repository</name>
-            <url>http://www.lag.net/repo</url>
+            <id>twttr</id>
+            <name>twttr</name>
+            <url>http://maven.twttr.com/</url>
         </repository>
     </repositories>
 
