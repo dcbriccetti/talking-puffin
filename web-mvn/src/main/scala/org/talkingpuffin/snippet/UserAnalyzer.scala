@@ -34,6 +34,35 @@ class UserAnalyzer extends Loggable {
 
   def headForGraph (xhtml: NodeSeq) = Flot.renderHead()
 
+  def followUnfollow = {
+    val tw = Auth.twitterS.is.get
+
+    def check(screenName: String)(on: Boolean) = {
+      try {
+        if (on) tw.createFriendship(screenName) else tw.destroyFriendship(screenName)
+        S.notice(if (on) "Followed" else "Unfollowed")
+      } catch {
+        case te: TwitterException =>
+          S.warning(te.getMessage)
+          Text("")
+      }
+      Noop
+    }
+    
+    user.is match {
+      case Some(screenName) if screenName != tw.getScreenName =>
+        try {
+          val rel = tw.showFriendship(tw.getScreenName, screenName)
+          List(SHtml.ajaxCheckbox(rel.isTargetFollowedBySource, check(screenName)), Text("following"))
+        } catch {
+          case te: TwitterException =>
+            // Error will appear to user from elsewhere
+            Text("")
+        }
+      case _ => Text("")
+    }
+  }
+
   def generalInfo = {
     val tw = Auth.twitterS.is.get
     val emptyRows = List[Elem]()
