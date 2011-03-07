@@ -14,8 +14,8 @@ case class WordCounter(text: String) {
   }
 
   private def calculateCounts(text: String): List[WordCount] = {
-    val words = text.replaceAll("""["'“”‘’()<>,:;.!?/\-+]""", "").toLowerCase.split("\\s").
-        filter(w => w.trim.length > 0 && w(0) != '@').toList -- stopList
+    val words = text.toLowerCase.split("\\s").
+        filter(w => w.trim.length > 0 && (w(0).isLetter || w(0) == '#')).toList -- stopList
     val emptyMap = Map.empty[String, WordCount].withDefault(w => WordCount(w, 0))
     val countsMap = words.foldLeft(emptyMap)((map, word) => map(word) += 1)
     countsMap.values.toList.sort(_.count > _.count)
