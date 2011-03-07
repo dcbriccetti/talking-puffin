@@ -3,14 +3,14 @@
     <p>Enter a Twitter screen name. Move the mouse cursor through the
     chart to read tweets. Use the mouse wheel to zoom, and mouse drag to pan.</p>
     <div>
-        <form class="lift:Auth.nameForm?form=post">
+        <form class="lift:UserAnalyzer.nameForm?form=post">
             <nameForm:name/> <nameForm:submit/>
         </form>
     </div>
     <div id="legend"/>
     <div id="ph_graph" style="width:100%; height:50px"></div>
     <div id="result" style="height: 3em; font-size: 200%;"></div>
-    <span class="lift:Auth.headForGraph"/>
+    <span class="lift:UserAnalyzer.headForGraph"/>
     <script>
         var previousPoint = null;
         $("#ph_graph").bind("plothover", function (event, pos, item) {
@@ -25,7 +25,7 @@
             }
         });
     </script>
-    <div class="lift:Auth.generalInfo">
+    <div class="lift:UserAnalyzer.generalInfo">
         <table class="generalUser">
           <tr>
             <td>
@@ -37,5 +37,5 @@
           </tr>
         </table>
     </div>
-    <div class="lift:Auth.plot"/>
+    <div class="lift:UserAnalyzer.plot"/>
 </div>
