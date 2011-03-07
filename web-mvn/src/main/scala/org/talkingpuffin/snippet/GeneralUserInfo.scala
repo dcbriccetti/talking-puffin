@@ -34,7 +34,7 @@ object GeneralUserInfo {
       disp("Users mentioned", ua.numUsers + " (" + ua.users.distinct.size + " unique)")
     disp("Clients", ua.clients.map(_.name).mkString(", "))
 
-    def dispFreq(title: String, bmap: WordCounter.BucketMap, fn: (List[String]) => Any, minFreq: Int): Unit =
+    def dispFreq(title: String, bmap: WordCounter.FreqToStringsMap, fn: (List[String]) => Any, minFreq: Int): Unit =
       bmap match {
         case freqs if ! freqs.isEmpty =>
           disp(title, "")
