@@ -1,5 +1,6 @@
 package org.talkingpuffin.snippet
 
+import scala.collection.JavaConversions._
 import xml.{Elem, NodeSeq, Text}
 import twitter4j.TwitterException
 import net.liftweb.widgets.flot.Flot
@@ -9,7 +10,8 @@ import net.liftweb.http.{RequestVar, SHtml, S}
 import net.liftweb.http.js.JsCmds._
 import org.talkingpuffin.snippet.GeneralUserInfo.ScreenNames
 import org.talkingpuffin.apix.PartitionedTweets
-import org.talkingpuffin.util.{Loggable, Links, Picture}
+import org.talkingpuffin.apix.RichStatus._
+import org.talkingpuffin.util.{TimeUtil2, Loggable, Links, Picture}
 
 class UserAnalyzer extends Loggable {
 
@@ -68,6 +70,15 @@ class UserAnalyzer extends Loggable {
     }
     "id=row" #> rows &
     "id=image" #> image
+  }
+
+  def tweets = {
+    val rows: List[Elem] = partitionedTweets.is match {
+      case Some(pt) => pt.tweets.toList.map(tw => <tr><td>{TimeUtil2.formatAge(tw.createdAt, false)}</td>
+        <td>{tw.text}</td></tr>)
+      case _ => List[Elem]()
+    }
+    "id=tweetRow" #> rows
   }
 
   def plot(xhtml: NodeSeq): NodeSeq =

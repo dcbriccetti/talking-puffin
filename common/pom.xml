@@ -8,7 +8,7 @@
       <artifactId>talking-puffin-base</artifactId>
       <version>${project.version}</version>
     </parent>
-    <name>TalkingPuffin Desktop Common</name>
+    <name>TalkingPuffin Common</name>
     <url>http://TalkingPuffin.org/</url>
     <description>TalkingPuffin common code</description>
 

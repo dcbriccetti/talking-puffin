@@ -4,7 +4,7 @@ import org.specs.runner.JUnit4
 import org.specs.Specification
 import org.joda.time.DateTime
 
-import TimeUtil.{isToday, toAge}
+import org.talkingpuffin.util.TimeUtil2.{isToday, toAge}
 
 class TimeUtilTest extends JUnit4(TimeUtilSpec)
 

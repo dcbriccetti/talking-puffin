@@ -8,7 +8,7 @@ import swing.GridBagPanel._
 import swing.{Reactor, Frame, Label, ComboBox, GridBagPanel, FlowPanel, Action, Button, BorderPanel}
 import org.joda.time.DateTime
 import util.Cancelable
-import org.talkingpuffin.time.TimeFormatter
+import org.talkingpuffin.util.TimeFormatter
 
 object DataProvidersDialog {
   val DefaultRefreshSecs = 600
