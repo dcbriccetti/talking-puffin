@@ -14,7 +14,7 @@ import org.talkingpuffin.util.{Loggable, Links, Picture}
 class UserAnalyzer extends Loggable {
 
   object user extends RequestVar[Option[String]](None)
-  object ptRv extends RequestVar[Option[PartitionedTweets]](None)
+  object partitionedTweets extends RequestVar[Option[PartitionedTweets]](None)
 
   def nameForm(content: NodeSeq) = {
     val tw = Auth.twitterS.is.get
@@ -34,13 +34,15 @@ class UserAnalyzer extends Loggable {
 
   def generalInfo = {
     val tw = Auth.twitterS.is.get
+    val emptyRows = List[Elem]()
+    val emptyImage = Text("")
 
-    user.is match {
+    val (rows, image) = user.is match {
       case Some(screenName) =>
         info(tw.getScreenName + " is analyzing " + screenName)
         try {
           val pt = PartitionedTweets(tw, screenName)
-          ptRv(Some(pt))
+          partitionedTweets(Some(pt))
           val uinfo = tw.lookupUsers(Array(screenName)).get(0)
           val rows: List[Elem] = GeneralUserInfo.create(uinfo, screenName, pt).map(il =>
             <tr>
@@ -51,24 +53,26 @@ class UserAnalyzer extends Loggable {
                 case s => s
               }}</td>
             </tr>)
-          "id=row" #> rows &
-          "id=image" #> <img src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
+          val image = <img src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
                 alt="Profile Image"/>
+          (rows, image)
         } catch {
           case te: TwitterException =>
             val failureMsg = "Unable to fetch data for that user (may be temporary Twitter problem). Status code: " +
               te.getStatusCode
             info(failureMsg)
             S.warning(failureMsg)
-            Text("")
+            (emptyRows, emptyImage)
         }
-      case _ => Text("")
+      case _ => (emptyRows, emptyImage)
     }
+    "id=row" #> rows &
+    "id=image" #> image
   }
 
   def plot(xhtml: NodeSeq): NodeSeq =
-    if (user.is.isDefined && ptRv.is.isDefined) // ptRv not set if error fetching user
-      Script(UserTimelinePlotRenderer.render(ptRv.is.get, user.is.get))
+    if (user.is.isDefined && partitionedTweets.is.isDefined) // partitionedTweets.is not defined if error fetching user
+      Script(UserTimelinePlotRenderer.render(partitionedTweets.is.get, user.is.get))
     else
       Text("")
 
