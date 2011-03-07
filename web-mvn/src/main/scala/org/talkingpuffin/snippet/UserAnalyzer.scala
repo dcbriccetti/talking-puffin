@@ -1,7 +1,6 @@
 package org.talkingpuffin.snippet
 
 import scala.collection.JavaConversions._
-import xml.{Elem, NodeSeq, Text}
 import twitter4j.TwitterException
 import net.liftweb.widgets.flot.Flot
 import net.liftweb.common.Full
@@ -12,6 +11,7 @@ import org.talkingpuffin.snippet.GeneralUserInfo.ScreenNames
 import org.talkingpuffin.apix.PartitionedTweets
 import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.util.{TimeUtil2, Loggable, Links, Picture}
+import xml.{Elem, NodeSeq, Text}
 
 class UserAnalyzer extends Loggable {
 
@@ -79,8 +79,7 @@ class UserAnalyzer extends Loggable {
             <tr>
               <td class="gnlInfoHead">{il.heading}</td>
               <td class="gnlInfoVal">{il.value match {
-                case ScreenNames(sn) => sn.map(name =>
-                  <span class="screenName"><a href={Links.linkForAnalyze(name)}>{name}</a> </span>)
+                case ScreenNames(sn) => createNameLinks(sn)
                 case s => s
               }}</td>
             </tr>)
@@ -116,11 +115,16 @@ class UserAnalyzer extends Loggable {
     else
       Text("")
 
-  private def setUserIfValid(u: String): Unit = {
+  private def setUserIfValid(u: String) {
     user(u.trim match {
       case screenName if screenName.length > 0 => Some(screenName)
       case _ => None
     })
   }
+
+  private def createNameLinks(names: List[String]) =
+    names.flatMap(name =>
+      <span class="screenName"><a href={Links.linkForAnalyze(name)}>{name}</a></span> ++ Text(", ")
+    ).dropRight(1)
 
 }
