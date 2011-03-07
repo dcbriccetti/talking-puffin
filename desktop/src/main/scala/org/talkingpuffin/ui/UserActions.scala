@@ -8,9 +8,9 @@ import javax.swing.JTable
 import java.awt.Toolkit
 import org.talkingpuffin.Session
 import org.talkingpuffin.apix.PageHandler._
-import org.talkingpuffin.util.{LinkUnIndirector, Loggable}
 import util.{DesktopUtil, Tiler}
 import twitter4j.Status
+import org.talkingpuffin.util.{Links, LinkUnIndirector, Loggable}
 
 /**
  * Handles user actions like follow
@@ -44,7 +44,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   def showUserTimeline(screenName: String) =
     createView(new UserTweetsProvider(session, screenName, session.progress))
 
-  def analyzeUser(screenName: String) = DesktopUtil.browse("http://TalkingPuffin.org/tpuf/analyze?user=" + screenName)
+  def analyzeUser(screenName: String) = DesktopUtil.browse(Links.linkForAnalyze(screenName))
 
   def showFriends(screenName: String) = {
     val rels = new Relationships

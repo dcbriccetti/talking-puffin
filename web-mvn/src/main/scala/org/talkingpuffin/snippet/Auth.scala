@@ -4,17 +4,19 @@ import scala.collection.JavaConversions._
 import twitter4j.conf.ConfigurationBuilder
 import net.liftweb.widgets.tablesorter.{Sorter, Sorting, TableSorter}
 import net.liftweb.widgets.flot._
-import net.liftweb.http.{RequestVar, SHtml, SessionVar, S}
+import net.liftweb.http._
 import net.liftweb.http.js.JsCmds._
-import _root_.net.liftweb.util._
-import _root_.net.liftweb.common._
-import Helpers._
+import net.liftweb.util._
+import net.liftweb.common._
+import net.liftweb.util.Helpers._
 import net.liftweb.http.js.JE.JsRaw
 import net.liftweb.http.js.JsCmd
 import org.talkingpuffin.apix.PartitionedTweets
 import twitter4j.{TwitterException, Twitter, TwitterFactory}
-import xml.{Text, NodeSeq}
-import org.talkingpuffin.util.{Picture, Loggable}
+import collection.immutable.List
+import xml.{Elem, Text, NodeSeq}
+import org.talkingpuffin.util.{Links, Picture, Loggable}
+import org.talkingpuffin.snippet.GeneralUserInfo.ScreenNames
 
 case class Credentials(user: String, token: String, secret: String)
 
@@ -93,7 +95,7 @@ class Auth extends Loggable {
 
   def headForGraph (xhtml: NodeSeq) = Flot.renderHead()
 
-  def generalInfo(xhtml: NodeSeq): NodeSeq = {
+  def generalInfo = {
     val tw = Auth.twitterS.is.get
 
     user.is match {
@@ -103,20 +105,18 @@ class Auth extends Loggable {
           val pt = PartitionedTweets(tw, screenName)
           ptRv(Some(pt))
           val uinfo = tw.lookupUsers(Array(screenName)).get(0)
-          <table class="generalUser">
+          val rows: List[Elem] = GeneralUserInfo.create(uinfo, screenName, pt).map(il =>
             <tr>
-              <td>
-                <table>
-                  {GeneralUserInfo.create(uinfo, screenName, pt).map(il =>
-                    <tr><td class="gnlInfoHead">{il.heading}</td><td class="gnlInfoVal">{il.value}</td></tr>)
-                  }
-                </table>
-              </td>
-              <td class="profilePicCell"><img
-                  src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
-                  alt="Profile Image"/></td>
-            </tr>
-          </table>
+              <td class="gnlInfoHead">{il.heading}</td>
+              <td class="gnlInfoVal">{il.value match {
+                case ScreenNames(sn) => sn.map(name =>
+                  <span class="screenName"><a href={Links.linkForAnalyze(name)}>{name}</a> </span>)
+                case s => s
+              }}</td>
+            </tr>)
+          "id=row" #> rows &
+          "id=image" #> <img src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
+                alt="Profile Image"/>
         } catch {
           case te: TwitterException =>
             val failureMsg = "Unable to fetch data for that user (may be temporary Twitter problem). Status code: " +

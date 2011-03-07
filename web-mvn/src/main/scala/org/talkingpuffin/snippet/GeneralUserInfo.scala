@@ -9,14 +9,15 @@ import org.talkingpuffin.user.UserAnalysis
 import org.talkingpuffin.util.WordCounter
 
 object GeneralUserInfo {
-  case class InfoLine(heading: String, value: String)
+  case class ScreenNames(names: List[String])
+  case class InfoLine(heading: String, value: Any)
 
   def create(user: User, screenName: String, pt: PartitionedTweets): List[InfoLine] = {
     val ua = UserAnalysis(pt)
     var msgs = List[InfoLine]()
     val fmt = NumberFormat.getInstance
     fmt.setMaximumFractionDigits(1)
-    def disp[T](heading: String, value: T) = msgs = InfoLine(heading, value.toString) :: msgs
+    def disp[T](heading: String, value: T) = msgs = InfoLine(heading, value) :: msgs
     disp("Name", user.getName + " (" + user.getScreenName + ")")
     disp("Location", user.getLocation)
     disp("Description", user.getDescription)
@@ -33,14 +34,17 @@ object GeneralUserInfo {
       disp("Users mentioned", ua.numUsers + " (" + ua.users.distinct.size + " unique)")
     disp("Clients", ua.clients.map(_.name).mkString(", "))
 
-    def displayFreqs(freqs: WordCounter.BucketMap): Unit = {
-      for (freq <- freqs.keysIterator.filter(_ > 2).toList.sorted.reverse)
-        disp(freq.toString, freqs.get(freq).get.sorted.mkString(", "))
-    }
-    disp("Word frequencies", "")
-    displayFreqs(ua.tweetsWordCounter.frequencies)
-    disp("Screen name frequencies", "")
-    displayFreqs(ua.screenNamesCounter.frequencies)
+    def dispFreq(title: String, bmap: WordCounter.BucketMap, fn: (List[String]) => Any, minFreq: Int): Unit =
+      bmap match {
+        case freqs if ! freqs.isEmpty =>
+          disp(title, "")
+          for (freq <- freqs.keysIterator.filter(_ > minFreq).toList.sorted.reverse)
+            disp(freq.toString, fn(freqs.get(freq).get.sorted))
+        case _ =>
+      }
+
+    dispFreq("Screen name frequencies", ua.screenNamesCounter.frequencies, (l) => ScreenNames(l), 0)
+    dispFreq("Word frequencies", ua.tweetsWordCounter.frequencies, (l) => l.mkString(", "), 2)
 
     msgs.reverse
   }
