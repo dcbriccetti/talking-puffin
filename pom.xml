@@ -25,6 +25,11 @@
             <url>http://scala-tools.org/repo-releases</url>
         </repository>
         <repository>
+            <id>scala-tools.org - snapshots</id>
+            <name>snapshots</name>
+            <url>http://scala-tools.org/repo-snapshots</url>
+        </repository>
+        <repository>
             <id>twttr</id>
             <name>twttr</name>
             <url>http://maven.twttr.com/</url>
