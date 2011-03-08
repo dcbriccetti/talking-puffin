@@ -6,24 +6,24 @@ import org.talkingpuffin.apix.PartitionedTweets
 import twitter4j.User
 import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.user.UserAnalysis
-import org.talkingpuffin.util.WordCounter
+import org.talkingpuffin.util.WordCounter.FreqToStringsMap
 
 object GeneralUserInfo {
   case class ScreenNames(names: List[String])
-  case class InfoLine(heading: String, value: Any)
+  case class InfoLine(heading: String, value: AnyRef)
 
   def create(user: User, screenName: String, pt: PartitionedTweets): List[InfoLine] = {
     val ua = UserAnalysis(pt)
     var msgs = List[InfoLine]()
     val fmt = NumberFormat.getInstance
     fmt.setMaximumFractionDigits(1)
-    def disp[T](heading: String, value: T) = msgs = InfoLine(heading, value) :: msgs
+    def disp(heading: String, value: AnyRef) = msgs = InfoLine(heading, value) :: msgs
     disp("Name", user.getName + " (" + user.getScreenName + ")")
     disp("Location", user.getLocation)
     disp("Description", user.getDescription)
     disp("Followers", fmt.format(user.getFollowersCount))
     disp("Following", fmt.format(user.getFriendsCount))
-    disp("Tweets analyzed", ua.numTweets)
+    disp("Tweets analyzed", fmt.format(ua.numTweets))
     disp("Range", ua.range.getDays + " days")
     disp( "Avg per day", fmt.format(ua.avgTweetsPerDay))
     if (ua.numReplies > 0)
@@ -34,7 +34,7 @@ object GeneralUserInfo {
       disp("Users mentioned", ua.numUsers + " (" + ua.users.distinct.size + " unique)")
     disp("Clients", ua.clients.map(_.name).mkString(", "))
 
-    def dispFreq(title: String, bmap: WordCounter.FreqToStringsMap, fn: (List[String]) => Any, minFreq: Int): Unit =
+    def dispFreq(title: String, bmap: FreqToStringsMap, fn: (List[String]) => AnyRef, minFreq: Int): Unit =
       bmap match {
         case freqs if ! freqs.isEmpty =>
           disp(title, "")
