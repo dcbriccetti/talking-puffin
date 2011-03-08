@@ -13,39 +13,43 @@ object GeneralUserInfo {
   case class InfoLine(heading: String, value: AnyRef)
 
   def create(user: User, screenName: String, pt: PartitionedTweets): List[InfoLine] = {
-    val ua = UserAnalysis(pt)
     var msgs = List[InfoLine]()
-    val fmt = NumberFormat.getInstance
-    fmt.setMaximumFractionDigits(1)
     def disp(heading: String, value: AnyRef) = msgs = InfoLine(heading, value) :: msgs
-    disp("Name", user.getName + " (" + user.getScreenName + ")")
-    disp("Location", user.getLocation)
-    disp("Description", user.getDescription)
-    disp("Followers", fmt.format(user.getFollowersCount))
-    disp("Following", fmt.format(user.getFriendsCount))
-    disp("Tweets analyzed", fmt.format(ua.numTweets))
-    disp("Range", ua.range.getDays + " days")
-    disp( "Avg per day", fmt.format(ua.avgTweetsPerDay))
-    if (ua.numReplies > 0)
-      disp("Avg excluding replies", fmt.format(ua.avgTweetsPerDayExcludingReplies))
-    if (ua.numLinks > 0)
-      disp("Links in tweets", ua.numLinks + " (" + ua.links.distinct.size + " unique)")
-    if (ua.numUsers > 0)
-      disp("Users mentioned", ua.numUsers + " (" + ua.users.distinct.size + " unique)")
-    disp("Clients", ua.clients.map(_.name).mkString(", "))
 
-    def dispFreq(title: String, bmap: FreqToStringsMap, fn: (List[String]) => AnyRef, minFreq: Int): Unit =
-      bmap match {
-        case freqs if ! freqs.isEmpty =>
-          disp(title, "")
-          for (freq <- freqs.keysIterator.filter(_ > minFreq).toList.sorted.reverse)
-            disp(freq.toString, fn(freqs.get(freq).get.sorted))
-        case _ =>
-      }
+    if (pt.tweets.isEmpty)
+      disp("Number of tweets", "0")
+    else {
+      val ua = UserAnalysis(pt)
+      val fmt = NumberFormat.getInstance
+      fmt.setMaximumFractionDigits(1)
+      disp("Name", user.getName + " (" + user.getScreenName + ")")
+      disp("Location", user.getLocation)
+      disp("Description", user.getDescription)
+      disp("Followers", fmt.format(user.getFollowersCount))
+      disp("Following", fmt.format(user.getFriendsCount))
+      disp("Tweets analyzed", fmt.format(ua.numTweets))
+      disp("Range", ua.range.getDays + " days")
+      disp( "Avg per day", fmt.format(ua.avgTweetsPerDay))
+      if (ua.numReplies > 0)
+        disp("Avg excluding replies", fmt.format(ua.avgTweetsPerDayExcludingReplies))
+      if (ua.numLinks > 0)
+        disp("Links in tweets", ua.numLinks + " (" + ua.links.distinct.size + " unique)")
+      if (ua.numUsers > 0)
+        disp("Users mentioned", ua.numUsers + " (" + ua.users.distinct.size + " unique)")
+      disp("Clients", ua.clients.map(_.name).mkString(", "))
 
-    dispFreq("Screen name frequencies", ua.screenNamesCounter.frequencies, (l) => ScreenNames(l), 0)
-    dispFreq("Word frequencies", ua.tweetsWordCounter.frequencies, (l) => l.mkString(", "), 2)
+      def dispFreq(title: String, bmap: FreqToStringsMap, fn: (List[String]) => AnyRef, minFreq: Int): Unit =
+        bmap match {
+          case freqs if ! freqs.isEmpty =>
+            disp(title, "")
+            for (freq <- freqs.keysIterator.filter(_ > minFreq).toList.sorted.reverse)
+              disp(freq.toString, fn(freqs.get(freq).get.sorted))
+          case _ =>
+        }
 
+      dispFreq("Screen name frequencies", ua.screenNamesCounter.frequencies, (l) => ScreenNames(l), 0)
+      dispFreq("Word frequencies", ua.tweetsWordCounter.frequencies, (l) => l.mkString(", "), 2)
+    }
     msgs.reverse
   }
 }

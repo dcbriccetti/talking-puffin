@@ -110,7 +110,7 @@ class UserAnalyzer extends Loggable {
   }
 
   def plot(xhtml: NodeSeq): NodeSeq =
-    if (user.is.isDefined && partitionedTweets.is.isDefined) // partitionedTweets.is not defined if error fetching user
+    if (user.is.isDefined && partitionedTweets.is.isDefined && ! partitionedTweets.is.get.tweets.isEmpty) // partitionedTweets.is not defined if error fetching user
       Script(UserTimelinePlotRenderer.render(partitionedTweets.is.get, user.is.get))
     else
       Text("")
