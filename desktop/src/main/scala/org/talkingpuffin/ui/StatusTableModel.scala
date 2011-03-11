@@ -77,16 +77,13 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     def senderNameEs(status: Status): EmphasizedString =
       new EmphasizedString(Some(senderName(status)), relationships.followerIds.contains(status.getUser.getId))
 
-    def toName(status: Status) = status.inReplyToScreenName match {
-      case Some(screenName) => Some(
-        if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) {
+    def toName(status: Status): Option[String] =
+      status.inReplyToScreenName.map(screenName =>
+        if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES))
           screenNameToUserNameMap.getOrElse(screenName, screenName)
-        } else {
-          screenName
-        })
-      case None => None
-    }
-    
+        else
+          screenName)
+
     columnIndex match {
       case 0 => status.createdAt.toDate
       case 1 => pictureCell.request(status.getUser.getProfileImageURL.toString, rowIndex)
