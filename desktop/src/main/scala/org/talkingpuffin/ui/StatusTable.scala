@@ -53,8 +53,9 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   val imageCol = getColumnExt(1)
   val nameCol  = getColumnExt(2)
   val toCol    = getColumnExt(3)
-  val colAndKeys = List(ageCol, imageCol, nameCol, toCol) zip
-    List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO)
+  val rtByCol  = getColumnExt(5)
+  val colAndKeys = List(ageCol, imageCol, nameCol, toCol, rtByCol) zip
+    List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO, PrefKeys.RT_BY)
   configureColumns
 
   private val mh = new PopupMenuHelper(this)
@@ -178,6 +179,11 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     statusCol.setCellRenderer(statusCellRenderer)
     statusCol.setSortable(false)
 
+    rtByCol.setPreferredWidth(100)
+    rtByCol.setMaxWidth(200)
+    rtByCol.setCellRenderer(new EmphasizedStringCellRenderer)
+    rtByCol.setComparator(EmphasizedStringComparator)
+
     // Set from preferences
     
     for ((col, key) <- colAndKeys) {
@@ -218,6 +224,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     if      (source == ageCol)  op.showAgeColumn  = ageCol .isVisible
     else if (source == nameCol) op.showNameColumn = nameCol.isVisible
     else if (source == toCol)   op.showToColumn   = toCol  .isVisible
+    else if (source == rtByCol) op.showRtByColumn = rtByCol.isVisible
   }
 
   protected def buildActions {

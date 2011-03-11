@@ -29,7 +29,8 @@ object PrefKeys {
   val IMAGE             = "Image"
   val FROM              = "From"
   val TO                = "To"
-  
+  val RT_BY             = "RtBy"
+
   val SORT_DIRECTION    = "sortDirection"
   val SORT_DIRECTION_ASC   = "asc"
   val SORT_DIRECTION_DESC  = "desc"

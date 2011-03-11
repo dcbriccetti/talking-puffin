@@ -24,7 +24,7 @@ class Streams(val prefs: Preferences, val session: Session, val tagUsers: TagUse
   def createView(parentWindow: Any, dataProvider: DataProvider,
                  include: Option[String], location: Option[Rectangle]): View = {
     val screenNameToUserNameMap = usersTableModel.usersModel.screenNameToUserNameMap
-    val sto = new StatusTableOptions(true, true, true)
+    val sto = new StatusTableOptions(true, true, true, true)
     val filterSet = new FilterSet(tagUsers)
     val model = dataProvider match {
       case p: CommonTweetsProvider if p.statusTableModelCust.isDefined =>

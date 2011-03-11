@@ -26,7 +26,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   private val username = session.twitter.getScreenName
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
 
-  val unessentialCols = List("When", "Image", "From", "To") // Can be quickly hidden
+  val unessentialCols = List("When", "Image", "From", "To", "RT By") // Can be quickly hidden
   
   private val userPrefs = GlobalPrefs.prefsForUser(session.serviceName, username)
 
@@ -57,9 +57,10 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     }
   }
   
-  def getColumnCount = 5
+  def getColumnCount = 6
   def getRowCount = filteredStatuses_.length
-  override def getColumnName(column: Int) = (unessentialCols ::: List("Status"))(column)
+  private val colNames = unessentialCols.slice(0, 4) ::: List("Status") ::: unessentialCols.takeRight(1)
+  override def getColumnName(column: Int) = colNames(column)
 
   private val pictureCell = new PictureCell(this, 0)
 
@@ -96,14 +97,19 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
         if (options.showToColumn) st = LinkExtractor.getWithoutUser(st)
         StatusCell(if (options.showAgeColumn) None else Some(status.createdAt.toDate),
           if (showNameInStatus) Some(senderNameEs(status)) else None, st)
+      case 5 => new EmphasizedString(topStatus.retweetedBy, false)
     }
   }
   
   protected def showNameInStatus = ! options.showNameColumn
   
-  def getStatusText(status: Status, username: String, parent: Option[Status]): String = {
-    status.text + (if (parent.isDefined) " " + RetweetSymbol + " " + parent.get.getUser.getScreenName else "")
-  }
+  protected def getStatusText(status: Status, username: String, parent: Option[Status]) =
+    status.text + (
+      if (parent.isDefined && ! options.showRtByColumn)
+        " " + RetweetSymbol + " " + parent.get.getUser.getScreenName
+      else
+        ""
+      )
 
   def getStatusAt(rowIndex: Int): Status = filteredStatuses_(rowIndex)
   
@@ -118,8 +124,10 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     classOf[Icon], 
     classOf[String],
     classOf[String], 
-    classOf[StatusCell])(col) 
-  
+    classOf[StatusCell],
+    classOf[String]
+    )(col)
+
   def getIndexOfStatus(statusId: Long): Option[Int] = 
     filteredStatuses_.zipWithIndex.find(si => si._1.getId == statusId) match {
       case Some((_, i)) => Some(i)

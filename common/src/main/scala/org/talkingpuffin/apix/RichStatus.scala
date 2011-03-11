@@ -13,6 +13,8 @@ case class RichStatus(status: Status) extends OptionMaker {
   def inReplyToUserId    : Option[Long]   = makeOption(status.getInReplyToUserId)
   def retweet            : Option[Status] = makeOption(status.getRetweetedStatus)
 
+  def retweetedBy: Option[String] = retweet.map(rt => status.getUser.getScreenName)
+
   def retweetOrTweet = retweet.getOrElse(status)
   def createdAt = new DateTime(status.getCreatedAt)
 
