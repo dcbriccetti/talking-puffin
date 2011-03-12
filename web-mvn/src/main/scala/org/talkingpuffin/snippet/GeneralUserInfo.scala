@@ -21,7 +21,7 @@ object GeneralUserInfo {
     else {
       val ua = UserAnalysis(pt)
       val fmt = NumberFormat.getInstance
-      fmt.setMaximumFractionDigits(1)
+      fmt.setMaximumFractionDigits(2)
       disp("Name", user.getName + " (" + user.getScreenName + ")")
       disp("Location", user.getLocation)
       disp("Description", user.getDescription)
@@ -29,9 +29,12 @@ object GeneralUserInfo {
       disp("Following", fmt.format(user.getFriendsCount))
       disp("Tweets analyzed", fmt.format(ua.numTweets))
       disp("Range", ua.range.getDays + " days")
-      disp( "Avg per day", fmt.format(ua.avgTweetsPerDay))
-      if (ua.numReplies > 0)
-        disp("Avg excluding replies", fmt.format(ua.avgTweetsPerDayExcludingReplies))
+      disp( "Avg per day", fmt.format(ua.avgTweetsPerDay) + (
+        if (ua.numReplies > 0)
+          " (" + fmt.format(ua.avgTweetsPerDayExcludingReplies) + " excluding replies)"
+        else
+          ""
+        ))
       if (ua.numLinks > 0)
         disp("Links in tweets", ua.numLinks + " (" + ua.links.distinct.size + " unique)")
       if (ua.numUsers > 0)
