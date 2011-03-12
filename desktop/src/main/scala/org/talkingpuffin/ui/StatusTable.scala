@@ -49,13 +49,14 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   val statusCellRenderer = new StatusCellRenderer
   statusCellRenderer.textSizePct = GlobalPrefs.prefs.getInt(PrefKeys.STATUS_TABLE_STATUS_FONT_SIZE, 100)
 
-  val ageCol   = getColumnExt(0)
-  val imageCol = getColumnExt(1)
-  val nameCol  = getColumnExt(2)
-  val toCol    = getColumnExt(3)
-  val rtByCol  = getColumnExt(5)
-  val colAndKeys = List(ageCol, imageCol, nameCol, toCol, rtByCol) zip
-    List(PrefKeys.AGE, PrefKeys.IMAGE, PrefKeys.FROM, PrefKeys.TO, PrefKeys.RT_BY)
+  def c(v: ColIdx.Value) = getColumnExt(v.id)
+  val ageCol   = c(ColIdx.age)
+  val rtByCol  = c(ColIdx.rtBy)
+  val toCol    = c(ColIdx.to)
+  val imageCol = c(ColIdx.image)
+  val nameCol  = c(ColIdx.senderName)
+  val colAndKeys = List(ageCol, rtByCol, toCol, imageCol, nameCol) zip
+    List(PrefKeys.AGE, PrefKeys.RT_BY, PrefKeys.TO, PrefKeys.IMAGE, PrefKeys.FROM)
   configureColumns
 
   private val mh = new PopupMenuHelper(this)
@@ -160,29 +161,29 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     ageCol.setMaxWidth(100)
     ageCol.setCellRenderer(new AgeCellRenderer)
     
+    rtByCol.setPreferredWidth(100)
+    rtByCol.setMaxWidth(200)
+    rtByCol.setCellRenderer(new EmphasizedStringCellRenderer)
+    rtByCol.setComparator(EmphasizedStringComparator)
+
+    toCol.setPreferredWidth(100)
+    toCol.setMaxWidth(200)
+    toCol.setCellRenderer(new EmphasizedStringCellRenderer)
+    toCol.setComparator(EmphasizedStringComparator)
+
     imageCol.setMinWidth(Thumbnail.THUMBNAIL_SIZE)
     imageCol.setMaxWidth(Thumbnail.THUMBNAIL_SIZE)
     imageCol.setSortable(false)
-    
+
     nameCol.setPreferredWidth(100)
     nameCol.setMaxWidth(200)
     nameCol.setCellRenderer(new EmphasizedStringCellRenderer)
     nameCol.setComparator(EmphasizedStringComparator)
     
-    toCol.setPreferredWidth(100)
-    toCol.setMaxWidth(200)
-    toCol.setCellRenderer(new EmphasizedStringCellRenderer)
-    toCol.setComparator(EmphasizedStringComparator)
-    
-    val statusCol = getColumnExt(4)
+    val statusCol = getColumnExt(ColIdx.status.id)
     statusCol.setPreferredWidth(600)
     statusCol.setCellRenderer(statusCellRenderer)
     statusCol.setSortable(false)
-
-    rtByCol.setPreferredWidth(100)
-    rtByCol.setMaxWidth(200)
-    rtByCol.setCellRenderer(new EmphasizedStringCellRenderer)
-    rtByCol.setComparator(EmphasizedStringComparator)
 
     // Set from preferences
     
@@ -306,4 +307,3 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   private def thumbnailHeight = Thumbnail.THUMBNAIL_SIZE + rowMarginVal + 2
   
 }
-

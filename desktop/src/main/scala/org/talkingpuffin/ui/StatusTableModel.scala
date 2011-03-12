@@ -26,7 +26,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   private val username = session.twitter.getScreenName
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
 
-  val unessentialCols = List("When", "Image", "From", "To", "RT By") // Can be quickly hidden
+  val unessentialCols = List("When", "RT By", "To", "Image", "From") // Can be quickly hidden
   
   private val userPrefs = GlobalPrefs.prefsForUser(session.serviceName, username)
 
@@ -59,12 +59,12 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   
   def getColumnCount = 6
   def getRowCount = filteredStatuses_.length
-  private val colNames = unessentialCols.slice(0, 4) ::: List("Status") ::: unessentialCols.takeRight(1)
+  private val colNames = unessentialCols :+ "Status"
   override def getColumnName(column: Int) = colNames(column)
 
   private val pictureCell = new PictureCell(this, 0)
 
-  override def getValueAt(rowIndex: Int, columnIndex: Int) = {
+  override def getValueAt(rowIndex: Int, columnIndex: Int): Object = {
     val topStatus = getStatusAt(rowIndex)
     val status = topStatus.retweetOrTweet
     val parent = if (topStatus.isRetweet) Some(topStatus) else None
@@ -84,17 +84,19 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
         else
           screenName)
 
-    columnIndex match {
-      case 0 => status.createdAt.toDate
-      case 1 => pictureCell.request(status.getUser.getProfileImageURL.toString, rowIndex)
-      case 2 => senderNameEs(status)
-      case 3 => new EmphasizedString(toName(status), false)
-      case 4 => 
+    val i = columnIndex
+    if      (i == ColIdx.age.id       ) status.createdAt.toDate
+    else if (i == ColIdx.rtBy.id      ) new EmphasizedString(topStatus.retweetedBy, false)
+    else if (i == ColIdx.to.id        ) new EmphasizedString(toName(status), false)
+    else if (i == ColIdx.image.id     ) pictureCell.request(status.getUser.getProfileImageURL.toString, rowIndex)
+    else if (i == ColIdx.senderName.id) senderNameEs(status)
+    else if (i == ColIdx.status.id    ) {
         var st = getStatusText(status, username, parent)
         if (options.showToColumn) st = LinkExtractor.getWithoutUser(st)
         StatusCell(if (options.showAgeColumn) None else Some(status.createdAt.toDate),
           if (showNameInStatus) Some(senderNameEs(status)) else None, st)
-      case 5 => new EmphasizedString(topStatus.retweetedBy, false)
+    } else {
+      throw new IllegalStateException("Invalid index " + i)
     }
   }
   
@@ -116,14 +118,15 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
       if (status.retweet.isDefined) Some(status.retweet.get.getUser) else None, Some(status))
   }
 
-  override def getColumnClass(col: Int) = List(
-    classOf[java.util.Date], 
-    classOf[Icon], 
-    classOf[String],
-    classOf[String], 
-    classOf[StatusCell],
-    classOf[String]
-    )(col)
+  private val classes = Map(
+    ColIdx.age.id        -> classOf[java.util.Date],
+    ColIdx.rtBy.id       -> classOf[String],
+    ColIdx.to.id         -> classOf[String],
+    ColIdx.image.id      -> classOf[Icon],
+    ColIdx.senderName.id -> classOf[String],
+    ColIdx.status.id     -> classOf[StatusCell])
+
+  override def getColumnClass(i: Int) = classes(i)
 
   def getIndexOfStatus(statusId: Long): Option[Int] = 
     filteredStatuses_.zipWithIndex.find(si => si._1.getId == statusId) match {
