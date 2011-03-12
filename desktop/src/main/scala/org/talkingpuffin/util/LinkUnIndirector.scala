@@ -16,13 +16,13 @@ object LinkUnIndirector extends Loggable {
    * Does shortenedUrlPart redirect to expandedUrlPart, and when that is fetched, does its contents
    * hold a target link identified by targetLinkRegex?  
    */
-  case class IndirectedLink(val shortenedUrlPart: String, val expandedUrlPart: String, targetLinkRegex: Regex)
+  case class IndirectedLink(shortenedUrlPart: String, expandedUrlPart: String, targetLinkRegex: Regex)
   
   /** A list of all known IndirectedLinks */
   val indirectedLinks = List(
-    IndirectedLink("ff.im", "http://friendfeed.com/", """.*<div class="text">.*?<a .*?href="(.*?)".*""".r),
-    IndirectedLink("digg.com", "http://digg.com/", """.*<h1 id="title">.*?<a .*?href="(.*?)".*""".r),
-    IndirectedLink("bit.ly", "http://www.dzone.com/", """.*<div class="ldTitle">.*?<a .*?href="(.*?)".*""".r)
+    IndirectedLink("ff.im"   , "http://friendfeed.com/", """.*<div class="text">.*?<a .*?href="(.*?)".*"""   .r),
+    IndirectedLink("digg.com", "http://digg.com/"      , """.*<h1 id="title">.*?<a .*?href="(.*?)".*"""      .r),
+    IndirectedLink("bit.ly"  , "http://www.dzone.com/" , """.*<div class="ldTitle">.*?<a .*?href="(.*?)".*""".r)
   )
   
   /**
@@ -75,3 +75,4 @@ object LinkUnIndirector extends Loggable {
     }})
   }
 }
+  
