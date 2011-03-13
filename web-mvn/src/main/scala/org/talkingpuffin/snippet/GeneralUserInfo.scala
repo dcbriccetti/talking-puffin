@@ -8,9 +8,13 @@ import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.user.UserAnalysis
 import org.talkingpuffin.util.WordCounter.FreqToStringsMap
 import org.talkingpuffin.snippet.LineCollector.InfoLine
+import java.net.URL
 
 object GeneralUserInfo {
   case class ScreenNames(names: List[String])
+  case class Link(url: URL) {
+    override def toString = url.toString.replaceAll("https?://", "")
+  }
 
   def create(user: User, screenName: String, pt: PartitionedTweets, ua: UserAnalysis): List[InfoLine] = {
     val lc = new LineCollector
@@ -50,6 +54,8 @@ object GeneralUserInfo {
     dispFreq(lc, "Word frequencies", ua.tweetsWordCounter.frequencies, (l) => l.mkString(", "), 2)
     lc.msgs.reverse
   }
+
+  def links(ua: UserAnalysis) = ua.links.map(_.link).distinct.map(link => Link(new URL(link))).sortBy(_.toString)
 
   private def dispFreq(lc: LineCollector, title: String, bmap: FreqToStringsMap,
   fn: (List[String]) => AnyRef, minFreq: Int): Unit =

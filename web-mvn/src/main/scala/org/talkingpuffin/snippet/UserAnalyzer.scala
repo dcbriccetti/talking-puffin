@@ -109,6 +109,11 @@ class UserAnalyzer extends Loggable {
 
   def generalWordFreq = fillFreqs(GeneralUserInfo.createWordFreq)
 
+  def links = "id=item" #> (userAnalysis.is match {
+      case Some(ua) => GeneralUserInfo.links(ua).map(l => <span><a href={l.url.toString}>{l.toString}</a><br/></span>)
+      case _ => List[Elem]()
+    })
+
   def tweets = {
     val rows: List[Elem] = partitionedTweets.is match {
       case Some(pt) => pt.tweets.toList.map(tw => <tr><td>{TimeUtil2.formatAge(tw.createdAt, false)}</td>
