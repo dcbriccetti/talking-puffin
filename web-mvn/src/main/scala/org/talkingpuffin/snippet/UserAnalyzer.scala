@@ -12,10 +12,16 @@ import org.talkingpuffin.apix.PartitionedTweets
 import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.util.{TimeUtil2, Loggable, Links, Picture}
 import xml.{Elem, NodeSeq, Text}
+import org.talkingpuffin.user.UserAnalysis
+import org.talkingpuffin.snippet.LineCollector.InfoLine
 
+/**
+ * Snippets for user analysis
+ */
 class UserAnalyzer extends Loggable {
 
   object user extends RequestVar[Option[String]](None)
+  object userAnalysis extends RequestVar[Option[UserAnalysis]](None)
   object partitionedTweets extends RequestVar[Option[PartitionedTweets]](None)
 
   def nameForm(content: NodeSeq) = {
@@ -75,17 +81,16 @@ class UserAnalyzer extends Loggable {
           val pt = PartitionedTweets(tw, screenName)
           partitionedTweets(Some(pt))
           val uinfo = tw.lookupUsers(Array(screenName)).get(0)
-          val rows: List[Elem] = GeneralUserInfo.create(uinfo, screenName, pt).map(il =>
-            <tr>
-              <td class="gnlInfoHead">{il.heading}</td>
-              <td class="gnlInfoVal">{il.value match {
-                case ScreenNames(sn) => createNameLinks(sn)
-                case s => s
-              }}</td>
-            </tr>)
+          val (gnlLines, ua) = if (pt.tweets.isEmpty)
+            (List(InfoLine("Number of tweets", "0")), None)
+          else {
+            val uan = UserAnalysis(pt)
+            (GeneralUserInfo.create(uinfo, screenName, pt, uan), Some(uan))
+          }
+          userAnalysis(ua)
           val image = <img src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
                 alt="Profile Image"/>
-          (rows, image)
+          (makeGnlRows(gnlLines), image)
         } catch {
           case te: TwitterException =>
             val failureMsg = "Unable to fetch data for that user (may be temporary Twitter problem). Status code: " +
@@ -99,6 +104,10 @@ class UserAnalyzer extends Loggable {
     "id=row" #> rows &
     "id=image" #> image
   }
+
+  def generalScreenNameFreq = fillFreqs(GeneralUserInfo.createScreenNameFreq)
+
+  def generalWordFreq = fillFreqs(GeneralUserInfo.createWordFreq)
 
   def tweets = {
     val rows: List[Elem] = partitionedTweets.is match {
@@ -126,5 +135,24 @@ class UserAnalyzer extends Loggable {
     names.flatMap(name =>
       <span class="screenName"><a href={Links.linkForAnalyze(name)}>{name}</a></span> ++ Text(", ")
     ).dropRight(1)
+
+  private def makeGnlRows(gnlLines: scala.List[InfoLine]) =
+    gnlLines.map(il =>
+      <tr>
+        <td class="gnlInfoHead">{il.heading}</td>
+        <td class="gnlInfoVal">
+          {il.value match {
+          case ScreenNames(sn) => createNameLinks(sn)
+          case s => s
+        }}
+        </td>
+      </tr>)
+
+  private def fillFreqs(freqProvider: (UserAnalysis) => List[InfoLine]) = {
+    "id=row" #> (userAnalysis.is match {
+      case Some(ua) => makeGnlRows(freqProvider(ua))
+      case _ => List[Elem]()
+    })
+  }
 
 }

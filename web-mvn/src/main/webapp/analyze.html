@@ -1,50 +1,77 @@
 <div class="lift:surround?with=default;at=content">
     <h3>Analyze a User</h3>
-    <p>Enter a Twitter screen name. Move the mouse cursor through the
-    chart to read tweets. Use the mouse wheel to zoom, and mouse drag to pan.</p>
     <div>
         <form class="lift:UserAnalyzer.nameForm?form=post">
-            <nameForm:name/> <nameForm:submit/>
+            Enter a Twitter screen name: <nameForm:name/> <nameForm:submit/>
         </form>
     </div>
-    <div id="legend"/>
-    <div id="ph_graph" style="width:100%; height:50px"></div>
-    <div id="result" style="height: 3em; font-size: 200%;"></div>
-    <span class="lift:UserAnalyzer.headForGraph"/>
     <script>
         var previousPoint = null;
-        $("#ph_graph").bind("plothover", function (event, pos, item) {
-            if (item) {
-                if (previousPoint != item.dataIndex) {
-                    previousPoint = item.dataIndex;
-                    $('#result').show();
-                    $('#result').text(tweets[item.datapoint[0]]);
+        $(function() {
+            $("#ph_graph").bind("plothover", function (event, pos, item) {
+                if (item) {
+                    if (previousPoint != item.dataIndex) {
+                        previousPoint = item.dataIndex;
+                        $('#result').show();
+                        $('#result').text(tweets[item.datapoint[0]]);
+                    }
+                } else {
+                    previousPoint = null;
                 }
-            } else {
-                previousPoint = null;
-            }
-        });
+            });
+            $("#tabs").tabs();
+        })
     </script>
 
     <div class="lift:UserAnalyzer.followUnfollow"/>
 
-    <div class="lift:UserAnalyzer.generalInfo">
-        <table class="generalUser">
-          <tr>
-            <td>
-              <table>
-                  <span id="row"/>
-              </table>
-            </td>
-            <td class="profilePicCell"><span id="image"/></td>
-          </tr>
-        </table>
-    </div>
+    <div id="tabs">
+        <ul>
+            <li><a href="#tabs-1">General</a></li>
+            <li><a href="#tabs-2">Screen Name Frequencies</a></li>
+            <li><a href="#tabs-3">Word Frequencies</a></li>
+            <li><a href="#tabs-4">Timeline Graph</a></li>
+            <li><a href="#tabs-5">Tweets</a></li>
+        </ul>
 
-    <div class="lift:UserAnalyzer.tweets">
-        <table class="tweets">
-            <span id="tweetRow"/>
-        </table>
+        <div id="tabs-1" class="lift:UserAnalyzer.generalInfo">
+            <table class="generalUser">
+              <tr>
+                <td>
+                  <table>
+                      <span id="row"/>
+                  </table>
+                </td>
+                <td class="profilePicCell"><span id="image"/></td>
+              </tr>
+            </table>
+        </div>
+
+        <div id="tabs-2" class="lift:UserAnalyzer.generalScreenNameFreq">
+            <table>
+                <span id="row"/>
+            </table>
+        </div>
+
+        <div id="tabs-3" class="lift:UserAnalyzer.generalWordFreq">
+            <table>
+                <span id="row"/>
+            </table>
+        </div>
+
+        <div id="tabs-4">
+            <p>Move the mouse cursor through the chart to read tweets. Use the mouse wheel to zoom, and mouse drag to pan.</p>
+            <div id="legend"/>
+            <div id="ph_graph" style="width:100%; height:50px"></div>
+            <div id="result" style="height: 3em; font-size: 200%;"></div>
+            <span class="lift:UserAnalyzer.headForGraph"/>
+        </div>
+
+        <div id="tabs-5" class="lift:UserAnalyzer.tweets">
+            <table class="tweets">
+                <span id="tweetRow"/>
+            </table>
+        </div>
     </div>
 
     <div class="lift:UserAnalyzer.plot"/>

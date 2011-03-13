@@ -123,8 +123,8 @@ table {
   padding: 3px;
 }
 
-.generalUser {
-    background: #f0f0f0;
+.generalUser tr td {
+    vertical-align: top;
 }
 
 .profilePicCell {
@@ -138,4 +138,8 @@ table {
 
 td.gnlInfoVal {
     vertical-align: bottom;
+}
+
+#tabs {
+    margin-top: .5em;
 }
