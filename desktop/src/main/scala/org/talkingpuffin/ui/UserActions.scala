@@ -44,7 +44,8 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   def showUserTimeline(screenName: String) =
     createView(new UserTweetsProvider(session, screenName, session.progress))
 
-  def analyzeUser(screenName: String) = DesktopUtil.browse(Links.linkForAnalyze(screenName))
+  def analyzeUser(screenName: String) = DesktopUtil.browse(
+    Links.linkForAnalyze(System.getProperty("webHost", "talkingpuffin.org"), screenName))
 
   def showFriends(screenName: String) = {
     val rels = new Relationships

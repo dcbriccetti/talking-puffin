@@ -148,7 +148,7 @@ class UserAnalyzer extends Loggable {
 
   private def createNameLinks(names: List[String]) =
     names.flatMap(name =>
-      <span class="screenName"><a href={Links.linkForAnalyze(name)}>{name}</a></span> ++ Text(", ")
+      <span class="screenName"><a href={Links.linkForAnalyze(S.hostName, name)}>{name}</a></span> ++ Text(", ")
     ).dropRight(1)
 
   private def makeGnlRows(gnlLines: scala.List[InfoLine]) =
