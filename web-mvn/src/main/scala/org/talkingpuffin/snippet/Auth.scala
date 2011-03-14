@@ -1,14 +1,10 @@
 package org.talkingpuffin.snippet
 
-import scala.collection.JavaConversions._
-import twitter4j.conf.ConfigurationBuilder
-import net.liftweb.http._
-import net.liftweb.util.Helpers._
-import twitter4j.{TwitterException, TwitterFactory}
 import xml.NodeSeq
+import twitter4j.conf.ConfigurationBuilder
+import twitter4j.{TwitterException, TwitterFactory}
+import net.liftweb.http._
 import org.talkingpuffin.util.{Links, Loggable}
-
-case class Credentials(user: String, token: String, secret: String)
 
 class Auth extends Loggable {
 
