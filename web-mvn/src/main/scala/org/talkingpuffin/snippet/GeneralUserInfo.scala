@@ -13,7 +13,10 @@ import java.net.URL
 object GeneralUserInfo {
   case class ScreenNames(names: List[String])
   case class Link(url: URL) {
-    override def toString = url.toString.replaceAll("https?://", "")
+    override def toString = Link.stripFront(url.toString)
+  }
+  object Link {
+    def stripFront(string: String) = string.replaceAll("https?://(www\\.)?", "")
   }
 
   def create(user: User, screenName: String, pt: PartitionedTweets, ua: UserAnalysis): List[InfoLine] = {

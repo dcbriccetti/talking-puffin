@@ -14,6 +14,8 @@ import org.talkingpuffin.util.{TimeUtil2, Loggable, Links, Picture}
 import xml.{Elem, NodeSeq, Text}
 import org.talkingpuffin.user.UserAnalysis
 import org.talkingpuffin.snippet.LineCollector.InfoLine
+import net.liftweb.http.js.JE.JsRaw
+import net.liftweb.http.js.{JsExp, JsCmd}
 
 /**
  * Snippets for user analysis
@@ -21,7 +23,6 @@ import org.talkingpuffin.snippet.LineCollector.InfoLine
 class UserAnalyzer extends Loggable {
 
   object user extends RequestVar[Option[String]](None)
-  object userAnalysis extends RequestVar[Option[UserAnalysis]](None)
   object partitionedTweets extends RequestVar[Option[PartitionedTweets]](None)
 
   def nameForm(content: NodeSeq) = {
@@ -87,7 +88,7 @@ class UserAnalyzer extends Loggable {
             val uan = UserAnalysis(pt)
             (GeneralUserInfo.create(uinfo, screenName, pt, uan), Some(uan))
           }
-          userAnalysis(ua)
+          Auth.userAnalysis(ua)
           val image = <img src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
                 alt="Profile Image"/>
           (makeGnlRows(gnlLines), image)
@@ -109,10 +110,19 @@ class UserAnalyzer extends Loggable {
 
   def generalWordFreq = fillFreqs(GeneralUserInfo.createWordFreq)
 
-  def links = "id=item" #> (userAnalysis.is match {
-      case Some(ua) => GeneralUserInfo.links(ua).map(l => <span><a href={l.url.toString}>{l.toString}</a><br/></span>)
+  private def expandLinks(): JsCmd = {
+    SetHtml("#replaceme", Text("How are you?"))
+  }
+
+  def links = {
+    "id=expandLinks" #> SHtml.ajaxButton("Expand shortened links", expandLinks _) &
+    "id=item" #> (Auth.userAnalysis.is match {
+      case Some(ua) => GeneralUserInfo.links(ua).map(l =>
+        <span><span class={"l:comet?type=LinkExpander;name=" + l.url.hashCode}/><span
+              id={"link_" + l.url.hashCode}><a href={l.url.toString}>{l.toString}</a><br/></span></span>)
       case _ => List[Elem]()
     })
+  }
 
   def tweets = {
     val rows: List[Elem] = partitionedTweets.is match {
@@ -154,7 +164,7 @@ class UserAnalyzer extends Loggable {
       </tr>)
 
   private def fillFreqs(freqProvider: (UserAnalysis) => List[InfoLine]) = {
-    "id=row" #> (userAnalysis.is match {
+    "id=row" #> (Auth.userAnalysis.is match {
       case Some(ua) => makeGnlRows(freqProvider(ua))
       case _ => List[Elem]()
     })

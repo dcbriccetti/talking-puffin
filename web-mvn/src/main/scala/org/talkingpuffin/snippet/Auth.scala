@@ -8,6 +8,7 @@ import net.liftweb.util.Helpers._
 import twitter4j.{TwitterException, Twitter, TwitterFactory}
 import xml.{Text, NodeSeq}
 import org.talkingpuffin.util.Loggable
+import org.talkingpuffin.user.UserAnalysis
 
 case class Credentials(user: String, token: String, secret: String)
 
@@ -64,4 +65,5 @@ class Auth extends Loggable {
 object Auth extends Loggable {
   object loggedIn extends SessionVar[Boolean](false)
   object twitterS extends SessionVar[Option[Twitter]](None)
+  object userAnalysis extends SessionVar[Option[UserAnalysis]](None)
 }
