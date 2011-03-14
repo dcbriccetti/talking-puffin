@@ -34,6 +34,10 @@ a {
     text-decoration: none;
 }
 
+.ui-widget-content a { /* Override jQuery UI */
+    color: #0066cc;
+}
+
 .resnote {
     color: #333;
 }
