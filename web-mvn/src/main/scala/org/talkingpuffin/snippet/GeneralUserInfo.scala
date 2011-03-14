@@ -8,12 +8,11 @@ import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.user.UserAnalysis
 import org.talkingpuffin.util.WordCounter.FreqToStringsMap
 import org.talkingpuffin.snippet.LineCollector.InfoLine
-import java.net.URL
 
 object GeneralUserInfo {
   case class ScreenNames(names: List[String])
-  case class Link(url: URL) {
-    override def toString = Link.stripFront(url.toString)
+  case class Link(url: String) {
+    override def toString = Link.stripFront(url)
   }
   object Link {
     def stripFront(string: String) = string.replaceAll("https?://(www\\.)?", "")
@@ -58,7 +57,7 @@ object GeneralUserInfo {
     lc.msgs.reverse
   }
 
-  def links(ua: UserAnalysis) = ua.links.map(_.link).distinct.map(link => Link(new URL(link))).sortBy(_.toString)
+  def links(ua: UserAnalysis) = ua.links.map(_.link).distinct.map(link => Link(link)).sortBy(_.toString)
 
   private def dispFreq(lc: LineCollector, title: String, bmap: FreqToStringsMap,
   fn: (List[String]) => AnyRef, minFreq: Int): Unit =

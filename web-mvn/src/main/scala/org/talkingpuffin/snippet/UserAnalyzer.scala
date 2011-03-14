@@ -10,12 +10,12 @@ import net.liftweb.http.js.JsCmds._
 import org.talkingpuffin.snippet.GeneralUserInfo.ScreenNames
 import org.talkingpuffin.apix.PartitionedTweets
 import org.talkingpuffin.apix.RichStatus._
-import org.talkingpuffin.util.{TimeUtil2, Loggable, Links, Picture}
 import xml.{Elem, NodeSeq, Text}
 import org.talkingpuffin.user.UserAnalysis
 import org.talkingpuffin.snippet.LineCollector.InfoLine
 import net.liftweb.http.js.JE.JsRaw
 import net.liftweb.http.js.{JsExp, JsCmd}
+import org.talkingpuffin.util._
 
 /**
  * Snippets for user analysis
@@ -110,19 +110,13 @@ class UserAnalyzer extends Loggable {
 
   def generalWordFreq = fillFreqs(GeneralUserInfo.createWordFreq)
 
-  private def expandLinks(): JsCmd = {
-    SetHtml("#replaceme", Text("How are you?"))
-  }
-
-  def links = {
-    "id=expandLinks" #> SHtml.ajaxButton("Expand shortened links", expandLinks _) &
-    "id=item" #> (Auth.userAnalysis.is match {
-      case Some(ua) => GeneralUserInfo.links(ua).map(l =>
-        <span><span class={"l:comet?type=LinkExpander;name=" + l.url.hashCode}/><span
-              id={"link_" + l.url.hashCode}><a href={l.url.toString}>{l.toString}</a><br/></span></span>)
+  def links = "id=item" #> (Auth.userAnalysis.is match {
+      case Some(ua) => Parallelizer.run(30, GeneralUserInfo.links(ua), expandLink).map(expanded =>
+        GeneralUserInfo.Link(expanded)).sortBy(_.toString.toLowerCase).map(_.url).map(url =>
+        <span><a href={url}>{GeneralUserInfo.Link.stripFront(url)}</a><br/></span>
+      )
       case _ => List[Elem]()
     })
-  }
 
   def tweets = {
     val rows: List[Elem] = partitionedTweets.is match {
@@ -168,6 +162,11 @@ class UserAnalyzer extends Loggable {
       case Some(ua) => makeGnlRows(freqProvider(ua))
       case _ => List[Elem]()
     })
+  }
+
+  private def expandLink(l: GeneralUserInfo.Link) = {
+    val url = l.url.toString
+    try {UrlExpander.expand(url)} catch {case _ => url}
   }
 
 }

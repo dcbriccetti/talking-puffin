@@ -4,10 +4,9 @@ import net.liftweb.sitemap.{Menu, SiteMap}
 import net.liftweb.sitemap.Loc._
 import net.liftweb.widgets.flot._
 import net.liftweb.common.{Loggable, Full}
+import net.liftweb.http.{ResourceServer, LiftRules}
 import net.liftweb.widgets.tablesorter.TableSorter
 import org.talkingpuffin.snippet.Auth
-import net.liftweb.http.{CometCreationInfo, ResourceServer, LiftRules}
-import org.talkingpuffin.comet.LinkExpander
 
 class Boot extends Loggable {
   def boot {
@@ -40,11 +39,6 @@ class Boot extends Loggable {
     Flot.init
     TableSorter.init
 
-    LiftRules.cometCreation.append {
-      // todo Find how to pass name to Status constructor without this
-      case CometCreationInfo("LinkExpander", name, defaultXml, attributes, session) =>
-        new LinkExpander(session, Full("LinkExpander"), name, defaultXml, attributes)
-    }
   }
 
   private def loggedIn_? = {
