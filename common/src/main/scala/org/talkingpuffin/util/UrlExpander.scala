@@ -13,6 +13,7 @@ object UrlExpander extends Loggable {
     debug("Connecting to " + urlString)
     val url = new URL(urlString)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
+    conn.setConnectTimeout(5000)
     conn.setRequestMethod("HEAD")
     conn.setInstanceFollowRedirects(false)
     conn.setRequestProperty("User-agent", "TalkingPuffin")
