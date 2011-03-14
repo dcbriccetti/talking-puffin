@@ -47,23 +47,22 @@ object GeneralUserInfo {
 
   def createScreenNameFreq(ua: UserAnalysis) = {
     val lc = new LineCollector
-    dispFreq(lc, "Screen name frequencies", ua.screenNamesCounter.frequencies, (l) => ScreenNames(l), 0)
+    dispFreq(lc, ua.screenNamesCounter.frequencies, (l) => ScreenNames(l), 0)
     lc.msgs.reverse
   }
 
   def createWordFreq(ua: UserAnalysis) = {
     val lc = new LineCollector
-    dispFreq(lc, "Word frequencies", ua.tweetsWordCounter.frequencies, (l) => l.mkString(", "), 2)
+    dispFreq(lc, ua.tweetsWordCounter.frequencies, (l) => l.mkString(", "), 2)
     lc.msgs.reverse
   }
 
   def links(ua: UserAnalysis) = ua.links.map(_.link).distinct.map(link => Link(link)).sortBy(_.toString)
 
-  private def dispFreq(lc: LineCollector, title: String, bmap: FreqToStringsMap,
+  private def dispFreq(lc: LineCollector, bmap: FreqToStringsMap,
   fn: (List[String]) => AnyRef, minFreq: Int): Unit =
     bmap match {
       case freqs if ! freqs.isEmpty =>
-        lc.disp(title, "")
         for (freq <- freqs.keysIterator.filter(_ > minFreq).toList.sorted.reverse)
           lc.disp(freq.toString, fn(freqs.get(freq).get.sorted))
       case _ =>
