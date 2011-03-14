@@ -13,9 +13,8 @@ import org.talkingpuffin.apix.RichStatus._
 import xml.{Elem, NodeSeq, Text}
 import org.talkingpuffin.user.UserAnalysis
 import org.talkingpuffin.snippet.LineCollector.InfoLine
-import net.liftweb.http.js.JE.JsRaw
-import net.liftweb.http.js.{JsExp, JsCmd}
 import org.talkingpuffin.util._
+import java.text.NumberFormat
 
 /**
  * Snippets for user analysis
@@ -111,10 +110,17 @@ class UserAnalyzer extends Loggable {
   def generalWordFreq = fillFreqs(GeneralUserInfo.createWordFreq)
 
   def links = "id=item" #> (Auth.userAnalysis.is match {
-      case Some(ua) => Parallelizer.run(30, GeneralUserInfo.links(ua), expandLink).map(expanded =>
-        GeneralUserInfo.Link(expanded)).sortBy(_.toString.toLowerCase).map(_.url).map(url =>
-        <span><a href={url}>{GeneralUserInfo.Link.stripFront(url)}</a><br/></span>
-      )
+      case Some(ua) => {
+        val guiLinks = GeneralUserInfo.links(ua)
+        val start = System.currentTimeMillis
+        val spans = Parallelizer.run(30, guiLinks, expandLink).map(expanded =>
+          GeneralUserInfo.Link(expanded)).sortBy(_.toString.toLowerCase).map(_.url).map(url =>
+          <span><a href={url}>{GeneralUserInfo.Link.stripFront(url)}</a><br/></span>
+        )
+        info("Processed " + guiLinks.size + " links in " +
+          NumberFormat.getInstance.format(System.currentTimeMillis - start) + " ms")
+        spans
+      }
       case _ => List[Elem]()
     })
 
