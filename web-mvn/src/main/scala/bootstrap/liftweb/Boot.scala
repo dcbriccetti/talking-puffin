@@ -6,21 +6,21 @@ import net.liftweb.widgets.flot._
 import net.liftweb.common.{Loggable, Full}
 import net.liftweb.http.{ResourceServer, LiftRules}
 import net.liftweb.widgets.tablesorter.TableSorter
-import org.talkingpuffin.snippet.Auth
+import org.talkingpuffin.snippet.{SessionState, Auth}
 
 class Boot extends Loggable {
+
   def boot {
     LiftRules.addToPackages("org.talkingpuffin")
 
     val LoggedIn    = If(()     => loggedIn_?, "Not logged in")
     val NotLoggedIn = Unless(() => loggedIn_?, "Logged in")
 
-    LiftRules.setSiteMap(SiteMap(List(
-      Menu("Home") / "index" >> Hidden,
-      Menu("Log In") / "login2" >> Hidden,
+    LiftRules.setSiteMap(SiteMap(
+      Menu("Home"   ) / "index"   >> Hidden,
+      Menu("Log In" ) / "login2"  >> Hidden,
       Menu("Analyze") / "analyze" >> LoggedIn,
-      Menu("People") / "people" >> LoggedIn)
-      : _*))
+      Menu("People" ) / "people"  >> LoggedIn))
 
     LiftRules.ajaxStart = Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
     LiftRules.ajaxEnd = Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
@@ -38,12 +38,7 @@ class Boot extends Loggable {
 
     Flot.init
     TableSorter.init
-
   }
 
-  private def loggedIn_? = {
-    val in = Auth.loggedIn.get
-    logger.info("Logged in? " + in)
-    in
-  }
+  private def loggedIn_? = SessionState.loggedIn.get
 }

@@ -22,7 +22,7 @@ object UserTimelinePlotRenderer {
       newSer("Replies"    , pt.replies),
       newSer("Retweets"   , pt.newStyleRts),
       newSer("OldRetweets", pt.oldStyleRts)),
-      createFlotOptions(pt.tweets.toList), Flot.script(Text(""))) & emitTweetsJs(pt)
+      createFlotOptions(pt.tweets.toList), Flot.script(Nil)) & emitTweetsJs(pt)
   }
 
   private def newSer(heading: String, statuses: Seq[Status]) =

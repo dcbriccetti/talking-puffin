@@ -10,7 +10,7 @@ import org.talkingpuffin.apix.RichUser._
 class UsersList {
   def show(content: NodeSeq): NodeSeq = {
     try {
-      val tw = Auth.twitterS.is.get
+      val tw = SessionState.twitter.is.get
       val ux = new Users()
       ux.setSession(tw)
       val userRows = ux.getUsers
@@ -31,7 +31,7 @@ class UsersList {
     } catch {
       case e: TooManyFriendsFollowers =>
         S.error("Can't process that many friends or followers")
-        Text("")
+        Nil
     }
   }
 }

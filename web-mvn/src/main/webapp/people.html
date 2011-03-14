@@ -1,34 +1,51 @@
 <lift:surround with="default" at="content">
-        <table id="users" class="tablesorter">
-            <thead>
+    <table id="users" class="tablesorter">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Frnds</th>
+            <th>Flwrs</th>
+            <th>Location</th>
+            <th>Description</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <lift:UsersList.show>
+            <resources:resourceItems>
                 <tr>
-                    <th> </th>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Frnds</th>
-                    <th>Flwrs</th>
-                    <th>Location</th>
-                    <th>Description</th>
-                    <th>Status</th>
+                    <td>
+                        <item:arrows/>
+                    </td>
+                    <td>
+                        <item:img/>
+                    </td>
+                    <td>
+                        <item:name/>
+                        <br/>
+                        <item:screenName/>
+                    </td>
+                    <td class="number">
+                        <item:friends/>
+                    </td>
+                    <td class="number rightmostNumber">
+                        <item:followers/>
+                    </td>
+                    <td>
+                        <item:location/>
+                    </td>
+                    <td>
+                        <item:description/>
+                    </td>
+                    <td>
+                        <item:status/>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                <lift:UsersList.show>
-                    <resources:resourceItems>
-                        <tr>
-                            <td><item:arrows/></td>
-                            <td><item:img/></td>
-                            <td><item:name/><br/>
-                            <item:screenName/></td>
-                            <td class="number"><item:friends/></td>
-                            <td class="number rightmostNumber"><item:followers/></td>
-                            <td><item:location/></td>
-                            <td><item:description/></td>
-                            <td><item:status/></td>
-                        </tr>
-                    </resources:resourceItems>
-                </lift:UsersList.show>
-            </tbody>
-        </table>
-        <lift:Auth:tableSorter/>
+            </resources:resourceItems>
+        </lift:UsersList.show>
+        </tbody>
+    </table>
+    <lift:People:tableSorter/>
 </lift:surround>

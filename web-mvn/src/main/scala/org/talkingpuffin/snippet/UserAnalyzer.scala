@@ -1,6 +1,8 @@
 package org.talkingpuffin.snippet
 
+import java.text.NumberFormat
 import scala.collection.JavaConversions._
+import xml.{Elem, NodeSeq, Text}
 import twitter4j.TwitterException
 import net.liftweb.widgets.flot.Flot
 import net.liftweb.common.Full
@@ -10,38 +12,36 @@ import net.liftweb.http.js.JsCmds._
 import org.talkingpuffin.snippet.GeneralUserInfo.ScreenNames
 import org.talkingpuffin.apix.PartitionedTweets
 import org.talkingpuffin.apix.RichStatus._
-import xml.{Elem, NodeSeq, Text}
 import org.talkingpuffin.user.UserAnalysis
 import org.talkingpuffin.snippet.LineCollector.InfoLine
 import org.talkingpuffin.util._
-import java.text.NumberFormat
 
 /**
  * Snippets for user analysis
  */
 class UserAnalyzer extends Loggable {
 
-  object user extends RequestVar[Option[String]](None)
-  object partitionedTweets extends RequestVar[Option[PartitionedTweets]](None)
+  private object screenName        extends RequestVar[Option[String]](None)
+  private object partitionedTweets extends RequestVar[Option[PartitionedTweets]](None)
 
   def nameForm(content: NodeSeq) = {
-    val tw = Auth.twitterS.is.get
+    val tw = SessionState.twitter.is.get
     S.param("user") match {
-      case Full(u) => setUserIfValid(u)
+      case Full(u) => setScreenName(u)
       case _ =>
-        if (! user.is.isDefined) {
-          user(Some(tw.getScreenName))
+        if (! screenName.is.isDefined) {
+          screenName(Some(tw.getScreenName))
         }
     }
     bind("nameForm", content,
-      "name"   -> SHtml.text(user.is.getOrElse(""), setUserIfValid(_)),
+      "name"   -> SHtml.text(screenName.is.getOrElse(""), setScreenName(_)),
       "submit" -> SHtml.submit("Analyze", () => {}))
   }
 
   def headForGraph (xhtml: NodeSeq) = Flot.renderHead()
 
   def followUnfollow = {
-    val tw = Auth.twitterS.is.get
+    val tw = SessionState.twitter.is.get
 
     def check(screenName: String)(on: Boolean) = {
       try {
@@ -50,12 +50,12 @@ class UserAnalyzer extends Loggable {
       } catch {
         case te: TwitterException =>
           S.warning(te.getMessage)
-          Text("")
+          Nil
       }
       Noop
     }
     
-    user.is match {
+    screenName.is match {
       case Some(screenName) if screenName != tw.getScreenName =>
         try {
           val rel = tw.showFriendship(tw.getScreenName, screenName)
@@ -63,18 +63,18 @@ class UserAnalyzer extends Loggable {
         } catch {
           case te: TwitterException =>
             // Error will appear to user from elsewhere
-            Text("")
+            Nil
         }
-      case _ => Text("")
+      case _ => Nil
     }
   }
 
   def generalInfo = {
-    val tw = Auth.twitterS.is.get
+    val tw = SessionState.twitter.is.get
     val emptyRows = List[Elem]()
-    val emptyImage = Text("")
+    val emptyImage = Nil
 
-    val (rows, image) = user.is match {
+    val (rows, image) = screenName.is match {
       case Some(screenName) =>
         info(tw.getScreenName + " is analyzing " + screenName)
         try {
@@ -87,7 +87,7 @@ class UserAnalyzer extends Loggable {
             val uan = UserAnalysis(pt)
             (GeneralUserInfo.create(uinfo, screenName, pt, uan), Some(uan))
           }
-          Auth.userAnalysis(ua)
+          SessionState.userAnalysis(ua)
           val image = <img src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
                 alt="Profile Image"/>
           (makeGnlRows(gnlLines), image)
@@ -109,7 +109,7 @@ class UserAnalyzer extends Loggable {
 
   def generalWordFreq = fillFreqs(GeneralUserInfo.createWordFreq)
 
-  def links = "id=item" #> (Auth.userAnalysis.is match {
+  def links = "id=item" #> (SessionState.userAnalysis.is match {
       case Some(ua) => {
         val guiLinks = GeneralUserInfo.links(ua)
         val start = System.currentTimeMillis
@@ -134,13 +134,13 @@ class UserAnalyzer extends Loggable {
   }
 
   def plot(xhtml: NodeSeq): NodeSeq =
-    if (user.is.isDefined && partitionedTweets.is.isDefined && ! partitionedTweets.is.get.tweets.isEmpty) // partitionedTweets.is not defined if error fetching user
-      Script(UserTimelinePlotRenderer.render(partitionedTweets.is.get, user.is.get))
+    if (screenName.is.isDefined && partitionedTweets.is.isDefined && ! partitionedTweets.is.get.tweets.isEmpty) // partitionedTweets.is not defined if error fetching user
+      Script(UserTimelinePlotRenderer.render(partitionedTweets.is.get, screenName.is.get))
     else
-      Text("")
+      Nil
 
-  private def setUserIfValid(u: String) {
-    user(u.trim match {
+  private def setScreenName(sn: String) {
+    screenName(sn.trim match {
       case screenName if screenName.length > 0 => Some(screenName)
       case _ => None
     })
@@ -164,7 +164,7 @@ class UserAnalyzer extends Loggable {
       </tr>)
 
   private def fillFreqs(freqProvider: (UserAnalysis) => List[InfoLine]) = {
-    "id=row" #> (Auth.userAnalysis.is match {
+    "id=row" #> (SessionState.userAnalysis.is match {
       case Some(ua) => makeGnlRows(freqProvider(ua))
       case _ => List[Elem]()
     })
