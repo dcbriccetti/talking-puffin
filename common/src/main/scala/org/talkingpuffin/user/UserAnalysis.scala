@@ -5,6 +5,7 @@ import org.joda.time.{DateTime, Days}
 import org.talkingpuffin.apix.PartitionedTweets
 import org.talkingpuffin.util.{WordCounter, LinkExtractor}
 import org.talkingpuffin.apix.RichStatus._
+import org.talkingpuffin.util.LinkExtractor.Link
 
 case class UserAnalysis(pt: PartitionedTweets) {
   val times = pt.tweets.map(_.getCreatedAt.getTime)
@@ -20,10 +21,10 @@ case class UserAnalysis(pt: PartitionedTweets) {
 
   val clients = pt.tweets.map(_.sourceDetails).distinct.sortBy(_.name)
 
-  val links = pt.tweets.flatMap(t => LinkExtractor.getLinks(t.getText, None, false, true, false))
+  val links: Seq[Link] = pt.tweets.flatMap(tweet => LinkExtractor.getLinks(tweet.getText, None, links = true))
   val numLinks = links.size
 
-  val users = pt.tweets.flatMap(t => LinkExtractor.getLinks(t.getText, None, true, false, false))
+  val users: Seq[Link] = pt.tweets.flatMap(tweet => LinkExtractor.getLinks(tweet.getText, None, users = true))
   val numUsers = users.size
 
   val allTweetText = pt.tweets.map(_.text).mkString(" ")

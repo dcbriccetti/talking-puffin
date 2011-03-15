@@ -24,7 +24,7 @@ class LinkExtractorTest {
 
   @Test def allLinksAreFound {
     val links = LinkExtractor.getLinks("CNN lies...silent http://bit.ly/cnn-BS Real story here: http://bit.ly/dSUqXT",
-      None, false, true, false)
+      None, links = true)
     assertEquals(2, links.size)
   }
 

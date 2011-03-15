@@ -26,10 +26,11 @@ object LinkExtractor {
    * <li>The in_reply_to_status_id
    * <li>@usernames
    * <li>Hyperlinks
-   * </ol> 
+   * <li>Twitter lists
+   * </ol>
    */
-  def getLinks(text: String, inReplyToStatusId: Option[Long], users: Boolean, pages: Boolean,
-        lists: Boolean): Links = {
+  def getLinks(text: String, inReplyToStatusId: Option[Long], users: Boolean = false, links: Boolean = false,
+        lists: Boolean = false): Links = {
     var urls = List[Link]()
     
     if (users) {
@@ -48,7 +49,7 @@ object LinkExtractor {
       }
     }
     
-    if (pages) 
+    if (links)
       urls = urls ::: getLinkItems(text)
     
     if (lists)
