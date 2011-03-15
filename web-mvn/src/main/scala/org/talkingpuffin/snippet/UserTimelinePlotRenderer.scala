@@ -18,14 +18,14 @@ object UserTimelinePlotRenderer {
    */
   def render(pt: PartitionedTweets, screenName: String): JsCmd = {
     Flot.renderJs("ph_graph", List(
-      newSer("Tweets"     , pt.plainTweets),
-      newSer("Replies"    , pt.replies),
-      newSer("Retweets"   , pt.newStyleRts),
-      newSer("OldRetweets", pt.oldStyleRts)),
+      newSeries("Tweets"     , pt.plainTweets),
+      newSeries("Replies"    , pt.replies),
+      newSeries("Retweets"   , pt.newStyleRts),
+      newSeries("OldRetweets", pt.oldStyleRts)),
       createFlotOptions(pt.tweets.toList), Flot.script(Nil)) & emitTweetsJs(pt)
   }
 
-  private def newSer(heading: String, statuses: Seq[Status]) =
+  private def newSeries(heading: String, statuses: Seq[Status]) =
     new FlotSerie() {
       override def label = Full(heading)
 
