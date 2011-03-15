@@ -3,9 +3,6 @@ package org.talkingpuffin.util
 import io.Source
 
 case class WordCounter(text: String) {
-  private val stopList: List[String] = Source.fromInputStream(
-    getClass.getResourceAsStream("/stoplist.csv")).getLines.mkString(",").split(",").toList
-
   val words: List[WordCount] = calculateCounts(text)
   val frequencies: WordCounter.FreqToStringsMap = calculateBuckets(words)
 
@@ -16,9 +13,11 @@ case class WordCounter(text: String) {
   private def calculateCounts(text: String): List[WordCount] = {
     val words = text.toLowerCase.split("\\s").toList.
         withFilter(w => w.trim.length > 0 && (w(0).isLetter || w(0) == '#')).
-        map(dropTrailingPunctuation) -- stopList
+        map(dropTrailingPunctuation) -- WordCounter.stopList
     val emptyMap = Map.empty[String, WordCount].withDefault(w => WordCount(w, 0))
-    val countsMap = words.foldLeft(emptyMap)((map, word) => map(word) += 1)
+    val countsMap = words.foldLeft(emptyMap) {(map, word) =>
+      map(word) += 1
+    }
     countsMap.values.toList.sort(_.count > _.count)
   }
 
@@ -38,4 +37,8 @@ case class WordCounter(text: String) {
 object WordCounter {
   type Frequency = Long
   type FreqToStringsMap = Map[Frequency,List[String]]
+
+  private val stopList: List[String] = Source.fromInputStream(
+    getClass.getResourceAsStream("/stoplist.csv")).getLines.mkString(",").split(",").toList
+
 }
