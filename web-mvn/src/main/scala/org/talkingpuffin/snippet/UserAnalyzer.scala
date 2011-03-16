@@ -19,23 +19,26 @@ import org.talkingpuffin.util._
 /**
  * Snippets for user analysis
  */
-class UserAnalyzer extends Loggable {
+class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
 
   private object screenName        extends RequestVar[Option[String]](None)
   private object partitionedTweets extends RequestVar[Option[PartitionedTweets]](None)
 
   def nameForm(content: NodeSeq) = {
-    val tw = SessionState.twitter.is.get
-    S.param("user") match {
-      case Full(u) => setScreenName(u)
-      case _ =>
-        if (! screenName.is.isDefined) {
-          screenName(Some(tw.getScreenName))
+    SessionState.twitter.is match {
+      case Some(tw) =>
+        S.param("user") match {
+          case Full(u) => setScreenName(u)
+          case _ =>
+            if (! screenName.is.isDefined) {
+              screenName(Some(tw.getScreenName))
+            }
         }
+        bind("nameForm", content,
+          "name"   -> SHtml.text(screenName.is.getOrElse(""), setScreenName(_)),
+          "submit" -> SHtml.submit("Analyze", () => {}))
+      case _ => S.redirectTo("index" + makeUserParm)
     }
-    bind("nameForm", content,
-      "name"   -> SHtml.text(screenName.is.getOrElse(""), setScreenName(_)),
-      "submit" -> SHtml.submit("Analyze", () => {}))
   }
 
   def headForGraph (xhtml: NodeSeq) = Flot.renderHead()

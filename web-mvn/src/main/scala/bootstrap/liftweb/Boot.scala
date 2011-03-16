@@ -19,7 +19,7 @@ class Boot extends Loggable {
     LiftRules.setSiteMap(SiteMap(
       Menu("Home"   ) / "index"   >> Hidden,
       Menu("Log In" ) / "login2"  >> Hidden,
-      Menu("Analyze") / "analyze" >> LoggedIn,
+      Menu("Analyze") / "analyze",
       Menu("People" ) / "people"  >> LoggedIn))
 
     LiftRules.ajaxStart = Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)

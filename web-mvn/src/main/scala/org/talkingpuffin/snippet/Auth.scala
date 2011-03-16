@@ -6,7 +6,7 @@ import twitter4j.{TwitterException, TwitterFactory}
 import net.liftweb.http._
 import org.talkingpuffin.util.{Links, Loggable}
 
-class Auth extends Loggable {
+class Auth extends RedirectorWithRequestParms with Loggable {
 
   /**
    * Does first stage of Twitter authentication, by redirecting to Twitter
@@ -18,7 +18,7 @@ class Auth extends Loggable {
       .setOAuthConsumerSecret("lSsNHuFhIbVfvvSffuiWWKlvoMd9PkAPtxD47NEG1k")
     val twitter = new TwitterFactory(cb.build()).getInstance()
     SessionState.twitter(Some(twitter))
-    val requestToken = twitter.getOAuthRequestToken(Links.getRedirectUrl(S.hostName, "login2"))
+    val requestToken = twitter.getOAuthRequestToken(Links.getRedirectUrl(S.hostName, "login2" + makeUserParm))
     S.redirectTo(requestToken.getAuthenticationURL)
     Nil
   }
@@ -39,8 +39,9 @@ class Auth extends Loggable {
           case e: TwitterException => S.redirectTo("index")
         }
         SessionState.loggedIn(true)
-        S.redirectTo("analyze")
-      case _ => S.redirectTo("index")
+        S.redirectTo("analyze" + makeUserParm)
+      case _ => S.redirectTo("index" + makeUserParm)
     }
   }
+
 }
