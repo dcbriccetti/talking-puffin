@@ -5,7 +5,7 @@ import javax.swing.SwingWorker
 import swing.event.Event
 import swing.Publisher
 import org.talkingpuffin.Session
-import org.talkingpuffin.model.BaseRelationships
+import org.talkingpuffin.model.{FriendsFollowersFetcher, FriendsFollowers, BaseRelationships}
 
 case class IdsChanged(source: Relationships) extends Event
 case class UsersChanged(source: Relationships) extends Event
@@ -20,15 +20,15 @@ class Relationships extends BaseRelationships with Publisher with ErrorHandler {
     val tw = session.twitter
     longOpListener.startOperation
 
-    new SwingWorker[Tuple2[Users,Users], Object] {
-      def doInBackground = getUsers(tw)
+    new SwingWorker[FriendsFollowers, Object] {
+      def doInBackground = FriendsFollowersFetcher.getUsers(tw, Some(screenName))
 
       override def done {
         longOpListener.stopOperation
         doAndHandleError(() => {
-          val (fr, fo) = get
-          friends = fr
-          followers = fo
+          val ff = get
+          friends   = ff.friends
+          followers = ff.followers
           Relationships.this.publish(UsersChanged(Relationships.this))
           }, "Error fetching friends and followers for " + tw.getScreenName, session)
       }
