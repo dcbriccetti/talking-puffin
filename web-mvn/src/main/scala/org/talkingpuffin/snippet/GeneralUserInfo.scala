@@ -46,16 +46,16 @@ object GeneralUserInfo {
   }
 
   def createScreenNameFreq(ua: UserAnalysis) =
-    dispFreq(ua.screenNamesCounter.frequencies, 0) {
+    displayFrequencies(ua.screenNamesCounter.frequencies, 0) {
       ScreenNames(_)
     }
 
   def createWordFreq(ua: UserAnalysis) =
-    dispFreq(ua.tweetsWordCounter.frequencies, 2) {
+    displayFrequencies(ua.tweetsWordCounter.frequencies, 2) {
       _.mkString(", ")
     }
 
-  private def dispFreq(freqToStringsMap: FreqToStringsMap, minFreq: Int)
+  private def displayFrequencies(freqToStringsMap: FreqToStringsMap, minFreq: Int)
                       (formatItems: (List[String]) => AnyRef): List[InfoLine] = {
     val lc = new LineCollector
     freqToStringsMap.keysIterator.filter(_ > minFreq).toList.sorted.reverse.foreach(freq =>
