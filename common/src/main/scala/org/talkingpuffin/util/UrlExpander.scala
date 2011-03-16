@@ -10,6 +10,9 @@ object UrlExpander extends Loggable {
   private val redirectionCodes = List(301, 302)
 
   def expand(urlString: String): String = {
+    if (urlString.toLowerCase.startsWith("https"))
+      return urlString
+    
     debug("Connecting to " + urlString)
     val url = new URL(urlString)
     val conn = url.openConnection.asInstanceOf[HttpURLConnection]
