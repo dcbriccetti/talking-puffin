@@ -6,5 +6,6 @@ object Links {
       "http://localhost:8080/"
     else "http://talkingpuffin.org/tpuf/") + path
 
-  def linkForAnalyze(hostName: String, screenName: String) = getRedirectUrl(hostName, "analyze?user=" + screenName)
+  def linkForAnalyze(screenName: String, hostName: String = System.getProperty("webHost", "talkingpuffin.org")) =
+    getRedirectUrl(hostName, "analyze?user=" + screenName)
 }

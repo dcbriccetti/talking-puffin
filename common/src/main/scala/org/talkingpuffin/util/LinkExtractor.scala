@@ -43,7 +43,7 @@ object LinkExtractor {
       val m = usernamePattern.matcher(text)
       while (m.find) {
         val userName = m.group(1)
-        val newItem = Link(userName, "http://twitter.com/" + userName)
+        val newItem = Link(userName, Links.linkForAnalyze(userName))
         if (! urls.contains(newItem))
           urls = urls ::: List(newItem)
       }
