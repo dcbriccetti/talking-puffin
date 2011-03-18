@@ -112,6 +112,8 @@ class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
 
   def generalWordFreq = fillFreqs(GeneralUserInfo.createWordFreq)
 
+  def generalHashtagFreq = fillFreqs(GeneralUserInfo.createHashtagFreq)
+
   def links = "id=item" #> (SessionState.userAnalysis.is match {
       case Some(ua) => {
         val guiLinks = GeneralUserInfo.links(ua)

@@ -2,7 +2,8 @@ package org.talkingpuffin.util
 
 import io.Source
 
-case class WordCounter(text: String) {
+case class WordCounter(text: String, wordFilter: String => Boolean = WordCounter.startsWithLetter,
+                        wordProcessor: String => String = identity) {
   val words: List[WordCount] = calculateCounts(text)
   val frequencies: WordCounter.FreqToStringsMap = calculateBuckets(words)
 
@@ -12,8 +13,8 @@ case class WordCounter(text: String) {
 
   private def calculateCounts(text: String): List[WordCount] = {
     val words = text.toLowerCase.split("\\s").toList.
-        withFilter(w => w.trim.length > 0 && (w(0).isLetter || w(0) == '#')).
-        map(dropTrailingPunctuation) -- WordCounter.stopList
+        withFilter(w => w.trim.length > 0 && ! w.toLowerCase.startsWith("http") && wordFilter(w)).
+        map(dropTrailingPunctuation).map(wordProcessor) -- WordCounter.stopList
     val emptyMap = Map.empty[String, WordCount].withDefault(w => WordCount(w, 0))
     val countsMap = words.foldLeft(emptyMap) {(map, word) =>
       map(word) += 1
@@ -37,6 +38,8 @@ case class WordCounter(text: String) {
 object WordCounter {
   type Frequency = Long
   type FreqToStringsMap = Map[Frequency,List[String]]
+
+  def startsWithLetter(word: String) = word(0).isLetter
 
   private val stopList: List[String] = Source.fromInputStream(
     getClass.getResourceAsStream("/stoplist.csv")).getLines.mkString(",").split(",").toList

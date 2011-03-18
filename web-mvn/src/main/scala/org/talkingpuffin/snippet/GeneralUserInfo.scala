@@ -55,6 +55,11 @@ object GeneralUserInfo {
       _.mkString(", ")
     }
 
+  def createHashtagFreq(ua: UserAnalysis) =
+    displayFrequencies(ua.tweetsHashtagCounter.frequencies, 0) {
+      _.mkString(", ")
+    }
+
   private def displayFrequencies(freqToStringsMap: FreqToStringsMap, minFreq: Int)
                       (formatItems: (List[String]) => AnyRef): List[InfoLine] = {
     val lc = new LineCollector
