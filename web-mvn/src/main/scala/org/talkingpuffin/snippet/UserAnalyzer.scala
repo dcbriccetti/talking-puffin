@@ -15,6 +15,7 @@ import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.user.UserAnalysis
 import org.talkingpuffin.snippet.LineCollector.InfoLine
 import org.talkingpuffin.util._
+import org.apache.commons.lang.StringEscapeUtils
 
 /**
  * Snippets for user analysis
@@ -131,8 +132,21 @@ class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
 
   def tweets = {
     val rows: List[Elem] = partitionedTweets.is match {
-      case Some(pt) => pt.tweets.toList.map(tw => <tr><td>{TimeUtil2.formatAge(tw.createdAt, false)}</td>
-        <td>{tw.text}</td></tr>)
+      case Some(pt) => pt.tweets.toList.map(tw =>
+        <tr>
+          <td>{xml.Unparsed(TimeUtil2.formatAge(tw.createdAt, false).replace(" ", "&nbsp;"))}</td>
+          <td>{tw.retweet match {
+            case Some(status) => hyperlinkScreenName(status.getUser.getScreenName)
+            case None => Text("")
+          }}</td>
+          <td>{tw.inReplyToScreenName match {
+            case Some(screenName) => hyperlinkScreenName(screenName)
+            case None => Text("")
+          }
+          }</td>
+          <td>{xml.Unparsed(LinkExtractor.createLinks(StringEscapeUtils.escapeHtml(
+            LinkExtractor.getWithoutUser(tw.text))).replaceAll("\n", "<br/>"))}</td>
+        </tr>)
       case _ => List[Elem]()
     }
     "id=tweetRow" #> rows
@@ -150,6 +164,9 @@ class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
       case _ => None
     })
   }
+
+  private def hyperlinkScreenName(screenName: String) =
+    <a href={Links.linkForAnalyze(screenName, hostName = S.hostName)}>{screenName}</a>
 
   private def createNameLinks(names: List[String]) =
     names.flatMap(name =>
