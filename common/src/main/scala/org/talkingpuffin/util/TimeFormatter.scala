@@ -42,8 +42,8 @@ case class TimeFormatter(time: Long) {
 }
 
 object TimeUtil2 {
-  private val fmt      = DateTimeFormat.forPattern("M/dd H:mm")
-  private val fmtNoDay = DateTimeFormat.forPattern("H:mm")
+  private val fmt      = DateTimeFormat.forPattern("M/dd HH:mm")
+  private val fmtNoDay = DateTimeFormat.forPattern("HH:mm")
 
   def formatAge(date: DateTime, showAsAge: Boolean): String =
     if (showAsAge)
