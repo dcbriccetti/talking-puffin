@@ -13,8 +13,9 @@ case class WordCounter(text: String, wordFilter: String => Boolean = WordCounter
 
   private def calculateCounts(text: String): List[WordCount] = {
     val words = text.toLowerCase.split("\\s").toList.
-        withFilter(w => w.trim.length > 0 && ! w.toLowerCase.startsWith("http") && wordFilter(w)).
-        map(dropTrailingPunctuation).map(wordProcessor) -- WordCounter.stopList
+        withFilter(w => w.trim.length > 0 && ! w.toLowerCase.startsWith("http") &&
+                   ! WordCounter.stopList.contains(w) && wordFilter(w)).
+        map(dropTrailingPunctuation).map(wordProcessor)
     val emptyMap = Map.empty[String, WordCount].withDefault(w => WordCount(w, 0))
     val countsMap = words.foldLeft(emptyMap) {(map, word) =>
       map(word) += 1
@@ -41,7 +42,7 @@ object WordCounter {
 
   def startsWithLetter(word: String) = word(0).isLetter
 
-  private val stopList: List[String] = Source.fromInputStream(
-    getClass.getResourceAsStream("/stoplist.csv")).getLines.mkString(",").split(",").toList
+  private val stopList: Set[String] = Source.fromInputStream(
+    getClass.getResourceAsStream("/stoplist.csv")).getLines.mkString(",").split(",").toSet
 
 }
