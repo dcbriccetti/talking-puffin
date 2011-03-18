@@ -31,8 +31,9 @@ case class WordCounter(text: String, wordFilter: String => Boolean = WordCounter
 
   private def calculateBuckets(wordCounts: List[WordCount]): WordCounter.FreqToStringsMap = {
     val emptyMap = Map.empty[Long,List[String]].withDefaultValue(List[String]())
-    wordCounts.foldLeft(emptyMap)((map, wordCount) =>
-        map(wordCount.count) = wordCount.word :: map(wordCount.count))
+    wordCounts.foldLeft(emptyMap) {(map, wordCount) =>
+        map(wordCount.count) = wordCount.word :: map(wordCount.count)
+    }
   }
 }
 
@@ -44,5 +45,4 @@ object WordCounter {
 
   private val stopList: Set[String] = Source.fromInputStream(
     getClass.getResourceAsStream("/stoplist.csv")).getLines.mkString(",").split(",").toSet
-
 }
