@@ -6,13 +6,18 @@ import java.awt._
 import javax.swing.ImageIcon
 import org.talkingpuffin.Main
 import actors.Actor._
+import org.talkingpuffin.util.Loggable
 
-object DesktopUtil {
+object DesktopUtil extends Loggable {
   private case class Browse(uri: String)
   val browser = actor {
     while(true) {
       receive {
-        case browse: Browse => Desktop.getDesktop.browse(new URI(browse.uri))
+        case browse: Browse => {
+          info("Before desktop.browse")
+          Desktop.getDesktop.browse(new URI(browse.uri))
+          info("After desktop.browse")
+        }
       }
     }
   }
@@ -25,7 +30,11 @@ object DesktopUtil {
     case _ => null
   }
 
-  def browse(uri: String) = if (Desktop.isDesktopSupported) browser ! Browse(uri)
+  def browse(uri: String) = if (Desktop.isDesktopSupported) {
+    info("Before sending Browse " + uri)
+    browser ! Browse(uri)
+    info("After sending Browse")
+  }
 
   def notify(message: String, header: String) = if (SystemTray.isSupported) 
     trayIcon.displayMessage(header, message, TrayIcon.MessageType.INFO)
