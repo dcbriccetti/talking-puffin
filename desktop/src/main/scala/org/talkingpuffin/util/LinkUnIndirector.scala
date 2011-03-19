@@ -32,34 +32,35 @@ object LinkUnIndirector extends Loggable {
   /**
    * Finds the target(s) of the specified URL, bypassing any “wrappers” 
    * like FriendFeed, Digg, and StumbleUpon. In the case of the 
-   * <code>IndirectedLink</code>s (such as FriendFeed), the expandedFound 
+   * <code>IndirectedLink</code>s (such as FriendFeed), the found
    * callback will be called twice: once for the intermediate page, and once 
    * for the target page.
    */
-  def findLinks(expandedFound: (String) => Unit, expandedNotFound: (String) => Unit)(url: String) {
-    if (ShortUrl.redirectionBypassesWrapper(new URL(url).getHost)) {
-      ShortUrl.getExpandedUrl(url, (expandedUrl: String) => expandedFound(expandedUrl))
+  def findLinks(foundCallback: (String) => Unit, notFoundCallback: (String) => Unit)(url: String) {
+    if (ShortUrl.wrapperBypassableWithSimpleRedirection(new URL(url).getHost)) {
+      ShortUrl.getExpandedUrl(url, foundCallback)
     } else {
-      indirectedLinks find(il => url.contains(il.shortenedUrlPart)) match {
+      indirectedLinks.find(link => url.contains(link.shortenedUrlPart)) match {
         case Some(il) =>
           debug(url + " contains " + il.shortenedUrlPart)
 
           new Thread(new Runnable { // Can’t tie up GUI, so new thread here
             def run = {
               ShortUrl.getExpandedUrl(url, (expandedUrl: String) => {
-                expandedFound(expandedUrl)
+                foundCallback(expandedUrl)
                 if (expandedUrl.startsWith(il.expandedUrlPart)) {
-                  findTarget(expandedUrl, il.targetLinkRegex, expandedFound)
+                  readIntermediatePageAndFindTargetUrl(expandedUrl, il.targetLinkRegex, foundCallback)
                 }
               })
             }
           }).start
-        case None => expandedNotFound(url)
+        case None => notFoundCallback(url)
       }
     }
   }
   
-  private def findTarget(expandedUrl: String, regex: Regex, expandedFound: (String) => Unit): Unit = {
+  private def readIntermediatePageAndFindTargetUrl(expandedUrl: String,
+      regex: Regex, expandedFound: (String) => Unit): Unit = {
     // ShortUrl.getExpandedUrls has called us in the GUI event thread, so we need
     // another thread here to fetch the HTML page.
     SwingInvoke.execSwingWorker ({
@@ -73,10 +74,9 @@ object LinkUnIndirector extends Loggable {
           debug("Target link not found in " + expandedUrl)
           None
       }
-    }, {(url: Option[String]) => url match { 
-      case Some(u) => expandedFound(u)
-      case None =>
-    }})
+    }, {(url: Option[String]) => url.foreach(u =>
+      expandedFound(u)
+    )})
   }
 }
   
