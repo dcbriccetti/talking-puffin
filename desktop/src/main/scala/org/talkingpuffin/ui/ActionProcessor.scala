@@ -21,7 +21,7 @@ trait ActionProcessor extends Loggable {
       )
     )
 
-  def processUsers(items: Seq[String], action: ((String) => User), actionName: String, msg: String) =
+  def processUsers(items: Seq[String], action: (String => User), actionName: String, msg: String) =
     process(items, (name: String) => {action(name)}: Unit, actionName, msg)
   
 }

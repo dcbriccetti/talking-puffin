@@ -37,7 +37,7 @@ object ShortUrl extends Loggable {
   /**
    * Gets the long form, if there is one, for the specified URL.
    */
-  def getExpandedUrl(url: String, expandedUrlCallback: (String) => Unit) =
+  def getExpandedUrl(url: String, expandedUrlCallback: String => Unit) =
     if (urlIsShortened(url))
       fetcher.get(expandedUrlCallback)(url)
 

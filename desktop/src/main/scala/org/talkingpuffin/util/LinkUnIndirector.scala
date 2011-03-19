@@ -36,7 +36,7 @@ object LinkUnIndirector extends Loggable {
    * callback will be called twice: once for the intermediate page, and once 
    * for the target page.
    */
-  def findLinks(foundCallback: (String) => Unit, notFoundCallback: (String) => Unit)(url: String) {
+  def findLinks(foundCallback: String => Unit, notFoundCallback: String => Unit)(url: String) {
     if (ShortUrl.wrapperBypassableWithSimpleRedirection(new URL(url).getHost)) {
       ShortUrl.getExpandedUrl(url, foundCallback)
     } else {
@@ -60,7 +60,7 @@ object LinkUnIndirector extends Loggable {
   }
   
   private def readIntermediatePageAndFindTargetUrl(expandedUrl: String,
-      regex: Regex, expandedFound: (String) => Unit): Unit = {
+      regex: Regex, expandedFound: String => Unit): Unit = {
     // ShortUrl.getExpandedUrls has called us in the GUI event thread, so we need
     // another thread here to fetch the HTML page.
     SwingInvoke.execSwingWorker ({

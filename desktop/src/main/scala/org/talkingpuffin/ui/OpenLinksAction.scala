@@ -12,7 +12,7 @@ import org.talkingpuffin.util.LinkExtractor
  * Shows a menu of links, or launches the browser on the link if there is only one. 
  */
 abstract class OpenLinksAction(getSelectedStatus: => Option[Status], table: JTable,
-    browse: (String) => Unit, title: String) extends Action(title) {
+    browse: String => Unit, title: String) extends Action(title) {
   
   def apply {
     def addMenuItem(menu: JPopupMenu, title: String, accelIndex: Int, action: => Unit) = {
@@ -61,7 +61,7 @@ abstract class OpenLinksAction(getSelectedStatus: => Option[Status], table: JTab
 }
 
 class OpenPageLinksAction(getSelectedStatus: => Option[Status], table: JTable,
-    browse: (String) => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,
+    browse: String => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,
     "Open Links…") {
   def users = false
   def links = true
@@ -69,7 +69,7 @@ class OpenPageLinksAction(getSelectedStatus: => Option[Status], table: JTable,
 }
 
 class OpenTwitterUserLinksAction(getSelectedStatus: => Option[Status], table: JTable,
-    browse: (String) => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,  
+    browse: String => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,
     "Open User Links…") {
   def users = true
   def links = false
@@ -77,7 +77,7 @@ class OpenTwitterUserLinksAction(getSelectedStatus: => Option[Status], table: JT
 }
 
 class OpenTwitterUserListsAction(getSelectedStatus: => Option[Status], table: JTable,
-    browse: (String) => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,  
+    browse: String => Unit) extends OpenLinksAction(getSelectedStatus, table, browse,
     "Open User Lists…") {
   def users = false
   def links = false

@@ -11,7 +11,7 @@ class TextChangingAnimator {
   val keepAnimating = new AtomicBoolean
   var thread: Thread = _
   
-  def run(origText: String, newText: String, callback: (String) => Unit) {
+  def run(origText: String, newText: String, callback: String => Unit) {
     if (! GlobalPrefs.isOn(PrefKeys.USE_ANIMATIONS)) {
       callback(newText) // Simply show end result
     } else {

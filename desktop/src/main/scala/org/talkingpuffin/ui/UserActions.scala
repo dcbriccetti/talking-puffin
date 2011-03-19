@@ -56,7 +56,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   def showFavorites(screenName: String) =
     createView(new FavoritesProvider(session, screenName, None, session.progress))
   
-  def forAll(selectedScreenNames: Names, fn: (String) => Unit) = {
+  def forAll(selectedScreenNames: Names, fn: String => Unit) = {
     selectedScreenNames.foreach(screenName => fn(screenName))
   }
 
