@@ -19,11 +19,15 @@ object LinkUnIndirector extends Loggable {
   case class IndirectedLink(shortenedUrlPart: String, expandedUrlPart: String, targetLinkRegex: Regex)
   
   /** A list of all known IndirectedLinks */
-  val indirectedLinks = List(
-    IndirectedLink("ff.im"   , "http://friendfeed.com/", """.*<div class="text">.*?<a .*?href="(.*?)".*"""   .r),
-    IndirectedLink("digg.com", "http://digg.com/"      , """.*<h1 id="title">.*?<a .*?href="(.*?)".*"""      .r),
-    IndirectedLink("bit.ly"  , "http://www.dzone.com/" , """.*<div class="ldTitle">.*?<a .*?href="(.*?)".*""".r)
-  )
+  val indirectedLinks = {
+    val dzoneTarget = """.*<div class="ldTitle">.*?<a .*?href="(.*?)".*""".r
+    List(
+      IndirectedLink("ff.im", "http://friendfeed.com/", """.*<div class="text">.*?<a .*?href="(.*?)".*""".r),
+      IndirectedLink("digg.com", "http://digg.com/", """.*<h1 id="title">.*?<a .*?href="(.*?)".*""".r),
+      IndirectedLink("bit.ly", "http://www.dzone.com/", dzoneTarget),
+      IndirectedLink("dzone.com", "http://www.dzone.com/", dzoneTarget)
+    )
+  }
   
   /**
    * Finds the target(s) of the specified URL, bypassing any “wrappers” 
