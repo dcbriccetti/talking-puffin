@@ -1,8 +1,6 @@
 package org.talkingpuffin.util
 
 import java.net.{HttpURLConnection, URL}
-import java.util.concurrent.ConcurrentHashMap
-import org.joda.time.DateTime
 
 /**
  * URL shortening and expanding.
@@ -18,10 +16,7 @@ object UrlExpander extends Loggable {
     if (url.getProtocol == "https")
       return urlString
 
-    cache.get(urlString).foreach(ceu => {
-      debug("In cache: " + urlString + " -> " + ceu.url)
-      return ceu.url.getOrElse(urlString)
-    })
+    cache.get(urlString).foreach(expUrl => return expUrl.url.getOrElse(urlString))
 
     getRedirectionChain(url) match {
       case Nil =>
@@ -29,9 +24,9 @@ object UrlExpander extends Loggable {
         cache.put(urlString, None)
         throw new NoRedirection(urlString)
       case ultimateUrl :: others =>
-        val loc = ultimateUrl.toString
-        cache.put(urlString, Some(loc))
-        loc
+        val expandedUrl = ultimateUrl.toString
+        cache.put(urlString, Some(expandedUrl))
+        expandedUrl
     }
   }
 
@@ -55,33 +50,11 @@ object UrlExpander extends Loggable {
 
   private def getLocFromHeader(conn: HttpURLConnection, url: URL): String = {
     val locHeader = conn.getHeaderField("Location")
-    val loc = if (locHeader.startsWith("/")) (new URL(url.getProtocol, url.getHost, locHeader)).toString else locHeader
-    loc
+    if (locHeader.startsWith("/"))
+      (new URL(url.getProtocol, url.getHost, locHeader)).toString
+    else
+      locHeader
   }
 
   private def isRedir(conn: HttpURLConnection) = redirectionCodes.contains(conn.getResponseCode)
-
 }
-
-class UrlsCache extends Loggable {
-  private val expandedUrls = new ConcurrentHashMap[String,CachedExpandedUrl]
-
-  def get(urlString: String): Option[CachedExpandedUrl] = {
-    val ceu = expandedUrls.get(urlString)
-    if (ceu != null) {
-      put(urlString, ceu.url) // Update date
-    }
-    Option(ceu)
-  }
-
-  def put(shortUrl: String, longUrl: Option[String]) = {
-    if (expandedUrls.size > 10000) {
-      debug("Cache reached limit. Clearing.")
-      expandedUrls.clear // TODO replace with LRU
-    }
-    expandedUrls.put(shortUrl, CachedExpandedUrl(new DateTime, longUrl))
-    debug(shortUrl + " -> " + longUrl + " (" + expandedUrls.size + " in cache)")
-  }
-}
-
-case class CachedExpandedUrl(lastUsed: DateTime, url: Option[String])
