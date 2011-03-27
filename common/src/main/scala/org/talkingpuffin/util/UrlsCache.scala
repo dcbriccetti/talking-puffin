@@ -1,26 +1,23 @@
 package org.talkingpuffin.util
 
-import java.util.concurrent.ConcurrentHashMap
-import org.joda.time.DateTime
+import com.redis.RedisClient
 
 class UrlsCache extends Loggable {
-  private val expandedUrls = new ConcurrentHashMap[String,CachedExpandedUrl]
+  val redis = new RedisClient
 
-  def get(urlString: String): Option[CachedExpandedUrl] = {
-    val ceu = expandedUrls.get(urlString)
-    if (ceu != null) {
-      debug("In cache: " + urlString + " -> " + ceu.url)
-      put(urlString, ceu.url) // Update date
+  def get(urlString: String): Option[String] = {
+    val ceu = redis.synchronized { redis.get(urlString) }
+    if (ceu.isDefined) {
+      debug("In cache: " + urlString + " -> " + ceu.get)
     }
-    Option(ceu)
+    ceu
   }
 
-  def put(shortUrl: String, longUrl: Option[String]) = {
-    if (expandedUrls.size > 10000) {
-      debug("Cache reached limit. Clearing.")
-      expandedUrls.clear // TODO replace with LRU
+  def put(shortUrl: String, longUrl: String) = {
+    redis.synchronized {
+      redis.set(shortUrl, longUrl)
+      redis.expire(shortUrl, 60 * 60 * 12)
     }
-    expandedUrls.put(shortUrl, CachedExpandedUrl(new DateTime, longUrl))
-    debug(shortUrl + " -> " + longUrl + " (" + expandedUrls.size + " in cache)")
+    debug(shortUrl + " -> " + longUrl)
   }
 }

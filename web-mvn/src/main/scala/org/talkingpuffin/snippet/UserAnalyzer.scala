@@ -16,6 +16,7 @@ import org.talkingpuffin.user.UserAnalysis
 import org.talkingpuffin.snippet.LineCollector.InfoLine
 import org.talkingpuffin.util._
 import org.apache.commons.lang.StringEscapeUtils
+import java.net.UnknownHostException
 
 /**
  * Snippets for user analysis
@@ -194,7 +195,16 @@ class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
 
   private def expandLink(l: GeneralUserInfo.Link) = {
     val url = l.url.toString
-    try {UrlExpander.expand(url)} catch {case _ => url}
+    val result = try {
+      UrlExpander.expand(url)
+    } catch {
+      case ex =>
+        info(ex.toString)
+        if (! ex.isInstanceOf[UnknownHostException])
+          info(ex.getStackTraceString)
+        url
+    }
+    result
   }
 
   private def tweetsAvailable = // partitionedTweets.is is not defined if error fetching user

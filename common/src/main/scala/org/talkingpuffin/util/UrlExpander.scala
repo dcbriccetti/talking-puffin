@@ -19,16 +19,16 @@ object UrlExpander extends Loggable {
       if (url.getProtocol == "https")
         return urlString
 
-      cache.get(urlString).foreach(expUrl => return expUrl.url.getOrElse(urlString))
+      cache.get(urlString).foreach(expUrl => return if (expUrl != "") expUrl else urlString)
 
       getRedirectionChain(url) match {
         case Nil =>
           debug(urlString + " does not redirect anywhere")
-          cache.put(urlString, None)
+          cache.put(urlString, "")
           throw new NoRedirection(urlString)
         case ultimateUrl :: others =>
           val expandedUrl = ultimateUrl.toString
-          cache.put(urlString, Some(expandedUrl))
+          cache.put(urlString, expandedUrl)
           expandedUrl
       }
     }
