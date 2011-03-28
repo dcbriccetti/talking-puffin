@@ -1,7 +1,7 @@
 package org.talkingpuffin.util
 
 import scala.collection.JavaConversions._
-import java.util.concurrent.{ExecutorCompletionService, Callable, Executors}
+import java.util.concurrent.{Callable, Executors}
 import java.util.{ArrayList, Collections}
 import java.text.NumberFormat
 
@@ -12,16 +12,14 @@ object Parallelizer extends Loggable {
   def run[T,A](numThreads: Int, args: Seq[A], f: (A) => T): List[T] = {
     val timings = Collections.synchronizedList(new ArrayList[Long])
     val pool = Executors.newFixedThreadPool(numThreads)
-    val completionService = new ExecutorCompletionService[T](pool)
-    args.foreach(arg => completionService.submit(new Callable[T] {
+    val result = args.map(arg => pool.submit(new Callable[T] {
       def call = {
         val startTime = System.currentTimeMillis
         val result = f(arg)
         timings.add(System.currentTimeMillis - startTime)
         result
       }
-    }))
-    val result = args map(_ => completionService.take.get)
+    })).map(_.get)
     pool.shutdown
     logStats(timings)
     result.toList
