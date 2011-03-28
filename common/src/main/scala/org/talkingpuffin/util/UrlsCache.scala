@@ -1,26 +1,29 @@
 package org.talkingpuffin.util
 
-import com.redis.RedisClient
+import redis.clients.jedis.JedisPool
+import org.apache.commons.pool.impl.GenericObjectPool.Config
 
 class UrlsCache extends Loggable {
   val r = """.*"port":(\d+).*"hostname":"(.*?)".*"password":"(.*?)".*""".r
 
-  val redis = Option(System.getenv("VMC_SERVICES")) match {
+  val pool = Option(System.getenv("VMC_SERVICES")) match {
     case Some(services) =>
       info(services)
       services match {
         case r(port, hostname, password) => {
-          info("Creating RedisClient for " + hostname + ":" + port)
-          new RedisClient(hostname, Integer.parseInt(port)) { auth(password) }
+          info("Creating JedisPool for " + hostname + ":" + port)
+          new JedisPool(new Config(), hostname, Integer.parseInt(port), 2000, password)
         }
       }
     case None =>
-      info("Creating RedisClient using defaults")
-      new RedisClient
+      info("Creating JedisPool using defaults")
+      new JedisPool(new Config(), "localhost")
   }
 
   def get(urlString: String): Option[String] = {
-    val ceu = redis.synchronized { redis.get(urlString) }
+    val jedis = pool.getResource
+    val ceu = Option(jedis.get(urlString))
+    pool.returnResource(jedis)
     if (ceu.isDefined) {
       debug("In cache: " + urlString + " -> " + ceu.get)
     }
@@ -28,10 +31,10 @@ class UrlsCache extends Loggable {
   }
 
   def put(shortUrl: String, longUrl: String) = {
-    redis.synchronized {
-      redis.set(shortUrl, longUrl)
-      redis.expire(shortUrl, 60 * 60 * 12)
-    }
+    val jedis = pool.getResource
+    jedis.set(shortUrl, longUrl)
+    jedis.expire(shortUrl, 60 * 60 * 12)
+    pool.returnResource(jedis)
     debug(shortUrl + " -> " + longUrl)
   }
 }
