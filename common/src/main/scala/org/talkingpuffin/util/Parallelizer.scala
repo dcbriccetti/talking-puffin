@@ -23,10 +23,7 @@ object Parallelizer extends Loggable {
     }))
     val result = args map(_ => completionService.take.get)
     pool.shutdown
-    val fmt = NumberFormat.getInstance
-    val mean = timings.sum.toDouble / timings.size
-    debug(timings.sorted.map(timing => fmt.format(timing)).toList.mkString(", "))
-    debug("Mean: " + fmt.format(mean) + ", Std dev: " + fmt.format(calcStdDev(timings, mean)))
+    logStats(timings)
     result.toList
   }
 
@@ -37,4 +34,12 @@ object Parallelizer extends Loggable {
     })
     math.sqrt(difSq.sum / timings.size)
   }
+
+  private def logStats[A, T](timings: java.util.List[Long]): Unit = {
+    val fmt = NumberFormat.getInstance
+    val mean = timings.sum.toDouble / timings.size
+    debug(timings.sorted.map(timing => fmt.format(timing)).toList.mkString(", "))
+    debug("Mean: " + fmt.format(mean) + ", Std dev: " + fmt.format(calcStdDev(timings, mean)))
+  }
+
 }
