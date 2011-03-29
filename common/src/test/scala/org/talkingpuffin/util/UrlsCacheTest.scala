@@ -8,12 +8,12 @@ class UrlsCacheTest extends JUnit4(UrlsCacheTest)
 object UrlsCacheTest extends Specification {
   "Cacheing" should {
     "return what was stored" in {
-      val cache = new UrlsCache()
+      val cache = UrlsCache()
       cache.put("a", "ax")
       cache.get("a") must be_==(Some("ax"))
     }
     "return none when not existing" in {
-      val cache = new UrlsCache()
+      val cache = UrlsCache()
       cache.get("[no such key]") must be_==(None)
     }
   }
