@@ -4,6 +4,7 @@ import scala.util.matching.Regex
 import scala.io.Source
 import org.talkingpuffin.ui.SwingInvoke
 import java.net.{HttpURLConnection, URL}
+import org.talkingpuffin.ui.util.Threads
 
 /**
  * Browses the end link in what may be a chain of indirection from the likes of FriendFeed, Digg, and
@@ -38,22 +39,22 @@ object LinkUnIndirector extends Loggable {
    */
   def findLinks(foundCallback: String => Unit, notFoundCallback: String => Unit)(url: String) {
     if (ShortUrl.wrapperBypassableWithSimpleRedirection(new URL(url).getHost)) {
-      ShortUrl.getExpandedUrl(url, foundCallback)
+      ShortUrl.expandUrl(url, foundCallback)
     } else {
       indirectedLinks.find(link => url.contains(link.shortenedUrlPart)) match {
         case Some(il) =>
           debug(url + " contains " + il.shortenedUrlPart)
 
-          new Thread(new Runnable { // Can’t tie up GUI, so new thread here
-            def run = {
-              ShortUrl.getExpandedUrl(url, (expandedUrl: String) => {
+          Threads.pool.execute(new Runnable { // Can’t tie up GUI, so new thread here
+            def run() {
+              ShortUrl.expandUrl(url, (expandedUrl: String) => {
                 foundCallback(expandedUrl)
                 if (expandedUrl.startsWith(il.expandedUrlPart)) {
                   readIntermediatePageAndFindTargetUrl(expandedUrl, il.targetLinkRegex, foundCallback)
                 }
               })
             }
-          }).start
+          })
         case None => notFoundCallback(url)
       }
     }

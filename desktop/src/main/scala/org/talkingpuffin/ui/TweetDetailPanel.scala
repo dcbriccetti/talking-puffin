@@ -149,7 +149,7 @@ class TweetDetailPanel(session: Session,
             }
           }
       
-          ShortUrl.getExpandedUrls(st.getText, replaceUrl)
+          ShortUrl.expandUrls(st.getText, replaceUrl)
         } 
     }
     largeTweet setCaretPosition 0

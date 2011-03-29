@@ -21,9 +21,9 @@ class Relationships extends BaseRelationships with Publisher with ErrorHandler {
     longOpListener.startOperation
 
     new SwingWorker[FriendsFollowers, Object] {
-      def doInBackground = FriendsFollowersFetcher.getUsers(tw, Some(screenName))
+      def doInBackground() = FriendsFollowersFetcher.getUsers(tw, Some(screenName))
 
-      override def done {
+      override def done() {
         longOpListener.stopOperation
         doAndHandleError(() => {
           val ff = get
@@ -32,32 +32,33 @@ class Relationships extends BaseRelationships with Publisher with ErrorHandler {
           Relationships.this.publish(UsersChanged(Relationships.this))
           }, "Error fetching friends and followers for " + tw.getScreenName, session)
       }
-    }.execute
+    }.execute()
   }
 
   def getIds(session: Session, longOpListener: LongOpListener) {
     val tw = session.twitter
+    type Ids = List[Int]
     longOpListener.startOperation
     val pool = Executors.newFixedThreadPool(2)
-    val friendsFuture = pool.submit(new Callable[List[Int]] {
+    val friendsFuture = pool.submit(new Callable[Ids] {
       def call = {tw.getFriendsIDs.getIDs.toList}
     })
-    val followersFuture = pool.submit(new Callable[List[Int]] {
+    val followersFuture = pool.submit(new Callable[Ids] {
       def call = {tw.getFollowersIDs.getIDs.toList}
     })
 
-    new SwingWorker[Tuple2[List[Int],List[Int]], Object] {
-      def doInBackground = (friendsFuture.get, followersFuture.get)
-      override def done {
+    new SwingWorker[(Ids, Ids), Object] {
+      def doInBackground() = (friendsFuture.get, followersFuture.get)
+      override def done() {
         longOpListener.stopOperation
         doAndHandleError(() => {
           val (fr, fo) = get
-          friendIds = fr map {_.toLong}
-          followerIds = fo map {_.toLong}
+          friendIds   = fr.map(_.toLong)
+          followerIds = fo.map(_.toLong)
           Relationships.this.publish(IdsChanged(Relationships.this)) // SwingWorker also has a publish
         }, "Error fetching friend and follower IDs for " + tw.getScreenName, session)
       }
-    }.execute
+    }.execute()
     pool.shutdown()
   }
   

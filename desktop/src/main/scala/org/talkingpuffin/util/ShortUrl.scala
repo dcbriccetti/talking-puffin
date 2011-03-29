@@ -37,18 +37,18 @@ object ShortUrl extends Loggable {
   /**
    * Gets the long form, if there is one, for the specified URL.
    */
-  def getExpandedUrl(url: String, expandedUrlCallback: String => Unit) =
+  def expandUrl(url: String, expandedUrlCallback: String => Unit) =
     if (urlIsShortened(url))
       fetcher.get(expandedUrlCallback)(url)
 
   /**
    * Gets the long forms, if they exist, for all cached shortened URLs found in text.
    */
-  def getExpandedUrls(text: String, provideSourceAndTargetUrl: (String, String) => Unit) = {
+  def expandUrls(text: String, provideSourceAndTargetUrl: (String, String) => Unit) {
     val matcher = LinkExtractor.hyperlinkPattern.matcher(text)
     while (matcher.find) {
       val sourceUrl = matcher.group(1)
-      getExpandedUrl(sourceUrl, (targetUrl: String) => {provideSourceAndTargetUrl(sourceUrl, targetUrl)})
+      expandUrl(sourceUrl, (targetUrl: String) => {provideSourceAndTargetUrl(sourceUrl, targetUrl)})
     }
   }
   

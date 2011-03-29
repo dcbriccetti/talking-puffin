@@ -11,7 +11,7 @@ import ui.{TopFrame}
 object Main {
   val title = "TalkingPuffin" 
   
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]) {
     MacInit init Main.title
     UIManager setLookAndFeel UIManager.getSystemLookAndFeelClassName
     JFrame setDefaultLookAndFeelDecorated true
