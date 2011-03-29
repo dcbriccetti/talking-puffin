@@ -1,10 +1,10 @@
 package org.talkingpuffin.util
 
-import org.slf4j.LoggerFactory
+import org.apache.log4j.Logger
 
 trait Loggable {
   private val cn = getClass.getName
-  val logger = LoggerFactory.getLogger(if (cn endsWith "$") cn.substring(0, cn.length - 1) else cn)
+  val logger = Logger.getLogger(if (cn endsWith "$") cn.substring(0, cn.length - 1) else cn)
   def debug(msg: String) = logger debug msg
   def info (msg: String) = logger info  msg
   def warn (msg: String) = logger warn  msg
