@@ -73,13 +73,7 @@ class RedisCache[T](pool: RedisClientPool, superKey: Option[String])(format: For
 class TrivialCache[T] extends Cache[T](null, null) {
   private val expandedUrls = new ConcurrentHashMap[String,T]
 
-  def get(urlString: String): Option[T] = {
-    val longUrl = expandedUrls.get(urlString)
-    if (longUrl != null) {
-      debug("In cache: " + urlString + " -> " + longUrl)
-    }
-    Option(longUrl)
-  }
+  def get(urlString: String): Option[T] = Option(expandedUrls.get(urlString))
 
   def put(shortUrl: String, longUrl: T, expiration: Int = 0) {
     if (expandedUrls.size > 10000) {

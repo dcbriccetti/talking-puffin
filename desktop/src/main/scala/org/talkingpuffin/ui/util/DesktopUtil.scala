@@ -30,11 +30,7 @@ object DesktopUtil extends Loggable {
     case _ => null
   }
 
-  def browse(uri: String) = if (Desktop.isDesktopSupported) {
-    info("Before sending Browse " + uri)
-    browser ! Browse(uri)
-    info("After sending Browse")
-  }
+  def browse(uri: String) = if (Desktop.isDesktopSupported) browser ! Browse(uri)
 
   def notify(message: String, header: String) = if (SystemTray.isSupported) 
     trayIcon.displayMessage(header, message, TrayIcon.MessageType.INFO)
