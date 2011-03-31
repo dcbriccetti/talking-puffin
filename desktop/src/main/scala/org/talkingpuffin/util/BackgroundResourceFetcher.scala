@@ -9,7 +9,7 @@ import org.talkingpuffin.ui.util.Threads
 import java.util.concurrent.atomic.AtomicBoolean
 import java.io._
 import com.redis.serialization._
-import com.redis.serialization.Parse._
+import com.redis.serialization.Parse.Implicits._
 
 trait BackgroundResourceFetcherMBean {
   def getCacheSize: Int
