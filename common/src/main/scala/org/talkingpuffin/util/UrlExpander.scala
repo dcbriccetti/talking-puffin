@@ -9,7 +9,7 @@ import java.text.NumberFormat
 object UrlExpander extends Loggable {
   class NoRedirection(msg: String) extends Exception(msg)
   private val redirectionCodes = List(301, 302)
-  private val cache = UrlsCache()
+  private val cache = Cache[String]("url")
   private val fmt = NumberFormat.getInstance
 
   def expand(urlString: String): String = {

@@ -4,6 +4,7 @@ import java.awt.Image
 import javax.swing.{ImageIcon}
 import java.net.URL
 import org.talkingpuffin.util._
+import java.io.Serializable
 
 /**
  * Fetches pictures in the background, and calls a method in the event
@@ -29,8 +30,8 @@ object PictureFetcher {
  * A picture fetcher, which when instantiated with an optional scale maximum and a “done” callback,
  * can be called with its requestItem method to request pictures.
  */
-class PictureFetcher(resource: String, scaleTo: Option[Int]) extends BackgroundResourceFetcher[String, ImageWithScaled](resource) 
-    with Loggable {
+class PictureFetcher(resource: String, scaleTo: Option[Int])
+  extends BackgroundResourceFetcher[ImageWithScaled](resource) with Loggable {
   
   def FetchImageRequest(url: String, id: Object, processFinishedImage: (PictureFetcher.ImageReady) => Unit) = 
       new FetchRequest[String,ImageWithScaled](url, id, processFinishedImage)
@@ -50,4 +51,4 @@ class PictureFetcher(resource: String, scaleTo: Option[Int]) extends BackgroundR
 
 }
 
-case class ImageWithScaled(val image: ImageIcon, val scaledImage: Option[ImageIcon])
+case class ImageWithScaled(image: ImageIcon, scaledImage: Option[ImageIcon]) extends Serializable

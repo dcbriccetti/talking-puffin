@@ -8,7 +8,7 @@ import org.talkingpuffin.util.BackgroundResourceFetcher
 /**
  * Geocoding.
  */
-object GeoCoder extends BackgroundResourceFetcher[String, String]("Geo") {
+object GeoCoder extends BackgroundResourceFetcher[String]("Geo") {
   private val locationCache: java.util.Map[String, String] = new MapMaker().softValues().makeMap()
   private val num = """(-?\d+\.\d*)"""
   private val latLongRegex = ("""[^-\d]*""" + num + """,\s*""" + num).r

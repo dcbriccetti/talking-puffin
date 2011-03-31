@@ -12,6 +12,14 @@
     <url>http://TalkingPuffin.org/</url>
     <description>TalkingPuffin common code</description>
 
+    <repositories>
+        <repository>
+            <id>nexus</id>
+            <name>nexus</name>
+            <url>http://nexus.scala-tools.org/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -29,9 +37,9 @@
              <version>2.1.11</version>
          </dependency>
         <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>1.5.0-RC2</version>
+            <groupId>net.debasishg</groupId>
+            <artifactId>redisclient_2.8.1</artifactId>
+            <version>2.3.1</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
