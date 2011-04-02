@@ -1,10 +1,11 @@
 package org.talkingpuffin.ui
 
-import java.awt.Image
 import javax.swing.{ImageIcon}
 import java.net.URL
 import org.talkingpuffin.util._
+import org.talkingpuffin.util.TimeLogger.{run => tlog}
 import java.io.Serializable
+import java.awt.{MediaTracker, Image}
 
 /**
  * Fetches pictures in the background, and calls a method in the event
@@ -33,7 +34,7 @@ object PictureFetcher {
 class PictureFetcher(resource: String, scaleTo: Option[Int])
   extends BackgroundResourceFetcher[ImageWithScaled](resource) with Loggable {
   
-  def FetchImageRequest(url: String, id: Object, processFinishedImage: (PictureFetcher.ImageReady) => Unit) = 
+  def fetchImageRequest(url: String, id: Object, processFinishedImage: (PictureFetcher.ImageReady) => Unit) =
       new FetchRequest[String,ImageWithScaled](url, id, processFinishedImage)
 
   /**
@@ -41,12 +42,12 @@ class PictureFetcher(resource: String, scaleTo: Option[Int])
    * uses that size to produce a scaled version of the image.
    */
   protected def getResourceFromSource(url: String): ImageWithScaled = {
-    val icon = new ImageIcon(new URL(url))
-    ImageWithScaled(icon,
-      scaleTo match {
-        case Some(sideLength) => Some(PictureFetcher.scaleImageToFitSquare(sideLength, icon))
-        case None => None
-      })
+    val icon = tlog(debug, "Create ImageIcon for " + url, {new ImageIcon(new URL(url))})
+    if (icon.getImageLoadStatus != MediaTracker.COMPLETE) {
+      warn("Could not load image for " + url)
+      throw new NoSuchResource(url)
+    }
+    ImageWithScaled(icon, scaleTo.map(sideLength => PictureFetcher.scaleImageToFitSquare(sideLength, icon)))
   }
 
 }
