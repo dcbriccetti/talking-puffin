@@ -43,7 +43,14 @@ class RedisCache[T](pool: RedisClientPool, superKey: Option[String])(format: For
     val key = makeKey(partialKey)
     val valueOp: Option[T] = pool.withClient((client: RedisClient) => {
       debug("Getting " + key)
-      client.get[T](key)(format, parse)
+      try {
+        client.get[T](key)(format, parse)
+      } catch {
+        case ex: Exception =>
+          error(ex.toString)
+          error(ex.getStackTraceString)
+          None
+      }
     })
     if (valueOp.isDefined) {
       debug("In cache: " + key + " -> " + valueOp.get)
