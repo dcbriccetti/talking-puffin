@@ -37,7 +37,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   private var filteredStatuses_ = Array[Status]()
   def filteredStatuses = filteredStatuses_
   
-  var preChangeListener: PreChangeListener = _;
+  var preChangeListener: PreChangeListener = _
   
   listenTo(filterSet)
   reactions += { case FilterSetChanged(s) => filterAndNotify }
