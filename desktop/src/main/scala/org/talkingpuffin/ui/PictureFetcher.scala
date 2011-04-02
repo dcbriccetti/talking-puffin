@@ -12,7 +12,7 @@ import java.awt.{MediaTracker, Image}
  * dispatching thread when done.
  */
 object PictureFetcher extends Loggable {
-  type ImageReady = ResourceReady[String,ImageWithScaled]
+  type ImageReady = ResourceReady[ImageWithScaled]
 
   /** Derives the full size filename from the thumbnail filename */
   def getFullSizeUrl(thumb: String) = Picture.getFullSizeUrl(thumb)
@@ -59,4 +59,4 @@ class PictureFetcher(resource: String, scaleTo: Option[Int])
 case class ImageWithScaled(image: ImageIcon, scaledImage: Option[ImageIcon]) extends Serializable
 
 case class FetchImageRequest(url: String, id: Object, processFinishedImage: (PictureFetcher.ImageReady) => Unit)
-  extends FetchRequest[String,ImageWithScaled](url, id, processFinishedImage)
+  extends FetchRequest[ImageWithScaled](url, id, processFinishedImage)

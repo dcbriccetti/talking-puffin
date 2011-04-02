@@ -12,7 +12,7 @@ object ShortUrl extends Loggable {
     "wapo.st") ::: wrapperBypassableWithSimpleRedirectionHosts
   private val regex = "http://(" + shortenerHosts.map(_.replace(".","""\.""")).mkString("|") + ")/" +
       LinkExtractor.urlCharClass + "*"
-  private type LongUrlReady = ResourceReady[String,String]
+  private type LongUrlReady = ResourceReady[String]
   
   private val fetcher = new BackgroundResourceFetcher[String]("URL") {
     override def getResourceFromSource(urlString: String): String = {

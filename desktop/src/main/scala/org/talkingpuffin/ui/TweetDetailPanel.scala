@@ -196,7 +196,7 @@ class TweetDetailPanel(session: Session,
                   return
                 }
                 case None =>
-                  GeoCoder.requestItem(new FetchRequest[String,String](latLong, user,
+                  GeoCoder.requestItem(new FetchRequest[String](latLong, user,
                     processFinishedGeocodes))
               }
             case None =>
@@ -221,7 +221,7 @@ class TweetDetailPanel(session: Session,
         })
   }
 
-  private def processFinishedGeocodes(resourceReady: ResourceReady[String,String]): Unit = {
+  private def processFinishedGeocodes(resourceReady: ResourceReady[String]): Unit = {
     if (resourceReady.userData == showingUser) {
       animator.stop
       animator.run(showingUser.location, resourceReady.resource,

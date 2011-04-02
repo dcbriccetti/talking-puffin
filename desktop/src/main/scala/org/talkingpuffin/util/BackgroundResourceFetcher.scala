@@ -26,7 +26,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
   val fetcherName = resourceName + " fetcher"
   val log = Logger.getLogger(fetcherName)
   val cache = Cache[Array[Byte]](fetcherName)
-  val requestQueue = new LinkedBlockingQueue[FetchRequest[String,T]]
+  val requestQueue = new LinkedBlockingQueue[FetchRequest[T]]
   val inProgress = Collections.synchronizedSet(new HashSet[String])
   val threadPool = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory(resourceName))
   val running = new AtomicBoolean(true)
@@ -59,7 +59,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
                 }
 
                 SwingInvoke.later{fetchRequest.processResource(
-                    new ResourceReady[String,T](key, fetchRequest.userData, resource))}
+                    new ResourceReady[T](key, fetchRequest.userData, resource))}
               } catch {
                 case e: NoSuchResource => // Do nothing
               }
@@ -97,7 +97,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
    * Requests that an item be fetched in a background thread. If the key is already in the 
    * cache, the request is ignored. 
    */
-  def requestItem(request: FetchRequest[String,T]) =
+  def requestItem(request: FetchRequest[T]) =
     if (! cache.get(request.key).isDefined &&
         ! requestQueue.contains(request) && ! inProgress.contains(request.key)) 
       requestQueue.put(request)
@@ -109,7 +109,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
   def get(provideValue: (T) => Unit)(key: String): Unit = {
     getCachedObject(key) match {
       case Some(value) => provideValue(value)
-      case None => requestItem(new FetchRequest(key, null, (urlReady: ResourceReady[String,T]) => {
+      case None => requestItem(FetchRequest(key, null, (urlReady: ResourceReady[T]) => {
           provideValue(urlReady.resource)
         }))
     }
@@ -137,8 +137,8 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
   }
 }
 
-case class FetchRequest[String,T](key: String, userData: Object, processResource: (ResourceReady[String,T]) => Unit)
+case class FetchRequest[T](key: String, userData: Object, processResource: (ResourceReady[T]) => Unit)
 
-class ResourceReady[String,T](val key: String, val userData: Object, val resource: T)
+class ResourceReady[T](val key: String, val userData: Object, val resource: T)
 
 case class NoSuchResource(resource: String) extends Exception
