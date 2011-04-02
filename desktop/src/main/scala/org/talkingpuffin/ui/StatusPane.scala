@@ -109,8 +109,5 @@ class StatusPane(val session: Session, val longTitle: String, val shortTitle: St
     lastSelectedRows = Nil
   }
   
-  def requestFocusForTable = {
-    info("requestFocusForTable " + shortTitle)
-    table.requestFocusInWindow
-  }
+  def requestFocusForTable = table.requestFocusInWindow
 }
