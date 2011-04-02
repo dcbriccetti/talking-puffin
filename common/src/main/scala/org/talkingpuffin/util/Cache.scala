@@ -42,6 +42,7 @@ class RedisCache[T](pool: RedisClientPool, superKey: Option[String])(format: For
   def get(partialKey: String): Option[T] = {
     val key = makeKey(partialKey)
     val valueOp: Option[T] = pool.withClient((client: RedisClient) => {
+      debug("Getting " + key)
       client.get[T](key)(format, parse)
     })
     if (valueOp.isDefined) {
