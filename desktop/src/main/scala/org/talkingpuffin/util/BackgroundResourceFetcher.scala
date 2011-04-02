@@ -23,15 +23,15 @@ trait BackgroundResourceFetcherMBean {
 abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String, numThreads: Int = 20)
     extends BackgroundResourceFetcherMBean {
 
-  val fetcherName = resourceName + " fetcher"
-  val log = Logger.getLogger(fetcherName)
-  val cache = Cache[Array[Byte]](fetcherName)
-  val requestQueue = new LinkedBlockingQueue[FetchRequest[T]]
-  val inProgress = Collections.synchronizedSet(new HashSet[String])
-  val threadPool = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory(resourceName))
-  val running = new AtomicBoolean(true)
-  var hits = 0
-  var misses = 0
+  private val fetcherName = resourceName + " fetcher"
+  private val log = Logger.getLogger(fetcherName)
+  private val cache = Cache[Array[Byte]](fetcherName)
+  private val requestQueue = new LinkedBlockingQueue[FetchRequest[T]]
+  private val inProgress = Collections.synchronizedSet(new HashSet[String])
+  private val threadPool = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory(resourceName))
+  private val running = new AtomicBoolean(true)
+  private var hits = 0
+  private var misses = 0
 
   val mbs = ManagementFactory.getPlatformMBeanServer
   mbs.registerMBean(this, new ObjectName("TalkingPuffin:name=" + fetcherName))
