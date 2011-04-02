@@ -15,7 +15,7 @@ class PictureCell(model: AbstractTableModel, column: Int) {
     picFetcher.getCachedObject(picUrl) match {
       case Some(imageWithScaled) => imageWithScaled.image
       case None => {
-        picFetcher.requestItem(picFetcher.fetchImageRequest(picUrl, rowIndex.asInstanceOf[Object],
+        picFetcher.requestItem(FetchImageRequest(picUrl, rowIndex.asInstanceOf[Object],
           (imageReady: PictureFetcher.ImageReady) => {
             if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
               val row = imageReady.userData.asInstanceOf[Int]

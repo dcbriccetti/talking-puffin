@@ -238,8 +238,8 @@ class TweetDetailPanel(session: Session,
   def prefetch(user: User) {
     val smallUrl = user.getProfileImageURL.toString
     val mediumUrl = PictureFetcher.getFullSizeUrl(smallUrl)
-    List(smallUrl, mediumUrl).foreach(url => medThumbPicFetcher.requestItem(
-        medThumbPicFetcher.fetchImageRequest(url, null, processFinishedPicture)))
+    List(smallUrl, mediumUrl).foreach(url =>
+      medThumbPicFetcher.requestItem(FetchImageRequest(url, null, processFinishedPicture)))
   }
 
   private def showMediumPicture(picUrl: String) {
@@ -249,10 +249,9 @@ class TweetDetailPanel(session: Session,
       setPicLabelIconAndBigPic(medThumbPicFetcher.getCachedObject(fullSizeUrl) match {
         case Some(images) => images
         case None => 
-          medThumbPicFetcher.requestItem(medThumbPicFetcher.fetchImageRequest(fullSizeUrl, null, processFinishedPicture))
+          medThumbPicFetcher.requestItem(FetchImageRequest(fullSizeUrl, null, processFinishedPicture))
           ImageWithScaled(Thumbnail.transparentMedium, None)
-    })
-  }
+    })}
   }
   
   private def setPicLabelIconAndBigPic(imageWithScaled: ImageWithScaled) {

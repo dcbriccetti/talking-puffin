@@ -1,5 +1,4 @@
 package org.talkingpuffin.util
-import java.util.concurrent.LinkedBlockingQueue
 import java.util.{Collections, HashSet}
 import org.talkingpuffin.ui.SwingInvoke
 import management.ManagementFactory
@@ -10,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.io._
 import com.redis.serialization._
 import com.redis.serialization.Parse.Implicits._
+import java.util.concurrent.{Executors, LinkedBlockingQueue}
 
 trait BackgroundResourceFetcherMBean {
   def getCacheSize: Int
@@ -20,7 +20,7 @@ trait BackgroundResourceFetcherMBean {
 /**
  * Fetches resources in the background, and calls a function in the Swing event thread when ready.
  */
-abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String)
+abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String, numThreads: Int = 20)
     extends BackgroundResourceFetcherMBean {
 
   val fetcherName = resourceName + " fetcher"
@@ -28,6 +28,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
   val cache = Cache[Array[Byte]](fetcherName)
   val requestQueue = new LinkedBlockingQueue[FetchRequest[String,T]]
   val inProgress = Collections.synchronizedSet(new HashSet[String])
+  val threadPool = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory(resourceName))
   val running = new AtomicBoolean(true)
   var hits = 0
   var misses = 0
@@ -46,7 +47,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
           val key = fetchRequest.key
           inProgress.add(key)
 
-          Threads.pool.execute(new Runnable {
+          threadPool.execute(new Runnable {
             def run() {
               try {
                 val resource = cache.get(key) match {
@@ -75,13 +76,20 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
    * Returns the object if it exists in the cache, otherwise None.
    */
   def getCachedObject(key: String): Option[T] = {
-    val obj = cache.get(key)
-    if (obj.isDefined) {
-      hits += 1
-      Some(deSerialize(obj.get))
-    } else {
-      misses += 1
-      None
+    try {
+      cache.get(key) match {
+        case Some(obj) =>
+          hits += 1
+          Some(deSerialize(obj))
+        case None =>
+          misses += 1
+          None
+      }
+    } catch {
+      case ex: Exception => {
+        error(ex.toString)
+        error(ex.getStackTraceString)
+      }
     }
   }
 
@@ -122,13 +130,11 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
     os.toByteArray
   }
 
-  private def deSerialize[T <: Serializable](stream: Array[Byte]): T = {
+  private def deSerialize(stream: Array[Byte]): T = {
     val is = new ByteArrayInputStream(stream)
     val ois = new ObjectInputStream(is)
     ois.readObject.asInstanceOf[T]
   }
-
-
 }
 
 case class FetchRequest[String,T](key: String, userData: Object, processResource: (ResourceReady[String,T]) => Unit)

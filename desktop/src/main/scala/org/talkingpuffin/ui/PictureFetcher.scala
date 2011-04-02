@@ -11,7 +11,7 @@ import java.awt.{MediaTracker, Image}
  * Fetches pictures in the background, and calls a method in the event
  * dispatching thread when done.
  */
-object PictureFetcher {
+object PictureFetcher extends Loggable {
   type ImageReady = ResourceReady[String,ImageWithScaled]
 
   /** Derives the full size filename from the thumbnail filename */
@@ -21,9 +21,16 @@ object PictureFetcher {
     val image = imageIcon.getImage
     val w = image.getWidth(null)
     val h = image.getHeight(null)
-    val newW: Int = if (w > h) Math.min(w, sideLength) else -1
-    val newH: Int = if (w > h) -1 else Math.min(h, sideLength)
-    new ImageIcon(image.getScaledInstance(newW, newH, Image.SCALE_SMOOTH))
+    if (w <= sideLength && h <= sideLength)
+      imageIcon
+    else {
+      val newW: Int = if (w > h) math.min(w, sideLength) else -1
+      val newH: Int = if (w > h) -1 else math.min(h, sideLength)
+      val scaledImage = tlog(debug, "Scale " + w + " x " + h + " " + imageIcon, {
+        new ImageIcon(image.getScaledInstance(newW, newH, Image.SCALE_SMOOTH))
+      })
+      scaledImage
+    }
   }
 }
 
@@ -34,9 +41,6 @@ object PictureFetcher {
 class PictureFetcher(resource: String, scaleTo: Option[Int])
   extends BackgroundResourceFetcher[ImageWithScaled](resource) with Loggable {
   
-  def fetchImageRequest(url: String, id: Object, processFinishedImage: (PictureFetcher.ImageReady) => Unit) =
-      new FetchRequest[String,ImageWithScaled](url, id, processFinishedImage)
-
   /**
    * Given the URL provided, fetches an image, and if the PictureFetcher was created with a scaleTo value,
    * uses that size to produce a scaled version of the image.
@@ -53,3 +57,6 @@ class PictureFetcher(resource: String, scaleTo: Option[Int])
 }
 
 case class ImageWithScaled(image: ImageIcon, scaledImage: Option[ImageIcon]) extends Serializable
+
+case class FetchImageRequest(url: String, id: Object, processFinishedImage: (PictureFetcher.ImageReady) => Unit)
+  extends FetchRequest[String,ImageWithScaled](url, id, processFinishedImage)
