@@ -33,8 +33,9 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
   private var hits = 0
   private var misses = 0
 
-  val mbs = ManagementFactory.getPlatformMBeanServer
+  private val mbs = ManagementFactory.getPlatformMBeanServer
   mbs.registerMBean(this, new ObjectName("TalkingPuffin:name=" + fetcherName))
+
   def getCacheSize = cache.size
   def getCacheHits = hits
   def getCacheMisses = misses
@@ -86,7 +87,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
           None
       }
     } catch {
-      case ex: Exception => {
+      case ex: Throwable => {
         error(ex.toString)
         error(ex.getStackTraceString)
       }

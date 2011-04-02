@@ -46,7 +46,7 @@ class RedisCache[T](pool: RedisClientPool, superKey: Option[String])(format: For
       try {
         client.get[T](key)(format, parse)
       } catch {
-        case ex: Exception =>
+        case ex: Throwable =>
           error(ex.toString)
           error(ex.getStackTraceString)
           None
