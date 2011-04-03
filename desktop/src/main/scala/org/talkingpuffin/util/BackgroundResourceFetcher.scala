@@ -114,9 +114,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
           res
       }
 
-      SwingInvoke.later {
-        fetchRequest.processResource(new ResourceReady[T](key, fetchRequest.userData, resource))
-      }
+      fetchRequest.returnResult(new ResourceReady[T](key, fetchRequest.userData, resource))
     } catch {
       case e: NoSuchResource => // Do nothing
     }
@@ -125,7 +123,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
 
 }
 
-case class FetchRequest[T](key: String, userData: Object, processResource: (ResourceReady[T]) => Unit)
+case class FetchRequest[T](key: String, userData: Object, returnResult: (ResourceReady[T]) => Unit)
 
 class ResourceReady[T](val key: String, val userData: Object, val resource: T)
 

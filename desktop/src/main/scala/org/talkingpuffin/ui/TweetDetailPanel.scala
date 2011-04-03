@@ -88,7 +88,7 @@ class TweetDetailPanel(session: Session,
     }
 
     table.getSelectionModel.addListSelectionListener(new ListSelectionListener {
-      def valueChanged(e: ListSelectionEvent) = {
+      def valueChanged(e: ListSelectionEvent) {
         if (! e.getValueIsAdjusting) {
           if (activateable.isActive && table.getSelectedRowCount == 1) {
             try {
@@ -109,7 +109,7 @@ class TweetDetailPanel(session: Session,
     })
   }
 
-  private def addUserDescription {
+  private def addUserDescription() {
     userDescription = new UserDescription
     userDescScrollPane = new JScrollPane {
       val dim = new Dimension(400, Thumbnail.MEDIUM_SIZE); setMinimumSize(dim); setPreferredSize(dim)
@@ -157,9 +157,9 @@ class TweetDetailPanel(session: Session,
     showMediumPicture(userAndStatus.origUser.getProfileImageURL.toString)
   }
   
-  def clearStatusDetails {
+  def clearStatusDetails() {
     session.clearMessage()
-    animator.stop
+    animator.stop()
     showingUrl = null
     picLabel.icon = Thumbnail.transparentMedium
     userDescription.text = null
@@ -169,10 +169,10 @@ class TweetDetailPanel(session: Session,
     picture.visible = false
   }
   
-  def showBigPicture = bigPic.showBigPicture(showingUrl, peer)
+  def showBigPicture() = bigPic.showBigPicture(showingUrl, peer)
 
   private def setText(user: User, statusOp: Option[Status]) {
-    animator.stop
+    animator.stop()
     showingUser = user
     val rawLocationOfShowingItem = user.location
 
@@ -196,8 +196,7 @@ class TweetDetailPanel(session: Session,
                   return
                 }
                 case None =>
-                  GeoCoder.requestItem(new FetchRequest[String](latLong, user,
-                    processFinishedGeocodes))
+                  GeoCoder.requestItem(FetchRequest[String](latLong, user, processFinishedGeocodes))
               }
             case None =>
           }
@@ -221,20 +220,20 @@ class TweetDetailPanel(session: Session,
         })
   }
 
-  private def processFinishedGeocodes(resourceReady: ResourceReady[String]): Unit = {
+  private def processFinishedGeocodes(resourceReady: ResourceReady[String]) = {
     if (resourceReady.userData == showingUser) {
-      animator.stop
-      animator.run(showingUser.location, resourceReady.resource,
-          (text: String) => setText(showingUser, text))
+      SwingInvoke.later {
+        animator.stop()
+        animator.run(showingUser.location, resourceReady.resource, (text: String) => setText(showingUser, text))
+      }
     }
   }
   
-  private def processFinishedPicture(imageReady: PictureFetcher.ImageReady) = {
-    if (imageReady.key.equals(showingUrl)) {
-      setPicLabelIconAndBigPic(imageReady.resource) 
-    }
+  private def processFinishedPicture(imageReady: PictureFetcher.ImageReady) = SwingInvoke.later {
+    if (imageReady.key.equals(showingUrl))
+      setPicLabelIconAndBigPic(imageReady.resource)
   }
-  
+
   def prefetch(user: User) {
     val smallUrl = user.getProfileImageURL.toString
     val mediumUrl = PictureFetcher.getFullSizeUrl(smallUrl)

@@ -16,7 +16,7 @@ class PictureCell(model: AbstractTableModel, column: Int) {
       case Some(imageWithScaled) => imageWithScaled.image
       case None => {
         picFetcher.requestItem(FetchImageRequest(picUrl, rowIndex.asInstanceOf[Object],
-          (imageReady: PictureFetcher.ImageReady) => {
+          (imageReady: PictureFetcher.ImageReady) => SwingInvoke.later {
             if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
               val row = imageReady.userData.asInstanceOf[Int]
               model.fireTableCellUpdated(row, column)
