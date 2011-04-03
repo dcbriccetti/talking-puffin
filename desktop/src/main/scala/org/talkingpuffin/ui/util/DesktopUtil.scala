@@ -13,14 +13,14 @@ object DesktopUtil extends Loggable {
   private case class Browse(uri: String)
 
   private val browser = actorOf(new Actor() {
-      def receive = {
-        case browse: Browse => {
-          info("Before desktop.browse")
-          Desktop.getDesktop.browse(new URI(browse.uri))
-          info("After desktop.browse")
-        }
+    def receive = {
+      case browse: Browse => {
+        info("Before desktop.browse")
+        Desktop.getDesktop.browse(new URI(browse.uri))
+        info("After desktop.browse")
       }
-    }).start()
+    }
+  }).start()
 
   private val trayIcon: TrayIcon = SystemTray.isSupported match {
     case true =>
