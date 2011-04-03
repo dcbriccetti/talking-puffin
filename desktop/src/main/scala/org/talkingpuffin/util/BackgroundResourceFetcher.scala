@@ -1,16 +1,12 @@
 package org.talkingpuffin.util
-import scala.collection.JavaConversions._
+import java.io._
+import java.util.concurrent._
 import java.util.{Collections, HashSet}
-import org.talkingpuffin.ui.SwingInvoke
+import scala.collection.JavaConversions._
 import management.ManagementFactory
 import javax.management.ObjectName
 import org.apache.log4j.Logger
-import org.talkingpuffin.ui.util.Threads
-import java.util.concurrent.atomic.AtomicBoolean
-import java.io._
-import com.redis.serialization._
 import com.redis.serialization.Parse.Implicits._
-import java.util.concurrent._
 
 trait BackgroundResourceFetcherMBean {
   def getCacheSize: Int
