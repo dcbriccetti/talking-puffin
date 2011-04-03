@@ -92,10 +92,13 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
 
   private def submitRequestAsRunnable(fetchRequest: FetchRequest[T]) {
     val key = fetchRequest.key
-    log.debug("Enqueueing Runnable. Now contains " +
-      runnableQueue.toList.map(_.asInstanceOf[RunnableFetch]).map(_.key).mkString(", ") + ".")
     inProgress.add(key)
     threadPool.execute(new RunnableFetch(key) { override def run() { processFetchRequest(fetchRequest) }})
+    log.debug("Enqueued Runnable." + (runnableQueue.toList match {
+      case Nil => ""
+      case list => " Now contains " +
+        list.map(_.asInstanceOf[RunnableFetch].key).mkString(", ") + "."
+    }))
   }
 
   private def processFetchRequest(fetchRequest: FetchRequest[T]) {
