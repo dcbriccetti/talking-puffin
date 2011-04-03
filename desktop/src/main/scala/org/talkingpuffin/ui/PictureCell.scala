@@ -7,7 +7,7 @@ import javax.swing.{Icon}
  * A JTable cell with an asynchronously-loaded image in it.
  */
 
-object picFetcher extends PictureFetcher("Picture cell", None, 5)
+object picFetcher extends PictureFetcher("Picture cell", None, 5, Some(100))
 
 class PictureCell(model: AbstractTableModel, column: Int) {
     

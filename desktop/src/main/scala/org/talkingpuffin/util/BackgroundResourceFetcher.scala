@@ -1,4 +1,5 @@
 package org.talkingpuffin.util
+import scala.collection.JavaConversions._
 import java.util.{Collections, HashSet}
 import org.talkingpuffin.ui.SwingInvoke
 import management.ManagementFactory
@@ -20,18 +21,17 @@ trait BackgroundResourceFetcherMBean {
 /**
  * Fetches resources in the background, and calls a function in the Swing event thread when ready.
  */
-abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String, numThreads: Int = 10)
-    extends BackgroundResourceFetcherMBean {
+abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String, numThreads: Int = 10,
+    waitingLimit: Option[Int] = None) extends BackgroundResourceFetcherMBean {
 
   private val fetcherName = resourceName + " fetcher"
   private val log = Logger.getLogger(fetcherName)
   private val cache = Cache[Array[Byte]](fetcherName)
-  private val requestQueue = new LinkedBlockingQueue[FetchRequest[T]]
   private val inProgress = Collections.synchronizedSet(new HashSet[String])
+  private case class RunnableFetch(key: String) extends Runnable { def run() {}}
   private val runnableQueue = new LinkedBlockingDeque[Runnable] { override def take() = super.takeLast() }
   private val threadPool = new ThreadPoolExecutor(numThreads, numThreads, 30, TimeUnit.SECONDS,
     runnableQueue, new NamedThreadFactory(resourceName))
-  private val running = new AtomicBoolean(true)
   private var hits = 0
   private var misses = 0
 
@@ -42,41 +42,6 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
   def getCacheHits = hits
   def getCacheMisses = misses
 
-  Threads.pool.execute(new Runnable {
-    def run() {
-      while (running.get)
-        try {
-          val fetchRequest = requestQueue.take
-          val key = fetchRequest.key
-          inProgress.add(key)
-
-          log.debug("Enqueueing Runnable. Size now " + runnableQueue.size)
-          threadPool.execute(new Runnable {
-            def run() {
-              log.debug("Runnable queue size: " + runnableQueue.size)
-              try {
-                val resource = cache.get(key) match {
-                  case Some(res: Array[Byte]) => deSerialize(res)
-                  case None =>
-                    val res = getResourceFromSource(key)
-                    cache.put(key, serialize(res))
-                    res
-                }
-
-                SwingInvoke.later{fetchRequest.processResource(
-                    new ResourceReady[T](key, fetchRequest.userData, resource))}
-              } catch {
-                case e: NoSuchResource => // Do nothing
-              }
-              inProgress.remove(key)
-            }
-          })
-        } catch {
-          case e: InterruptedException => // This is how the thread is ended
-        }
-    }
-  })
-
   /**
    * Returns the object if it exists in the cache, otherwise None.
    */
@@ -85,7 +50,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
       cache.get(key) match {
         case Some(obj) =>
           hits += 1
-          Some(deSerialize(obj))
+          Some(Serializer.deSerialize(obj))
         case None =>
           misses += 1
           None
@@ -103,9 +68,16 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
    * cache, the request is ignored. 
    */
   def requestItem(request: FetchRequest[T]) =
-    if (! cache.get(request.key).isDefined &&
-        ! requestQueue.contains(request) && ! inProgress.contains(request.key)) 
-      requestQueue.put(request)
+    if (! cache.get(request.key).isDefined && !inProgress.contains(request.key)) {
+      waitingLimit.foreach(limit =>
+        while (runnableQueue.size > limit - 1) {
+          val runnableFetch = runnableQueue.takeFirst.asInstanceOf[RunnableFetch]
+          inProgress.remove(runnableFetch.key)
+          log.debug("Removed old fetch request for " + runnableFetch.key)
+        }
+      )
+      submitRequestAsRunnable(request)
+    }
   
   /**
    * Gets the item from the cache if present and calls the callback in the same thread, or
@@ -120,26 +92,37 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
     }
   }
   
-  def stop() {
-    running.set(false)
-  }
-  
   protected def getResourceFromSource(key: String): T
 
-  private def serialize(obj: AnyRef): Array[Byte] = {
-    val os = new ByteArrayOutputStream()
-    val oos = new ObjectOutputStream(os)
-    oos.writeObject(obj)
-    oos.close()
-    os.close()
-    os.toByteArray
+  private def submitRequestAsRunnable(fetchRequest: FetchRequest[T]) {
+    val key = fetchRequest.key
+    log.debug("Enqueueing Runnable. Now contains " +
+      runnableQueue.toList.map(_.asInstanceOf[RunnableFetch]).map(_.key).mkString(", ") + ".")
+    inProgress.add(key)
+    threadPool.execute(new RunnableFetch(key) { override def run() { processFetchRequest(fetchRequest) }})
   }
 
-  private def deSerialize(stream: Array[Byte]): T = {
-    val is = new ByteArrayInputStream(stream)
-    val ois = new ObjectInputStream(is)
-    ois.readObject.asInstanceOf[T]
+  private def processFetchRequest(fetchRequest: FetchRequest[T]) {
+    log.debug("Runnable queue size: " + runnableQueue.size)
+    val key = fetchRequest.key
+    try {
+      val resource = cache.get(key) match {
+        case Some(res: Array[Byte]) => Serializer.deSerialize(res)
+        case None =>
+          val res = getResourceFromSource(key)
+          cache.put(key, Serializer.serialize(res))
+          res
+      }
+
+      SwingInvoke.later {
+        fetchRequest.processResource(new ResourceReady[T](key, fetchRequest.userData, resource))
+      }
+    } catch {
+      case e: NoSuchResource => // Do nothing
+    }
+    inProgress.remove(key)
   }
+
 }
 
 case class FetchRequest[T](key: String, userData: Object, processResource: (ResourceReady[T]) => Unit)

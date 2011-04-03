@@ -38,8 +38,9 @@ object PictureFetcher extends Loggable {
  * A picture fetcher, which when instantiated with an optional scale maximum and a “done” callback,
  * can be called with its requestItem method to request pictures.
  */
-class PictureFetcher(resource: String, scaleTo: Option[Int], numThreads: Int)
-  extends BackgroundResourceFetcher[ImageWithScaled](resource, numThreads = numThreads) with Loggable {
+class PictureFetcher(resource: String, scaleTo: Option[Int], numThreads: Int, waitingLimit: Option[Int])
+  extends BackgroundResourceFetcher[ImageWithScaled](resource, numThreads = numThreads,
+    waitingLimit = waitingLimit) with Loggable {
   
   /**
    * Given the URL provided, fetches an image, and if the PictureFetcher was created with a scaleTo value,
