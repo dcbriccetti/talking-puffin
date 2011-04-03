@@ -6,6 +6,7 @@ import org.talkingpuffin.util._
 import org.talkingpuffin.util.TimeLogger.{run => tlog}
 import java.io.Serializable
 import java.awt.{MediaTracker, Image}
+import akka.actor.ActorRef
 
 /**
  * Fetches pictures in the background, and calls a method in the event
@@ -58,6 +59,3 @@ class PictureFetcher(resource: String, scaleTo: Option[Int], numThreads: Int, wa
 }
 
 case class ImageWithScaled(image: ImageIcon, scaledImage: Option[ImageIcon]) extends Serializable
-
-case class FetchImageRequest(url: String, id: Object, processFinishedImage: (PictureFetcher.ImageReady) => Unit)
-  extends FetchRequest[ImageWithScaled](url, id, processFinishedImage)

@@ -18,6 +18,11 @@
             <name>nexus</name>
             <url>http://nexus.scala-tools.org/content/repositories/releases/</url>
         </repository>
+        <repository>
+          <id>akka.repository</id>
+          <name>Akka Maven Repository</name>
+          <url>http://akka.io/repository</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -40,6 +45,11 @@
             <groupId>net.debasishg</groupId>
             <artifactId>redisclient_2.8.1</artifactId>
             <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>se.scalablesolutions.akka</groupId>
+            <artifactId>akka-actor</artifactId>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>

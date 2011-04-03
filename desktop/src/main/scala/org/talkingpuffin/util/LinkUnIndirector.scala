@@ -5,6 +5,9 @@ import scala.io.Source
 import org.talkingpuffin.ui.SwingInvoke
 import java.net.{HttpURLConnection, URL}
 import org.talkingpuffin.ui.util.Threads
+import akka.actor.Actor._
+import akka.actor.{ActorRef, Actor}
+import org.talkingpuffin.util.ActorUtil.swingResourceReady
 
 /**
  * Browses the end link in what may be a chain of indirection from the likes of FriendFeed, Digg, and
@@ -29,7 +32,7 @@ object LinkUnIndirector extends Loggable {
       IndirectedLink("dzone.com", "http://www.dzone.com/", dzoneTarget)
     )
   }
-  
+
   /**
    * Finds the target(s) of the specified URL, bypassing any “wrappers” 
    * like FriendFeed, Digg, and StumbleUpon. In the case of the 
@@ -39,7 +42,7 @@ object LinkUnIndirector extends Loggable {
    */
   def findLinks(foundCallback: String => Unit, notFoundCallback: String => Unit)(url: String) {
     if (ShortUrl.wrapperBypassableWithSimpleRedirection(new URL(url).getHost)) {
-      ShortUrl.expandUrl(url, foundCallback)
+      ShortUrl.expandUrl(url, swingResourceReady(foundCallback))
     } else {
       indirectedLinks.find(link => url.contains(link.shortenedUrlPart)) match {
         case Some(il) =>
@@ -47,14 +50,12 @@ object LinkUnIndirector extends Loggable {
 
           Threads.pool.execute(new Runnable { // Can’t tie up GUI, so new thread here
             def run() {
-              ShortUrl.expandUrl(url, (expandedUrl: String) => {
+              ShortUrl.expandUrl(url, swingResourceReady((expandedUrl: String) => {
                 foundCallback(expandedUrl)
                 if (expandedUrl.startsWith(il.expandedUrlPart)) {
                   readIntermediatePageAndFindTargetUrl(expandedUrl, il.targetLinkRegex, foundCallback)
                 }
-              })
-            }
-          })
+              }))}})
         case None => notFoundCallback(url)
       }
     }

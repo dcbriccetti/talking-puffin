@@ -7,6 +7,9 @@ import management.ManagementFactory
 import javax.management.ObjectName
 import org.apache.log4j.Logger
 import com.redis.serialization.Parse.Implicits._
+import akka.actor._
+import akka.actor.Actor._
+import akka.actor.ActorRef
 
 trait BackgroundResourceFetcherMBean {
   def getCacheSize: Int
@@ -63,7 +66,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
    * Requests that an item be fetched in a background thread. If the key is already in the 
    * cache, the request is ignored. 
    */
-  def requestItem(request: FetchRequest[T]) =
+  def requestItem(request: FetchRequest) =
     if (! cache.get(request.key).isDefined && !inProgress.contains(request.key)) {
       waitingLimit.foreach(limit =>
         while (runnableQueue.size > limit - 1) {
@@ -79,18 +82,16 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
    * Gets the item from the cache if present and calls the callback in the same thread, or
    * submits a request for the item.
    */
-  def get(provideValue: (T) => Unit)(key: String): Unit = {
+  def get(resultProcessor: ActorRef)(key: String): Unit = {
     getCachedObject(key) match {
-      case Some(value) => provideValue(value)
-      case None => requestItem(FetchRequest(key, null, (urlReady: ResourceReady[T]) => {
-          provideValue(urlReady.resource)
-        }))
+      case Some(value) => resultProcessor ! value
+      case None => requestItem(FetchRequest(key, null, resultProcessor))
     }
   }
   
   protected def getResourceFromSource(key: String): T
 
-  private def submitRequestAsRunnable(fetchRequest: FetchRequest[T]) {
+  private def submitRequestAsRunnable(fetchRequest: FetchRequest) {
     val key = fetchRequest.key
     inProgress.add(key)
     threadPool.execute(new RunnableFetch(key) { override def run() { processFetchRequest(fetchRequest) }})
@@ -101,7 +102,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
     }))
   }
 
-  private def processFetchRequest(fetchRequest: FetchRequest[T]) {
+  private def processFetchRequest(fetchRequest: FetchRequest) {
     log.debug("Runnable queue size: " + runnableQueue.size)
     val key = fetchRequest.key
     try {
@@ -113,7 +114,7 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
           res
       }
 
-      fetchRequest.returnResult(ResourceReady(fetchRequest, resource))
+      fetchRequest.resultProcessor ! ResourceReady(fetchRequest, resource)
     } catch {
       case e: NoSuchResource => // Do nothing
     }
@@ -122,8 +123,8 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
 
 }
 
-case class FetchRequest[T](key: String, userData: Object, returnResult: (ResourceReady[T]) => Unit)
+case class FetchRequest(key: String, userData: Object, resultProcessor: ActorRef)
 
-case class ResourceReady[T](request: FetchRequest[T], resource: T)
+case class ResourceReady[T](request: FetchRequest, resource: T)
 
 case class NoSuchResource(resource: String) extends Exception

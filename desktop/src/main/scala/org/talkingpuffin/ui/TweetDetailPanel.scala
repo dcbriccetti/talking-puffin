@@ -18,6 +18,9 @@ import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.apix.RichUser._
 import org.talkingpuffin.util.{EscapeHtml}
 import util.{Activateable, CenteredPicture, TextChangingAnimator}
+import akka.actor._
+import akka.actor.Actor._
+import PictureFetcher.ImageReady
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE), 2, Some(5))
 
@@ -171,6 +174,15 @@ class TweetDetailPanel(session: Session,
   
   def showBigPicture() = bigPic.showBigPicture(showingUrl, peer)
 
+  private val finishGeoActor = actorOf(new Actor() {
+    protected def receive = {
+      case resourceReady: ResourceReady[String] =>
+        SwingInvoke.later {
+          processFinishedGeocodes(resourceReady)
+        }
+    }
+  }).start()
+
   private def setText(user: User, statusOp: Option[Status]) {
     animator.stop()
     showingUser = user
@@ -196,7 +208,7 @@ class TweetDetailPanel(session: Session,
                   return
                 }
                 case None =>
-                  GeoCoder.requestItem(FetchRequest[String](latLong, user, processFinishedGeocodes))
+                  GeoCoder.requestItem(FetchRequest(latLong, user, finishGeoActor))
               }
             case None =>
           }
@@ -230,15 +242,22 @@ class TweetDetailPanel(session: Session,
   }
   
   private def processFinishedPicture(imageReady: PictureFetcher.ImageReady) = SwingInvoke.later {
-    if (imageReady.request.key.equals(showingUrl))
-      setPicLabelIconAndBigPic(imageReady.resource)
   }
+
+  private val processFinishedActor = actorOf(new Actor() {
+    def receive = {
+      case imageReady: ImageReady => SwingInvoke.later {
+        if (imageReady.request.key.equals(showingUrl))
+          setPicLabelIconAndBigPic(imageReady.resource)
+      }
+    }
+  }).start()
 
   def prefetch(user: User) {
     val smallUrl = user.getProfileImageURL.toString
     val mediumUrl = PictureFetcher.getFullSizeUrl(smallUrl)
     List(smallUrl, mediumUrl).foreach(url =>
-      medThumbPicFetcher.requestItem(FetchImageRequest(url, null, processFinishedPicture)))
+      medThumbPicFetcher.requestItem(FetchRequest(url, null, processFinishedActor)))
   }
 
   private def showMediumPicture(picUrl: String) {
@@ -248,7 +267,7 @@ class TweetDetailPanel(session: Session,
       setPicLabelIconAndBigPic(medThumbPicFetcher.getCachedObject(fullSizeUrl) match {
         case Some(images) => images
         case None => 
-          medThumbPicFetcher.requestItem(FetchImageRequest(fullSizeUrl, null, processFinishedPicture))
+          medThumbPicFetcher.requestItem(FetchRequest(fullSizeUrl, null, processFinishedActor))
           ImageWithScaled(Thumbnail.transparentMedium, None)
     })}
   }

@@ -1,5 +1,9 @@
 package org.talkingpuffin.util
 
+import akka.actor.Actor._
+import akka.actor.{ActorRef, Actor}
+import org.talkingpuffin.ui.SwingInvoke
+
 /**
  * URL shortening and expanding.
  */
@@ -37,9 +41,9 @@ object ShortUrl extends Loggable {
   /**
    * Gets the long form, if there is one, for the specified URL.
    */
-  def expandUrl(url: String, expandedUrlCallback: String => Unit) =
+  def expandUrl(url: String, resultProcessor: ActorRef) =
     if (urlIsShortened(url))
-      fetcher.get(expandedUrlCallback)(url)
+      fetcher.get(resultProcessor)(url)
 
   /**
    * Gets the long forms, if they exist, for all cached shortened URLs found in text.
@@ -48,7 +52,13 @@ object ShortUrl extends Loggable {
     val matcher = LinkExtractor.hyperlinkPattern.matcher(text)
     while (matcher.find) {
       val sourceUrl = matcher.group(1)
-      expandUrl(sourceUrl, (targetUrl: String) => {provideSourceAndTargetUrl(sourceUrl, targetUrl)})
+      expandUrl(sourceUrl, actorOf(new Actor() {
+        def receive = {
+          case resourceReady: ResourceReady[String] => SwingInvoke.later {
+            provideSourceAndTargetUrl(sourceUrl, resourceReady.resource)
+          }
+        }
+      }).start())
     }
   }
   

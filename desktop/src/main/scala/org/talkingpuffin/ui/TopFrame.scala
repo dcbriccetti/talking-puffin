@@ -12,6 +12,8 @@ import util.{AppEvent, eventDistributor}
 import twitter4j.{RateLimitStatusListener, Twitter, User, RateLimitStatusEvent}
 import swing._
 import swing.TabbedPane.Page
+import akka.actor.Actor._
+import akka.actor.{ActorRef, Actor}
 
 /**
  * The top-level application Swing frame window. There is one per user session.
@@ -57,12 +59,18 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
     val userPic = new Label
     val picFetcher = new PictureFetcher("Frame picture " + hashCode, None, 1, None)
     picFetcher.requestItem(FetchRequest(tw.showUser(tw.getScreenName).getProfileImageURL.toString, null,
-      (imageReady: PictureFetcher.ImageReady) => SwingInvoke.later {
-        val icon = imageReady.resource.image
-        if (icon.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
-          userPic.icon = icon
+      actorOf(new Actor() {
+        def receive = {
+          case imageReady: PictureFetcher.ImageReady =>
+            SwingInvoke.later {
+              val icon = imageReady.resource.image
+              if (icon.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
+                userPic.icon = icon
+              }
+            }
         }
-      }))
+      }).start()
+    ))
     add(userPic, new Constraints { grid = (0,0); gridheight=2})
     add(session.statusMsgLabel, new Constraints {
       grid = (1,0); anchor=GridBagPanel.Anchor.West; fill = GridBagPanel.Fill.Horizontal; weightx = 1;  
