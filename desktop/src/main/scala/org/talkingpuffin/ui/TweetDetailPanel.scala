@@ -221,7 +221,7 @@ class TweetDetailPanel(session: Session,
   }
 
   private def processFinishedGeocodes(resourceReady: ResourceReady[String]) = {
-    if (resourceReady.userData == showingUser) {
+    if (resourceReady.request.userData == showingUser) {
       SwingInvoke.later {
         animator.stop()
         animator.run(showingUser.location, resourceReady.resource, (text: String) => setText(showingUser, text))
@@ -230,7 +230,7 @@ class TweetDetailPanel(session: Session,
   }
   
   private def processFinishedPicture(imageReady: PictureFetcher.ImageReady) = SwingInvoke.later {
-    if (imageReady.key.equals(showingUrl))
+    if (imageReady.request.key.equals(showingUrl))
       setPicLabelIconAndBigPic(imageReady.resource)
   }
 
