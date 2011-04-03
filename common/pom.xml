@@ -4,9 +4,9 @@
     <groupId>org.talkingpuffin</groupId>
     <artifactId>common</artifactId>
     <parent>
-      <groupId>org.talkingpuffin</groupId>
-      <artifactId>talking-puffin-base</artifactId>
-      <version>${project.version}</version>
+        <groupId>org.talkingpuffin</groupId>
+        <artifactId>talking-puffin-base</artifactId>
+        <version>${project.version}</version>
     </parent>
     <name>TalkingPuffin Common</name>
     <url>http://TalkingPuffin.org/</url>
@@ -17,6 +17,11 @@
             <id>nexus</id>
             <name>nexus</name>
             <url>http://nexus.scala-tools.org/content/repositories/releases/</url>
+        </repository>
+        <repository>
+            <id>akka.repository</id>
+            <name>Akka Maven Repository</name>
+            <url>http://akka.io/repository</url>
         </repository>
     </repositories>
 
@@ -32,14 +37,19 @@
             <version>${scala.version}</version>
         </dependency>
         <dependency>
-             <groupId>org.twitter4j</groupId>
-             <artifactId>twitter4j-core</artifactId>
-             <version>2.1.11</version>
-         </dependency>
+            <groupId>org.twitter4j</groupId>
+            <artifactId>twitter4j-core</artifactId>
+            <version>2.1.11</version>
+        </dependency>
         <dependency>
             <groupId>net.debasishg</groupId>
             <artifactId>redisclient_2.8.1</artifactId>
             <version>2.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>se.scalablesolutions.akka</groupId>
+            <artifactId>akka-actor</artifactId>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -67,24 +77,24 @@
             <version>1.0-rc1</version>
         </dependency>
         <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <version>4.5</version>
-          <scope>test</scope>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.5</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>joda-time</groupId>
-          <artifactId>joda-time</artifactId>
-          <version>1.6</version>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>1.6</version>
         </dependency>
     </dependencies>
 
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>
         <resources>
-          <resource>
-            <directory>resources</directory>
-          </resource>
+            <resource>
+                <directory>resources</directory>
+            </resource>
         </resources>
         <plugins>
             <plugin>
