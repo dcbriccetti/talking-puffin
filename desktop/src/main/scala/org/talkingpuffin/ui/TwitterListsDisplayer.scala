@@ -59,19 +59,19 @@ object TwitterListsDisplayer {
   private def viewListStatuses(list: UserList, session: Session, tiler: Option[Tiler]) = {
     val provider = new ListStatusesProvider(session, list, None, session.progress)
     session.streams.createView(session.tabbedPane, provider, None, tilerNext(tiler))
-    provider.loadContinually
+    provider.loadContinually()
   }
 
   private def getLists(session: Session, screenNames: List[String]): LLUL = {
     val tw = session.twitter
     def getMembers(screenName: String) = allPages(userLists(tw, screenName))
-    Parallelizer.run(20, screenNames, getMembers) filter(_ != Nil)
+    Parallelizer.run(20, screenNames, getMembers, "Get lists") filter(_ != Nil)
   }
     
   private def getListsContaining(session: Session, screenNames: List[String]): LLUL = {
     val tw = session.twitter
     def getAllMembers(screenName: String) = allPages(userListMemberships(tw, screenName))
-    Parallelizer.run(20, screenNames, getAllMembers) filter(_ != Nil)
+    Parallelizer.run(20, screenNames, getAllMembers, "Get lists containing") filter(_ != Nil)
   }
     
   private def processLists(vl: (UserList, Session, Option[Tiler]) => Unit)(

@@ -1,11 +1,11 @@
 package org.talkingpuffin.ui
 
-import java.util.concurrent.{Executors, Callable}
 import javax.swing.SwingWorker
 import swing.event.Event
 import swing.Publisher
 import org.talkingpuffin.Session
 import org.talkingpuffin.model.{FriendsFollowersFetcher, FriendsFollowers, BaseRelationships}
+import org.talkingpuffin.util.Threads.submitCallable
 
 case class IdsChanged(source: Relationships) extends Event
 case class UsersChanged(source: Relationships) extends Event
@@ -39,16 +39,12 @@ class Relationships extends BaseRelationships with Publisher with ErrorHandler {
     val tw = session.twitter
     type Ids = List[Int]
     longOpListener.startOperation
-    val pool = Executors.newFixedThreadPool(2)
-    val friendsFuture = pool.submit(new Callable[Ids] {
-      def call = {tw.getFriendsIDs.getIDs.toList}
-    })
-    val followersFuture = pool.submit(new Callable[Ids] {
-      def call = {tw.getFollowersIDs.getIDs.toList}
-    })
+    val friendsFuture   = submitCallable {tw.getFriendsIDs  .getIDs.toList}
+    val followersFuture = submitCallable {tw.getFollowersIDs.getIDs.toList}
 
     new SwingWorker[(Ids, Ids), Object] {
       def doInBackground() = (friendsFuture.get, followersFuture.get)
+
       override def done() {
         longOpListener.stopOperation
         doAndHandleError(() => {
@@ -59,7 +55,6 @@ class Relationships extends BaseRelationships with Publisher with ErrorHandler {
         }, "Error fetching friend and follower IDs for " + tw.getScreenName, session)
       }
     }.execute()
-    pool.shutdown()
   }
   
   def removeFriendsWithScreenNames(names: List[String]) {
@@ -70,4 +65,3 @@ class Relationships extends BaseRelationships with Publisher with ErrorHandler {
   }
   
 }
-  

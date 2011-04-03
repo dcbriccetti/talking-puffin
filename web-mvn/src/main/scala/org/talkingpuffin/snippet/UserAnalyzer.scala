@@ -120,7 +120,7 @@ class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
       case Some(ua) => {
         val guiLinks = GeneralUserInfo.links(ua)
         val start = System.currentTimeMillis
-        val spans = Parallelizer.run(30, guiLinks, expandLink).map(expanded =>
+        val spans = Parallelizer.run(30, guiLinks, expandLink, "Expand link").map(expanded =>
           GeneralUserInfo.Link(expanded)).sortBy(_.toString.toLowerCase).map(_.url).map(url =>
           <span><a href={url}>{GeneralUserInfo.Link.stripFront(url)}</a><br/></span>
         )

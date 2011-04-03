@@ -4,7 +4,6 @@ import scala.util.matching.Regex
 import scala.io.Source
 import org.talkingpuffin.ui.SwingInvoke
 import java.net.{HttpURLConnection, URL}
-import org.talkingpuffin.ui.util.Threads
 
 /**
  * Browses the end link in what may be a chain of indirection from the likes of FriendFeed, Digg, and

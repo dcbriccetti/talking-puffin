@@ -1,7 +1,7 @@
 package org.talkingpuffin.util
 
 import scala.collection.JavaConversions._
-import java.util.concurrent.{Callable, Executors}
+import java.util.concurrent.Executors
 import java.util.{ArrayList, Collections}
 import java.text.NumberFormat
 
@@ -9,17 +9,15 @@ object Parallelizer extends Loggable {
   /**
    * Runs, in the number of threads requested, the function f, giving it each A of args, returning a List[T]
    */
-  def run[T,A](numThreads: Int, args: Seq[A], f: (A) => T): List[T] = {
+  def run[T,A](numThreads: Int, args: Seq[A], f: (A) => T, threadName: String = "Parallel"): List[T] = {
     val timings = Collections.synchronizedList(new ArrayList[Long])
-    val pool = Executors.newFixedThreadPool(numThreads)
-    val result = args.map(arg => pool.submit(new Callable[T] {
-      def call = {
-        val startTime = System.currentTimeMillis
-        val result = f(arg)
-        timings.add(System.currentTimeMillis - startTime)
-        result
-      }
-    })).map(_.get)
+    val pool = Executors.newFixedThreadPool(numThreads, NamedThreadFactory(threadName))
+    val result: List[T] = args.map(arg => pool.submit(Threads.callable {
+      val startTime = System.currentTimeMillis
+      val result = f(arg)
+      timings.add(System.currentTimeMillis - startTime)
+      result
+    })).map(_.get).toList
     pool.shutdown()
     logStats(timings)
     result.toList
