@@ -19,7 +19,7 @@ import org.talkingpuffin.apix.RichUser._
 import org.talkingpuffin.util.{EscapeHtml}
 import util.{Activateable, CenteredPicture, TextChangingAnimator}
 
-object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE))
+object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE), 2)
 
 /**
  * Details of the currently-selected tweet.

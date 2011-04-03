@@ -14,7 +14,7 @@ object ShortUrl extends Loggable {
       LinkExtractor.urlCharClass + "*"
   private type LongUrlReady = ResourceReady[String]
   
-  private val fetcher = new BackgroundResourceFetcher[String]("URL") {
+  private val fetcher = new BackgroundResourceFetcher[String]("URL", numThreads = 20) {
     override def getResourceFromSource(urlString: String): String = {
       try {
         UrlExpander.expand(urlString)

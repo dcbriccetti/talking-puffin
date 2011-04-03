@@ -55,7 +55,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
 
   contents = new GridBagPanel {
     val userPic = new Label
-    val picFetcher = new PictureFetcher("Frame picture " + hashCode, None)
+    val picFetcher = new PictureFetcher("Frame picture " + hashCode, None, 1)
     picFetcher.requestItem(new FetchRequest(tw.showUser(tw.getScreenName).
       getProfileImageURL.toString, null,
       (imageReady: PictureFetcher.ImageReady) => {

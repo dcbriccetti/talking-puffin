@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.io._
 import com.redis.serialization._
 import com.redis.serialization.Parse.Implicits._
-import java.util.concurrent.{Executors, LinkedBlockingQueue}
+import java.util.concurrent._
 
 trait BackgroundResourceFetcherMBean {
   def getCacheSize: Int
@@ -20,7 +20,7 @@ trait BackgroundResourceFetcherMBean {
 /**
  * Fetches resources in the background, and calls a function in the Swing event thread when ready.
  */
-abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String, numThreads: Int = 20)
+abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String, numThreads: Int = 10)
     extends BackgroundResourceFetcherMBean {
 
   private val fetcherName = resourceName + " fetcher"
@@ -28,7 +28,9 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
   private val cache = Cache[Array[Byte]](fetcherName)
   private val requestQueue = new LinkedBlockingQueue[FetchRequest[T]]
   private val inProgress = Collections.synchronizedSet(new HashSet[String])
-  private val threadPool = Executors.newFixedThreadPool(numThreads, new NamedThreadFactory(resourceName))
+  private val runnableQueue = new LinkedBlockingDeque[Runnable] { override def take() = super.takeLast() }
+  private val threadPool = new ThreadPoolExecutor(numThreads, numThreads, 30, TimeUnit.SECONDS,
+    runnableQueue, new NamedThreadFactory(resourceName))
   private val running = new AtomicBoolean(true)
   private var hits = 0
   private var misses = 0
@@ -48,8 +50,10 @@ abstract class BackgroundResourceFetcher[T <: Serializable](resourceName: String
           val key = fetchRequest.key
           inProgress.add(key)
 
+          log.debug("Enqueueing Runnable. Size now " + runnableQueue.size)
           threadPool.execute(new Runnable {
             def run() {
+              log.debug("Runnable queue size: " + runnableQueue.size)
               try {
                 val resource = cache.get(key) match {
                   case Some(res: Array[Byte]) => deSerialize(res)
