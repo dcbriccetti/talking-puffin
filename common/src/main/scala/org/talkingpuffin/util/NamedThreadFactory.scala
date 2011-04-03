@@ -1,5 +1,6 @@
 package org.talkingpuffin.util
 import java.util.concurrent.{ThreadFactory, Executors}
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * A wrapper for the default Executors thread factor that replaces the pool-n-thread-n
@@ -7,11 +8,11 @@ import java.util.concurrent.{ThreadFactory, Executors}
  */
 class NamedThreadFactory(baseName: String) extends ThreadFactory {
   val factory = Executors.defaultThreadFactory
+  val id = new AtomicLong(0)
 
   def newThread(p1: Runnable) = {
     val thread = factory.newThread(p1)
-    val id = thread.getName.split("-").toList.last
-    thread.setName(baseName + " " + id)
+    thread.setName(baseName + " " + id.incrementAndGet)
     thread
   }
 }
