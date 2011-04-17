@@ -4,8 +4,8 @@ object Links {
   def getRedirectUrl(hostName: String, path: String) = (
     if (hostName == "localhost")
       "http://localhost:8080/"
-    else if (hostName.contains("vcloudlabs"))
-      "http://tpuf.vcloudlabs.com/"
+    else if (hostName.contains("cloudfoundry"))
+      "http://tpuf.cloudfoundry.com/"
     else "http://talkingpuffin.org/tpuf/"
     ) + path
 
