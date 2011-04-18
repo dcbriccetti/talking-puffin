@@ -6,7 +6,7 @@ import com.redis.serialization._
 import com.redis.serialization.Parse._
 
 object Cache extends Loggable {
-  val r = """.*"port":(\d+).*"hostname":"(.*?)".*"password":"(.*?)".*""".r
+  val r = """.*"hostname":"(.*?)".*"port":(\d+).*"password":"(.*?)".*""".r
 
   def apply[T](superKey: Option[String])(implicit format: Format, parse: Parse[T]): Cache[T] = {
     Option(System.getProperty("local.redis")) match {
@@ -16,7 +16,7 @@ object Cache extends Loggable {
           case Some(services) =>
             info(services)
             services match {
-              case r(port, hostname, password) => {
+              case r(hostname, port, password) => {
                 info("Creating RedisClientPool for " + hostname + ":" + port)
                 new RedisCache[T](new RedisClientPool(hostname, Integer.parseInt(port)), superKey)(format, parse)
               }
