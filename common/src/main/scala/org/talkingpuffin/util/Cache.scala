@@ -10,7 +10,8 @@ object Cache extends Loggable {
 
   def apply[T](superKey: Option[String])(implicit format: Format, parse: Parse[T]): Cache[T] = {
     Option(System.getProperty("local.redis")) match {
-      case Some(local) => new RedisCache[T](new RedisClientPool("localhost", 6379), superKey)(format, parse)
+      case Some(local) => new RedisCache[T](new RedisClientPool("localhost", 6379),
+        None, superKey)(format, parse)
       case None =>
         Option(System.getenv("VMC_SERVICES")) match {
           case Some(services) =>
@@ -18,7 +19,8 @@ object Cache extends Loggable {
             services match {
               case r(hostname, port, password) => {
                 info("Creating RedisClientPool for " + hostname + ":" + port)
-                new RedisCache[T](new RedisClientPool(hostname, Integer.parseInt(port)), superKey)(format, parse)
+                new RedisCache[T](new RedisClientPool(hostname, Integer.parseInt(port)),
+                  Some(password), superKey)(format, parse)
               }
             }
           case None => new TrivialCache[T]
@@ -36,12 +38,14 @@ abstract class Cache[T](pool: RedisClientPool, superKey: Option[String]) extends
   def size: Int
 }
 
-class RedisCache[T](pool: RedisClientPool, superKey: Option[String])(format: Format, parse: Parse[T])
+class RedisCache[T](pool: RedisClientPool, password: Option[String],
+                    superKey: Option[String])(format: Format, parse: Parse[T])
   extends Cache[T](pool, superKey) {
 
   def get(partialKey: String): Option[T] = {
     val key = makeKey(partialKey)
     val valueOp: Option[T] = pool.withClient((client: RedisClient) => {
+      password.foreach(pw => client.auth(pw))
       debug("Getting " + key)
       try {
         client.get[T](key)(format, parse)
