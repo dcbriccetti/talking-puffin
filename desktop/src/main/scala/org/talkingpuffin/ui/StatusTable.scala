@@ -57,13 +57,13 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   val nameCol  = c(ColIdx.senderName)
   val colAndKeys = List(ageCol, rtByCol, toCol, imageCol, nameCol) zip
     List(PrefKeys.AGE, PrefKeys.RT_BY, PrefKeys.TO, PrefKeys.IMAGE, PrefKeys.FROM)
-  configureColumns
+  configureColumns()
 
   private val mh = new PopupMenuHelper(this)
   private var specialMenuItems = new SpecialMenuItems(this, tableModel.relationships,
       getSelectedStatuses(true) map(_.getUser.getId.toLong), getSelectedScreenNames(true),
       {getSelectedStatuses(true).exists(_.inReplyToStatusId.isDefined)})
-  buildActions
+  buildActions()
 
   new Reactor {
     listenTo(GlobalPrefs.publisher)
@@ -79,7 +79,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     override def mouseClicked(e: MouseEvent) = if (e.getClickCount == 2) reply
   })
   
-  def saveState {
+  def saveState() {
     val sortKeys = getSortController.getSortKeys
     if (sortKeys.size > 0) {
       val sortKey = sortKeys.get(0)
@@ -91,22 +91,22 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     }
   }
   
-  private def viewSelected = getSelectedStatuses(true).foreach(status =>
+  private def viewSelected() = getSelectedStatuses(true).foreach(status =>
     DesktopUtil.browse("http://twitter.com/" + status.getUser.getScreenName + "/statuses/" + status.getId))
  
-  private def viewSourceSelected = getSelectedStatuses(true).foreach(status =>
+  private def viewSourceSelected() = getSelectedStatuses(true).foreach(status =>
     DesktopUtil.browse("http://twitter.com/statuses/show/" + status.getId + ".xml"))
  
-  private def viewUser = getSelectedScreenNames(true).foreach(screenName =>
+  private def viewUser() = getSelectedScreenNames(true).foreach(screenName =>
     DesktopUtil.browse("http://twitter.com/" + screenName))
 
-  private def viewParent = getSelectedStatuses(true).foreach(status =>
+  private def viewParent() = getSelectedStatuses(true).foreach(status =>
     if (status.inReplyToScreenName.isDefined && status.inReplyToStatusId.isDefined)
       DesktopUtil.browse("http://twitter.com/" + status.inReplyToScreenName.get +
           "/statuses/" + status.inReplyToStatusId.get)
   )
  
-  private def editUser = getSelectedStatuses(true).foreach(status => {
+  private def editUser() = getSelectedStatuses(true).foreach(status => {
     val userProperties = new UserPropertiesDialog(session.userPrefs, status)
     userProperties.visible = true  
   })
@@ -117,7 +117,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     GlobalPrefs.prefs.putInt(PrefKeys.STATUS_TABLE_STATUS_FONT_SIZE, sizePct)
   }
   
-  def reply {
+  def reply() {
     val statuses = getSelectedStatuses(true)
     if (! statuses.isEmpty) {
       val recipients = statuses.map(("@" + _.getUser.getScreenName)).mkString(" ")
@@ -128,13 +128,13 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   def dm(screenName: String) =
     (new SendMsgDialog(session, null, Some(screenName), None, None, true)).visible = true
   
-  private def retweetOldWay {
+  private def retweetOldWay() {
     val status = getSelectedStatuses(true)(0)
     val name = "@" + status.getUser.getScreenName
     createSendMsgDialog(status, Some(name), Some(status.text)).visible = true
   }
   
-  private def retweetNewWay = process(getSelectedStatuses(true).map(_.getId), session.twitter.retweetStatus,
+  private def retweetNewWay() = process(getSelectedStatuses(true).map(_.getId), session.twitter.retweetStatus,
       "retweeting", "Status %s retweeted.")
   
   private def createSendMsgDialog(status: Status, names: Option[String], retweetMsg: Option[String]) =
@@ -156,7 +156,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     if (row == -1) None else Some(tableModel.getStatusAt(convertRowIndexToModel(row)))
   }
 
-  private def configureColumns {
+  private def configureColumns() {
     ageCol.setPreferredWidth(60)
     ageCol.setMaxWidth(100)
     ageCol.setCellRenderer(new AgeCellRenderer)
@@ -228,7 +228,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     else if (source == rtByCol) op.showRtByColumn = rtByCol.isVisible
   }
 
-  protected def buildActions {
+  protected def buildActions() {
     val SHORTCUT = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
     val SHIFT = java.awt.event.InputEvent.SHIFT_DOWN_MASK
     val ALT = java.awt.event.InputEvent.ALT_DOWN_MASK
@@ -299,7 +299,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
 
   private def changeFontSize(change: Int) {
     statusTextSize += change
-    tableModel.fireTableDataChanged  
+    tableModel.fireTableDataChanged()
   }
   
   private def changeRowHeight(change: Int) = customRowHeight += change
