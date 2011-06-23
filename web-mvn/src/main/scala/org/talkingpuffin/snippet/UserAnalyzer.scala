@@ -117,7 +117,7 @@ class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
   def generalHashtagFreq = fillFreqs(GeneralUserInfo.createHashtagFreq)
 
   def links = "id=item" #> (SessionState.userAnalysis.is match {
-      case Some(ua) => {
+      case Some(ua) =>
         val guiLinks = GeneralUserInfo.links(ua)
         val start = System.currentTimeMillis
         val spans = Parallelizer.run(30, guiLinks, expandLink, "Expand link").map(expanded =>
@@ -127,7 +127,6 @@ class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
         info("Processed " + guiLinks.size + " links in " +
           NumberFormat.getInstance.format(System.currentTimeMillis - start) + " ms")
         spans
-      }
       case _ => List[Elem]()
     })
 
