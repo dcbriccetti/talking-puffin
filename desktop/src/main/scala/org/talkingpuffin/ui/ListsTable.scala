@@ -10,6 +10,7 @@ import org.talkingpuffin.Session
 import javax.swing.JTable
 import util.{TableUtil, Cancelable}
 import twitter4j.UserList
+import org.talkingpuffin.filter.TagUsers
 
 class ListsTableModel(lists: List[UserList]) extends AbstractTableModel {
   def getValueAt(rowIndex: Int, columnIndex: Int)= {
@@ -58,11 +59,14 @@ class ListsFrame(session: Session, lists: List[UserList]) extends Frame with Can
       peer.setViewportView(table)
     }, BorderPanel.Position.Center)
     add(new FlowPanel {
-      contents += new Button(Action("View"){
+      contents += new Button(Action("View") {
         TwitterListsDisplayer.viewLists(session, selectedLists(table))
       })
-      contents += new Button(Action("View Statuses"){
+      contents += new Button(Action("View Statuses") {
         TwitterListsDisplayer.viewListsStatuses(session, selectedLists(table))
+      })
+      contents += new Button(Action("Import") {
+        TwitterListsDisplayer.importLists(session, selectedLists(table))
       })
     }, BorderPanel.Position.South)
   }
