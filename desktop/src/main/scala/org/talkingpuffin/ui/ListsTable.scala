@@ -10,7 +10,6 @@ import org.talkingpuffin.Session
 import javax.swing.JTable
 import util.{TableUtil, Cancelable}
 import twitter4j.UserList
-import org.talkingpuffin.filter.TagUsers
 
 class ListsTableModel(lists: List[UserList]) extends AbstractTableModel {
   def getValueAt(rowIndex: Int, columnIndex: Int)= {
