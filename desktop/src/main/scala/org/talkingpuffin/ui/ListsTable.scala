@@ -3,7 +3,6 @@ package org.talkingpuffin.ui
 import org.jdesktop.swingx.JXTable
 import org.talkingpuffin.util.Loggable
 import javax.swing.table.{AbstractTableModel, TableModel}
-import java.awt.BorderLayout
 import org.jdesktop.swingx.decorator.HighlighterFactory
 import swing.{FlowPanel, ScrollPane, BorderPanel, Frame, Button, Action}
 import org.talkingpuffin.Session
