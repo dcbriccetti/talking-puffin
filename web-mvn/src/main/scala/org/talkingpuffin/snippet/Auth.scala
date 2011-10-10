@@ -32,7 +32,7 @@ class Auth extends RedirectorWithRequestParms with Loggable {
     SessionState.twitter.is match {
       case Some(tw) =>
         try {
-          val accessToken = tw.getOAuthAccessToken(token, verifier)
+          tw.getOAuthAccessToken(token, verifier)
           val twitterUser = tw.verifyCredentials
           info("Verified credentials of " + twitterUser.getScreenName)
         } catch {
