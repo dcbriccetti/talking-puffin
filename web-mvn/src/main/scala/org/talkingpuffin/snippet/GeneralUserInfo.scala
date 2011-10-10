@@ -30,7 +30,7 @@ object GeneralUserInfo {
     lc.disp("Following", fmt.format(user.getFriendsCount))
     lc.disp("Tweets analyzed", fmt.format(ua.numTweets))
     lc.disp("Range", ua.range.getDays + " days")
-    lc.disp( "Avg per day", fmt.format(ua.avgTweetsPerDay) + (
+    lc.disp("Avg per day", fmt.format(ua.avgTweetsPerDay) + (
       if (ua.numReplies > 0)
         " (" + fmt.format(ua.avgTweetsPerDayExcludingReplies) + " excluding replies)"
       else
