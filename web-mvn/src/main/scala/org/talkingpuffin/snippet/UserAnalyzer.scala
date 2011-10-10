@@ -86,12 +86,13 @@ class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
           val pt = PartitionedTweets(tw, screenName)
           partitionedTweets(Some(pt))
           val uinfo = tw.lookupUsers(Array(screenName)).get(0)
-          val (gnlLines, ua) = if (pt.tweets.isEmpty)
-            (List(InfoLine("Number of tweets", "0")), None)
-          else {
-            val uan = UserAnalysis(pt)
-            (GeneralUserInfo.create(uinfo, screenName, pt, uan), Some(uan))
-          }
+          val (gnlLines, ua) =
+            if (pt.tweets.isEmpty)
+              (List(InfoLine("Number of tweets", "0")), None)
+            else {
+              val uan = UserAnalysis(pt)
+              (GeneralUserInfo.create(uinfo, screenName, pt, uan), Some(uan))
+            }
           SessionState.userAnalysis(ua)
           val image = <img src={Picture.getFullSizeUrl(uinfo.getProfileImageURL.toString)}
                 alt="Profile Image"/>
@@ -106,8 +107,8 @@ class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
         }
       case _ => (emptyRows, emptyImage)
     }
-    "id=row" #> rows &
-    "id=image" #> image
+    "#row" #> rows &
+    "#image" #> image
   }
 
   def generalScreenNameFreq = fillFreqs(GeneralUserInfo.createScreenNameFreq)
@@ -116,13 +117,13 @@ class UserAnalyzer extends RedirectorWithRequestParms with Loggable {
 
   def generalHashtagFreq = fillFreqs(GeneralUserInfo.createHashtagFreq)
 
-  def links = "id=item" #> (SessionState.userAnalysis.is match {
+  def links = "#item" #> (SessionState.userAnalysis.is match {
       case Some(ua) =>
         val guiLinks = GeneralUserInfo.links(ua)
         val start = System.currentTimeMillis
         val spans = Parallelizer.run(30, guiLinks, expandLink, "Expand link").map(expanded =>
-          GeneralUserInfo.Link(expanded)).sortBy(_.toString.toLowerCase).map(_.url).map(url =>
-          <span><a href={url}>{GeneralUserInfo.Link.stripFront(url)}</a><br/></span>
+          GeneralUserInfo.Link(expanded)).sortBy(_.toString.toLowerCase).map(link =>
+          <span><a href={link.url}>{link.toString}</a><br/></span>
         )
         info("Processed " + guiLinks.size + " links in " +
           NumberFormat.getInstance.format(System.currentTimeMillis - start) + " ms")
