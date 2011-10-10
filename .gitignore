@@ -7,3 +7,4 @@ target
 *.ipr
 *.iws
 .idea
+website/media
