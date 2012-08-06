@@ -2,8 +2,8 @@ package org.talkingpuffin.util
 
 import scala.util.matching.Regex
 import scala.io.Source
-import org.talkingpuffin.ui.SwingInvoke
 import java.net.{HttpURLConnection, URL}
+import org.talkingpuffin.ui.SwingInvoke
 
 /**
  * Browses the end link in what may be a chain of indirection from the likes of FriendFeed, Digg, and
@@ -60,13 +60,13 @@ object LinkUnIndirector extends Loggable {
   }
   
   private def readIntermediatePageAndFindTargetUrl(expandedUrl: String,
-      regex: Regex, expandedFound: String => Unit): Unit = {
+      regex: Regex, expandedFound: String => Unit) {
     // ShortUrl.getExpandedUrls has called us in the GUI event thread, so we need
     // another thread here to fetch the HTML page.
     SwingInvoke.execSwingWorker ({
       val conn = new URL(expandedUrl).openConnection.asInstanceOf[HttpURLConnection]
       conn.setRequestProperty("User-agent", "TalkingPuffin")
-      Source.fromInputStream(conn.getInputStream).getLines.map(_.trim).mkString(" ") match {
+      Source.fromInputStream(conn.getInputStream).getLines().map(_.trim).mkString(" ") match {
         case regex(realUrl) => 
           debug("Target link " + realUrl + " found in " + expandedUrl)
           Some(realUrl)
@@ -79,4 +79,3 @@ object LinkUnIndirector extends Loggable {
     )})
   }
 }
-  

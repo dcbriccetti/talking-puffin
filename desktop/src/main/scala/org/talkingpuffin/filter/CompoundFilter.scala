@@ -1,8 +1,8 @@
 package org.talkingpuffin.filter
 
+import twitter4j.Status
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.filter.RetweetDetector._
-import twitter4j.Status
 
 /**
  * Used to match a tweet against a set of TextFilters and retweet options.
@@ -45,13 +45,12 @@ case class CompoundFilter(textFilters: List[TextFilter],
 
 object CompoundFilter {
   def muteRtSender(sender: String) = 
-      CompoundFilter(List(FromTextFilter(sender, false)), Some(true), None)
+      CompoundFilter(List(FromTextFilter(sender, isRegEx = false)), Some(true), None)
 
   def muteCRtSender(sender: String) = 
-      CompoundFilter(List(FromTextFilter(sender, false)), None, Some(true))
+      CompoundFilter(List(FromTextFilter(sender, isRegEx = false)), None, Some(true))
   
-  def muteApp(app: String) = CompoundFilter(List(SourceTextFilter(app, false)), None, None)
+  def muteApp(app: String) = CompoundFilter(List(SourceTextFilter(app, isRegEx = false)), None, None)
   
-  def muteSender(sender: String) = CompoundFilter(List(FromTextFilter(sender, false)), None, None)
+  def muteSender(sender: String) = CompoundFilter(List(FromTextFilter(sender, isRegEx = false)), None, None)
 }
-

@@ -1,7 +1,7 @@
 package org.talkingpuffin.util
 
-import org.talkingpuffin.apix.PageHandler._
 import twitter4j.{UserList, Twitter, User}
+import org.talkingpuffin.apix.PageHandler._
 
 object TwitterListUtils extends Loggable {
   /**
@@ -30,5 +30,4 @@ object TwitterListUtils extends Loggable {
       case None => tw.createUserList(tag, false, description)
     }
   }
-
 }

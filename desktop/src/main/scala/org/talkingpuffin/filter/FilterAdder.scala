@@ -5,35 +5,39 @@ package org.talkingpuffin.filter
  */
 class FilterAdder(filterSet: FilterSet) {
 
-  def muteApps(apps: List[String]) {
+  def muteApps(apps: Iterable[String]) {
     apps.foreach(app => exclude(CompoundFilter.muteApp(app)))
-    filterSet.publish
+    filterSet.publish()
   }
 
-  def muteSenders(senders: List[String]) {
+  def muteSenders(senders: Iterable[String]) {
     senders.foreach(sender => exclude(CompoundFilter.muteSender(sender)))
-    filterSet.publish
+    filterSet.publish()
   }
 
-  def muteRetweetUsers(senders: List[String]) {
+  def muteRetweetUsers(senders: Iterable[String]) {
     senders.foreach(sender => exclude(CompoundFilter.muteRtSender(sender)))
-    filterSet.publish
+    filterSet.publish()
   }
 
-  def muteSelectedUsersCommentedRetweets(senders: List[String]) {
+  def muteSelectedUsersCommentedRetweets(senders: Iterable[String]) {
     senders.foreach(sender => {
       exclude(CompoundFilter.muteRtSender(sender))
       exclude(CompoundFilter.muteCRtSender(sender))
     })
-    filterSet.publish
+    filterSet.publish()
   }
 
-  def muteSenderReceivers(srs: List[(String, String)]) {
-    srs.foreach(sr => exclude(
-        CompoundFilter(List(FromTextFilter(sr._1, false), 
-        ToTextFilter(sr._2, false)), None, None)))
-    filterSet.publish
+  def muteSenderReceivers(senderReceivers: Iterable[(String, String)]) {
+    senderReceivers.foreach(sr => exclude(
+      CompoundFilter(List(
+        FromTextFilter(sr._1, isRegEx = false),
+        ToTextFilter(sr._2, isRegEx = false)),
+      None, None)))
+    filterSet.publish()
   }
   
-  private def exclude(filter: CompoundFilter) = filterSet.excludeSet.cpdFilters.add(filter) 
+  private def exclude(filter: CompoundFilter) {
+    filterSet.excludeSet.cpdFilters.add(filter)
+  }
 }

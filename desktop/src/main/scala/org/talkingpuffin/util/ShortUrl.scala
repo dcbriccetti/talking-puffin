@@ -37,9 +37,10 @@ object ShortUrl extends Loggable {
   /**
    * Gets the long form, if there is one, for the specified URL.
    */
-  def expandUrl(url: String, expandedUrlCallback: String => Unit) =
+  def expandUrl(url: String, expandedUrlCallback: String => Unit) {
     if (urlIsShortened(url))
       fetcher.get(expandedUrlCallback)(url)
+  }
 
   /**
    * Gets the long forms, if they exist, for all cached shortened URLs found in text.
@@ -51,8 +52,8 @@ object ShortUrl extends Loggable {
       expandUrl(sourceUrl, (targetUrl: String) => {provideSourceAndTargetUrl(sourceUrl, targetUrl)})
     }
   }
-  
+
   private def urlIsShortened(url: String) = shortenerHosts.exists(url.contains(_)) ||
     shortenerRegexes.exists(r => url match {case r() => true case _ => false})
-  
+
 }

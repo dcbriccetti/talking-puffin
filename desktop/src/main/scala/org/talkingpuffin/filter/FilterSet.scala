@@ -2,10 +2,9 @@ package org.talkingpuffin.filter
 
 import scala.swing.Publisher
 import twitter4j.Status
-import org.talkingpuffin.ui.{Relationships}
+import org.talkingpuffin.ui.Relationships
 import org.talkingpuffin.filter.RetweetDetector._
 import org.talkingpuffin.util.Loggable
-import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.apix.RichStatus
 
 /**
@@ -48,5 +47,7 @@ class FilterSet(tagUsers: TagUsers) extends Publisher with Loggable {
     statuses.filter(includeStatus)
   }
   
-  def publish: Unit = publish(new FilterSetChanged(this))
+  def publish() {
+    publish(new FilterSetChanged(this))
+  }
 }

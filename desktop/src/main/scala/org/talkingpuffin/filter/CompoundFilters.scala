@@ -13,33 +13,36 @@ class CompoundFilters extends Publisher {
   /**
    * Clears the list of filters.
    */
-  def clear = list = List[CompoundFilter]()
+  def clear() {
+    list = List[CompoundFilter]()
+  }
 
   /**
    * Returns whether the given status matches all the filters.
    */
-  def matchesAll(status: Status): Boolean = list.forall(_.matches(status))
+  def matchesAll(status: Status) = list.forall(_.matches(status))
   
   /**
    * Returns whether the given status matches any of the filters.
    */
-  def matchesAny(status: Status): Boolean = list.exists(_.matches(status))
+  def matchesAny(status: Status) = list.exists(_.matches(status))
 
   /**
    * Adds a filter to the list
    */
-  def add(cf: CompoundFilter) = {
-    list = list ::: List(cf)
-    publish
+  def add(compoundFilter: CompoundFilter) {
+    list = list ::: List(compoundFilter)
+    publish()
   }
 
   /**
    * Publishes that the filters have changed.
    */
-  def publish: Unit = publish(new CompoundFiltersChanged)
+  def publish() {
+    publish(new CompoundFiltersChanged)
+  }
   
   override def toString = list.map(_.toString).mkString("↑")
 }
 
 class CompoundFiltersChanged extends Event
-
