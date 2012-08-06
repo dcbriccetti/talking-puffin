@@ -1,9 +1,9 @@
 package org.talkingpuffin.ui
 
-import java.awt.{Rectangle}
+import java.awt.Rectangle
 import javax.swing.ImageIcon
 import java.text.NumberFormat
-import scala.swing.event.{WindowClosing}
+import scala.swing.event.WindowClosing
 import org.talkingpuffin.{Main, Globals, Session, Constants}
 import org.talkingpuffin.filter.TagUsers
 import org.talkingpuffin.util.{FetchRequest, Loggable}
@@ -31,7 +31,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
 
   val mainToolBar = new MainToolBar
   session.progress = mainToolBar
-  setUpUserStatusReactor
+  setUpUserStatusReactor()
 
   val rels = new Relationships()
   
@@ -47,7 +47,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
     case e: AppEvent if e.session != session =>  // Ignore all from other sessions 
     case e: NewFollowingViewEvent => createView(providers.following, e.include, None) 
     case e: NewViewEvent => createView(e.provider, e.include, None) 
-    case e: NewPeoplePaneEvent => createPeoplePane 
+    case e: NewPeoplePaneEvent => createPeoplePane()
     case e: SendStatusEvent => (new SendMsgDialog(session, null, None, None, None, false)).visible = true
     case e: SendDirectMessageEvent => (new SendMsgDialog(session, null, None, None, None, true)).visible = true
   }
@@ -73,7 +73,7 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
   }
 
   reactions += {
-    case WindowClosing(_) => close
+    case WindowClosing(_) => close()
   }
 
   peer.setLocationRelativeTo(null)
@@ -82,63 +82,67 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
     case ic: IdsChanged => 
       if ((rels.followers.isEmpty && rels.friends.isEmpty) && 
           (rels.followerIds.length + rels.friendIds.length < Constants.MaxPeopleForAutoPaneCreation)) {
-        updatePeople
+        updatePeople()
       }
   }
-  rels.getIds(session, mainToolBar)
+  rels.fetchAndPublishUserIds(session, mainToolBar)
   
-  pack
+  pack()
   visible = true
-  setFocus
+  setFocus()
 
-  def setFocus = streams.views.foreach(_.pane.requestFocusForTable)
+  def setFocus() {
+    streams.views.foreach(_.pane.requestFocusForTable)
+  }
   
-  override def close {
+  override def close() {
     streams.stop
     tw.setRateLimitStatusListener(null)
     Globals.sessions -= session
-    dispose
+    dispose()
     StateSaver.save(streams, session.userPrefs, tagUsers)
     TopFrames.removeFrame(this)
   }
 
   type Users = List[User]
   
-  def createPeoplePane(longTitle: String, shortTitle: String, otherRels: Option[Relationships], users: Option[Users],
+  def createPeoplePane(longTitle: String, shortTitle: String, opOtherRels: Option[Relationships], opUsers: Option[Users],
         updatePeople: Option[() => Unit], location: Option[Rectangle]): PeoplePane = {
-    def getRels = if (otherRels.isDefined) otherRels.get else rels
-    val model = 
-      if (users.isDefined || otherRels.isDefined) 
-        new UsersTableModel(users, tagUsers, getRels) 
+    def getRels = if (opOtherRels.isDefined) opOtherRels.get else rels
+    val usersTableModel =
+      if (opUsers.isDefined || opOtherRels.isDefined)
+        new UsersTableModel(opUsers, tagUsers, getRels)
       else 
         streams.usersTableModel
-    val customRels = if (users.isDefined) {
+    val customRels = opUsers.map(users =>
       new Relationships {
-        friends = rels.friends intersect users.get
-        friendIds = friends map(_.getId.toLong)
-        followers = rels.followers intersect users.get
+        friends     = rels.friends intersect users
+        friendIds   = friends map(_.getId.toLong)
+        followers   = rels.followers intersect users
         followerIds = followers map(_.getId.toLong)
       }
-    } else getRels
-    val peoplePane = new PeoplePane(longTitle, shortTitle, session, model, customRels, updatePeople)
+    ).getOrElse(getRels)
+    val peoplePane = new PeoplePane(longTitle, shortTitle, session, usersTableModel, customRels, updatePeople)
     session.tabbedPane.pages += new Page(shortTitle, peoplePane) {tip = longTitle}
     peoplePane
   }
 
-  private def updatePeople = {
-    rels.getUsers(session, tw.getScreenName, mainToolBar)
+  private def updatePeople() {
+    rels.fetchAndPublishUsers(session, tw.getScreenName, mainToolBar)
   }
           
-  private def createPeoplePane: Unit = {
+  private def createPeoplePane() {
     peoplePane = createPeoplePane("People You Follow and People Who Follow You", "People", None, None,
         Some(updatePeople _), None)
   }
   
-  private def setUpUserStatusReactor {
+  private def setUpUserStatusReactor() {
     tw.setRateLimitStatusListener(new RateLimitStatusListener() {
-      def onRateLimitReached(e: RateLimitStatusEvent) = {}
-      def onRateLimitStatus(e: RateLimitStatusEvent) = SwingInvoke.later {
-        mainToolBar.remaining.text = NumberFormat.getIntegerInstance.format(e.getRateLimitStatus.getRemainingHits)
+      def onRateLimitReached(e: RateLimitStatusEvent) {}
+      def onRateLimitStatus(e: RateLimitStatusEvent) {
+        SwingInvoke.later {
+          mainToolBar.remaining.text = NumberFormat.getIntegerInstance.format(e.getRateLimitStatus.getRemainingHits)
+        }
       }
     })
   }
@@ -148,5 +152,3 @@ class TopFrame(tw: Twitter) extends Frame with Loggable
     provider.loadContinually()
   }
 }
-
-  

@@ -11,17 +11,22 @@ import org.talkingpuffin.state.{GlobalPrefs, PrefKeys}
 import org.talkingpuffin.ui.table.{EmphasizedString, StatusCell}
 import util.DesktopUtil
 import org.talkingpuffin.Session
-import twitter4j.{User, Status}
+import twitter4j.Status
 import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.util.{LinkExtractor, Loggable}
 
 /**
  * Model providing status data to the JTable
  */
-class StatusTableModel(session: Session, val options: StatusTableOptions, val tweetsProvider: BaseProvider,
-    val relationships: Relationships, screenNameToUserNameMap: Map[String, String], filterSet: FilterSet,
-    val tagUsers: TagUsers) 
-    extends UserAndStatusProvider with TaggingSupport with Publisher with Reactor with Loggable
+class StatusTableModel(
+  session:                  Session,
+  val options:              StatusTableOptions,
+  val tweetsProvider:       BaseProvider,
+  val relationships:        Relationships,
+  screenNameToUserNameMap:  Map[String, String],
+  filterSet:                FilterSet,
+  val tagUsers:             TagUsers
+) extends UserAndStatusProvider with TaggingSupport with Publisher with Reactor with Loggable
 {
   private val username = session.twitter.getScreenName
   private val log = Logger.getLogger("StatusTableModel " + tweetsProvider.providerName + " " + username)
@@ -37,24 +42,30 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
   private var filteredStatuses_ = Array[Status]()
   def filteredStatuses = filteredStatuses_
   
-  var preChangeListener: PreChangeListener = _
+  var preChangeListener: Option[PreChangeListener] = None
   
   listenTo(filterSet)
-  reactions += { case FilterSetChanged(s) => filterAndNotify }
+  reactions += {
+    case FilterSetChanged(s) => filterAndNotify()
+  }
 
   listenTo(GlobalPrefs.publisher)
-  reactions += { case e: PrefChangedEvent => 
-    if (e.key == PrefKeys.SHOW_TWEET_DATE_AS_AGE) fireTableDataChanged}  
+  reactions += {
+    case e: PrefChangedEvent =>
+      if (e.key == PrefKeys.SHOW_TWEET_DATE_AS_AGE)
+        fireTableDataChanged()
+  }
 
   listenTo(tweetsProvider)
   reactions += { 
-    case e: NewTwitterDataEvent => {
+    case e: NewTwitterDataEvent =>
       val newTweets = e.data
       log.info("Tweets Arrived: " + newTweets.length)
-      if (e.clear) clear(true)
+      if (e.clear)
+        clear(all = true)
       processStatuses(newTweets)
-      if (GlobalPrefs.isOn(PrefKeys.NOTIFY_TWEETS)) doNotify(newTweets)
-    }
+      if (GlobalPrefs.isOn(PrefKeys.NOTIFY_TWEETS))
+        doNotify(newTweets)
   }
   
   def getColumnCount = 6
@@ -72,7 +83,8 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     def senderName(status: Status) =
       if (GlobalPrefs.isOn(PrefKeys.USE_REAL_NAMES)) 
         UserProperties.overriddenUserName(userPrefs, status.getUser)
-      else status.getUser.getScreenName
+      else
+        status.getUser.getScreenName
 
     def senderNameEs(status: Status): EmphasizedString =
       new EmphasizedString(Some(senderName(status)), relationships.followerIds.contains(status.getUser.getId))
@@ -134,14 +146,12 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
       case None => None
     }
 
-  private def mapToIdTuple(users: List[User]) = users.map(user => (user.getId, user))
-  
-  def muteSelectedUsers(rows: List[Int]) = {
+  def muteSelectedUsers(rows: List[Int]) {
     filterSet.adder.muteSenders(getScreenNames(rows))
-    filterAndNotify
+    filterAndNotify()
   }
 
-  def muteSelectedSenderReceivers(rows: List[Int], andViceVersa: Boolean) = {
+  def muteSelectedSenderReceivers(rows: List[Int], andViceVersa: Boolean) {
     val senderReceivers = for {
       row <- rows
       status = filteredStatuses_(row)
@@ -152,22 +162,22 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
     filterSet.adder.muteSenderReceivers(senderReceivers)
     if (andViceVersa)
       filterSet.adder.muteSenderReceivers(senderReceivers map (t => (t._2, t._1)))
-    filterAndNotify
+    filterAndNotify()
   }
 
-  def muteSelectedUsersRetweets(rows: List[Int]) = {
+  def muteSelectedUsersRetweets(rows: List[Int]) {
     filterSet.adder.muteRetweetUsers(getScreenNames(rows))
-    filterAndNotify
+    filterAndNotify()
   }
 
-  def muteSelectedUsersCommentedRetweets(rows: List[Int]) = {
+  def muteSelectedUsersCommentedRetweets(rows: List[Int]) {
     filterSet.adder.muteSelectedUsersCommentedRetweets(getScreenNames(rows))
-    filterAndNotify
+    filterAndNotify()
   }
 
-  def muteSelectedApps(rows: List[Int]) = {
+  def muteSelectedApps(rows: List[Int]) {
     filterSet.adder.muteApps(rows.map(i => filteredStatuses_(i).sourceName))
-    filterAndNotify
+    filterAndNotify()
   }
 
   def getUsers(rows: List[Int]): List[UserIdName] = rows.map(i => {
@@ -181,7 +191,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
 
   private def processStatuses(newStatuses: List[Status]) {
     statuses :::= newStatuses.reverse
-    filterAndNotify
+    filterAndNotify()
   }
   
   /**
@@ -189,33 +199,33 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
    */
   def clear(all: Boolean) {
     statuses = if (all) List[Status]() else statuses.filter(! filteredStatuses_.contains(_))
-    filterAndNotify
+    filterAndNotify()
   }
   
   def removeStatuses(indexes: List[Int]) {
     val deleteStatuses = getStatuses(indexes)
     statuses = statuses.filter(! deleteStatuses.contains(_))
-    filterAndNotify
+    filterAndNotify()
   }
   
   def removeStatusesFrom(screenNames: List[String]) {
     statuses = statuses.filter(s => ! screenNames.contains(s.getUser.getScreenName))
-    filterAndNotify
+    filterAndNotify()
   }
 
-  private def filterAndNotify {
-    if (preChangeListener != null) {
-      preChangeListener.tableChanging
-    }
-    
-    filteredStatuses_ = filterSet.filter(statuses, relationships).toArray 
+  private def filterAndNotify() {
+    preChangeListener.foreach(_.tableChanging())
+    filteredStatuses_ = filterSet.filter(statuses, relationships).toArray
     publish(new TableContentsChanged(this, filteredStatuses_.length, statuses.length))
-    fireTableDataChanged
+    fireTableDataChanged()
   }
   
-  def doNotify(newTweets: List[Status]) = newTweets.length match {
-    case 1 => DesktopUtil.notify(newTweets.first.getUser.getScreenName+": "+newTweets.first.getText,"New tweet")
-    case _ => DesktopUtil.notify(newTweets.length +" new tweets arrived","New tweets")
+  def doNotify(newTweets: List[Status]) {
+    val (message, header) = newTweets.length match {
+      case 1 => (newTweets(0).getUser.getScreenName + ": " + newTweets(0).getText, "New tweet")
+      case _ => (newTweets.length + " new tweets arrived", "New tweets")
+    }
+    DesktopUtil.notify(message, header)
   }
 }
 
@@ -224,7 +234,7 @@ class StatusTableModel(session: Session, val options: StatusTableOptions, val tw
  * so that the currently selected rows can be saved.
  */
 trait PreChangeListener {
-  def tableChanging
+  def tableChanging()
 }
 
 case class TableContentsChanged(model: StatusTableModel, filteredIn: Int, total: Int) extends Event

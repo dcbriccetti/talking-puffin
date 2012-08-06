@@ -3,7 +3,7 @@ package org.talkingpuffin
 import javax.swing.{UIManager, JFrame}
 import mac.MacInit
 import twitter.{Credentials, CredentialsRepository, AuthenticatedSession}
-import ui.{TopFrame}
+import ui.TopFrame
 
 /**
  * TalkingPuffin main object
@@ -15,12 +15,12 @@ object Main {
     MacInit init Main.title
     UIManager setLookAndFeel UIManager.getSystemLookAndFeelClassName
     JFrame setDefaultLookAndFeelDecorated true
-    launchAllSessions
+    launchAllSessions()
   }
 
   def launchNewSession(credentials: Option[Credentials] = None) = new TopFrame(AuthenticatedSession.logIn(credentials))
 
-  private def launchAllSessions = {
+  private def launchAllSessions() {
     val credentials = CredentialsRepository.getAll
     if (credentials.isEmpty)
       launchNewSession(None)

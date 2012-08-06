@@ -17,11 +17,12 @@ object CredentialsRepository {
   /**
    * Creates Credentials for all saved users with an access token and secret.
    */
-  def getAll(): List[Credentials] =
-    for {username <- prefs.childrenNames.toList
-      userNode = prefs.node(username)
-      token = userNode.get(TOKEN, "")
-      secret = userNode.get(SECRET, "")
+  def getAll: Iterable[Credentials] =
+    for {
+      username <- prefs.childrenNames.toList
+      userNode  = prefs.node(username)
+      token     = userNode.get(TOKEN, "")
+      secret    = userNode.get(SECRET, "")
       if token != "" && secret != ""
     } yield Credentials(SERVICE, username, token, secret)
 
@@ -38,7 +39,7 @@ object CredentialsRepository {
   /**
    * Deletes the token and secret for the user whose credentials are supplied.
    */
-  def delete(credentials: Credentials): Unit = {
+  def delete(credentials: Credentials) {
     val userPrefs = GlobalPrefs.prefsForUser(SERVICE, credentials.user)
     userPrefs.remove(TOKEN)
     userPrefs.remove(SECRET)

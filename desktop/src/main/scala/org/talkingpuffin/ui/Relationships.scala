@@ -16,7 +16,7 @@ class Relationships extends BaseRelationships with Publisher with ErrorHandler {
    * Uses the provided Twitter to get all friends and followers (doing the
    * fetches in parallel to be quicker), and publishes the results in the event-dispatching thread when done.
    */
-  def getUsers(session: Session, screenName: String, longOpListener: LongOpListener) {
+  def fetchAndPublishUsers(session: Session, screenName: String, longOpListener: LongOpListener) {
     val tw = session.twitter
     longOpListener.startOperation
 
@@ -35,7 +35,7 @@ class Relationships extends BaseRelationships with Publisher with ErrorHandler {
     }.execute()
   }
 
-  def getIds(session: Session, longOpListener: LongOpListener) {
+  def fetchAndPublishUserIds(session: Session, longOpListener: LongOpListener) {
     val tw = session.twitter
     type Ids = List[Int]
     longOpListener.startOperation

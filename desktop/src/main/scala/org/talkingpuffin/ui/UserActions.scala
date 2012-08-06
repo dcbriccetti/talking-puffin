@@ -6,10 +6,10 @@ import swing.Action
 import javax.swing.KeyStroke.{getKeyStroke => ks}
 import javax.swing.JTable
 import java.awt.Toolkit
+import twitter4j.Status
 import org.talkingpuffin.Session
 import org.talkingpuffin.apix.PageHandler._
-import util.{DesktopUtil, Tiler}
-import twitter4j.Status
+import util.DesktopUtil
 import org.talkingpuffin.util.{Links, LinkUnIndirector, Loggable}
 
 /**
@@ -19,7 +19,9 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
   val tw = session.twitter
   type Names = List[String]
 
-  def follow(names: Names) = processUsers(names, tw.createFriendship, "following", "Now following %s.")
+  def follow(names: Names) {
+    processUsers(names, tw.createFriendship, "following", "Now following %s.")
+  }
   
   def unfollow(names: Names) {
     processUsers(names, tw.destroyFriendship, "unfollowing", "Unfollowed %s.")
@@ -31,45 +33,59 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
     rels.removeFriendsWithScreenNames(names)
   }
   
-  def unblock(names: Names) = processUsers(names, tw.destroyBlock, "unblock", "%s unblocked.")
+  def unblock(names: Names) {
+    processUsers(names, tw.destroyBlock, "unblock", "%s unblocked.")
+  }
   
-  def reportSpam(names: Names) = processUsers(names, tw.reportSpam, "report spam", "%s reported for spam.")
+  def reportSpam(names: Names) {
+    processUsers(names, tw.reportSpam, "report spam", "%s reported for spam.")
+  }
   
-  def viewLists(selectedScreenNames: Names, table: JTable) =
+  def viewLists(selectedScreenNames: Names, table: JTable) {
     TwitterListsDisplayer.viewListsTable(session, selectedScreenNames)
+  }
 
-  def viewListsOn(selectedScreenNames: Names, table: JTable) =
+  def viewListsOn(selectedScreenNames: Names, table: JTable) {
     TwitterListsDisplayer.viewListsContaining(session, selectedScreenNames)
+  }
 
-  def showUserTimeline(screenName: String) =
+  def showUserTimeline(screenName: String) {
     createView(new UserTweetsProvider(session, screenName, session.progress))
+  }
 
-  def analyzeUser(screenName: String) = DesktopUtil.browse(Links.linkForAnalyze(screenName))
+  def analyzeUser(screenName: String) {
+    DesktopUtil.browse(Links.linkForAnalyze(screenName))
+  }
 
   def showFriends(screenName: String) = {
     val rels = new Relationships
-    rels.getUsers(session, screenName, session.progress)
+    rels.fetchAndPublishUsers(session, screenName, session.progress)
     session.peoplePaneCreator.createPeoplePane("Friends and Followers of " + screenName, screenName,
       Some(rels), None, None, None)
   }
   
-  def showFavorites(screenName: String) =
+  def showFavorites(screenName: String) {
     createView(new FavoritesProvider(session, screenName, None, session.progress))
+  }
   
-  def forAll(selectedScreenNames: Names, fn: String => Unit) = {
+  def forAll(selectedScreenNames: Names, fn: String => Unit) {
     selectedScreenNames.foreach(screenName => fn(screenName))
   }
 
   def followAK(smi: SpecialMenuItems, getSelectedScreenNames: => Names) = {
     new ActionAndKeys(new Action("Follow") { 
-      def apply = follow(getSelectedScreenNames)
+      def apply() {
+        follow(getSelectedScreenNames)
+      }
       smi.notFriendsOnly.list ::= this
     }, ks(VK_F, UserActions.shortcutKeyMask))
   }
   
   def unfollowAK(smi: SpecialMenuItems, getSelectedScreenNames: => Names) = {
     new ActionAndKeys(new Action("Unfollow") {
-      def apply = unfollow(getSelectedScreenNames)
+      def apply() {
+        unfollow(getSelectedScreenNames)
+      }
       smi.friendsOnly.list ::= this
     }, ks(VK_F, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK))
   }
@@ -81,7 +97,9 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
     def names = getSelectedScreenNames(true)
 
     mh add(new Action("Show larger image") { 
-      def apply = showBigPicture
+      def apply() {
+        showBigPicture
+      }
       specialMenuItems.oneStatusSelected.list ::= this
     }, ks(VK_I, 0))
     
@@ -100,7 +118,7 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
     mh add(new ActionAndKeys(Action("Block") {block(names)}, ks(VK_B, UserActions.shortcutKeyMask)))
     mh add(new ActionAndKeys(Action("Report Spam") {reportSpam(names)},
         ks(VK_S, UserActions.shortcutKeyMask | SHIFT_DOWN_MASK)))
-    def getSelStat(): Option[Status] = {
+    def getSelStat: Option[Status] = {
       getSelectedStatuses(true) match {
         case status :: others => Some(status)
         case _ => None
@@ -112,14 +130,13 @@ class UserActions(val session: Session, rels: Relationships) extends ActionProce
     mh add(new OpenTwitterUserListsAction(getSelStat, table, DesktopUtil.browse), ks(VK_U, SHIFT_DOWN_MASK))
   }
 
-  private def createView(provider: DataProvider): Unit = {
+  private def createView(provider: DataProvider) {
     session.streams.createView(session.tabbedPane, provider, None, None)
-    provider.loadAndPublishData(newPagingMaxPer, false)
+    provider.loadAndPublishData(newPagingMaxPer(), clear = false)
   }
 }
 
 object UserActions {
   private val shortcutKeyMask = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
-
-  val UnblockAccel  = ks(VK_B, shortcutKeyMask | SHIFT_DOWN_MASK)  
+  val UnblockAccel  = ks(VK_B, shortcutKeyMask | SHIFT_DOWN_MASK)
 }

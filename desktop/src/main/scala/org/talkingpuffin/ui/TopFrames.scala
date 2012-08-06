@@ -15,12 +15,16 @@ object TopFrames {
 
   def closeCurrentWindow() {
     findCurrentWindow match {
-      case Some(frame) => frame.close
-      case _ => closeOtherFrame()
+      case Some(frame) =>
+        frame.close()
+      case _ =>
+        closeOtherFrame()
     }
   }
 
-  def closeOtherFrame() = Frame.getFrames().find(_.isFocused).foreach(_.dispose)
+  def closeOtherFrame() {
+    Frame.getFrames.find(_.isFocused).foreach(_.dispose())
+  }
 
   def addFrame(f: TopFrame) {
     frames = f :: frames
@@ -28,16 +32,21 @@ object TopFrames {
 
   def removeFrame(f: TopFrame) {
     frames -= f
-    exitIfNoFrames
+    exitIfNoFrames()
   }
 
-  def exitIfNoFrames = if (frames == Nil) System.exit(0)
+  def exitIfNoFrames() {
+    if (frames == Nil)
+      System.exit(0)
+  }
 
   def numFrames = frames.size
 
-  def closeAll: Unit = closeAll(frames)
+  def closeAll() {
+    closeAll(frames)
+  }
 
-  def closeAll(frames: List[TopFrame]) = frames.foreach(_.close)
+  def closeAll(frames: List[TopFrame]) {
+    frames.foreach(_.close())
+  }
 }
-  
- 

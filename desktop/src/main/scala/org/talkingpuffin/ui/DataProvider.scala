@@ -23,92 +23,105 @@ abstract class DataProvider(session: Session, startingId: Option[Long],
   val titleCreator = new TitleCreator(providerName)
 
   /** How often, in ms, to fetch and load new data */
-  private var updateFrequencyMs = DataProvidersDialog.DefaultRefreshSecs * 1000;
+  private var updateFrequencyMs = DataProvidersDialog.DefaultRefreshSecs * 1000
   
-  private var timer: Timer = _
+  private var timer: Option[Timer] = None
   
   def getHighestId = highestId
   
-  def isActive = timer != null && timer.isRunning
+  def isActive = timer.exists(_.isRunning)
 
   /**
    * Sets the update frequency, in seconds.
    */
   def setUpdateFrequency(updateFrequencySecs: Int) {
     updateFrequencyMs = updateFrequencySecs * 1000
-    if (timer != null) 
-      restartTimer                                                 
+    timer.foreach(t => restartTimer())
   }
 
   def loadContinually() {
-    loadNewDataInternal
-    restartTimer
+    loadNewDataInternal()
+    restartTimer()
   }
   
-  def loadAndPublishData(paging: Paging, clear: Boolean): Unit = {
+  def loadAndPublishData(paging: Paging, clear: Boolean) {
     longOpListener.startOperation
     new SwingWorker[List[Status], Object] {
-      override def doInBackground: List[Status] = {
+      override def doInBackground(): List[Status] = {
         val data = updateFunc(paging)
         highestId = computeHighestId(data, getHighestId)
         data
       }
-      override def done {
+
+      override def done() {
         longOpListener.stopOperation
         doAndHandleError(() => get match {
           case Nil =>
           case statuses => DataProvider.this.publish(NewTwitterDataEvent(statuses, clear))
         }, "Error fetching " + providerName + " data for " + tw.getScreenName, session)
       }
-    }.execute
+    }.execute()
   }
 
-  def stop: Unit = {
-    if (timer != null) 
-      timer.stop
+  def stop() {
+    timer.foreach(_.stop())
   }
   
-  def loadAllAvailable() = loadAndPublishData(newPagingMaxPer(), true)
+  def loadAllAvailable() {
+    loadAndPublishData(newPagingMaxPer(), clear = true)
+  }
 
   def getResponseId(response: Status): Long
 
   protected def newPaging(sinceId: Option[Long] = getHighestId): Paging = {
-    val paging = newPagingMaxPer
+    val paging = newPagingMaxPer()
     sinceId.foreach(paging.setSinceId)
     paging
   }
 
   def updateFunc(paging: Paging): List[Status]
 
-  private def computeHighestId(tweets: List[Status], maxId: Option[Long]):Option[Long] = tweets match {
-    case tweet :: rest => maxId match {
-      case Some(id) => computeHighestId(rest, if (getResponseId(tweet) > id) Some(getResponseId(tweet)) else Some(id))
-      case None => computeHighestId(rest,Some(getResponseId(tweet)))
-    }
-    case Nil => maxId
+  private def computeHighestId(tweets: List[Status], maxId: Option[Long]): Option[Long] = tweets match {
+    case tweet :: rest =>
+      maxId match {
+        case Some(id) =>
+          computeHighestId(rest, Some(
+            if (getResponseId(tweet) > id)
+              getResponseId(tweet)
+            else
+              id
+          ))
+        case None =>
+          computeHighestId(rest,Some(getResponseId(tweet)))
+      }
+    case Nil =>
+      maxId
   }
 
-  private def restartTimer {
-    def publishNextLoadTime = publish(NextLoadAt(new DateTime((new Date).getTime + updateFrequencyMs)))
-
-    if (timer != null && timer.isRunning) {
-      timer.stop
+  private def restartTimer() {
+    def publishNextLoadTime() {
+      publish(NextLoadAt(new DateTime((new Date).getTime + updateFrequencyMs)))
     }
+
+    timer.filter(_.isRunning).foreach(_.stop())
   
     if (updateFrequencyMs > 0) {
-      timer = new Timer(updateFrequencyMs, new ActionListener() {
-        def actionPerformed(event: ActionEvent) = {
-          loadNewDataInternal
-          publishNextLoadTime
+      val t = new Timer(updateFrequencyMs, new ActionListener() {
+        def actionPerformed(event: ActionEvent) {
+          loadNewDataInternal()
+          publishNextLoadTime()
         }
       })
-      timer.start
-      publishNextLoadTime
+      t.start()
+      timer = Some(t)
+      publishNextLoadTime()
     }
     
   }
 
-  private def loadNewDataInternal = loadAndPublishData(newPaging(highestId), false)
+  private def loadNewDataInternal() {
+    loadAndPublishData(newPaging(highestId), clear = false)
+  }
 }
 
 case class NextLoadAt(when: DateTime) extends Event
@@ -118,4 +131,3 @@ abstract class BaseProvider(val providerName: String) extends Publisher {
   def loadAllAvailable()
   def setUpdateFrequency(updateFrequencySecs: Int)
 }
-

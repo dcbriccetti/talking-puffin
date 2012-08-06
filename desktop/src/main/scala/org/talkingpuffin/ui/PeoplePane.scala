@@ -45,15 +45,20 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
   private val tweetDetailPanel = new TweetDetailPanel(session, None)
   private val userActions = new UserActions(session, rels)
   val mh = new PopupMenuHelper(table)
-  private var specialMenuItems = new SpecialMenuItems(table, tableModel.relationships,
-    {getSelectedUsers map(_.getId.toLong)}, getSelectedScreenNames(true), {false})
+  private val specialMenuItems = new SpecialMenuItems(table, tableModel.relationships, {
+    getSelectedUsers map (_.getId.toLong)
+  }, getSelectedScreenNames(retweets = true), {
+    false
+  })
   buildActions(mh, table)
   table.addMouseListener(new PopupListener(table, mh.menu))
 
   class FriendFollowButton(label: String) extends JToggleButton(label) {
     setSelected(true)
     addActionListener(new ActionListener {
-      def actionPerformed(e: ActionEvent) = buildModelData
+      def actionPerformed(e: ActionEvent) {
+        buildModelData()
+      }
     })
   }
 
@@ -63,39 +68,41 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
   val searchText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
   val findPeopleText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
   reactions += {
-    case EditDone(`searchText`) => buildModelData
-    case EditDone(`findPeopleText`) => findPeople
+    case EditDone(`searchText`) => buildModelData()
+    case EditDone(`findPeopleText`) => findPeople()
   }
   listenTo(searchText)
   listenTo(findPeopleText)
 
   val toolbar = new JToolBar {
     setFloatable(false)
-    setLabels
+    setLabels()
     add(followingButton)
     add(followersButton)
     add(overlapLabel)
 
-    addSeparator
+    addSeparator()
 
     if (updateCallback.isDefined) {
       add(new JButton(new Action("Reload") {
         toolTip = "Reloads this data from Twitter"
-        def apply = updateCallback.get()
+        def apply() {
+          updateCallback.get()
+        }
       }.peer))
     }
 
-    addSeparator
+    addSeparator()
 
     add(new JLabel("Search user name: "))
     add(searchText.peer)
 
-    addSeparator
+    addSeparator()
 
     add(new JLabel("Find people on Twitter: "))
     add(findPeopleText.peer)
 
-    addSeparator
+    addSeparator()
     add(dockedButton)
     add((new CommonToolbarButtons).createDetailsButton(tweetDetailPanel))
   }
@@ -106,61 +113,63 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
   })
   
   add(tweetDetailPanel, new Constraints{
-    grid = (0,2); fill = GridBagPanel.Fill.Horizontal;
+    grid = (0,2); fill = GridBagPanel.Fill.Horizontal
   })
 
   tweetDetailPanel.connectToTable(table, None)
 
   reactions += {
-    case e: UsersChanged => setLabels
+    case e: UsersChanged => setLabels()
   }
   listenTo(rels)
   
-  private def setLabels {
+  private def setLabels() {
     followingButton.setText("Following: " + rels.friends.length)
     followersButton.setText("Followers: " + rels.followers.length)
     overlapLabel.setText(" Overlap: " + (rels.friends intersect rels.followers).length)
   }
   
-  private def buildModelData = tableModel.buildModelData(UserSelection(
-    followingButton.isSelected, followersButton.isSelected, searchText.text.length match {
-      case 0 => None
-      case _ => Some(searchText.text)
-    }))
+  private def buildModelData() {
+    tableModel.buildModelData(UserSelection(
+      followingButton.isSelected, followersButton.isSelected,
+        if (searchText.text.isEmpty) None else Some(searchText.text)
+      ))
+  }
   
-  private def findPeople: Unit = {
+  private def findPeople() {
     val people = session.twitter.searchUsers(findPeopleText.text, 1).toList
     debug("Found people: " + people)
     session.peoplePaneCreator.createPeoplePane(findPeopleText.text, findPeopleText.text,
       None, Some(people), None, None)
   }
 
-  private def buildActions(mh: PopupMenuHelper, comp: java.awt.Component) = {
-    mh.add(Action("View in Browser") {viewSelected}, ks(KeyEvent.VK_V,0))
+  private def buildActions(mh: PopupMenuHelper, comp: java.awt.Component) {
+    mh.add(Action("View in Browser") {viewSelected()}, ks(KeyEvent.VK_V,0))
     mh.add(new NextTAction(comp))
     mh.add(new PrevTAction(comp))
-    mh.add(Action("Reply") { reply }, ks(KeyEvent.VK_R,0))
+    mh.add(Action("Reply") { reply() }, ks(KeyEvent.VK_R,0))
     userActions.addCommonItems(mh, specialMenuItems, table, 
-        tweetDetailPanel.showBigPicture, getSelectedScreenNames, getSelectedStatuses)
+      tweetDetailPanel.showBigPicture(), getSelectedScreenNames, getSelectedStatuses)
   }
 
   private def getSelectedUsers:List[User] =
     TableUtil.getSelectedModelIndexes(table).map(tableModel.usersModel.users(_))
   
-  def getSelectedScreenNames(retweets: Boolean): List[String] = getSelectedUsers.map(user => user.getScreenName)
+  def getSelectedScreenNames(retweets: Boolean): List[String] = getSelectedUsers.map(_.getScreenName)
 
   def getSelectedStatuses(retweets: Boolean): List[Status] = for {
     user <- getSelectedUsers
     status <- user.status
   } yield status
 
-  private def viewSelected = getSelectedUsers.foreach(u => DesktopUtil.browse("http://twitter.com/" +
+  private def viewSelected() {
+    getSelectedUsers.foreach(u => DesktopUtil.browse("http://twitter.com/" +
       u.getScreenName))
+  }
   
-  private def reply {
+  private def reply() {
     val names = getSelectedUsers.map(user => ("@" + user.getScreenName)).mkString(" ")
     val sm = new SendMsgDialog(session, null, Some(names), None, None, false)
     sm.visible = true
   }
-
 }
