@@ -63,5 +63,4 @@ class Relationships extends BaseRelationships with Publisher with ErrorHandler {
     publish(UsersChanged(this))
     publish(IdsChanged(this))
   }
-  
 }

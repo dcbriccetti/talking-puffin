@@ -1,7 +1,7 @@
 package org.talkingpuffin.ui
 
-import javax.swing.table.{AbstractTableModel}
-import javax.swing.{Icon}
+import javax.swing.table.AbstractTableModel
+import javax.swing.Icon
 
 /**
  * A JTable cell with an asynchronously-loaded image in it.
@@ -13,8 +13,9 @@ class PictureCell(model: AbstractTableModel, column: Int) {
     
   def request(picUrl: String, rowIndex: Int): Icon = {
     picFetcher.getCachedObject(picUrl) match {
-      case Some(imageWithScaled) => imageWithScaled.image
-      case None => {
+      case Some(imageWithScaled) =>
+        imageWithScaled.image
+      case None =>
         picFetcher.requestItem(FetchImageRequest(picUrl, rowIndex.asInstanceOf[Object],
           (imageReady: PictureFetcher.ImageReady) => SwingInvoke.later {
             if (imageReady.resource.image.getIconHeight <= Thumbnail.THUMBNAIL_SIZE) {
@@ -25,6 +26,4 @@ class PictureCell(model: AbstractTableModel, column: Int) {
         Thumbnail.transparentThumbnail
     }
   }
-  }
-  
 }

@@ -1,11 +1,11 @@
 package org.talkingpuffin.ui
 
-import javax.swing.{ImageIcon}
+import javax.swing.ImageIcon
 import java.net.URL
-import org.talkingpuffin.util._
-import org.talkingpuffin.util.TimeLogger.{run => tlog}
 import java.io.Serializable
 import java.awt.{MediaTracker, Image}
+import org.talkingpuffin.util._
+import org.talkingpuffin.util.TimeLogger.{run => tlog}
 
 /**
  * Fetches pictures in the background, and calls a method in the event
@@ -54,7 +54,6 @@ class PictureFetcher(resource: String, scaleTo: Option[Int], numThreads: Int, wa
     }
     ImageWithScaled(icon, scaleTo.map(sideLength => PictureFetcher.scaleImageToFitSquare(sideLength, icon)))
   }
-
 }
 
 case class ImageWithScaled(image: ImageIcon, scaledImage: Option[ImageIcon]) extends Serializable

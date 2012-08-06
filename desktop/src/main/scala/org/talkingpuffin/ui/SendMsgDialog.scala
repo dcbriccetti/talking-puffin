@@ -1,14 +1,14 @@
 package org.talkingpuffin.ui
 
-import _root_.scala.swing._
+import scala.swing._
 import event.{SelectionChanged, CaretUpdate, EditDone}
-import java.awt.event.{KeyAdapter, KeyEvent}
+import java.awt.event.KeyEvent
 import java.awt.{Dimension, Font}
-import javax.swing.{SwingWorker}
+import javax.swing.SwingWorker
+import twitter4j.User
 import org.talkingpuffin.util.Loggable
 import org.talkingpuffin.ui.util.Cancelable
 import org.talkingpuffin.{Globals, Session}
-import twitter4j.User
 
 /**
  * A dialog for sending messages
@@ -22,7 +22,7 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
     font = new Font("Serif", Font.PLAIN, 18)
   }
   
-  case class NameAndScreenName(val name: String, val screenName: String) extends Ordered[NameAndScreenName] {
+  case class NameAndScreenName(name: String, screenName: String) extends Ordered[NameAndScreenName] {
     override def toString = screenName + " (" + name + ")"
     def compare(other: NameAndScreenName) = screenName compareToIgnoreCase other.screenName
     def matches(search: String) = {
@@ -83,12 +83,11 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
       add(new FlowPanel(FlowPanel.Alignment.Left)() {
         contents += new Label("To: ")
         recipients match {
-          case Some(r) => {
+          case Some(r) =>
             rels.followers.find(_.getScreenName == r) match {
               case Some(u) => dmRecipCombo.selection.item = NameAndScreenName(u.getName, u.getScreenName)
               case _ =>
             }
-          }
           case _ =>
         }
         contents += dmRecipCombo
@@ -131,21 +130,23 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
     
     add(new FlowPanel(FlowPanel.Alignment.Left)() {
       val sendButton = new Button(new Action("Send") {
-        def apply = send 
+        def apply() {
+          send()
+        }
         mnemonic = KeyEvent.VK_S
       })
       defaultButton = sendButton
       contents += sendButton
     }, new Constr {grid=(0,6); anchor=GridBagPanel.Anchor.West})
   }
-  pack
+  pack()
   peer.setLocationRelativeTo(parent)
-  message.requestFocus
+  message.requestFocus()
   
-  private def send {
+  private def send() {
     session.addMessage("Sending message")
     new SwingWorker[Object, Object] {
-      override def doInBackground: Object = {
+      override def doInBackground(): Object = {
         val tw = sendingSession.twitter
         if (isDm) dmRecipCombo.selection.item match {
           case u: NameAndScreenName => tw.sendDirectMessage(u.screenName, message.text)
@@ -156,11 +157,12 @@ class SendMsgDialog(session: Session, parent: java.awt.Component, recipients: Op
         }
         null
       }
-      override def done = {
-        val result = get
+
+      override def done() {
+        get
         session.addMessage("Message sent")
       }
-    }.execute
+    }.execute()
 
     visible = false
   }

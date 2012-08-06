@@ -3,10 +3,10 @@ package org.talkingpuffin.ui
 import java.awt.Dimension
 import javax.swing.event._
 import swing.{ScrollPane, GridBagPanel}
+import twitter4j.Status
 import org.talkingpuffin.filter.{TagUsers, FilterSet}
 import org.talkingpuffin.ui.filter.FiltersDialog
 import org.talkingpuffin.Session
-import twitter4j.Status
 import util.Dockable
 
 /**
