@@ -6,17 +6,16 @@ import java.text.NumberFormat
 import javax.swing.{JScrollPane, BorderFactory, JTable}
 import java.awt.{Color, Dimension, Insets, Font}
 import scala.swing.{Label, GridBagPanel, TextArea}
-import scala.swing.GridBagPanel._
 import scala.swing.GridBagPanel.Anchor._
+import twitter4j.{User, Status}
 import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.geo.GeoCoder
 import org.talkingpuffin.Session
 import org.talkingpuffin.ui.filter.FiltersDialog
 import org.talkingpuffin.util._
-import twitter4j.{User, Status}
 import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.apix.RichUser._
-import org.talkingpuffin.util.{EscapeHtml}
+import org.talkingpuffin.util.EscapeHtml
 import util.{Activateable, CenteredPicture, TextChangingAnimator}
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE), 2, Some(5))
@@ -37,10 +36,10 @@ class TweetDetailPanel(session: Session,
   }
 
   private val bigPic = new BigPictureDisplayer(medThumbPicFetcher)
-  private var userDescription: TextArea = _
+  private var userDescription: Option[TextArea] = None
   private var largeTweet = new LargeTweet(session, background, getActivateable _)
-  private var showingUrl: String = _
-  private var showingUser: User = _
+  private var showingUrl: Option[String] = None
+  private var showingUser: Option[User] = None
           
   val largeTweetScrollPane = new JScrollPane {
     val dim = new Dimension(600, 140); setMinimumSize(dim); setPreferredSize(dim)
@@ -55,7 +54,9 @@ class TweetDetailPanel(session: Session,
   }.peer)
 
   picLabel.peer.addMouseListener(new MouseAdapter {
-    override def mouseClicked(e: MouseEvent) = if (showingUrl != null) bigPic.showBigPicture(showingUrl, peer)
+    override def mouseClicked(e: MouseEvent) {
+      showingUrl.foreach(bigPic.showBigPicture(_, peer))
+    }
   })
   val picture = new CenteredPicture(picLabel) {visible = false}
   add(picture, new Constraints { anchor = SouthWest; grid = (0,1)})
@@ -110,16 +111,17 @@ class TweetDetailPanel(session: Session,
   }
 
   private def addUserDescription() {
-    userDescription = new UserDescription
+    val newUd = new UserDescription
+    userDescription = Some(newUd)
     userDescScrollPane = new JScrollPane {
       val dim = new Dimension(400, Thumbnail.MEDIUM_SIZE); setMinimumSize(dim); setPreferredSize(dim)
-      setViewportView(userDescription.peer)
+      setViewportView(newUd.peer)
       setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4))
       setVisible(false)
     }
     peer.add(userDescScrollPane, new Constraints {
-      anchor = SouthWest; insets = new Insets(0, 8, 0, 0); 
-      grid = (1,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1; 
+      anchor = SouthWest; insets = new Insets(0, 8, 0, 0)
+      grid = (1,1); fill = GridBagPanel.Fill.Horizontal; weightx = 1
     }.peer)
   }
   
@@ -160,20 +162,22 @@ class TweetDetailPanel(session: Session,
   def clearStatusDetails() {
     session.clearMessage()
     animator.stop()
-    showingUrl = null
+    showingUrl = None
     picLabel.icon = Thumbnail.transparentMedium
-    userDescription.text = null
+    userDescription.foreach(_.text = null)
     largeTweet.setText(null)
     largeTweetScrollPane.setVisible(false)
     userDescScrollPane.setVisible(false)
     picture.visible = false
   }
   
-  def showBigPicture() = bigPic.showBigPicture(showingUrl, peer)
+  def showBigPicture() {
+    showingUrl.foreach(bigPic.showBigPicture(_, peer))
+  }
 
   private def setText(user: User, statusOp: Option[Status]) {
     animator.stop()
-    showingUser = user
+    showingUser = Some(user)
     val rawLocationOfShowingItem = user.location
 
     statusOp match {
@@ -208,30 +212,34 @@ class TweetDetailPanel(session: Session,
   private def setText(user: User, location: String) {
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
 
-    userDescription.text = UserProperties.overriddenUserName(session.userPrefs, user) + 
-        " (" + user.getScreenName + ")\n" +
-        location + "\n\n" + 
-        user.description  + "\n\n" +
-        fmt(user.getFollowersCount) + " followers, following " +
-        fmt(user.getFriendsCount) +
-        (session.tagUsers.tagsForUser(user.getId) match {
-          case Nil => "" 
-          case tags => "\n\nTags: " + tags.mkString(", ")
-        })
+    userDescription.foreach(_.text = UserProperties.overriddenUserName(session.userPrefs, user) +
+      " (" + user.getScreenName + ")\n" +
+      location + "\n\n" +
+      user.description  + "\n\n" +
+      fmt(user.getFollowersCount) + " followers, following " +
+      fmt(user.getFriendsCount) +
+      (session.tagUsers.tagsForUser(user.getId) match {
+        case Nil => ""
+        case tags => "\n\nTags: " + tags.mkString(", ")
+      }))
   }
 
-  private def processFinishedGeocodes(resourceReady: ResourceReady[String]) = {
-    if (resourceReady.request.userData == showingUser) {
+  private def processFinishedGeocodes(resourceReady: ResourceReady[String]) {
+    showingUser.filter(_ == resourceReady.request.userData).foreach(user =>
       SwingInvoke.later {
         animator.stop()
-        animator.run(showingUser.location, resourceReady.resource, (text: String) => setText(showingUser, text))
+        animator.run(user.location, resourceReady.resource, (text: String) => setText(user, text))
       }
-    }
+    )
   }
   
-  private def processFinishedPicture(imageReady: PictureFetcher.ImageReady) = SwingInvoke.later {
-    if (imageReady.request.key.equals(showingUrl))
-      setPicLabelIconAndBigPic(imageReady.resource)
+  private def processFinishedPicture(imageReady: PictureFetcher.ImageReady) {
+    showingUrl.foreach(url =>
+      SwingInvoke.later {
+        if (imageReady.request.key.equals(url))
+          setPicLabelIconAndBigPic(imageReady.resource)
+      }
+    )
   }
 
   def prefetch(user: User) {
@@ -243,8 +251,8 @@ class TweetDetailPanel(session: Session,
 
   private def showMediumPicture(picUrl: String) {
     val fullSizeUrl = PictureFetcher.getFullSizeUrl(picUrl)
-    if (! fullSizeUrl.equals(showingUrl)) {
-      showingUrl = fullSizeUrl
+    if (! showingUrl.exists(_ == fullSizeUrl)) {
+      showingUrl = Some(fullSizeUrl)
       setPicLabelIconAndBigPic(medThumbPicFetcher.getCachedObject(fullSizeUrl) match {
         case Some(images) => images
         case None => 
@@ -254,8 +262,7 @@ class TweetDetailPanel(session: Session,
   }
   
   private def setPicLabelIconAndBigPic(imageWithScaled: ImageWithScaled) {
-    picLabel.icon = imageWithScaled.scaledImage match { case Some(icon) => icon case None => null} 
-    bigPic.setBigPicLabelIcon(Some(imageWithScaled.image), showingUrl, peer)
+    picLabel.icon = imageWithScaled.scaledImage.getOrElse(null)
+    showingUrl.foreach(bigPic.setBigPicLabelIcon(Some(imageWithScaled.image), _, peer))
   }
-
 }

@@ -22,8 +22,7 @@ class CommonTweetsProvider(title: String, session: Session, startingId: Option[L
   override def updateFunc(paging: Paging): List[Status] = allPages(twFunc, paging)
 }
 
-class FavoritesProvider(session: Session, id: String, startingId: Option[Long],
-    longOpListener: LongOpListener)
+class FavoritesProvider(session: Session, id: String, startingId: Option[Long], longOpListener: LongOpListener)
     extends TweetsProvider(session, startingId, id + " Favorites", longOpListener) {
   override def updateFunc(paging: Paging) = tw.getFavorites(id).toList
 }
@@ -38,9 +37,5 @@ class ListStatusesProvider(session: Session, list: UserList,
 class UserTweetsProvider(session: Session, screenName: String, longOpListener: LongOpListener)
     extends TweetsProvider(session, None, screenName, longOpListener) {
   override def updateFunc(paging: Paging): List[Status] = tw.getUserTimeline(screenName, paging).toList.
-    filter(status => status.inReplyToUserId match {
-    case Some(userId) => session.streams.relationships.friendIds.contains(userId)
-    case None => true
-    })
+    filter(_.inReplyToUserId.map(session.streams.relationships.friendIds.contains(_)).getOrElse(true))
 }
-

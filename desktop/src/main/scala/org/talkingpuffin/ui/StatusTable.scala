@@ -1,15 +1,15 @@
 package org.talkingpuffin.ui
 
-import java.awt.{Toolkit}
-import _root_.scala.{Option}
+import java.awt.Toolkit
 import java.awt.event.{MouseEvent, MouseAdapter}
 import java.awt.event.KeyEvent._
 import java.beans.PropertyChangeEvent
 import javax.swing.event._
-import javax.swing.table.{DefaultTableCellRenderer}
+import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.KeyStroke.{getKeyStroke => ks}
-import javax.swing.{JMenu}
+import javax.swing.JMenu
 import scala.swing.{Reactor, Action}
+import twitter4j.Status
 import com.google.common.collect.Lists
 import org.jdesktop.swingx.decorator.{SortKey, SortOrder, HighlighterFactory}
 import org.jdesktop.swingx.event.TableColumnModelExtListener
@@ -19,8 +19,7 @@ import org.talkingpuffin.state.{PrefKeys, GlobalPrefs}
 import org.talkingpuffin.Session
 import table.{AgeCellRenderer, EmphasizedStringCellRenderer, EmphasizedStringComparator, StatusCellRenderer}
 import util.{TableUtil, DesktopUtil, Activateable}
-import org.talkingpuffin.util.{LinkUnIndirector, Loggable, PopupListener}
-import twitter4j.Status
+import org.talkingpuffin.util.{Loggable, PopupListener}
 import org.talkingpuffin.apix.RichStatus._
 
 /**
@@ -38,12 +37,12 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   
   private var customRowHeight_ = 0
   private def customRowHeight = customRowHeight_
-  private def customRowHeight_=(value: Int) = {
+  private def customRowHeight_=(value: Int) {
     customRowHeight_ = value
     setRowHeight(customRowHeight_)
     GlobalPrefs.prefs.putInt(PrefKeys.STATUS_TABLE_ROW_HEIGHT, value)
   }
-  customRowHeight = GlobalPrefs.prefs.getInt(PrefKeys.STATUS_TABLE_ROW_HEIGHT, thumbnailHeight) 
+  customRowHeight = GlobalPrefs.prefs.getInt(PrefKeys.STATUS_TABLE_ROW_HEIGHT, thumbnailHeight)
   
   setDefaultRenderer(classOf[String], new DefaultTableCellRenderer)
   val statusCellRenderer = new StatusCellRenderer
@@ -60,9 +59,10 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
   configureColumns()
 
   private val mh = new PopupMenuHelper(this)
-  private var specialMenuItems = new SpecialMenuItems(this, tableModel.relationships,
-      getSelectedStatuses(true) map(_.getUser.getId.toLong), getSelectedScreenNames(true),
-      {getSelectedStatuses(true).exists(_.inReplyToStatusId.isDefined)})
+  private val specialMenuItems = new SpecialMenuItems(this, tableModel.relationships,
+    getSelectedStatuses(retweets = true) map (_.getUser.getId.toLong), getSelectedScreenNames(retweets = true), {
+      getSelectedStatuses(retweets = true).exists(_.inReplyToStatusId.isDefined)
+    })
   buildActions()
 
   new Reactor {
@@ -76,7 +76,10 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
 
   addMouseListener(new PopupListener(this, mh.menu))
   addMouseListener(new MouseAdapter {
-    override def mouseClicked(e: MouseEvent) = if (e.getClickCount == 2) reply
+    override def mouseClicked(e: MouseEvent) {
+      if (e.getClickCount == 2)
+        reply()
+    }
   })
   
   def saveState() {
@@ -91,51 +94,64 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     }
   }
   
-  private def viewSelected() = getSelectedStatuses(true).foreach(status =>
-    DesktopUtil.browse("http://twitter.com/" + status.getUser.getScreenName + "/statuses/" + status.getId))
+  private def viewSelected() {
+    getSelectedStatuses(retweets = true).foreach(status =>
+      DesktopUtil.browse("http://twitter.com/" + status.getUser.getScreenName + "/statuses/" + status.getId))
+  }
  
-  private def viewSourceSelected() = getSelectedStatuses(true).foreach(status =>
-    DesktopUtil.browse("http://twitter.com/statuses/show/" + status.getId + ".xml"))
+  private def viewSourceSelected() {
+    getSelectedStatuses(retweets = true).foreach(status =>
+      DesktopUtil.browse("http://twitter.com/statuses/show/" + status.getId + ".xml"))
+  }
  
-  private def viewUser() = getSelectedScreenNames(true).foreach(screenName =>
-    DesktopUtil.browse("http://twitter.com/" + screenName))
+  private def viewUser() {
+    getSelectedScreenNames(retweets = true).foreach(screenName =>
+      DesktopUtil.browse("http://twitter.com/" + screenName))
+  }
 
-  private def viewParent() = getSelectedStatuses(true).foreach(status =>
-    if (status.inReplyToScreenName.isDefined && status.inReplyToStatusId.isDefined)
-      DesktopUtil.browse("http://twitter.com/" + status.inReplyToScreenName.get +
+  private def viewParent() {
+    getSelectedStatuses(retweets = true).foreach(status =>
+      if (status.inReplyToScreenName.isDefined && status.inReplyToStatusId.isDefined)
+        DesktopUtil.browse("http://twitter.com/" + status.inReplyToScreenName.get +
           "/statuses/" + status.inReplyToStatusId.get)
-  )
- 
-  private def editUser() = getSelectedStatuses(true).foreach(status => {
-    val userProperties = new UserPropertiesDialog(session.userPrefs, status)
-    userProperties.visible = true  
-  })
+    )
+  }
+
+  private def editUser() {
+    getSelectedStatuses(retweets = true).foreach(status => {
+      val userProperties = new UserPropertiesDialog(session.userPrefs, status)
+      userProperties.visible = true
+    })
+  }
 
   private def statusTextSize = statusCellRenderer.textSizePct
-  private def statusTextSize_=(sizePct: Int) = {
+  private def statusTextSize_=(sizePct: Int) {
     statusCellRenderer.textSizePct = sizePct
     GlobalPrefs.prefs.putInt(PrefKeys.STATUS_TABLE_STATUS_FONT_SIZE, sizePct)
   }
   
   def reply() {
-    val statuses = getSelectedStatuses(true)
+    val statuses = getSelectedStatuses(retweets = true)
     if (! statuses.isEmpty) {
       val recipients = statuses.map(("@" + _.getUser.getScreenName)).mkString(" ")
       createSendMsgDialog(statuses(0), Some(recipients), None).visible = true
     }
   }
   
-  def dm(screenName: String) =
+  def dm(screenName: String) {
     (new SendMsgDialog(session, null, Some(screenName), None, None, true)).visible = true
+  }
   
   private def retweetOldWay() {
-    val status = getSelectedStatuses(true)(0)
+    val status = getSelectedStatuses(retweets = true)(0)
     val name = "@" + status.getUser.getScreenName
     createSendMsgDialog(status, Some(name), Some(status.text)).visible = true
   }
   
-  private def retweetNewWay() = process(getSelectedStatuses(true).map(_.getId), session.twitter.retweetStatus,
+  private def retweetNewWay() {
+    process(getSelectedStatuses(retweets = true).map(_.getId), session.twitter.retweetStatus,
       "retweeting", "Status %s retweeted.")
+  }
   
   private def createSendMsgDialog(status: Status, names: Option[String], retweetMsg: Option[String]) =
     new SendMsgDialog(session, null, names, Some(status.getId), retweetMsg, false)
@@ -199,7 +215,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     getSortController.setSortKeys(Lists.newArrayList(new SortKey(sortDir, modelIndex)))
 
     getColumnModel.addColumnModelListener(new TableColumnModelExtListener {
-      def columnPropertyChange(event: PropertyChangeEvent) = {
+      def columnPropertyChange(event: PropertyChangeEvent) {
         if (event.getPropertyName.equals("visible")) {
           // Save changes into preferences.
           val source = event.getSource
@@ -209,11 +225,11 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
         }
       }
 
-      def columnSelectionChanged(e: ListSelectionEvent) = {}
-      def columnRemoved(e: TableColumnModelEvent) = {}
-      def columnMoved(e: TableColumnModelEvent) = {}
-      def columnMarginChanged(e: ChangeEvent) = {}
-      def columnAdded(e: TableColumnModelEvent) = {}
+      def columnSelectionChanged(e: ListSelectionEvent) {}
+      def columnRemoved(e: TableColumnModelEvent) {}
+      def columnMoved(e: TableColumnModelEvent) {}
+      def columnMarginChanged(e: ChangeEvent) {}
+      def columnAdded(e: TableColumnModelEvent) {}
     })
   }
 
@@ -238,29 +254,35 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     mh add new NextTAction(this)
     mh add new PrevTAction(this)
     
-    mh add(Action("Reply…") { reply }, ks(VK_R, 0))
+    mh add(Action("Reply…") { reply() }, ks(VK_R, 0))
     mh add(new Action("Direct Message…") { 
-      def apply = dm(getSelectedScreenNames(true)(0))
+      def apply() {
+        dm(getSelectedScreenNames(retweets = true)(0))
+      }
       specialMenuItems.oneScreennameSelected.list ::= this
       specialMenuItems.followersOnly.list ::= this
     }, ks(VK_D, 0))
     mh add(new Action("Retweet old way…") { 
-      def apply = retweetOldWay
+      def apply() {
+        retweetOldWay()
+      }
       specialMenuItems.oneStatusSelected.list ::= this
     }, ks(VK_E, 0))
-    mh add(Action("Retweet new way") { retweetNewWay }, ks(VK_E, SHORTCUT))
+    mh add(Action("Retweet new way") { retweetNewWay() }, ks(VK_E, SHORTCUT))
     
     mh.menu.add(new JMenu("View in browser") {
-      mh add(Action("Status") {viewSelected}, this, ks(VK_V, 0))
-      mh add(Action("Status source") {viewSourceSelected}, this, ks(VK_V, SHORTCUT | SHIFT))
-      mh add(Action("Sender") {viewUser}, this, ks(VK_V, SHIFT))
+      mh add(Action("Status") {viewSelected()}, this, ks(VK_V, 0))
+      mh add(Action("Status source") {viewSourceSelected()}, this, ks(VK_V, SHORTCUT | SHIFT))
+      mh add(Action("Sender") {viewUser()}, this, ks(VK_V, SHIFT))
       mh add(new Action("Parent status") {
-        def apply = viewParent
+        def apply() {
+          viewParent()
+        }
         specialMenuItems.replyOnly.list ::= this
       }, this, ks(VK_A, 0))
     })
     
-    mh add(Action("Edit user properties…") {editUser}, ks(VK_P, SHORTCUT))
+    mh add(Action("Edit user properties…") {editUser()}, ks(VK_P, SHORTCUT))
 
     mh.menu.add(new JMenu("Mute") {
       mh add(Action("User") {tableModel.muteSelectedUsers(smi)}, this, ks(VK_M, SHORTCUT))
@@ -268,7 +290,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
         smi)}, this, ks(VK_M, SHORTCUT | SHIFT))
       mh add(Action("Commented retweets by user") {tableModel.muteSelectedUsersCommentedRetweets(
         smi)}, this, ks(VK_C, SHORTCUT | SHIFT))
-      mh add(Action("Sender to receiver") {tableModel.muteSelectedSenderReceivers(smi, false)}, 
+      mh add(Action("Sender to receiver") {tableModel.muteSelectedSenderReceivers(smi, andViceVersa = false)},
         this, ks(VK_M, SHORTCUT | ALT))
       mh add(Action("Sender to receiver and vice versa") {tableModel.muteSelectedSenderReceivers(smi, true)}, 
         this, ks(VK_M, SHORTCUT | ALT | SHIFT))
@@ -293,7 +315,7 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
       }, this, ks(VK_D, SHORTCUT), ks(VK_DELETE, 0), ks(VK_BACK_SPACE, 0))
   
       mh add(Action("All tweets from selected users") {
-        tableModel removeStatusesFrom getSelectedScreenNames(false) }, this, ks(VK_D, SHORTCUT | SHIFT))
+        tableModel removeStatusesFrom getSelectedScreenNames(retweets = false) }, this, ks(VK_D, SHORTCUT | SHIFT))
     })
   }
 
@@ -302,8 +324,9 @@ class StatusTable(val session: Session, tableModel: StatusTableModel, showBigPic
     tableModel.fireTableDataChanged()
   }
   
-  private def changeRowHeight(change: Int) = customRowHeight += change
+  private def changeRowHeight(change: Int) {
+    customRowHeight += change
+  }
   
   private def thumbnailHeight = Thumbnail.THUMBNAIL_SIZE + rowMarginVal + 2
-  
 }
