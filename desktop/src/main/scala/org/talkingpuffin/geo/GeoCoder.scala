@@ -2,16 +2,15 @@ package org.talkingpuffin.geo
 
 import java.net.URL
 import xml.XML
-import org.talkingpuffin.util.{Loggable, BackgroundResourceFetcher}
+import org.talkingpuffin.util.BackgroundResourceFetcher
 
 /**
  * Geocoding.
  */
-object GeoCoder extends BackgroundResourceFetcher[String]("Geo", numThreads = 2) with Loggable {
+object GeoCoder extends BackgroundResourceFetcher[String]("Geo", numThreads = 2) {
   private val latLongRegex = {
     val num = """(-?\d+\.\d*)"""
     val latLongRexexSource = num + """,\s*""" + num
-    info(latLongRexexSource)
     latLongRexexSource.r
   }
   private val apiKey = "ABQIAAAAVOsftmRci5v5FgKzeSDTjRQRy7BtqlAMzRCsHHZRQCk8HnV1mBQ5tPe8d9oZTkHqFfsayPz758T-Mw"
@@ -21,15 +20,11 @@ object GeoCoder extends BackgroundResourceFetcher[String]("Geo", numThreads = 2)
    * produces a (latitude, comma, longitude) String, or None if the pattern does not match.
    */
   def extractLatLong(location: String): Option[String] = {
-    info(location)
-    val lr = location.replaceAll(".*: ?", "")
-    info(lr)
-    lr match {
+    val locWithoutPrefix = location.replaceAll(".*: ?", "") // Such as iPhone:
+    locWithoutPrefix match {
       case latLongRegex(lat, long) =>
-        info("match %s %s".format(lat,long))
         Some(formatLatLongKey(lat, long))
       case _ =>
-        info("no match")
         None
     }
   }
