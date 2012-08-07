@@ -21,8 +21,10 @@ class UsersTableModel(users: Option[List[User]], val tagUsers: TagUsers,
   var usersModel: UsersModel = _
   var lastIncludeFriends = true
   var lastIncludeFollowers = true
+  var lastIncludeEmptyDescriptions = true
   var lastSearch: Option[String] = None
-  buildModelData(UserSelection(true, true, None))
+  buildModelData(UserSelection(includeFriends = true, includeFollowers = true,
+    includeEmptyDescriptions = true, searchString = None))
   reactions += {
     case u: UsersChanged => if (u.source eq relationships) usersChanged
   }
@@ -85,13 +87,14 @@ class UsersTableModel(users: Option[List[User]], val tagUsers: TagUsers,
   private[ui] def buildModelData(sel: UserSelection) {
     lastIncludeFriends = sel.includeFriends
     lastIncludeFollowers = sel.includeFollowers
+    lastIncludeEmptyDescriptions = sel.includeEmptyDescriptions
     lastSearch = sel.searchString
     usersModel = UsersModel(users, relationships, sel)
-    fireTableDataChanged
+    fireTableDataChanged()
   }
   
-  private def usersChanged {
-    buildModelData(UserSelection(lastIncludeFriends, lastIncludeFollowers, lastSearch))
+  private def usersChanged() {
+    buildModelData(UserSelection(lastIncludeFriends, lastIncludeFollowers, lastIncludeEmptyDescriptions, lastSearch))
   }
   
 }

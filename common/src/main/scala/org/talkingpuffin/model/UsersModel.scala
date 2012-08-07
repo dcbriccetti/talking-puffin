@@ -15,9 +15,9 @@ object UsersModel {
    */
   def apply(usersList: Option[List[User]], rels: BaseRelationships, sel: UserSelection): UsersModel = {
 
-    def selected(users: List[User], search: Option[String]) = search match {
+    def selected(users: List[User], opSearch: Option[String]) = opSearch match {
       case None => users
-      case Some(search) => users.filter(u => u.getName.toLowerCase.contains(search.toLowerCase))
+      case Some(search) => users.filter(_.getName.toLowerCase.contains(search.toLowerCase))
     }
 
     val combinedList = (usersList match {
@@ -26,7 +26,11 @@ object UsersModel {
         var set = Set[User]()
         if (sel.includeFriends)   set ++= selected(rels.friends  , sel.searchString)
         if (sel.includeFollowers) set ++= selected(rels.followers, sel.searchString)
-        set.toList
+        val userList = set.toList
+        if (sel.includeEmptyDescriptions)
+          userList
+        else
+          userList.filterNot(u => Option(u.getDescription).map(_.trim.isEmpty).getOrElse(true))
     }).sortBy(_.getName.toLowerCase)
     val users = combinedList.toArray
     val arrows = combinedList.map(user => {
@@ -39,4 +43,3 @@ object UsersModel {
     new UsersModel(rels, users, arrows, screenNameToUserNameMap, friendScreenNames)
   }
 }
-

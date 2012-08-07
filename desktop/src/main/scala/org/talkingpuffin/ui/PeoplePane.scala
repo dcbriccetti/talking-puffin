@@ -53,7 +53,7 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
   buildActions(mh, table)
   table.addMouseListener(new PopupListener(table, mh.menu))
 
-  class FriendFollowButton(label: String) extends JToggleButton(label) {
+  private class FilterButton(label: String) extends JToggleButton(label) {
     setSelected(true)
     addActionListener(new ActionListener {
       def actionPerformed(e: ActionEvent) {
@@ -62,11 +62,14 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     })
   }
 
-  var followingButton = new FriendFollowButton("")
-  var followersButton = new FriendFollowButton("")
-  var overlapLabel = new JLabel("")
-  val searchText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
-  val findPeopleText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
+  private val followingButton = new FilterButton("")
+  private val followersButton = new FilterButton("")
+  private val overlapLabel = new JLabel("")
+  private val emptyDescriptionsButton = new FilterButton("No Desc.") {
+    tooltip = "Show or hide people with no description"
+  }
+  private val searchText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
+  private val findPeopleText = new TextField { val s=new Dimension(100,20); minimumSize = s; preferredSize = s}
   reactions += {
     case EditDone(`searchText`) => buildModelData()
     case EditDone(`findPeopleText`) => findPeople()
@@ -80,6 +83,7 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
     add(followingButton)
     add(followersButton)
     add(overlapLabel)
+    add(emptyDescriptionsButton)
 
     addSeparator()
 
@@ -131,7 +135,7 @@ class PeoplePane(val longTitle: String, val shortTitle: String, val session: Ses
   
   private def buildModelData() {
     tableModel.buildModelData(UserSelection(
-      followingButton.isSelected, followersButton.isSelected,
+      followingButton.isSelected, followersButton.isSelected, emptyDescriptionsButton.isSelected,
         if (searchText.text.isEmpty) None else Some(searchText.text)
       ))
   }
