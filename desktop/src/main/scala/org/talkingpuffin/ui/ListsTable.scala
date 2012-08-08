@@ -1,18 +1,19 @@
 package org.talkingpuffin.ui
 
+import javax.swing.table.{AbstractTableModel, TableModel}
+import swing.{FlowPanel, ScrollPane, BorderPanel, Frame, Button, Action}
+import javax.swing.JTable
+import twitter4j.UserList
 import org.jdesktop.swingx.JXTable
 import org.talkingpuffin.util.Loggable
-import javax.swing.table.{AbstractTableModel, TableModel}
 import org.jdesktop.swingx.decorator.HighlighterFactory
-import swing.{FlowPanel, ScrollPane, BorderPanel, Frame, Button, Action}
 import org.talkingpuffin.Session
-import javax.swing.JTable
 import util.{TableUtil, Cancelable}
-import twitter4j.UserList
 
-class ListsTableModel(lists: List[UserList]) extends AbstractTableModel {
+class ListsTableModel(lists: Iterable[UserList]) extends AbstractTableModel {
+  val listsArray = lists.toArray
   def getValueAt(rowIndex: Int, columnIndex: Int)= {
-    val list = lists(rowIndex)
+    val list = listsArray(rowIndex)
     columnIndex match {
       case 0 => list.getUser.getName
       case 1 => list.getName
@@ -22,7 +23,7 @@ class ListsTableModel(lists: List[UserList]) extends AbstractTableModel {
     }
   }
 
-  def getRowCount = lists.length
+  def getRowCount = listsArray.length
 
   def getColumnCount = 5
 
@@ -34,7 +35,6 @@ class ListsTableModel(lists: List[UserList]) extends AbstractTableModel {
     classOf[Long])(col) 
 
   override def getColumnName(column: Int) = List("Owner", "Name", "Description", "Fllwing", "Fllrs")(column)
-  
 }
 
 class ListsTable(model: TableModel) extends JXTable(model) with Loggable {
@@ -49,10 +49,11 @@ class ListsTable(model: TableModel) extends JXTable(model) with Loggable {
   List(memberCountCol, subscriberCountCol).foreach(_.setPreferredWidth(50))
 }
 
-class ListsFrame(session: Session, lists: List[UserList]) extends Frame with Cancelable {
+class ListsFrame(session: Session, lists: Iterable[UserList]) extends Frame with Cancelable {
+  val listsArray = lists.toArray
   title = "Lists"
   contents = new BorderPanel {
-    val table = new ListsTable(new ListsTableModel(lists))
+    val table = new ListsTable(new ListsTableModel(listsArray))
     add(new ScrollPane {
       peer.setViewportView(table)
     }, BorderPanel.Position.Center)
@@ -71,6 +72,5 @@ class ListsFrame(session: Session, lists: List[UserList]) extends Frame with Can
   peer.setLocationRelativeTo(null)
   visible = true
   
-  private def selectedLists(table: JTable) = 
-    for {i <- TableUtil.getSelectedModelIndexes(table)} yield lists(i)
+  private def selectedLists(table: JTable) = TableUtil.getSelectedModelIndexes(table).map(listsArray)
 }

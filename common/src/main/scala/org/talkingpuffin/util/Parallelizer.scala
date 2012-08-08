@@ -9,10 +9,10 @@ object Parallelizer extends Loggable {
   /**
    * Runs, in the number of threads requested, the function f, giving it each A of args, returning a List[T]
    */
-  def run[T,A](numThreads: Int, args: Seq[A], f: (A) => T, threadName: String = "Parallel"): List[T] = {
+  def run[T,A](numThreads: Int, args: Iterable[A], f: (A) => T, threadName: String = "Parallel"): Iterable[T] = {
     val timings = Collections.synchronizedList(new ArrayList[Long])
     val pool = Executors.newFixedThreadPool(numThreads, NamedThreadFactory(threadName))
-    val result: List[T] = args.map(arg => pool.submit(Threads.callable {
+    val result: Iterable[T] = args.map(arg => pool.submit(Threads.callable {
       val startTime = System.currentTimeMillis
       val result = f(arg)
       timings.add(System.currentTimeMillis - startTime)
@@ -20,7 +20,7 @@ object Parallelizer extends Loggable {
     })).map(_.get).toList
     pool.shutdown()
     logStats(timings)
-    result.toList
+    result
   }
 
   private def calcStdDev(timings: java.util.List[Long], mean: Double): Double = {

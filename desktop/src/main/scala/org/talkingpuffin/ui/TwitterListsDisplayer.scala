@@ -1,46 +1,49 @@
 package org.talkingpuffin.ui
 
-import scala.collection.JavaConversions._
-import org.talkingpuffin.ui.util.Tiler
-import swing.{Action, MenuItem}
-import org.talkingpuffin.util.Parallelizer
-import javax.swing.{JComponent, JPopupMenu, JTable}
+import javax.swing.JComponent
 import java.awt.Rectangle
-import org.talkingpuffin.Session
 import twitter4j.{UserList, User}
-import org.talkingpuffin.apix.PageHandler._
-import org.talkingpuffin.filter.TagUsers
 import SwingInvoke.execSwingWorker
+import org.talkingpuffin.ui.util.Tiler
+import org.talkingpuffin.util.Parallelizer
+import org.talkingpuffin.apix.PageHandler._
+import org.talkingpuffin.Session
 
 case class MenuPos(parent: JComponent, menuX: Int, menuY: Int)
 
 object TwitterListsDisplayer {
 
-  type LLUL = List[List[UserList]]
+  type LLUL = Seq[Seq[UserList]]
   
-  def viewListsTable(session: Session, screenNames: List[String]): Unit =
+  def viewListsTable(session: Session, screenNames: Iterable[String]) {
     execSwingWorker({
       getLists(session, screenNames)
     }, showListsInTable(session))
+  }
   
   /**
    * Presents a pop-up menu of lists containing the specified screen names. One or all lists can 
    * be selected. Each list is launched in a new PeoplePane.
    */
-  def viewListsContaining(session: Session, screenNames: List[String]) {
+  def viewListsContaining(session: Session, screenNames: Iterable[String]) {
     execSwingWorker({getListsContaining(session, screenNames)},
         showListsInTable(session))
   }
   
-  def viewLists(session: Session, lists: List[UserList]) = lists.foreach(l => viewList(l, session, None))
+  def viewLists(session: Session, lists: List[UserList]) {
+    lists.foreach(viewList(_, session, None))
+  }
   
-  def viewListsStatuses(session: Session, lists: List[UserList]) =
-    lists.foreach(l => viewListStatuses(l, session, None))
+  def viewListsStatuses(session: Session, lists: List[UserList]) {
+    lists.foreach(viewListStatuses(_, session, None))
+  }
   
-  def importLists(session: Session, lists: List[UserList]) = lists.foreach(l => importList(l, session))
+  def importLists(session: Session, lists: List[UserList]) {
+    lists.foreach(importList(_, session))
+  }
 
   private def showListsInTable(session: Session)(lltl: LLUL) {
-    new ListsFrame(session, lltl.flatMap(f => f))
+    new ListsFrame(session, lltl.flatten)
   }
   
   private def viewList(list: UserList, session: Session, tiler: Option[Tiler]) {
@@ -57,7 +60,7 @@ object TwitterListsDisplayer {
   private def tilerNext(tiler: Option[Tiler]): Option[Rectangle] =
     tiler match {case Some(t) => Some(t.next) case _ => None}
 
-  private def viewListStatuses(list: UserList, session: Session, tiler: Option[Tiler]) = {
+  private def viewListStatuses(list: UserList, session: Session, tiler: Option[Tiler]) {
     val provider = new ListStatusesProvider(session, list, None, session.progress)
     session.streams.createView(session.tabbedPane, provider, None, tilerNext(tiler))
     provider.loadContinually()
@@ -74,16 +77,15 @@ object TwitterListsDisplayer {
     }
   }
 
-  private def getLists(session: Session, screenNames: List[String]): LLUL = {
+  private def getLists(session: Session, screenNames: Iterable[String]): LLUL = {
     val tw = session.twitter
     def getMembers(screenName: String) = allPages(userLists(tw, screenName))
-    Parallelizer.run(20, screenNames, getMembers, "Get lists") filter(_ != Nil)
+    Parallelizer.run(20, screenNames, getMembers, "Get lists").filter(_ != Nil).toSeq
   }
     
-  private def getListsContaining(session: Session, screenNames: List[String]): LLUL = {
+  private def getListsContaining(session: Session, screenNames: Iterable[String]): LLUL = {
     val tw = session.twitter
     def getAllMembers(screenName: String) = allPages(userListMemberships(tw, screenName))
-    Parallelizer.run(20, screenNames, getAllMembers, "Get lists containing") filter(_ != Nil)
+    Parallelizer.run(20, screenNames, getAllMembers, "Get lists containing").filter(_ != Nil).toSeq
   }
-    
 }
