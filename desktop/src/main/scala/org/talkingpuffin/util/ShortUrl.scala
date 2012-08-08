@@ -49,11 +49,10 @@ object ShortUrl extends Loggable {
     val matcher = LinkExtractor.hyperlinkPattern.matcher(text)
     while (matcher.find) {
       val sourceUrl = matcher.group(1)
-      expandUrl(sourceUrl, (targetUrl: String) => {provideSourceAndTargetUrl(sourceUrl, targetUrl)})
+      expandUrl(sourceUrl, (targetUrl: String) => provideSourceAndTargetUrl(sourceUrl, targetUrl))
     }
   }
 
   private def urlIsShortened(url: String) = shortenerHosts.exists(url.contains(_)) ||
     shortenerRegexes.exists(r => url match {case r() => true case _ => false})
-
 }

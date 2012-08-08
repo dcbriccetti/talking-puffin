@@ -125,8 +125,6 @@ class TweetDetailPanel(session: Session,
     }.peer)
   }
   
-  private def getFiltersDialog: Option[FiltersDialog] = None
-  
   private def showStatusDetails(userAndStatus: UserAndStatus, filtersDialog: Option[FiltersDialog]) {
     session.clearMessage()
     setText(userAndStatus.origUser, userAndStatus.status)
@@ -142,9 +140,11 @@ class TweetDetailPanel(session: Session,
             userAndStatus.retweetingUser))
 
         if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
-          def replaceUrl(shortUrl: String, fullUrl: String) = {
+          def urlWithoutRequestParams(url: String) = url.split("\\?")(0)
+
+          def replaceUrl(shortUrl: String, fullUrl: String) {
             val beforeText = largeTweet.getText
-            val afterText = beforeText.replace(shortUrl, fullUrl)
+            val afterText = beforeText.replace(shortUrl, urlWithoutRequestParams(fullUrl))
             if (beforeText != afterText) {
               largeTweet setText afterText
               largeTweet setCaretPosition 0
