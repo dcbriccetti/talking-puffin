@@ -17,6 +17,7 @@ import org.talkingpuffin.apix.RichStatus._
 import org.talkingpuffin.apix.RichUser._
 import org.talkingpuffin.util.EscapeHtml
 import util.{Activateable, CenteredPicture, TextChangingAnimator}
+import java.net.URL
 
 object medThumbPicFetcher extends PictureFetcher("Medium thumb", Some(Thumbnail.MEDIUM_SIZE), 2, Some(5))
 
@@ -142,11 +143,20 @@ class TweetDetailPanel(session: Session,
             userAndStatus.retweetingUser))
 
         if (GlobalPrefs.isOn(PrefKeys.EXPAND_URLS)) {
-          def urlWithoutRequestParams(url: String) = url.split("\\?")(0)
+          def formatUrl(url: String) = {
+            try {
+              val u = new URL(url)
+              //TODO make a way to show a short version of the ultimate URL while preserving the hyperlink
+              u.getHost + u.getPath
+              url
+            } catch {
+              case e: Exception => url
+            }
+          }
 
           def replaceUrl(shortUrl: String, fullUrl: String) {
             val beforeText = largeTweet.getText
-            val afterText = beforeText.replace(shortUrl, urlWithoutRequestParams(fullUrl))
+            val afterText = beforeText.replace(shortUrl, formatUrl(fullUrl))
             if (beforeText != afterText) {
               largeTweet setText afterText
               largeTweet setCaretPosition 0

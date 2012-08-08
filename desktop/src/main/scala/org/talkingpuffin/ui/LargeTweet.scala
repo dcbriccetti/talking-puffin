@@ -17,26 +17,31 @@ class LargeTweet(session: Session, backgroundColor: Color,
     activateable: Function0[Option[Activateable]]) extends JTextPane with Loggable {
   var filtersDialog: Option[FiltersDialog] = None 
   setBackground(backgroundColor)
-  setContentType("text/html");
-  setEditable(false);
-  
+  setContentType("text/html")
+  setEditable(false)
+
+  private val findLinks =
+    if (Desktop.isDesktopSupported)
+      Some(LinkUnIndirector.findLinks(DesktopUtil.browse, DesktopUtil.browse) _)
+    else
+      None
+
   addHyperlinkListener(new HyperlinkListener() {
     def hyperlinkUpdate(e: HyperlinkEvent) {
-      if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-        if (Desktop.isDesktopSupported) {
-          LinkUnIndirector.findLinks(DesktopUtil.browse, DesktopUtil.browse)(e.getURL.toString)
-        }
-        activateable() match { 
-          case Some(a) => a.activate // Let user resume using keyboard to move through tweets
-          case _ =>
-        }
+      if (e.getEventType == HyperlinkEvent.EventType.ACTIVATED) {
+        findLinks.foreach(_(e.getURL.toString))
+        activateable().foreach(_.activate) // Let user resume using keyboard to move through tweets
       }
     }
-  });
+  })
   
   addMouseListener(new MouseAdapter {
-    override def mousePressed(e: MouseEvent) = showPopup(e)
-    override def mouseReleased(e: MouseEvent) = showPopup(e)
+    override def mousePressed(e: MouseEvent) {
+      showPopup(e)
+    }
+    override def mouseReleased(e: MouseEvent) {
+      showPopup(e)
+    }
     def showPopup(e: MouseEvent) {
       if (e.isPopupTrigger) {
         val text = getSelectedText
@@ -59,6 +64,4 @@ class LargeTweet(session: Session, backgroundColor: Color,
       }
     }
   })
-  
 }
-
