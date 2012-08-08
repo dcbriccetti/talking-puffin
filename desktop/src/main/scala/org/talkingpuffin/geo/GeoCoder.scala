@@ -10,8 +10,7 @@ import org.talkingpuffin.util.BackgroundResourceFetcher
 object GeoCoder extends BackgroundResourceFetcher[String]("Geo", numThreads = 2) {
   private val latLongRegex = {
     val num = """(-?\d+\.\d*)"""
-    val latLongRexexSource = num + """,\s*""" + num
-    latLongRexexSource.r
+    (num + """,\s*""" + num).r
   }
   private val apiKey = "ABQIAAAAVOsftmRci5v5FgKzeSDTjRQRy7BtqlAMzRCsHHZRQCk8HnV1mBQ5tPe8d9oZTkHqFfsayPz758T-Mw"
 
@@ -31,9 +30,6 @@ object GeoCoder extends BackgroundResourceFetcher[String]("Geo", numThreads = 2)
 
   def formatLatLongKey(lat: String, long: String): String = lat + "," + long 
   
-  def formatLatLongKey(location: Tuple2[Double, Double]): String = 
-    formatLatLongKey(location._1.toString, location._2.toString) 
-
   protected def getResourceFromSource(latLong: String): String = {
     val url = new URL("http://maps.google.com/maps/geo?key=" + GeoCoder.apiKey + 
         "&ll=" + latLong + "&output=xml&oe=utf-8")

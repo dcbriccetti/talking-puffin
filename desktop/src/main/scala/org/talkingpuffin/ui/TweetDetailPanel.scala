@@ -42,7 +42,9 @@ class TweetDetailPanel(session: Session,
   private var showingUser: Option[User] = None
           
   val largeTweetScrollPane = new JScrollPane {
-    val dim = new Dimension(600, 140); setMinimumSize(dim); setPreferredSize(dim)
+    val dim = new Dimension(600, 140)
+    setMinimumSize(dim)
+    setPreferredSize(dim)
     setViewportView(largeTweet)
     setBorder(null)
     setBackground(Color.WHITE)
@@ -68,7 +70,7 @@ class TweetDetailPanel(session: Session,
     wordWrap = true
     editable = false
   }
-  addUserDescription
+  addUserDescription()
   
   var userDescScrollPane: JScrollPane = _
   private var currentActivateable: Option[Activateable] = None
@@ -78,7 +80,7 @@ class TweetDetailPanel(session: Session,
     val table = activateable.asInstanceOf[JTable]
     val model = table.getModel.asInstanceOf[UserAndStatusProvider]
     
-    def prefetchAdjacentRows {        
+    def prefetchAdjacentRows() {
       List(-1, 1).foreach(offset => {
         val adjacentRowIndex = table.getSelectedRow + offset
         if (adjacentRowIndex >= 0 && adjacentRowIndex < table.getRowCount) {
@@ -97,12 +99,12 @@ class TweetDetailPanel(session: Session,
               val userAndStatus = model.getUserAndStatusAt(modelRowIndex)
               currentActivateable = Some(activateable)
               showStatusDetails(userAndStatus, filtersDialog)
-              prefetchAdjacentRows        
+              prefetchAdjacentRows()
             } catch {
               case ex: IndexOutOfBoundsException => println(ex)
             }
           } else {
-            clearStatusDetails
+            clearStatusDetails()
             currentActivateable = None
           }
         }
@@ -175,41 +177,31 @@ class TweetDetailPanel(session: Session,
     showingUrl.foreach(bigPic.showBigPicture(_, peer))
   }
 
-  private def setText(user: User, statusOp: Option[Status]) {
+  private def setText(user: User, opTopStatus: Option[Status]) {
     animator.stop()
     showingUser = Some(user)
     val rawLocationOfShowingItem = user.location
 
-    statusOp match {
-      case None =>
-      case Some(topStatus) =>
-        val status = topStatus.retweetOrTweet
-        if (GlobalPrefs.isOn(PrefKeys.LOOK_UP_LOCATIONS)) {
-          (status.getGeoLocation match {
-            case null => GeoCoder.extractLatLong(rawLocationOfShowingItem)
-            case location => {
-              val key = GeoCoder.formatLatLongKey(String.valueOf(location.getLatitude),
-                String.valueOf(location.getLongitude))
-              Some(key)
-            }
-          }) match {
-            case Some(latLong) =>
-              GeoCoder.getCachedObject(latLong) match {
-                case Some(location) => {
-                  setText(user, location)
-                  return
-                }
-                case None =>
-                  GeoCoder.requestItem(FetchRequest[String](latLong, user, processFinishedGeocodes))
-              }
+    if (GlobalPrefs.isOn(PrefKeys.LOOK_UP_LOCATIONS)) {
+      opTopStatus.foreach(topStatus => {
+        val opLatLong = Option(topStatus.retweetOrTweet.getGeoLocation).map(loc =>
+          Some(GeoCoder.formatLatLongKey(loc.getLatitude.toString, loc.getLongitude.toString))).getOrElse(
+          GeoCoder.extractLatLong(rawLocationOfShowingItem))
+        opLatLong.foreach(latLong => {
+          GeoCoder.getCachedObject(latLong) match {
+            case Some(location) =>
+              setUserDescriptionText(user, location)
+              return
             case None =>
+              GeoCoder.requestItem(FetchRequest[String](latLong, user, processFinishedGeocodes))
           }
-        }
+        })
+      })
     }
-    setText(user, rawLocationOfShowingItem)
+    setUserDescriptionText(user, rawLocationOfShowingItem)
   }
   
-  private def setText(user: User, location: String) {
+  private def setUserDescriptionText(user: User, location: String) {
     def fmt(value: Int) = NumberFormat.getIntegerInstance.format(value)
 
     userDescription.foreach(_.text = UserProperties.overriddenUserName(session.userPrefs, user) +
@@ -228,7 +220,7 @@ class TweetDetailPanel(session: Session,
     showingUser.filter(_ == resourceReady.request.userData).foreach(user =>
       SwingInvoke.later {
         animator.stop()
-        animator.run(user.location, resourceReady.resource, (text: String) => setText(user, text))
+        animator.run(user.location, resourceReady.resource, (text: String) => setUserDescriptionText(user, text))
       }
     )
   }
