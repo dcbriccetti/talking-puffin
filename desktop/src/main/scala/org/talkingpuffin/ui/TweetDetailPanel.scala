@@ -188,13 +188,11 @@ class TweetDetailPanel(session: Session,
           Some(GeoCoder.formatLatLongKey(loc.getLatitude.toString, loc.getLongitude.toString))).getOrElse(
           GeoCoder.extractLatLong(rawLocationOfShowingItem))
         opLatLong.foreach(latLong => {
-          GeoCoder.getCachedObject(latLong) match {
-            case Some(location) =>
-              setUserDescriptionText(user, location)
-              return
-            case None =>
-              GeoCoder.requestItem(FetchRequest[String](latLong, user, processFinishedGeocodes))
-          }
+          GeoCoder.getCachedObject(latLong).foreach(location => {
+            setUserDescriptionText(user, location)
+            return
+          })
+          GeoCoder.requestItem(FetchRequest[String](latLong, user, processFinishedGeocodes))
         })
       })
     }
