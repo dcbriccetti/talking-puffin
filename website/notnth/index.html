@@ -75,7 +75,7 @@ to see why.</p>
         </td>
         <td>
             <div>Former Followers</div>
-            <div class='peopleDiv' id='ffollowers'>
+            <div class='peopleDiv' id="formerFollowers">
             </div>
         </td>
     </tr>
@@ -83,10 +83,10 @@ to see why.</p>
 
 <script language="JavaScript">
     startSim = function() {
-        NotNth.goal                = parseFloat($('#followersGoal')[0].value);
-        NotNth.followProbability   = parseFloat($('#followProb'   )[0].value);
-        NotNth.unfollowProbability = parseFloat($('#unfollowProb' )[0].value);
-        NotNth.animationDelayMs    = parseFloat($('#cycleTimeMs'  )[0].value);
+        NotNth.goal                = parseFloat($('#followersGoal').val());
+        NotNth.followProbability   = parseFloat($('#followProb'   ).val());
+        NotNth.unfollowProbability = parseFloat($('#unfollowProb' ).val());
+        NotNth.animationDelayMs    = parseFloat($('#cycleTimeMs'  ).val());
         var notNth = new NotNth();
         notNth.run();
     };

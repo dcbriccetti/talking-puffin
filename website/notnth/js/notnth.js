@@ -49,7 +49,7 @@ NotNth.prototype = {
             --this.numFollowers;
             var nn = this;
             unfollower.slideUp('fast', function () {
-                $("#ffollowers").append(unfollower);
+                $("#formerFollowers").append(unfollower);
                 nn.setNumFol();
                 unfollower.slideDown('fast');
             });
@@ -87,7 +87,7 @@ NotNth.prototype = {
 
     resetDom: function () {
         $('#followers').empty();
-        $('#ffollowers').empty();
+        $('#formerFollowers').empty();
     },
 
     run: function() {
